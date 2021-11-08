@@ -1,0 +1,32 @@
+Package: sfaR
+Version: 0.1.0
+Date: 2021-05-04
+Title: Stochastic Frontier Analysis using R
+Authors@R: c(
+   person("K Hervé", "Dakpo", email = "k-herve.dakpo@inrae.fr", role = "aut"),
+   person("Yann", "Desjeux", email = "yann.desjeux@inrae.fr", role = c("aut","cre")),
+   person("Laure", "Latruffe", role = "aut"))
+Maintainer: Yann Desjeux <yann.desjeux@inrae.fr>
+Description: Maximum likelihood estimation for stochastic frontier analysis (SFA) of production 
+    (profit) and cost functions. 
+    The package includes several distributions for the one-sided error term (i.e. Rayleigh, 
+    Gamma, Weibull, lognormal, uniform, generalized exponential and truncated skewed Laplace) 
+    as well as the latent class stochastic frontier model (LCM) as described in Dakpo et al. (2021) 
+ <doi:10.1111/1477-9552.12422>. 
+    Several possibilities in terms of optimization algorithms are proposed. 
+Depends: R (>= 3.5.0)
+BugReports: https://r-forge.r-project.org/tracker/?group_id=2413
+Imports: dplyr, emdbook, fBasics, Formula, gsl, marqLevAlg, MASS,
+        maxLik, methods, moments, nleqslv, numDeriv, primes, qrng,
+        randtoolbox, trustOptim, ucminf
+Suggests: mlogit
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+NeedsCompilation: no
+Packaged: 2021-05-03 22:03:28 UTC; ydesjeux
+Author: K Hervé Dakpo [aut],
+  Yann Desjeux [aut, cre],
+  Laure Latruffe [aut]
+Repository: CRAN
+Date/Publication: 2021-05-04 04:40:03 UTC

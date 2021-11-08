@@ -1,0 +1,23 @@
+year <- sub("-.*", "", meta$Date)
+vers <- sprintf("R package version %s", meta$Version)
+
+citHeader("To cite the 'sfaR' package in publications please use:")
+
+citEntry(entry="Manual",
+         title = "{sfaR}: Stochastic Frontier Analysis using R.",
+         author = personList(as.person("K Hervé Dakpo"),
+            as.person("Yann Desjeux"),
+            as.person("Laure Latruffe")),
+         year = year,
+         note = vers,
+         url = "https://CRAN.R-project.org/package=sfaR/",
+
+         textVersion =
+         paste("Dakpo KH., Desjeux Y. and Latruffe L. (",
+               year,
+               "). sfaR: Stochastic Frontier Analysis using R. ",
+               vers, ".", 
+               ", url: https://CRAN.R-project.org/package=sfaR/.", 
+               sep=""))
+
+citFooter(paste("See also", sQuote("citation()"), "for citing R.", sep = " "))
