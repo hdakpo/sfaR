@@ -187,6 +187,196 @@ cgradgammanormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
   return(gradll)
 }
 
+# Hessian of the likelihood function ----------
+#' hessian for gamma-normal distribution
+#' @param parm all parameters to be estimated
+#' @param nXvar number of main variables (inputs + env. var)
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @param Yvar vector of dependent variable
+#' @param Xvar matrix of main variables
+#' @param S integer for cost/prod estimation
+#' @param N number of observations
+#' @param FiMat matrix of random draws
+#' @noRd
+chessgammanormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
+  uHvar, vHvar, Yvar, Xvar, S, N, FiMat) {
+  beta <- parm[1:(nXvar)]
+  delta <- parm[(nXvar + 1):(nXvar + nuZUvar)]
+  phi <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
+  P <- parm[nXvar + nuZUvar + nvZVvar + 1]
+  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
+  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
+  ewv <- exp(Wv)
+  ewu <- exp(Wu)
+  ewv_h <- exp(Wv/2)
+  ewu_h <- exp(Wu/2)
+  wuwv <- sqrt(ewv/ewu)
+  dwuwv <- dnorm(-(S * (epsilon)/ewv_h + wuwv))
+  pwuwv <- pnorm(-(S * (epsilon)/ewv_h + wuwv))
+  depsi <- dnorm((ewv/ewu_h + S * (epsilon))/ewv_h)
+  pepsi <- pnorm((ewv/ewu_h + S * (epsilon))/ewv_h)
+  sigx1 <- (ewv/ewu_h + S * (epsilon))
+  Q <- dim(FiMat)[2]
+  F1 <- sweep((1 - FiMat), MARGIN = 1, STATS = pepsi, FUN = "*") +
+    FiMat
+  qF1 <- qnorm(F1)
+  dqF1 <- dnorm(qF1)
+  F2 <- sweep(qF1, MARGIN = 1, STATS = ewv_h, FUN = "*")
+  F3 <- sweep(F2, MARGIN = 1, STATS = sigx1, FUN = "-")
+  sumF3 <- apply(F3^(P - 1), 1, sum)
+  F4 <- sweep((1 - FiMat)/dqF1, MARGIN = 1, STATS = depsi,
+    FUN = "*")
+  F5 <- sweep((0.5 - 0.5 * (F4)) * (F3)^(P - 2) * (P - 1),
+    MARGIN = 1, STATS = ewv/ewu_h, FUN = "*")
+  F6 <- sweep(F4, MARGIN = 1, STATS = ewv/ewu_h - 0.5 * sigx1,
+    FUN = "*") + 0.5 * (F2)
+  F7 <- sweep(F6, MARGIN = 1, STATS = ewv/ewu_h, FUN = "-") *
+    F3^(P - 2) * (P - 1)
+  F8 <- sweep((1 - FiMat) * dqF1 * qF1/dqF1^2, MARGIN = 1,
+    STATS = depsi, FUN = "*")
+  F9 <- sweep((-F8), MARGIN = 1, STATS = sigx1/ewv_h, FUN = "+")
+  F10 <- sweep((1 - FiMat) * (F3)^(P - 2)/(dqF1), MARGIN = 1,
+    STATS = depsi/ewv_h, FUN = "*")
+  F11 <- ((F3)^(P - 2) + (F3)^(P - 2) * log(F3) * (P - 1))
+  F12 <- sweep((F6), MARGIN = 1, STATS = ewv/ewu_h, FUN = "-")
+  F13 <- sweep(F9 * (1 - FiMat) * (F3)^(P - 2)/(dqF1), MARGIN = 1,
+    STATS = depsi * (ewv/ewu_h - 0.5 * sigx1)/ewv_h, FUN = "*")
+  F14 <- sweep((-0.5 * (F8)), MARGIN = 1, STATS = 0.5 * (sigx1/ewv_h),
+    FUN = "+")
+  F15 <- sweep(((0.5 - 0.5 * F4)^2 * (F3)^(P - 3) * (P - 2) -
+    0.5 * (F14 * F10)), MARGIN = 1, STATS = ewv/ewu_h, FUN = "*")
+  F16 <- sweep(F14, MARGIN = 1, STATS = (ewv/ewu_h - 0.5 *
+    sigx1)/ewv_h, FUN = "*")
+  F17 <- sweep((F8), MARGIN = 1, STATS = sigx1/ewv_h, FUN = "-")
+  F18 <- sweep(F17, MARGIN = 1, STATS = (ewv/ewu_h - 0.5 *
+    sigx1)^2/ewv_h, FUN = "*")
+  F19 <- sweep((F18), MARGIN = 1, STATS = 0.5 * (ewv/ewu_h),
+    FUN = "+")
+  F20 <- sweep(0.5 * (F6), MARGIN = 1, STATS = ewv/ewu_h, FUN = "-")
+  sigx7 <- (S * (epsilon)/ewv_h + wuwv)
+  sumF3H <- apply((F3)^(P - 1) * log(F3), 1, sum)
+  X1 <- matrix(nrow = N, ncol = nXvar)
+  X2 <- matrix(nrow = N, ncol = nXvar)
+  X3 <- matrix(nrow = N, ncol = nXvar)
+  for (k in 1:nXvar) {
+    X1[, k] <- apply(sweep(S * (1 - F4) * F3^(P - 2) * (P -
+      1), MARGIN = 1, STATS = Xvar[, k], FUN = "*"), 1,
+      sum)/sumF3
+    X2[, k] <- apply(sweep(S * (1 - F4) * (F3)^(P - 2) *
+      (P - 1), MARGIN = 1, STATS = Xvar[, k], FUN = "*"),
+      1, sum)/sumF3
+    X3[, k] <- apply(sweep(S * F11 * (1 - F4), MARGIN = 1,
+      STATS = Xvar[, k], FUN = "*"), 1, sum)/sumF3
+  }
+  ZU1 <- matrix(nrow = N, ncol = nuZUvar)
+  ZU2 <- matrix(nrow = N, ncol = nuZUvar)
+  for (k in 1:nuZUvar) {
+    ZU1[, k] <- apply(sweep(F5, MARGIN = 1, STATS = uHvar[,
+      k], FUN = "*"), 1, sum)/sumF3
+    ZU2[, k] <- apply(sweep(F11 * (0.5 - 0.5 * F4), MARGIN = 1,
+      STATS = uHvar[, k] * ewv/ewu_h, FUN = "*"), 1, sum)/sumF3
+  }
+  ZV1 <- matrix(nrow = N, ncol = nvZVvar)
+  ZV2 <- matrix(nrow = N, ncol = nvZVvar)
+  for (k in 1:nvZVvar) {
+    ZV1[, k] <- apply(sweep(F7, MARGIN = 1, STATS = vHvar[,
+      k], FUN = "*"), 1, sum)/sumF3
+    ZV2[, k] <- apply(sweep(F12 * F11, MARGIN = 1, STATS = vHvar[,
+      k], FUN = "*"), 1, sum)/sumF3
+  }
+  HX1 <- list()
+  HXU1 <- list()
+  HXV1 <- list()
+  HU1 <- list()
+  HUV1 <- list()
+  HV1 <- list()
+  for (r in 1:Q) {
+    HX1[[r]] <- crossprod(sweep(Xvar, MARGIN = 1, STATS = ((1 -
+      F4)^2 * (F3)^(P - 3) * (P - 2) - F9 * F10)[, r] *
+      (P - 1)/sumF3, FUN = "*"), Xvar)
+    HXU1[[r]] <- crossprod(sweep(Xvar, MARGIN = 1, STATS = S *
+      ((0.5 - 0.5 * F4) * (1 - F4) * (F3)^(P - 3) * (P -
+        2) - 0.5 * (F9 * F10))[, r] * ewv * (P - 1)/ewu_h/sumF3,
+      FUN = "*"), uHvar)
+    HXV1[[r]] <- crossprod(sweep(Xvar, MARGIN = 1, STATS = S *
+      (F12 * (1 - F4) * (F3)^(P - 3) * (P - 2) + F13)[,
+        r] * (P - 1)/sumF3, FUN = "*"), vHvar)
+    HU1[[r]] <- crossprod(sweep(uHvar, MARGIN = 1, STATS = (F15 -
+      0.5 * ((0.5 - 0.5 * F4) * (F3)^(P - 2)))[, r] * ewv *
+      (P - 1)/ewu_h/sumF3, FUN = "*"), uHvar)
+    HUV1[[r]] <- crossprod(sweep(uHvar, MARGIN = 1, STATS = (((F16 -
+      0.5) * F4 + 0.5) * (F3)^(P - 2) + F12 * (0.5 - 0.5 *
+      F4) * (F3)^(P - 3) * (P - 2))[, r] * ewv * (P - 1)/ewu_h/sumF3,
+      FUN = "*"), vHvar)
+    HV1[[r]] <- crossprod(sweep(vHvar, MARGIN = 1, STATS = ((F19 *
+      F4 + F20) * (F3)^(P - 2) + F12^2 * (F3)^(P - 3) *
+      (P - 2))[, r] * (P - 1)/sumF3, FUN = "*"), vHvar)
+  }
+  hessll <- matrix(nrow = nXvar + nuZUvar + nvZVvar + 1, ncol = nXvar +
+    nuZUvar + nvZVvar + 1)
+  hessll[1:nXvar, 1:nXvar] <- Reduce("+", HX1) - crossprod(sweep(X2,
+    MARGIN = 1, STATS = 1/sumF3^2, FUN = "*"), X2) + crossprod(sweep(Xvar,
+    MARGIN = 1, STATS = (sigx7/(ewv_h^2 * pwuwv) - dwuwv/(ewv_h *
+      pwuwv)^2) * dwuwv, FUN = "*"), Xvar)
+  hessll[1:nXvar, (nXvar + 1):(nXvar + nuZUvar)] <- Reduce("+",
+    HXU1) - crossprod(sweep(X2, MARGIN = 1, STATS = 1/sumF3,
+    FUN = "*"), ZU1) + crossprod(sweep(Xvar, MARGIN = 1,
+    STATS = S * (0.5 * ((sigx7/(ewu * pwuwv * wuwv) - dwuwv *
+      ewu * wuwv/(ewu * pwuwv * wuwv)^2) * dwuwv * ewv/ewv_h) +
+      0.5/ewu_h), FUN = "*"), uHvar)
+  hessll[1:nXvar, (nXvar + nuZUvar + 1):(nXvar + nuZUvar +
+    nvZVvar)] <- Reduce("+", HXV1) - crossprod(sweep(X2,
+    MARGIN = 1, STATS = 1/sumF3, FUN = "*"), ZV1) - crossprod(sweep(Xvar,
+    MARGIN = 1, STATS = S * ((0.5 * (ewv/(ewu * wuwv)) -
+      0.5 * (S * (epsilon)/ewv_h)) * (S * (epsilon)/ewv_h +
+      wuwv - dwuwv/pwuwv) + 0.5) * dwuwv/(ewv_h * pwuwv),
+    FUN = "*"), vHvar)
+  hessll[1:nXvar, nXvar + nuZUvar + nvZVvar + 1] <- colSums(X3 -
+    sweep(X1, MARGIN = 1, STATS = sumF3H/sumF3, FUN = "*"))
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + 1):(nXvar +
+    nuZUvar)] <- Reduce("+", HU1) - crossprod(sweep(ZU1,
+    MARGIN = 1, STATS = 1/sumF3, FUN = "*"), ZU1) + crossprod(sweep(uHvar,
+    MARGIN = 1, STATS = ((0.5 * ((0.5 * (sigx7/(ewu * pwuwv)) -
+      ((0.5 * (dwuwv * ewv/wuwv) + ewu * pwuwv) * wuwv -
+        0.5 * (ewv * pwuwv/wuwv))/(ewu * pwuwv * wuwv)^2) *
+      dwuwv) - 2 * ((1 - 8 * (ewu^2/(2 * ewu)^2)) * ewu/(2 *
+      ewu)^2)) * ewv + 0.25 * (S * (epsilon)/ewu_h)), FUN = "*"),
+    uHvar)
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + nuZUvar +
+    1):(nXvar + nuZUvar + nvZVvar)] <- Reduce("+", HUV1) -
+    crossprod(sweep(ZU1, MARGIN = 1, STATS = 1/sumF3, FUN = "*"),
+      ZV1) - crossprod(sweep(uHvar, MARGIN = 1, STATS = (((0.5 *
+    (ewv/(ewu * wuwv)) - 0.5 * (S * (epsilon)/ewv_h)) * (0.5 *
+    sigx7 - 0.5 * (dwuwv/pwuwv))/(ewu * wuwv) - 0.5 * ((ewu *
+    wuwv - 0.5 * (ewv/wuwv))/(ewu * wuwv)^2)) * dwuwv/pwuwv +
+    2 * (ewu/(2 * ewu)^2)) * ewv, FUN = "*"), vHvar)
+  hessll[(nXvar + 1):(nXvar + nuZUvar), nXvar + nuZUvar + nvZVvar +
+    1] <- colSums(ZU2 - sweep(ZU1, MARGIN = 1, STATS = sumF3H/sumF3,
+    FUN = "*") - 0.5 * uHvar)
+  hessll[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar),
+    (nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)] <- Reduce("+",
+    HV1) - crossprod(sweep(ZV1, MARGIN = 1, STATS = 1/sumF3,
+    FUN = "*"), ZV1) + crossprod(sweep(vHvar, MARGIN = 1,
+    STATS = (ewv/(2 * ewu) - ((0.5 * (ewv/(ewu * wuwv)) -
+      0.5 * (S * (epsilon)/ewv_h))^2 * (dwuwv/pwuwv - sigx7) +
+      0.25 * (S * (epsilon)/ewv_h) + 0.5 * ((1/ewu - 0.5 *
+      (ewv/(ewu * wuwv)^2)) * ewv/wuwv)) * dwuwv/pwuwv),
+    FUN = "*"), vHvar)
+  hessll[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar),
+    nXvar + nuZUvar + nvZVvar + 1] <- colSums(ZV2 - sweep(ZV1,
+    MARGIN = 1, STATS = sumF3H/sumF3, FUN = "*"))
+  hessll[nXvar + nuZUvar + nvZVvar + 1, nXvar + nuZUvar + nvZVvar +
+    1] <- sum((apply((F3)^(P - 1) * log(F3)^2, 1, sum) -
+    sumF3H^2/sumF3)/sumF3 - trigamma(P))
+  hessll[lower.tri(hessll)] <- t(hessll)[lower.tri(hessll)]
+  # hessll <- (hessll + (hessll))/2
+  return(hessll)
+}
+
 # Optimization using different algorithms ----------
 #' optimizations solve for gamma-normal distribution
 #' @param start starting value for optimization
@@ -238,52 +428,72 @@ gammanormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       S = S, N = N, FiMat = FiMat)), hessian = 0, control = list(trace = if (printInfo) 1 else 0,
       maxeval = itermax, stepmax = stepmax, xtol = tol,
       grtol = gradtol)), maxLikAlgo = maxRoutine(fn = cgammanormlike,
-    grad = cgradgammanormlike, start = startVal, finalHessian = if (hessianType ==
-      2) "bhhh" else TRUE, control = list(printLevel = if (printInfo) 2 else 0,
+    grad = cgradgammanormlike, hess = chessgammanormlike,
+    start = startVal, finalHessian = if (hessianType == 2) {
+      "bhhh"
+    } else {
+      TRUE
+    }, control = list(printLevel = if (printInfo) 2 else 0,
       iterlim = itermax, reltol = tol, tol = tol, qac = qac),
     nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
     uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
     S = S, N = N, FiMat = FiMat), sr1 = trust.optim(x = startVal,
-    fn = function(parm) -sum(cgammanormlike(parm, nXvar = nXvar,
-      nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
-      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
-      FiMat = FiMat)), gr = function(parm) -colSums(cgradgammanormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S, N = N, FiMat = FiMat)), method = "SR1", control = list(maxit = itermax,
-      cgtol = gradtol, stop.trust.radius = tol, prec = tol,
-      report.level = if (printInfo) 2 else 0, report.precision = 1L)),
-    sparse = trust.optim(x = startVal, fn = function(parm) -sum(cgammanormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S, N = N, FiMat = FiMat)), gr = function(parm) -colSums(cgradgammanormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S, N = N, FiMat = FiMat)), hs = function(parm) as(jacobian(function(parm) -colSums(cgradgammanormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S, N = N, FiMat = FiMat)), parm), "dgCMatrix"),
-      method = "Sparse", control = list(maxit = itermax,
-        cgtol = gradtol, stop.trust.radius = tol, prec = tol,
-        report.level = if (printInfo) 2 else 0, report.precision = 1L,
-        preconditioner = 1L)), mla = mla(b = startVal,
-      fn = function(parm) -sum(cgammanormlike(parm, nXvar = nXvar,
+    fn = function(parm) {
+      -sum(cgammanormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+        nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+        Yvar = Yvar, Xvar = Xvar, S = S, N = N, FiMat = FiMat))
+    }, gr = function(parm) {
+      -colSums(cgradgammanormlike(parm, nXvar = nXvar,
         nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
         vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
-        N = N, FiMat = FiMat)), gr = function(parm) -colSums(cgradgammanormlike(parm,
-        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-        S = S, N = N, FiMat = FiMat)), print.info = printInfo,
-      maxiter = itermax, epsa = gradtol, epsb = gradtol),
-    nlminb = nlminb(start = startVal, objective = function(parm) -sum(cgammanormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S, N = N, FiMat = FiMat)), gradient = function(parm) -colSums(cgradgammanormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S, N = N, FiMat = FiMat)), control = list(iter.max = itermax,
-      trace = if (printInfo) 1 else 0, eval.max = itermax,
-      rel.tol = tol, x.tol = tol)))
+        N = N, FiMat = FiMat))
+    }, method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
+      stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
+      report.precision = 1L)), sparse = trust.optim(x = startVal,
+    fn = function(parm) {
+      -sum(cgammanormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+        nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+        Yvar = Yvar, Xvar = Xvar, S = S, N = N, FiMat = FiMat))
+    }, gr = function(parm) {
+      -colSums(cgradgammanormlike(parm, nXvar = nXvar,
+        nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
+        N = N, FiMat = FiMat))
+    }, hs = function(parm) {
+      as(-chessgammanormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+        nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+        Yvar = Yvar, Xvar = Xvar, S = S, N = N, FiMat = FiMat),
+        "dgCMatrix")
+    }, method = "Sparse", control = list(maxit = itermax,
+      cgtol = gradtol, stop.trust.radius = tol, prec = tol,
+      report.level = if (printInfo) 2 else 0, report.precision = 1L,
+      preconditioner = 1L)), mla = mla(b = startVal, fn = function(parm) {
+    -sum(cgammanormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+      nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+      Yvar = Yvar, Xvar = Xvar, S = S, N = N, FiMat = FiMat))
+  }, gr = function(parm) {
+    -colSums(cgradgammanormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+      nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+      Yvar = Yvar, Xvar = Xvar, S = S, N = N, FiMat = FiMat))
+  }, hess = function(parm) {
+    -chessgammanormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+      nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+      Yvar = Yvar, Xvar = Xvar, S = S, N = N, FiMat = FiMat)
+  }, print.info = printInfo, maxiter = itermax, epsa = gradtol,
+    epsb = gradtol), nlminb = nlminb(start = startVal, objective = function(parm) {
+    -sum(cgammanormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+      nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+      Yvar = Yvar, Xvar = Xvar, S = S, N = N, FiMat = FiMat))
+  }, gradient = function(parm) {
+    -colSums(cgradgammanormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+      nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+      Yvar = Yvar, Xvar = Xvar, S = S, N = N, FiMat = FiMat))
+  }, hessian = function(parm) {
+    -chessgammanormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+      nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+      Yvar = Yvar, Xvar = Xvar, S = S, N = N, FiMat = FiMat)
+  }, control = list(iter.max = itermax, trace = if (printInfo) 1 else 0,
+    eval.max = itermax, rel.tol = tol, x.tol = tol)))
   if (method %in% c("ucminf", "nlminb")) {
     mleObj$gradient <- colSums(cgradgammanormlike(mleObj$par,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
@@ -308,15 +518,15 @@ gammanormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
   }
   if (hessianType != 2) {
     if (method %in% c("ucminf", "nlminb"))
-      mleObj$hessian <- jacobian(function(parm) colSums(cgradgammanormlike(parm,
+      mleObj$hessian <- chessgammanormlike(parm = mleObj$par,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-        S = S, N = N, FiMat = FiMat)), mleObj$par)
+        S = S, N = N, FiMat = FiMat)
     if (method == "sr1")
-      mleObj$hessian <- jacobian(function(parm) colSums(cgradgammanormlike(parm,
+      mleObj$hessian <- chessgammanormlike(parm = mleObj$solution,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-        S = S, N = N, FiMat = FiMat)), mleObj$solution)
+        S = S, N = N, FiMat = FiMat)
   }
   mleObj$logL_OBS <- cgammanormlike(parm = mlParam, nXvar = nXvar,
     nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
