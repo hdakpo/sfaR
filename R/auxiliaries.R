@@ -1,5 +1,12 @@
-# Intercept check in formulas ----------
+################################################################################
+#                                                                              #
+# R auxiliary functions for the sfaR package                                   #
+#                                                                              #
+################################################################################
 
+# Intercept check for main formula ----------
+#' @param formula main formula of model
+#' @noRd
 interCheckMain <- function(formula) {
   terM <- terms(formula(formula))
   if (attr(terM, "response") == 0)
@@ -15,8 +22,10 @@ interCheckMain <- function(formula) {
   return(formula)
 }
 
-# intercept check in heteroscedasticity ----------
-
+# intercept check for heteroscedasticity in u ----------
+#' @param formula formula for heteroscedasticity in inefficiency term
+#' @param scaling logical for scaling property
+#' @noRd
 lhsCheck_u <- function(formula, scaling) {
   terM <- terms(formula(formula))
   if (attr(terM, "response") == 1)
@@ -33,6 +42,10 @@ lhsCheck_u <- function(formula, scaling) {
   return(formula)
 }
 
+# intercept check for heterogeneity in mu ----------
+#' @param formula formula for heterogeneity in inefficiency term
+#' @param scaling logical for scaling property
+#' @noRd
 lhsCheck_mu <- function(formula, scaling) {
   terM <- terms(formula(formula))
   if (attr(terM, "response") == 1)
@@ -49,6 +62,9 @@ lhsCheck_mu <- function(formula, scaling) {
   return(formula)
 }
 
+# intercept check for heteroscedasticity in v ----------
+#' @param formula formula for heteroscedasticity in noise component
+#' @noRd
 lhsCheck_v <- function(formula) {
   terM <- terms(formula(formula))
   if (attr(terM, "response") == 1)
@@ -65,6 +81,9 @@ lhsCheck_v <- function(formula) {
   return(formula)
 }
 
+# intercept check for separating variables in LCM ----------
+#' @param formula formula for logit form in LCM
+#' @noRd
 lhsCheck_t <- function(formula) {
   terM <- terms(formula(formula))
   if (attr(terM, "response") == 1)
@@ -82,7 +101,12 @@ lhsCheck_t <- function(formula) {
 }
 
 # Formulas depending on the distribution ----------
-
+#' @param udist inefficiency term distribution
+#' @param formula formula for model
+#' @param muhet heterogeneity in mu
+#' @param uhet heteroscedasticity in u
+#' @param vhet heteroscedasticity in v
+#' @noRd
 formDist_sfacross <- function(udist, formula, muhet, uhet, vhet) {
   if (udist %in% c("tnormal", "lognormal")) {
     formula <- as.Formula(formula, muhet, uhet, vhet)
@@ -92,13 +116,20 @@ formDist_sfacross <- function(udist, formula, muhet, uhet, vhet) {
   return(formula)
 }
 
+#' @param udist inefficiency term distribution
+#' @param formula formula for model
+#' @param uhet heteroscedasticity in u
+#' @param vhet heteroscedasticity in v
+#' @param thet separating variables for LCM
+#' @noRd
 formDist_lcmcross <- function(formula, uhet, vhet, thet) {
   formula <- as.Formula(formula, uhet, vhet, thet)
   return(formula)
 }
 
 # Check infinite values ----------
-
+#' @param x data frame
+#' @noRd
 is.infinite.data.frame <- function(x) {
   y <- do.call(cbind, lapply(x, is.infinite))
   if (.row_names_info(x) > 0L)
@@ -107,7 +138,13 @@ is.infinite.data.frame <- function(x) {
 }
 
 # names for variables ----------
-
+#' @param Xvar variables in main formula (e.g. inputs/outputs)
+#' @param udist inefficiency distribution
+#' @param muHvar heterogeneity variables in mu
+#' @param uHvar heteroscedasticity variables in u
+#' @param vHvar heteroscedasticity variables in v
+#' @param scaling logical for scaling property
+#' @noRd
 fName_mu_sfacross <- function(Xvar, udist, muHvar, uHvar, vHvar,
   scaling) {
   c(colnames(Xvar), if (udist == "tnormal") {
@@ -132,6 +169,11 @@ fName_mu_sfacross <- function(Xvar, udist, muHvar, uHvar, vHvar,
   })
 }
 
+#' @param Xvar variables in main formula (e.g. inputs/outputs)
+#' @param udist inefficiency distribution
+#' @param uHvar heteroscedasticity variables in u
+#' @param vHvar heteroscedasticity variables in v
+#' @noRd
 fName_uv_sfacross <- function(Xvar, udist, uHvar, vHvar) {
   c(colnames(Xvar), if (udist == "gamma") {
     c(paste0("Zu_", colnames(uHvar)), paste0("Zv_", colnames(vHvar)),
@@ -152,7 +194,15 @@ fName_uv_sfacross <- function(Xvar, udist, uHvar, vHvar) {
   })
 }
 
-fName_lcmcross <- function(Xvar, uHvar, vHvar, Zvar, nZHvar, lcmClasses) {
+#' @param Xvar variables in main formula (e.g. inputs/outputs)
+#' @param uHvar heteroscedasticity variables in u
+#' @param vHvar heteroscedasticity variables in v
+#' @param Zvar separating variables in LCM
+#' @param nZHvar number of separating variables in LCM
+#' @param lcmClasses number of classes in LCM
+#' @noRd
+fName_lcmcross <- function(Xvar, uHvar, vHvar, Zvar, nZHvar,
+  lcmClasses) {
   c(rep(c(colnames(Xvar), paste0("Zu_", colnames(uHvar)), paste0("Zv_",
     colnames(vHvar))), lcmClasses), paste0(rep(paste0("Cl",
     1:(lcmClasses - 1)), each = nZHvar), "_", rep(colnames(Zvar),
@@ -160,7 +210,10 @@ fName_lcmcross <- function(Xvar, uHvar, vHvar, Zvar, nZHvar, lcmClasses) {
 }
 
 # Halton sequence (code from mlogit) ----------
-
+#' @param prime prime number
+#' @param length length of halton sequence
+#' @param drop number of first observations to drop
+#' @noRd
 halton <- function(prime, length, drop) {
   halt <- 0
   t <- 0
@@ -173,7 +226,13 @@ halton <- function(prime, length, drop) {
 }
 
 # matrix of draws ----------
-
+#' @param N number of observations
+#' @param Nsim number of draw per observation
+#' @param prime prime number
+#' @param burn number of first observations dropped
+#' @param seed seed for the draw
+#' @param antithetics logical for antithetics draws
+#' @noRd
 drawMat <- function(N, Nsim, simType, prime, burn, seed, antithetics) {
   if (simType == "halton") {
     matDraw <- matrix(halton(prime = prime, length = (Nsim *
@@ -209,7 +268,8 @@ drawMat <- function(N, Nsim, simType, prime, burn, seed, antithetics) {
 }
 
 # Inverse hessian ----------
-
+#' @param hess hessian matrix
+#' @noRd
 invHess_fun <- function(hess) {
   if (!is.null(hess)) {
     hessev <- tryCatch(abs(eigen(hess, symmetric = TRUE,
@@ -221,8 +281,8 @@ invHess_fun <- function(hess) {
       invhess <- matrix(Inf, nParm, nParm)
     } else {
       if (min(hessev) > (1e-12 * max(hessev))) {
-        ## is 1e-12 relatively acceptable!!! to what values solve does
-        ## not work
+        ## is 1e-12 relatively acceptable!!! to what values
+        ## solve does not work
         invhess <- solve(-hess)
         invhess <- (invhess + t(invhess))/2
       } else {
@@ -236,6 +296,11 @@ invHess_fun <- function(hess) {
   } else return(NULL)
 }
 
+#' @param mleObj optimization object
+#' @param hessianType numeric for type of inverse hessian
+#' @param method optimization algorithm
+#' @param nParm number of parameters in optimization
+#' @noRd
 vcovObj <- function(mleObj, hessianType, method, nParm) {
   if (hessianType == 1) {
     if (method == "mla") {
@@ -244,7 +309,7 @@ vcovObj <- function(mleObj, hessianType, method, nParm) {
       invhess[lower.tri(invhess)] <- t(invhess)[lower.tri(invhess)]
       invhess <- (invhess + t(invhess))/2
     } else {
-      if (method == "sparse") {
+      if (method %in% c("sparse", "trust")) {
         invhess <- invHess_fun(hess = -mleObj$hessian)
       } else {
         invhess <- invHess_fun(hess = mleObj$hessian)
@@ -252,7 +317,7 @@ vcovObj <- function(mleObj, hessianType, method, nParm) {
     }
   } else {
     if (hessianType == 2) {
-      if (method %in% c("bfgs", "bhhh", "nr", "nm")) {
+      if (method %in% c("bfgs", "bhhh", "nr", "cg", "nm")) {
         invhess <- invHess_fun(hess = mleObj$hessian)
       } else {
         hess <- -crossprod(mleObj$gradL_OBS)
@@ -268,7 +333,7 @@ vcovObj <- function(mleObj, hessianType, method, nParm) {
           invhess <- invhess %*% crossprod(mleObj$gradL_OBS) %*%
           invhess  # H^(-1)GH^(-1) G: outer product of gradient
         } else {
-          if (method == "sparse") {
+          if (method %in% c("sparse", "trust")) {
           invhess <- invHess_fun(hess = -mleObj$hessian)
           invhess <- invhess %*% crossprod(mleObj$gradL_OBS) %*%
             invhess
@@ -285,22 +350,27 @@ vcovObj <- function(mleObj, hessianType, method, nParm) {
 }
 
 # SFA + distribution ----------
-
+#' @param udist inefficiency distribution
+#' @noRd
 sfadist <- function(udist) {
   switch(udist, tnormal = "Truncated-Normal Normal Stochastic Frontier Model",
     hnormal = "Normal-Half Normal Stochastic Frontier Model",
     exponential = "Exponential Normal Stochastic Frontier Model",
     rayleigh = "Rayleigh Normal Stochastic Frontier Model",
     uniform = "Uniform Normal Stochastic Frontier Model",
-    gamma = "Gamma Normal Stochastic Frontier Model",
-    lognormal = "Log-Normal Normal Stochastic Frontier Model",
+    gamma = "Gamma Normal Stochastic Frontier Model", lognormal = "Log-Normal Normal Stochastic Frontier Model",
     weibull = "Weibull Normal Stochastic Frontier Model",
     genexponential = "Generalized-Exponential Normal Stochastic Frontier Model",
     tslaplace = "Truncated Skewed-Laplace Normal Stochastic Frontier Model")
 }
 
 # variance of u ----------
-
+#' @param object object from sfacross/lcmcross ...
+#' @param mu mu in truncated normal and log-normal distribution
+#' @param P Shape parameter in gamma distribution
+#' @param lambda parameter in truncated skewed laplace distribution
+#' @param k parameter in weibull distribution
+#' @noRd
 varuFun <- function(object, mu, P, lambda, k) {
   if (object$udist == "hnormal") {
     object$sigmauSq * (pi - 2)/pi
@@ -351,7 +421,12 @@ varuFun <- function(object, mu, P, lambda, k) {
 }
 
 # expected value of u ----------
-
+#' @param object object from sfacross/lcmcross ...
+#' @param mu mu in truncated normal and log-normal distribution
+#' @param P Shape parameter in gamma distribution
+#' @param lambda parameter in truncated skewed laplace distribution
+#' @param k parameter in weibull distribution
+#' @noRd
 euFun <- function(object, mu, P, lambda, k) {
   if (object$udist == "hnormal") {
     sqrt(object$sigmauSq) * sqrt(2/pi)
@@ -403,7 +478,12 @@ euFun <- function(object, mu, P, lambda, k) {
 }
 
 # expected value of E(exp(-u)) ----------
-
+#' @param object object from sfacross/lcmcross ...
+#' @param mu mu in truncated normal and log-normal distribution
+#' @param P Shape parameter in gamma distribution
+#' @param lambda parameter in truncated skewed laplace distribution
+#' @param k parameter in weibull distribution
+#' @noRd
 eExpuFun <- function(object, mu, P, lambda, k) {
   if (object$udist == "hnormal") {
     2 * (1 - pnorm(sqrt(object$sigmauSq))) * exp(object$sigmauSq/2)
@@ -459,13 +539,17 @@ eExpuFun <- function(object, mu, P, lambda, k) {
 }
 
 # Center text strings (adapted from gdata package) ----------
-
+#' @param s string
+#' @noRd
 trimChar <- function(s, recode.factor = TRUE, ...) {
   s <- sub(pattern = "^[[:blank:]]+", replacement = "", x = s)
   s <- sub(pattern = "[[:blank:]]+$", replacement = "", x = s)
   s
 }
 
+#' @param x strings
+#' @param width width
+#' @noRd
 centerText <- function(x, width) {
   retval <- vector(length = length(x), mode = "character")
   for (i in 1:length(x)) {
@@ -478,71 +562,65 @@ centerText <- function(x, width) {
   retval
 }
 
-
 # S3methods
-
+#' @param object sfacross, lcmcross ... objects
+#' @noRd
 efficiencies <- function(object, ...) {
-  UseMethod("efficiencies")
+  UseMethod("efficiencies", object)
 }
 
-marginal <- function(object, ...) {
-  UseMethod("marginal")
-}
-
+#' @param object sfacross, lcmcross ... objects
+#' @noRd
 ic <- function(object, ...) {
-  UseMethod("ic")
+  UseMethod("ic", object)
 }
 
+#' @param object sfacross, lcmcross ... objects
+#' @noRd
+marginal <- function(object, ...) {
+  UseMethod("marginal", object)
+}
 
-setClass("dagoTest",
-    representation(
-        call = "call",
-        data = "list",
-        test = "list",
-        title = "character")
-)
+setClass("dagoTest", representation(call = "call", data = "list",
+  test = "list", title = "character"))
 
-setMethod("show", "dagoTest",
-      function(object)
-{  # Unlike print the argument for show is 'object'.
-    x = object
-
-    # Title:
-    cat("## ", "D'Agostino's  Test", " ##\n", sep = "")
-
-    # Test Results:
-    test = x@test
-    cat("\nTest Results:\n", sep = "")
-
-    # Statistic:
-    if (!is.null(test$statistic)) {
-        statistic = test$statistic
-        Names = names(statistic)
-        cat("  STATISTIC:\n")
-        for (i in 1:length(Names)) {
-            if (!is.na(statistic[i])) {
-                cat(paste("    ", Names[i], ": ",
-                    round(statistic[i], digits = 4), "\n", sep = "" ) )
-            }
-        }
+setMethod("show", "dagoTest", function(object) {
+  # Unlike print the argument for show is 'object'.
+  x = object
+  # Title:
+  cat("## ", "D'Agostino's  Test", " ##\n", sep = "")
+  # Test Results:
+  test = x@test
+  cat("\nTest Results:\n", sep = "")
+  # Statistic:
+  if (!is.null(test$statistic)) {
+    statistic = test$statistic
+    Names = names(statistic)
+    cat("  STATISTIC:\n")
+    for (i in 1:length(Names)) {
+      if (!is.na(statistic[i])) {
+        cat(paste("    ", Names[i], ": ", round(statistic[i],
+          digits = 4), "\n", sep = ""))
+      }
     }
-
-    # P-Value:
-    if (!is.null(test$p.value)) {
-        pval = test$p.value
-        Names = names(pval)
-        if (Names[1] == "") space = "" else space = ": "
-        cat("  P.VALUE:\n")
-        for (i in 1:length(Names)) {
-            if (!is.na(pval[i])) {
-                if (class(version) != "Sversion") {
-                    cat(paste("    ", Names[i], space,
-                    format.pval(pval[i], digits = 4), " \n", sep = "" ) )
-                } else {
-                    cat(paste("    ", Names[i], space,
-                    round(pval[i], digits = 4), " \n", sep = "" ) )
-                }
-            }
+  }
+  # P-Value:
+  if (!is.null(test$p.value)) {
+    pval = test$p.value
+    Names = names(pval)
+    if (Names[1] == "")
+      space = "" else space = ": "
+    cat("  P.VALUE:\n")
+    for (i in 1:length(Names)) {
+      if (!is.na(pval[i])) {
+        if (class(version) != "Sversion") {
+          cat(paste("    ", Names[i], space, format.pval(pval[i],
+          digits = 4), " \n", sep = ""))
+        } else {
+          cat(paste("    ", Names[i], space, round(pval[i],
+          digits = 4), " \n", sep = ""))
         }
+      }
     }
+  }
 })
