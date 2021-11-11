@@ -1,12 +1,29 @@
-########################################################
-#                                                      #
-# Gamma + normal distributions                         #
-#                                                      #
-#                                                      #
-########################################################
+################################################################################
+#                                                                              #
+# R internal functions for the sfaR package                                    #
+#                                                                              #
+################################################################################
+
+#------------------------------------------------------------------------------#
+# Data: Cross sectional data & Pooled data                                     #
+# Model: Standard Stochastic Frontier Analysis                                 #
+# Convolution: gamma - normal                                                  #
+#------------------------------------------------------------------------------#
 
 # Log-likelihood ----------
-
+#' log-likelihood for gamma-normal distribution
+#' @param parm all parameters to be estimated
+#' @param nXvar number of main variables (inputs + env. var)
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @param Yvar vector of dependent variable
+#' @param Xvar matrix of main variables
+#' @param S integer for cost/prod estimation
+#' @param N number of observations
+#' @param FiMat matrix of random draws
+#' @noRd
 cgammanormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
   vHvar, Yvar, Xvar, S, N, FiMat) {
   beta <- parm[1:(nXvar)]
@@ -23,8 +40,9 @@ cgammanormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
       ] + (1 - FiMat[i, ]) * pnorm(-mui[i]/sqrt(exp(Wv[i])))))^(P -
       1))
   }
-  if (P <= 0)
+  if (P <= 0) {
     return(NA)
+  }
   ll <- -1/2 * P * Wu - log(gamma(P)) + exp(Wv)/(2 * exp(Wu)) +
     S * epsilon/sqrt(exp(Wu)) + pnorm(-S * epsilon/sqrt(exp(Wv)) -
     sqrt(exp(Wv)/exp(Wu)), log.p = TRUE) + log(Hi)
@@ -32,9 +50,17 @@ cgammanormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
 }
 
 # starting value for the log-likelihood ----------
-
-cstgammanorm <- function(olsObj, epsiRes, S, nuZUvar, uHvar, nvZVvar,
-  vHvar) {
+#' starting values for gamma-normal distribution
+#' @param olsObj OLS object
+#' @param epsiRes residuals from OLS
+#' @param S integer for cost/prod estimation
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @noRd
+cstgammanorm <- function(olsObj, epsiRes, S, nuZUvar, uHvar,
+  nvZVvar, vHvar) {
   m2 <- moment(epsiRes, order = 2)
   m3 <- moment(epsiRes, order = 3)
   if (S * m3 > 0) {
@@ -54,21 +80,23 @@ cstgammanorm <- function(olsObj, epsiRes, S, nuZUvar, uHvar, nvZVvar,
   } else {
     lm(dep_u ~ ., data = as.data.frame(uHvar[, 2:nuZUvar]))
   }
-  if (any(is.na(reg_hetu$coefficients)))
+  if (any(is.na(reg_hetu$coefficients))) {
     stop("At least one of the OLS coefficients of 'uhet' is NA: ",
       paste(colnames(uHvar)[is.na(reg_hetu$coefficients)],
         collapse = ", "), ". This may be due to a singular matrix due to potential perfect multicollinearity",
       call. = FALSE)
+  }
   reg_hetv <- if (nvZVvar == 1) {
     lm(log(varv) ~ 1)
   } else {
     lm(dep_v ~ ., data = as.data.frame(vHvar[, 2:nvZVvar]))
   }
-  if (any(is.na(reg_hetv$coefficients)))
+  if (any(is.na(reg_hetv$coefficients))) {
     stop("at least one of the OLS coefficients of 'vhet' is NA: ",
       paste(colnames(vHvar)[is.na(reg_hetv$coefficients)],
         collapse = ", "), ". This may be due to a singular matrix due to potential perfect multicollinearity",
       call. = FALSE)
+  }
   delta <- coefficients(reg_hetu)
   names(delta) <- paste0("Zu_", colnames(uHvar))
   phi <- coefficients(reg_hetv)
@@ -82,9 +110,21 @@ cstgammanorm <- function(olsObj, epsiRes, S, nuZUvar, uHvar, nvZVvar,
 }
 
 # Gradient of the likelihood function ----------
-
-cgradgammanormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
-  vHvar, Yvar, Xvar, S, N, FiMat) {
+#' gradient for gamma-normal distribution
+#' @param parm all parameters to be estimated
+#' @param nXvar number of main variables (inputs + env. var)
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @param Yvar vector of dependent variable
+#' @param Xvar matrix of main variables
+#' @param S integer for cost/prod estimation
+#' @param N number of observations
+#' @param FiMat matrix of random draws
+#' @noRd
+cgradgammanormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
+  uHvar, vHvar, Yvar, Xvar, S, N, FiMat) {
   beta <- parm[1:(nXvar)]
   delta <- parm[(nXvar + 1):(nXvar + nuZUvar)]
   phi <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
@@ -148,7 +188,29 @@ cgradgammanormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
 }
 
 # Optimization using different algorithms ----------
-
+#' optimizations solve for gamma-normal distribution
+#' @param start starting value for optimization
+#' @param olsParam OLS coefficients
+#' @param dataTable dataframe contains id of observations
+#' @param nXvar number of main variables (inputs + env. var)
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @param Yvar vector of dependent variable
+#' @param Xvar matrix of main variables
+#' @param S integer for cost/prod estimation
+#' @param N number of observations
+#' @param FiMat matrix of random draws
+#' @param method algorithm for solver
+#' @param printInfo logical print info during optimization
+#' @param itermax maximum iteration
+#' @param stepmax stepmax for ucminf
+#' @param tol parameter tolerance
+#' @param gradtol gradient tolerance
+#' @param hessianType how hessian is computed
+#' @param qac qac option for maxLik
+#' @noRd
 gammanormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
   N, FiMat, uHvar, nuZUvar, vHvar, nvZVvar, Yvar, Xvar, method,
   printInfo, itermax, stepmax, tol, gradtol, hessianType, qac) {
@@ -157,8 +219,9 @@ gammanormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
     S = S, uHvar = uHvar, nuZUvar = nuZUvar, vHvar = vHvar,
     nvZVvar = nvZVvar)
   startLoglik <- sum(cgammanormlike(startVal, nXvar = nXvar,
-    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
-    Yvar = Yvar, Xvar = Xvar, S = S, N = N, FiMat = FiMat))
+    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
+    FiMat = FiMat))
   if (method %in% c("bfgs", "bhhh", "nr", "nm")) {
     maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
       bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
@@ -178,17 +241,18 @@ gammanormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
     grad = cgradgammanormlike, start = startVal, finalHessian = if (hessianType ==
       2) "bhhh" else TRUE, control = list(printLevel = if (printInfo) 2 else 0,
       iterlim = itermax, reltol = tol, tol = tol, qac = qac),
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
-    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
-    FiMat = FiMat), sr1 = trust.optim(x = startVal, fn = function(parm) -sum(cgammanormlike(parm,
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
-    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
-    FiMat = FiMat)), gr = function(parm) -colSums(cgradgammanormlike(parm,
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
-    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
-    FiMat = FiMat)), method = "SR1", control = list(maxit = itermax,
-    cgtol = gradtol, stop.trust.radius = tol, prec = tol,
-    report.level = if (printInfo) 2 else 0, report.precision = 1L)),
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S, N = N, FiMat = FiMat), sr1 = trust.optim(x = startVal,
+    fn = function(parm) -sum(cgammanormlike(parm, nXvar = nXvar,
+      nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
+      FiMat = FiMat)), gr = function(parm) -colSums(cgradgammanormlike(parm,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, N = N, FiMat = FiMat)), method = "SR1", control = list(maxit = itermax,
+      cgtol = gradtol, stop.trust.radius = tol, prec = tol,
+      report.level = if (printInfo) 2 else 0, report.precision = 1L)),
     sparse = trust.optim(x = startVal, fn = function(parm) -sum(cgammanormlike(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -218,8 +282,8 @@ gammanormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, N = N, FiMat = FiMat)), control = list(iter.max = itermax,
-      trace = if (printInfo) 1 else 0, eval.max = itermax, rel.tol = tol,
-      x.tol = tol)))
+      trace = if (printInfo) 1 else 0, eval.max = itermax,
+      rel.tol = tol, x.tol = tol)))
   if (method %in% c("ucminf", "nlminb")) {
     mleObj$gradient <- colSums(cgradgammanormlike(mleObj$par,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
@@ -255,17 +319,22 @@ gammanormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
         S = S, N = N, FiMat = FiMat)), mleObj$solution)
   }
   mleObj$logL_OBS <- cgammanormlike(parm = mlParam, nXvar = nXvar,
-    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
-    Yvar = Yvar, Xvar = Xvar, S = S, N = N, FiMat = FiMat)
+    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
+    FiMat = FiMat)
   mleObj$gradL_OBS <- cgradgammanormlike(parm = mlParam, nXvar = nXvar,
-    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
-    Yvar = Yvar, Xvar = Xvar, S = S, N = N, FiMat = FiMat)
+    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
+    FiMat = FiMat)
   return(list(startVal = startVal, startLoglik = startLoglik,
     mleObj = mleObj, mlParam = mlParam))
 }
 
 # Conditional efficiencies estimation ----------
-
+#' efficiencies for gamma-normal distribution
+#' @param object object of class sfacross
+#' @param level level for confidence interval
+#' @noRd
 cgammanormeff <- function(object, level) {
   beta <- object$mlParam[1:(object$nXvar)]
   delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
@@ -305,7 +374,9 @@ cgammanormeff <- function(object, level) {
 }
 
 # Marginal effects on inefficiencies ----------
-
+#' marginal impact on efficiencies for gamma-normal distribution
+#' @param object object of class sfacross
+#' @noRd
 cmarggammanorm_Eu <- function(object) {
   delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]

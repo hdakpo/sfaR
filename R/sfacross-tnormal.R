@@ -1,17 +1,35 @@
-########################################################
-#                                                      #
-# truncated normal + normal distributions              #
-#                                                      #
-#                                                      #
-########################################################
+################################################################################
+#                                                                              #
+# R internal functions for the sfaR package                                    #
+#                                                                              #
+################################################################################
+
+#------------------------------------------------------------------------------#
+# Data: Cross sectional data & Pooled data                                     #
+# Model: Standard Stochastic Frontier Analysis                                 #
+# Convolution: truncated normal - normal                                       #
+#------------------------------------------------------------------------------#
 
 # Log-likelihood ----------
-
+#' log-likelihood for truncated normal-normal distribution
+#' @param parm all parameters to be estimated
+#' @param nXvar number of main variables (inputs + env. var)
+#' @param nmuZUvar number of Zmu variables
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param muHvar matrix of Zmu variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @param Yvar vector of dependent variable
+#' @param Xvar matrix of main variables
+#' @param S integer for cost/prod estimation
+#' @noRd
 ctruncnormlike <- function(parm, nXvar, nmuZUvar, nuZUvar, nvZVvar,
   muHvar, uHvar, vHvar, Yvar, Xvar, S) {
   beta <- parm[1:(nXvar)]
   omega <- parm[(nXvar + 1):(nXvar + nmuZUvar)]
-  delta <- parm[(nXvar + nmuZUvar + 1):(nXvar + nmuZUvar + nuZUvar)]
+  delta <- parm[(nXvar + nmuZUvar + 1):(nXvar + nmuZUvar +
+    nuZUvar)]
   phi <- parm[(nXvar + nmuZUvar + nuZUvar + 1):(nXvar + nmuZUvar +
     nuZUvar + nvZVvar)]
   mu <- as.numeric(crossprod(matrix(omega), t(muHvar)))
@@ -28,7 +46,17 @@ ctruncnormlike <- function(parm, nXvar, nmuZUvar, nuZUvar, nvZVvar,
 }
 
 # starting value for the log-likelihood ----------
-
+#' starting values for truncated normal-normal distribution
+#' @param olsObj OLS object
+#' @param epsiRes residuals from OLS
+#' @param S integer for cost/prod estimation
+#' @param nmuZUvar number of Zmu variables
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param muHvar matrix of Zmu variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @noRd
 csttruncnorm <- function(olsObj, epsiRes, S, nmuZUvar, nuZUvar,
   uHvar, muHvar, nvZVvar, vHvar) {
   m2 <- moment(epsiRes, order = 2)
@@ -91,12 +119,25 @@ csttruncnorm <- function(olsObj, epsiRes, S, nmuZUvar, nuZUvar,
 }
 
 # Gradient of the likelihood function ----------
-
+#' gradient for truncated normal-normal distribution
+#' @param parm all parameters to be estimated
+#' @param nXvar number of main variables (inputs + env. var)
+#' @param nmuZUvar number of Zmu variables
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param muHvar matrix of Zmu variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @param Yvar vector of dependent variable
+#' @param Xvar matrix of main variables
+#' @param S integer for cost/prod estimation
+#' @noRd
 cgradtruncnormlike <- function(parm, nXvar, nmuZUvar, nuZUvar,
   nvZVvar, muHvar, uHvar, vHvar, Yvar, Xvar, S) {
   beta <- parm[1:(nXvar)]
   omega <- parm[(nXvar + 1):(nXvar + nmuZUvar)]
-  delta <- parm[(nXvar + nmuZUvar + 1):(nXvar + nmuZUvar + nuZUvar)]
+  delta <- parm[(nXvar + nmuZUvar + 1):(nXvar + nmuZUvar +
+    nuZUvar)]
   phi <- parm[(nXvar + nmuZUvar + nuZUvar + 1):(nXvar + nmuZUvar +
     nuZUvar + nvZVvar)]
   mu <- as.numeric(crossprod(matrix(omega), t(muHvar)))
@@ -140,12 +181,25 @@ cgradtruncnormlike <- function(parm, nXvar, nmuZUvar, nuZUvar,
 }
 
 # Hessian of the likelihood function ----------
-
+#' hessian for truncated normal-normal distribution
+#' @param parm all parameters to be estimated
+#' @param nXvar number of main variables (inputs + env. var)
+#' @param nmuZUvar number of Zmu variables
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param muHvar matrix of Zmu variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @param Yvar vector of dependent variable
+#' @param Xvar matrix of main variables
+#' @param S integer for cost/prod estimation
+#' @noRd
 chesstruncnormlike <- function(parm, nXvar, nmuZUvar, nuZUvar,
   nvZVvar, muHvar, uHvar, vHvar, Yvar, Xvar, S) {
   beta <- parm[1:(nXvar)]
   omega <- parm[(nXvar + 1):(nXvar + nmuZUvar)]
-  delta <- parm[(nXvar + nmuZUvar + 1):(nXvar + nmuZUvar + nuZUvar)]
+  delta <- parm[(nXvar + nmuZUvar + 1):(nXvar + nmuZUvar +
+    nuZUvar)]
   phi <- parm[(nXvar + nmuZUvar + nuZUvar + 1):(nXvar + nmuZUvar +
     nuZUvar + nvZVvar)]
   mu <- as.numeric(crossprod(matrix(omega), t(muHvar)))
@@ -214,10 +268,10 @@ chesstruncnormlike <- function(parm, nXvar, nmuZUvar, nuZUvar,
       pmusigx2)) * exp(Wu) - ((sigx6) * (muwuepsi)/exp(Wv) +
       1/sigmastar)/(sigma_sq)) * dmusig/pmusig) * exp(Wu),
     FUN = "*"), uHvar)
-  hessll[1:nXvar, (nXvar + nmuZUvar + nuZUvar + 1):(nXvar + nmuZUvar +
-    nuZUvar + nvZVvar)] <- crossprod(sweep(Xvar, MARGIN = 1,
-    STATS = S * (sigx7 - (sigx14 * exp(Wu) + (muwuepsi) *
-      (sigmu)/((sigma_sq) * exp(Wv))) * dmusig/pmusig) *
+  hessll[1:nXvar, (nXvar + nmuZUvar + nuZUvar + 1):(nXvar +
+    nmuZUvar + nuZUvar + nvZVvar)] <- crossprod(sweep(Xvar,
+    MARGIN = 1, STATS = S * (sigx7 - (sigx14 * exp(Wu) +
+      (muwuepsi) * (sigmu)/((sigma_sq) * exp(Wv))) * dmusig/pmusig) *
       exp(Wv), FUN = "*"), vHvar)
   hessll[(nXvar + 1):(nXvar + nmuZUvar), (nXvar + 1):(nXvar +
     nmuZUvar)] <- crossprod(sweep(muHvar, MARGIN = 1, STATS = (dmu *
@@ -257,22 +311,45 @@ chesstruncnormlike <- function(parm, nXvar, nmuZUvar, nuZUvar,
       sigx14 * exp(Wv)) * dmusig/pmusig + sigx8) * exp(Wv),
     FUN = "*"), vHvar)
   hessll[(nXvar + nmuZUvar + 1):(nXvar + nmuZUvar + nuZUvar),
-    (nXvar + nmuZUvar + nuZUvar + 1):(nXvar + nmuZUvar + nuZUvar +
-      nvZVvar)] <- crossprod(sweep(uHvar, MARGIN = 1, STATS = (((sigx6) *
-    (sigx9) * (sigmu) - ((0.5 * ((1 - wusq) * wvsq) + 0.5 *
-    ((wusq - 1) * wvsq + 1 - 0.5 * ((1 - wusq) * (1 - wvsq)))) *
-    sigmustar + mu * (sigx10) - (sigx3) * (2 * ((sigx10) *
-    sigx11) + S * (epsilon)))/(sigx2)^2) * dmusig/pmusig +
-    (0.5 * ((0.5 * ((mustar3)^2/(dmustar2 * (sigma_sq)^3)) -
-      (sigx12)/dmusqx2) * dmustar2epsi) - dmustar2epsix3)/(sigma_sq)) *
-    exp(Wu) * exp(Wv), FUN = "*"), vHvar)
+    (nXvar + nmuZUvar + nuZUvar + 1):(nXvar + nmuZUvar +
+      nuZUvar + nvZVvar)] <- crossprod(sweep(uHvar, MARGIN = 1,
+    STATS = (((sigx6) * (sigx9) * (sigmu) - ((0.5 * ((1 -
+      wusq) * wvsq) + 0.5 * ((wusq - 1) * wvsq + 1 - 0.5 *
+      ((1 - wusq) * (1 - wvsq)))) * sigmustar + mu * (sigx10) -
+      (sigx3) * (2 * ((sigx10) * sigx11) + S * (epsilon)))/(sigx2)^2) *
+      dmusig/pmusig + (0.5 * ((0.5 * ((mustar3)^2/(dmustar2 *
+      (sigma_sq)^3)) - (sigx12)/dmusqx2) * dmustar2epsi) -
+      dmustar2epsix3)/(sigma_sq)) * exp(Wu) * exp(Wv),
+    FUN = "*"), vHvar)
   hessll[lower.tri(hessll)] <- t(hessll)[lower.tri(hessll)]
   # hessll <- (hessll + (hessll))/2
   return(hessll)
 }
 
 # Optimization using different algorithms ----------
-
+#' optimizations solve for truncated normal-normal distribution
+#' @param start starting value for optimization
+#' @param olsParam OLS coefficients
+#' @param dataTable dataframe contains id of observations
+#' @param nXvar number of main variables (inputs + env. var)
+#' @param nmuZUvar number of Zmu variables
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param muHvar matrix of Zmu variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @param Yvar vector of dependent variable
+#' @param Xvar matrix of main variables
+#' @param S integer for cost/prod estimation
+#' @param method algorithm for solver
+#' @param printInfo logical print info during optimization
+#' @param itermax maximum iteration
+#' @param stepmax stepmax for ucminf
+#' @param tol parameter tolerance
+#' @param gradtol gradient tolerance
+#' @param hessianType how hessian is computed
+#' @param qac qac option for maxLik
+#' @noRd
 truncnormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
   muHvar, nmuZUvar, uHvar, nuZUvar, vHvar, nvZVvar, Yvar, Xvar,
   method, printInfo, itermax, stepmax, tol, gradtol, hessianType,
@@ -299,67 +376,66 @@ truncnormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
       vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S)),
-    hessian = 0, control = list(trace = if (printInfo) 1 else 0, maxeval = itermax,
-      stepmax = stepmax, xtol = tol, grtol = gradtol)),
-    maxLikAlgo = maxRoutine(fn = ctruncnormlike, grad = cgradtruncnormlike,
-      hess = chesstruncnormlike, start = startVal, finalHessian = if (hessianType ==
-        2) "bhhh" else TRUE, control = list(printLevel = if (printInfo) 2 else 0,
-        iterlim = itermax, reltol = tol, tol = tol, qac = qac),
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S),
-    sr1 = trust.optim(x = startVal, fn = function(parm) -sum(ctruncnormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S)),
-      gr = function(parm) -colSums(cgradtruncnormlike(parm,
-        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-        nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S)),
-      method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
-        stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
-        report.precision = 1L)), sparse = trust.optim(x = startVal,
-      fn = function(parm) -sum(ctruncnormlike(parm, nXvar = nXvar,
-        nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
-        muHvar = muHvar, uHvar = uHvar, vHvar = vHvar,
-        Yvar = Yvar, Xvar = Xvar, S = S)), gr = function(parm) -colSums(cgradtruncnormlike(parm,
-        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-        nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S)),
-      hs = function(parm) as(-chesstruncnormlike(parm,
-        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-        nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S),
-        "dgCMatrix"), method = "Sparse", control = list(maxit = itermax,
-        cgtol = gradtol, stop.trust.radius = tol, prec = tol,
-        report.level = if (printInfo) 2 else 0, report.precision = 1L,
-        preconditioner = 1L)), mla = mla(b = startVal,
-      fn = function(parm) -sum(ctruncnormlike(parm, nXvar = nXvar,
-        nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
-        muHvar = muHvar, uHvar = uHvar, vHvar = vHvar,
-        Yvar = Yvar, Xvar = Xvar, S = S)), gr = function(parm) -colSums(cgradtruncnormlike(parm,
-        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-        nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S)),
-      hess = function(parm) -chesstruncnormlike(parm, nXvar = nXvar,
-        nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
-        muHvar = muHvar, uHvar = uHvar, vHvar = vHvar,
-        Yvar = Yvar, Xvar = Xvar, S = S), print.info = printInfo,
-      maxiter = itermax, epsa = gradtol, epsb = gradtol),
-    nlminb = nlminb(start = startVal, objective = function(parm) -sum(ctruncnormlike(parm,
+    hessian = 0, control = list(trace = if (printInfo) 1 else 0,
+      maxeval = itermax, stepmax = stepmax, xtol = tol,
+      grtol = gradtol)), maxLikAlgo = maxRoutine(fn = ctruncnormlike,
+    grad = cgradtruncnormlike, hess = chesstruncnormlike,
+    start = startVal, finalHessian = if (hessianType == 2) "bhhh" else TRUE,
+    control = list(printLevel = if (printInfo) 2 else 0,
+      iterlim = itermax, reltol = tol, tol = tol, qac = qac),
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
+    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S), sr1 = trust.optim(x = startVal,
+    fn = function(parm) -sum(ctruncnormlike(parm, nXvar = nXvar,
+      nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
+      muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
+      Xvar = Xvar, S = S)), gr = function(parm) -colSums(cgradtruncnormlike(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
       vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S)),
-      gradient = function(parm) -colSums(cgradtruncnormlike(parm,
-        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-        nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S)),
-      hessian = function(parm) -chesstruncnormlike(parm,
-        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-        nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S),
-      control = list(iter.max = itermax, trace = if (printInfo) 1 else 0,
-        eval.max = itermax, rel.tol = tol, x.tol = tol)))
+    method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
+      stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
+      report.precision = 1L)), sparse = trust.optim(x = startVal,
+    fn = function(parm) -sum(ctruncnormlike(parm, nXvar = nXvar,
+      nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
+      muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
+      Xvar = Xvar, S = S)), gr = function(parm) -colSums(cgradtruncnormlike(parm,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
+      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S)),
+    hs = function(parm) as(-chesstruncnormlike(parm, nXvar = nXvar,
+      nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
+      muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
+      Xvar = Xvar, S = S), "dgCMatrix"), method = "Sparse",
+    control = list(maxit = itermax, cgtol = gradtol, stop.trust.radius = tol,
+      prec = tol, report.level = if (printInfo) 2 else 0,
+      report.precision = 1L, preconditioner = 1L)), mla = mla(b = startVal,
+    fn = function(parm) -sum(ctruncnormlike(parm, nXvar = nXvar,
+      nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
+      muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
+      Xvar = Xvar, S = S)), gr = function(parm) -colSums(cgradtruncnormlike(parm,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
+      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S)),
+    hess = function(parm) -chesstruncnormlike(parm, nXvar = nXvar,
+      nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
+      muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
+      Xvar = Xvar, S = S), print.info = printInfo, maxiter = itermax,
+    epsa = gradtol, epsb = gradtol), nlminb = nlminb(start = startVal,
+    objective = function(parm) -sum(ctruncnormlike(parm,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
+      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S)),
+    gradient = function(parm) -colSums(cgradtruncnormlike(parm,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
+      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S)),
+    hessian = function(parm) -chesstruncnormlike(parm, nXvar = nXvar,
+      nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
+      muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
+      Xvar = Xvar, S = S), control = list(iter.max = itermax,
+      trace = if (printInfo) 1 else 0, eval.max = itermax,
+      rel.tol = tol, x.tol = tol)))
   if (method %in% c("ucminf", "nlminb")) {
     mleObj$gradient <- colSums(cgradtruncnormlike(mleObj$par,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
@@ -406,9 +482,11 @@ truncnormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
     mleObj = mleObj, mlParam = mlParam))
 }
 
-
 # Conditional efficiencies estimation ----------
-
+#' efficiencies for truncated normal-normal distribution
+#' @param object object of class sfacross
+#' @param level level for confidence interval
+#' @noRd
 ctruncnormeff <- function(object, level) {
   beta <- object$mlParam[1:(object$nXvar)]
   omega <- object$mlParam[(object$nXvar + 1):(object$nXvar +
@@ -416,7 +494,8 @@ ctruncnormeff <- function(object, level) {
   delta <- object$mlParam[(object$nXvar + object$nmuZUvar +
     1):(object$nXvar + object$nmuZUvar + object$nuZUvar)]
   phi <- object$mlParam[(object$nXvar + object$nmuZUvar + object$nuZUvar +
-    1):(object$nXvar + object$nmuZUvar + object$nuZUvar + object$nvZVvar)]
+    1):(object$nXvar + object$nmuZUvar + object$nuZUvar +
+    object$nvZVvar)]
   Xvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 1)
   muHvar <- model.matrix(object$formula, data = object$dataTable,
@@ -456,7 +535,9 @@ ctruncnormeff <- function(object, level) {
 }
 
 # Marginal effects on inefficiencies ----------
-
+#' marginal impact on efficiencies for truncated normal-normal distribution
+#' @param object object of class sfacross
+#' @noRd
 cmargtruncnorm_Eu <- function(object) {
   omega <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nmuZUvar)]

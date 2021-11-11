@@ -1,17 +1,37 @@
-########################################################
-#                                                      #
-# Lognormal + normal distributions                     #
-#                                                      #
-#                                                      #
-########################################################
+################################################################################
+#                                                                              #
+# R internal functions for the sfaR package                                    #
+#                                                                              #
+################################################################################
+
+#------------------------------------------------------------------------------#
+# Data: Cross sectional data & Pooled data                                     #
+# Model: Standard Stochastic Frontier Analysis                                 #
+# Convolution: lognormal - normal                                              #
+#------------------------------------------------------------------------------#
 
 # Log-likelihood ----------
-
+#' log-likelihood for lognormal-normal distribution
+#' @param parm all parameters to be estimated
+#' @param nXvar number of main variables (inputs + env. var)
+#' @param nmuZUvar number of Zmu variables
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param muHvar matrix of Zmu variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @param Yvar vector of dependent variable
+#' @param Xvar matrix of main variables
+#' @param S integer for cost/prod estimation
+#' @param N number of observations
+#' @param FiMat matrix of random draws
+#' @noRd
 clognormlike <- function(parm, nXvar, nmuZUvar, nuZUvar, nvZVvar,
   muHvar, uHvar, vHvar, Yvar, Xvar, S, N, FiMat) {
   beta <- parm[1:(nXvar)]
   omega <- parm[(nXvar + 1):(nXvar + nmuZUvar)]
-  delta <- parm[(nXvar + nmuZUvar + 1):(nXvar + nmuZUvar + nuZUvar)]
+  delta <- parm[(nXvar + nmuZUvar + 1):(nXvar + nmuZUvar +
+    nuZUvar)]
   phi <- parm[(nXvar + nmuZUvar + nuZUvar + 1):(nXvar + nmuZUvar +
     nuZUvar + nvZVvar)]
   mu <- as.numeric(crossprod(matrix(omega), t(muHvar)))
@@ -19,25 +39,39 @@ clognormlike <- function(parm, nXvar, nmuZUvar, nuZUvar, nvZVvar,
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
   epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
   ll <- numeric(N)
+  ur <- list()
   for (i in 1:N) {
-    ur <- exp(mu[i] + exp(Wu[i]/2) * qnorm(FiMat[i, ]))
+    ur[[i]] <- exp(mu[i] + exp(Wu[i]/2) * qnorm(FiMat[i,
+      ]))
     ll[i] <- log(mean(1/exp(Wv[i]/2) * dnorm((epsilon[i] +
-      S * ur)/exp(Wv[i]/2))))
+      S * ur[[i]])/exp(Wv[i]/2))))
   }
   return(ll)
 }
 
 # starting value for the log-likelihood ----------
-
-cstlognorm <- function(olsObj, epsiRes, S, nmuZUvar, nuZUvar, uHvar,
-  muHvar, nvZVvar, vHvar) {
+#' starting values for lognormal-normal distribution
+#' @param olsObj OLS object
+#' @param epsiRes residuals from OLS
+#' @param S integer for cost/prod estimation
+#' @param nmuZUvar number of Zmu variables
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param muHvar matrix of Zmu variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @noRd
+cstlognorm <- function(olsObj, epsiRes, S, nmuZUvar, nuZUvar,
+  uHvar, muHvar, nvZVvar, vHvar) {
   m2 <- moment(epsiRes, order = 2)
   m3 <- moment(epsiRes, order = 3)
-  varu <- tryCatch((nleqslv(x = 0.01, fn = function(x) -exp(9 *
-    x^2/2) + 3 * exp(5 * x^2/2) - 2 * exp(3 * x^2/2) - S *
-    m3, method = "Newton")$x)^2, error = function(e) e)
-  if (inherits(varu, "error"))
+  varu <- tryCatch((nleqslv(x = 0.01, fn = function(x) {
+    -exp(9 * x^2/2) + 3 * exp(5 * x^2/2) - 2 * exp(3 * x^2/2) -
+      S * m3
+  }, method = "Newton")$x)^2, error = function(e) e)
+  if (inherits(varu, "error")) {
     varu <- 0.01
+  }
   varv <- if ((m2 - exp(varu) * (exp(varu) - 1)) < 0) {
     abs(m2 - exp(varu) * (exp(varu) - 1))
   } else {
@@ -51,31 +85,34 @@ cstlognorm <- function(olsObj, epsiRes, S, nmuZUvar, nuZUvar, uHvar,
   } else {
     lm(dep_u ~ ., data = as.data.frame(uHvar[, 2:nuZUvar]))
   }
-  if (any(is.na(reg_hetu$coefficients)))
+  if (any(is.na(reg_hetu$coefficients))) {
     stop("At least one of the OLS coefficients of 'uhet' is NA: ",
       paste(colnames(uHvar)[is.na(reg_hetu$coefficients)],
         collapse = ", "), ". This may be due to a singular matrix due to potential perfect multicollinearity",
       call. = FALSE)
+  }
   reg_hetv <- if (nvZVvar == 1) {
     lm(log(varv) ~ 1)
   } else {
     lm(dep_v ~ ., data = as.data.frame(vHvar[, 2:nvZVvar]))
   }
-  if (any(is.na(reg_hetv$coefficients)))
+  if (any(is.na(reg_hetv$coefficients))) {
     stop("at least one of the OLS coefficients of 'vhet' is NA: ",
       paste(colnames(vHvar)[is.na(reg_hetv$coefficients)],
         collapse = ", "), ". This may be due to a singular matrix due to potential perfect multicollinearity",
       call. = FALSE)
+  }
   reg_hetmu <- if (nmuZUvar == 1) {
     lm(epsiRes ~ 1)
   } else {
     lm(epsiRes ~ ., data = as.data.frame(muHvar[, 2:nmuZUvar]))
   }
-  if (any(is.na(reg_hetmu$coefficients)))
+  if (any(is.na(reg_hetmu$coefficients))) {
     stop("at least one of the OLS coefficients of 'muhet' is NA: ",
       paste(colnames(muHvar)[is.na(reg_hetmu$coefficients)],
         collapse = ", "), ". This may be due to a singular matrix due to potential perfect multicollinearity",
       call. = FALSE)
+  }
   delta <- coefficients(reg_hetu)
   names(delta) <- paste0("Zu_", colnames(uHvar))
   phi <- coefficients(reg_hetv)
@@ -91,12 +128,27 @@ cstlognorm <- function(olsObj, epsiRes, S, nmuZUvar, nuZUvar, uHvar,
 }
 
 # Gradient of the likelihood function ----------
-
-cgradlognormlike <- function(parm, nXvar, nmuZUvar, nuZUvar, nvZVvar,
-  muHvar, uHvar, vHvar, Yvar, Xvar, S, N, FiMat) {
+#' gradient for lognormal-normal distribution
+#' @param parm all parameters to be estimated
+#' @param nXvar number of main variables (inputs + env. var)
+#' @param nmuZUvar number of Zmu variables
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param muHvar matrix of Zmu variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @param Yvar vector of dependent variable
+#' @param Xvar matrix of main variables
+#' @param S integer for cost/prod estimation
+#' @param N number of observations
+#' @param FiMat matrix of random draws
+#' @noRd
+cgradlognormlike <- function(parm, nXvar, nmuZUvar, nuZUvar,
+  nvZVvar, muHvar, uHvar, vHvar, Yvar, Xvar, S, N, FiMat) {
   beta <- parm[1:(nXvar)]
   omega <- parm[(nXvar + 1):(nXvar + nmuZUvar)]
-  delta <- parm[(nXvar + nmuZUvar + 1):(nXvar + nmuZUvar + nuZUvar)]
+  delta <- parm[(nXvar + nmuZUvar + 1):(nXvar + nmuZUvar +
+    nuZUvar)]
   phi <- parm[(nXvar + nmuZUvar + nuZUvar + 1):(nXvar + nmuZUvar +
     nuZUvar + nvZVvar)]
   mu <- as.numeric(crossprod(matrix(omega), t(muHvar)))
@@ -148,7 +200,31 @@ cgradlognormlike <- function(parm, nXvar, nmuZUvar, nuZUvar, nvZVvar,
 }
 
 # Optimization using different algorithms ----------
-
+#' optimizations solve for lognormal-normal distribution
+#' @param start starting value for optimization
+#' @param olsParam OLS coefficients
+#' @param dataTable dataframe contains id of observations
+#' @param nXvar number of main variables (inputs + env. var)
+#' @param nmuZUvar number of Zmu variables ()
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param muHvar matrix of Zmu variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @param Yvar vector of dependent variable
+#' @param Xvar matrix of main variables
+#' @param S integer for cost/prod estimation
+#' @param S integer for cost/prod estimation
+#' @param N number of observations
+#' @param method algorithm for solver
+#' @param printInfo logical print info during optimization
+#' @param itermax maximum iteration
+#' @param stepmax stepmax for ucminf
+#' @param tol parameter tolerance
+#' @param gradtol gradient tolerance
+#' @param hessianType how hessian is computed
+#' @param qac qac option for maxLik
+#' @noRd
 lognormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
   muHvar, nmuZUvar, N, FiMat, uHvar, nuZUvar, vHvar, nvZVvar,
   Yvar, Xvar, method, printInfo, itermax, stepmax, tol, gradtol,
@@ -181,19 +257,20 @@ lognormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
     grad = cgradlognormlike, start = startVal, finalHessian = if (hessianType ==
       2) "bhhh" else TRUE, control = list(printLevel = if (printInfo) 2 else 0,
       iterlim = itermax, reltol = tol, tol = tol, qac = qac),
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
-    muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
-    Xvar = Xvar, S = S, N = N, FiMat = FiMat), sr1 = trust.optim(x = startVal,
-    fn = function(parm) -sum(clognormlike(parm, nXvar = nXvar,
-      nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
-      muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
-      Xvar = Xvar, S = S, N = N, FiMat = FiMat)), gr = function(parm) -colSums(cgradlognormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
-      FiMat = FiMat)), method = "SR1", control = list(maxit = itermax,
-      cgtol = gradtol, stop.trust.radius = tol, prec = tol,
-      report.level = if (printInfo) 2 else 0, report.precision = 1L)),
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
+    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
+    FiMat = FiMat), sr1 = trust.optim(x = startVal, fn = function(parm) -sum(clognormlike(parm,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
+    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
+    FiMat = FiMat)), gr = function(parm) -colSums(cgradlognormlike(parm,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
+    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
+    FiMat = FiMat)), method = "SR1", control = list(maxit = itermax,
+    cgtol = gradtol, stop.trust.radius = tol, prec = tol,
+    report.level = if (printInfo) 2 else 0, report.precision = 1L)),
     sparse = trust.optim(x = startVal, fn = function(parm) -sum(clognormlike(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
@@ -229,8 +306,8 @@ lognormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
         nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
         vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
         N = N, FiMat = FiMat)), control = list(iter.max = itermax,
-        trace = if (printInfo) 1 else 0, eval.max = itermax, rel.tol = tol,
-        x.tol = tol)))
+        trace = if (printInfo) 1 else 0, eval.max = itermax,
+        rel.tol = tol, x.tol = tol)))
   if (method %in% c("ucminf", "nlminb")) {
     mleObj$gradient <- colSums(cgradlognormlike(mleObj$par,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
@@ -281,14 +358,25 @@ lognormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
 }
 
 # average efficiency (BC style) evaluation ----------
-
+#' function to estimate unconditional efficiency (Battese and Coelli style)
+#' @param u inefficiency variable over which integration will be done
+#' @param sigma standard error of the weibull distribution
+#' @param mu location parameter
+#' @noRd
 fnExpULogNorm <- function(u, sigma, mu) {
   1/(u * sigma * sqrt(2 * pi)) * exp(-(log(u) - mu)^2/(2 *
     sigma^2) - u)
 }
 
 # integral to solve for conditional efficiencies ----------
-
+#' function to estimate unconditional efficiency (Battese and Coelli style)
+#' @param u inefficiency variable over which integration will be done
+#' @param sigmaU standard error of the weibull distribution
+#' @param sigmaV standard error of the two-sided error component
+#' @param mu location parameter
+#' @param epsilon composite noise
+#' @param S integer for cost/prod estimation
+#' @noRd
 fnCondEffLogNorm <- function(u, sigmaU, sigmaV, mu, epsilon,
   S) {
   1/(sigmaU * sigmaV) * dnorm((log(u) - mu)/sigmaU) * dnorm((epsilon +
@@ -296,7 +384,10 @@ fnCondEffLogNorm <- function(u, sigmaU, sigmaV, mu, epsilon,
 }
 
 # Conditional efficiencies estimation ----------
-
+#' efficiencies for lognormal-normal distribution
+#' @param object object of class sfacross
+#' @param level level for confidence interval
+#' @noRd
 clognormeff <- function(object, level) {
   beta <- object$mlParam[1:(object$nXvar)]
   omega <- object$mlParam[(object$nXvar + 1):(object$nXvar +
@@ -304,7 +395,8 @@ clognormeff <- function(object, level) {
   delta <- object$mlParam[(object$nXvar + object$nmuZUvar +
     1):(object$nXvar + object$nmuZUvar + object$nuZUvar)]
   phi <- object$mlParam[(object$nXvar + object$nmuZUvar + object$nuZUvar +
-    1):(object$nXvar + object$nmuZUvar + object$nuZUvar + object$nvZVvar)]
+    1):(object$nXvar + object$nmuZUvar + object$nuZUvar +
+    object$nvZVvar)]
   Xvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 1)
   muHvar <- model.matrix(object$formula, data = object$dataTable,
@@ -338,7 +430,9 @@ clognormeff <- function(object, level) {
 }
 
 # Marginal effects on inefficiencies ----------
-
+#' marginal impact on efficiencies for lognormal-normal distribution
+#' @param object object of class sfacross
+#' @noRd
 cmarglognorm_Eu <- function(object) {
   omega <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nmuZUvar)]

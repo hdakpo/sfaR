@@ -1,12 +1,27 @@
-########################################################
-#                                                      #
-# uniform + normal distributions                       #
-#                                                      #
-#                                                      #
-########################################################
+################################################################################
+#                                                                              #
+# R internal functions for the sfaR package                                    #
+#                                                                              #
+################################################################################
+
+#------------------------------------------------------------------------------#
+# Data: Cross sectional data & Pooled data                                     #
+# Model: Standard Stochastic Frontier Analysis                                 #
+# Convolution: uniform - normal                                                #
+#------------------------------------------------------------------------------#
 
 # Log-likelihood ----------
-
+#' log-likelihood for uniform-normal distribution
+#' @param parm all parameters to be estimated
+#' @param nXvar number of main variables (inputs + env. var)
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @param Yvar vector of dependent variable
+#' @param Xvar matrix of main variables
+#' @param S integer for cost/prod estimation
+#' @noRd
 cuninormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
   vHvar, Yvar, Xvar, S) {
   beta <- parm[1:(nXvar)]
@@ -21,7 +36,15 @@ cuninormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
 }
 
 # starting value for the log-likelihood ----------
-
+#' starting values for uniform-normal distribution
+#' @param olsObj OLS object
+#' @param epsiRes residuals from OLS
+#' @param S integer for cost/prod estimation
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @noRd
 cstuninorm <- function(olsObj, epsiRes, S, nuZUvar, uHvar, nvZVvar,
   vHvar) {
   m2 <- moment(epsiRes, order = 2)
@@ -73,7 +96,17 @@ cstuninorm <- function(olsObj, epsiRes, S, nuZUvar, uHvar, nvZVvar,
 }
 
 # Gradient of the likelihood function ----------
-
+#' gradient for uniform-normal distribution
+#' @param parm all parameters to be estimated
+#' @param nXvar number of main variables (inputs + env. var)
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @param Yvar vector of dependent variable
+#' @param Xvar matrix of main variables
+#' @param S integer for cost/prod estimation
+#' @noRd
 cgraduninormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
   vHvar, Yvar, Xvar, S) {
   beta <- parm[1:(nXvar)]
@@ -103,7 +136,17 @@ cgraduninormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
 }
 
 # Hessian of the likelihood function ----------
-
+#' hessian for uniform-normal distribution
+#' @param parm all parameters to be estimated
+#' @param nXvar number of main variables (inputs + env. var)
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @param Yvar vector of dependent variable
+#' @param Xvar matrix of main variables
+#' @param S integer for cost/prod estimation
+#' @noRd
 chessuninormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
   vHvar, Yvar, Xvar, S) {
   beta <- parm[1:(nXvar)]
@@ -134,20 +177,21 @@ chessuninormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
   hessll[1:nXvar, (nXvar + 1):(nXvar + nuZUvar)] <- crossprod(sweep(Xvar,
     MARGIN = 1, STATS = S * ((epsiu)/(sigx5) - (sigx2)/(sigx4)^2) *
       depsiuvx2, FUN = "*"), uHvar)
-  hessll[1:nXvar, (nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)] <- crossprod(sweep(Xvar,
-    MARGIN = 1, STATS = S * ((0.5 * (depsiv * (S^2 * (epsilon)^2/exp(Wv/2)^2 -
-      1)) - 0.5 * (((epsiu)^2/exp(Wv/2)^2 - 1) * depsiuv))/(sigx4) -
+  hessll[1:nXvar, (nXvar + nuZUvar + 1):(nXvar + nuZUvar +
+    nvZVvar)] <- crossprod(sweep(Xvar, MARGIN = 1, STATS = S *
+    ((0.5 * (depsiv * (S^2 * (epsilon)^2/exp(Wv/2)^2 - 1)) -
+      0.5 * (((epsiu)^2/exp(Wv/2)^2 - 1) * depsiuv))/(sigx4) -
       (sigx1) * (sigx2)/(sigx4)^2), FUN = "*"), vHvar)
   hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + 1):(nXvar +
     nuZUvar)] <- crossprod(sweep(uHvar, MARGIN = 1, STATS = ((1 -
     exp(Wu) * epsiuv/exp(Wv/2))/(sigx4) - depsiuvx2/(sigx4)^2) *
     depsiuvx2, FUN = "*"), uHvar)
-  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + nuZUvar + 1):(nXvar +
-    nuZUvar + nvZVvar)] <- crossprod(sweep(uHvar, MARGIN = 1,
-    STATS = -(((sigx1)/(sigx4)^2 + 0.5 * ((1 - epsiuv^2)/(sigx4))) *
-      depsiuvx2), FUN = "*"), vHvar)
-  hessll[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar), (nXvar +
-    nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)] <- crossprod(sweep(vHvar,
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + nuZUvar +
+    1):(nXvar + nuZUvar + nvZVvar)] <- crossprod(sweep(uHvar,
+    MARGIN = 1, STATS = -(((sigx1)/(sigx4)^2 + 0.5 * ((1 -
+      epsiuv^2)/(sigx4))) * depsiuvx2), FUN = "*"), vHvar)
+  hessll[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar),
+    (nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)] <- crossprod(sweep(vHvar,
     MARGIN = 1, STATS = ((0.25 * (S^3 * depsiv * (epsilon)^3) -
       0.25 * (depsiuv * (epsiu)^3))/(sigx5) - (0.5 * (sigx4) +
       sigx1) * (sigx1)/(sigx4)^2), FUN = "*"), vHvar)
@@ -157,7 +201,27 @@ chessuninormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
 }
 
 # Optimization using different algorithms ----------
-
+#' optimizations solve for uniform-normal distribution
+#' @param start starting value for optimization
+#' @param olsParam OLS coefficients
+#' @param dataTable dataframe contains id of observations
+#' @param nXvar number of main variables (inputs + env. var)
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @param Yvar vector of dependent variable
+#' @param Xvar matrix of main variables
+#' @param S integer for cost/prod estimation
+#' @param method algorithm for solver
+#' @param printInfo logical print info during optimization
+#' @param itermax maximum iteration
+#' @param stepmax stepmax for ucminf
+#' @param tol parameter tolerance
+#' @param gradtol gradient tolerance
+#' @param hessianType how hessian is computed
+#' @param qac qac option for maxLik
+#' @noRd
 uninormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
   uHvar, nuZUvar, vHvar, nvZVvar, Yvar, Xvar, method, printInfo,
   itermax, stepmax, tol, gradtol, hessianType, qac) {
@@ -166,8 +230,8 @@ uninormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
     S = S, uHvar = uHvar, nuZUvar = nuZUvar, vHvar = vHvar,
     nvZVvar = nvZVvar)
   startLoglik <- sum(cuninormlike(startVal, nXvar = nXvar,
-    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
-    Yvar = Yvar, Xvar = Xvar, S = S))
+    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S))
   if (method %in% c("bfgs", "bhhh", "nr", "nm")) {
     maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
       bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
@@ -181,23 +245,24 @@ uninormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
     gr = function(parm) -colSums(cgraduninormlike(parm, nXvar = nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
       vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S)),
-    hessian = 0, control = list(trace = if (printInfo) 1 else 0, maxeval = itermax,
-      stepmax = stepmax, xtol = tol, grtol = gradtol)),
-    maxLikAlgo = maxRoutine(fn = cuninormlike, grad = cgraduninormlike,
-      hess = chessuninormlike, start = startVal, finalHessian = if (hessianType ==
-        2) "bhhh" else TRUE, control = list(printLevel = if (printInfo) 2 else 0,
-        iterlim = itermax, reltol = tol, tol = tol, qac = qac),
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S), sr1 = trust.optim(x = startVal, fn = function(parm) -sum(cuninormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S)), gr = function(parm) -colSums(cgraduninormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S)), method = "SR1", control = list(maxit = itermax,
-      cgtol = gradtol, stop.trust.radius = tol, prec = tol,
-      report.level = if (printInfo) 2 else 0, report.precision = 1L)),
+    hessian = 0, control = list(trace = if (printInfo) 1 else 0,
+      maxeval = itermax, stepmax = stepmax, xtol = tol,
+      grtol = gradtol)), maxLikAlgo = maxRoutine(fn = cuninormlike,
+    grad = cgraduninormlike, hess = chessuninormlike, start = startVal,
+    finalHessian = if (hessianType == 2) "bhhh" else TRUE,
+    control = list(printLevel = if (printInfo) 2 else 0,
+      iterlim = itermax, reltol = tol, tol = tol, qac = qac),
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S), sr1 = trust.optim(x = startVal, fn = function(parm) -sum(cuninormlike(parm,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S)), gr = function(parm) -colSums(cgraduninormlike(parm,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S)), method = "SR1", control = list(maxit = itermax,
+    cgtol = gradtol, stop.trust.radius = tol, prec = tol,
+    report.level = if (printInfo) 2 else 0, report.precision = 1L)),
     sparse = trust.optim(x = startVal, fn = function(parm) -sum(cuninormlike(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -267,17 +332,20 @@ uninormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
         S = S)
   }
   mleObj$logL_OBS <- cuninormlike(parm = mlParam, nXvar = nXvar,
-    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
-    Yvar = Yvar, Xvar = Xvar, S = S)
+    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S)
   mleObj$gradL_OBS <- cgraduninormlike(parm = mlParam, nXvar = nXvar,
-    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
-    Yvar = Yvar, Xvar = Xvar, S = S)
+    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S)
   return(list(startVal = startVal, startLoglik = startLoglik,
     mleObj = mleObj, mlParam = mlParam))
 }
 
 # Conditional efficiencies estimation ----------
-
+#' efficiencies for uniform-normal distribution
+#' @param object object of class sfacross
+#' @param level level for confidence interval
+#' @noRd
 cuninormeff <- function(object, level) {
   beta <- object$mlParam[1:(object$nXvar)]
   delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
@@ -334,7 +402,9 @@ cuninormeff <- function(object, level) {
 }
 
 # Marginal effects on inefficiencies ----------
-
+#' marginal impact on efficiencies for uniform-normal distribution
+#' @param object object of class sfacross
+#' @noRd
 cmarguninorm_Eu <- function(object) {
   delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]

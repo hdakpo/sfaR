@@ -1,12 +1,27 @@
-########################################################
-#                                                      #
-# half-normal + normal distributions                   #
-#                                                      #
-#                                                      #
-########################################################
+################################################################################
+#                                                                              #
+# R internal functions for the sfaR package                                    #
+#                                                                              #
+################################################################################
+
+#------------------------------------------------------------------------------#
+# Data: Cross sectional data & Pooled data                                     #
+# Model: Standard Stochastic Frontier Analysis                                 #
+# Convolution: halfnormal - normal                                             #
+#------------------------------------------------------------------------------#
 
 # Log-likelihood ----------
-
+#' log-likelihood for halfnormal-normal distribution
+#' @param parm all parameters to be estimated
+#' @param nXvar number of main variables (inputs + env. var)
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @param Yvar vector of dependent variable
+#' @param Xvar matrix of main variables
+#' @param S integer for cost/prod estimation
+#' @noRd
 chalfnormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
   vHvar, Yvar, Xvar, S) {
   beta <- parm[1:(nXvar)]
@@ -23,7 +38,15 @@ chalfnormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
 }
 
 # starting value for the log-likelihood ----------
-
+#' starting values for halfnormal-normal distribution
+#' @param olsObj OLS object
+#' @param epsiRes residuals from OLS
+#' @param S integer for cost/prod estimation
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @noRd
 csthalfnorm <- function(olsObj, epsiRes, S, nuZUvar, uHvar, nvZVvar,
   vHvar) {
   m2 <- moment(epsiRes, order = 2)
@@ -74,9 +97,19 @@ csthalfnorm <- function(olsObj, epsiRes, S, nuZUvar, uHvar, nvZVvar,
 }
 
 # Gradient of the likelihood function ----------
-
-cgradhalfnormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
-  vHvar, Yvar, Xvar, S) {
+#' gradient for halfnormal-normal distribution
+#' @param parm all parameters to be estimated
+#' @param nXvar number of main variables (inputs + env. var)
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @param Yvar vector of dependent variable
+#' @param Xvar matrix of main variables
+#' @param S integer for cost/prod estimation
+#' @noRd
+cgradhalfnormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
+  uHvar, vHvar, Yvar, Xvar, S) {
   beta <- parm[1:(nXvar)]
   delta <- parm[(nXvar + 1):(nXvar + nuZUvar)]
   phi <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
@@ -119,9 +152,19 @@ cgradhalfnormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
 }
 
 # Hessian of the likelihood function ----------
-
-chesshalfnormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
-  vHvar, Yvar, Xvar, S) {
+#' hessian for halfnormal-normal distribution
+#' @param parm all parameters to be estimated
+#' @param nXvar number of main variables (inputs + env. var)
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @param Yvar vector of dependent variable
+#' @param Xvar matrix of main variables
+#' @param S integer for cost/prod estimation
+#' @noRd
+chesshalfnormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
+  uHvar, vHvar, Yvar, Xvar, S) {
   beta <- parm[1:(nXvar)]
   delta <- parm[(nXvar + 1):(nXvar + nuZUvar)]
   phi <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
@@ -164,12 +207,13 @@ chesshalfnormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
       (sig2wu) * dmusigwu * (S * (epsilon)/exp(Wv) - dmusig/(pmusig2))/((sigma_sq) *
         pmusig)) * (epsilon)) * exp(Wu), FUN = "*"),
     uHvar)
-  hessll[1:nXvar, (nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)] <- crossprod(sweep(Xvar,
-    MARGIN = 1, STATS = S * exp(Wv) * (S * ((sigx3) * dmusigwu *
-      exp(Wu) * (S * (epsilon)/((sigx2)^2 * exp(Wv) * pmusig) -
-      (sigx2)^2 * dmusig/(((sigx2)^2 * pmusig)^2 * sigmastar))/(sigma_sq) +
-      (sigx4) * depsi) * (epsilon) - (sigx3) * dmusigwu/((sigx2)^2 *
-      pmusig)), FUN = "*"), vHvar)
+  hessll[1:nXvar, (nXvar + nuZUvar + 1):(nXvar + nuZUvar +
+    nvZVvar)] <- crossprod(sweep(Xvar, MARGIN = 1, STATS = S *
+    exp(Wv) * (S * ((sigx3) * dmusigwu * exp(Wu) * (S * (epsilon)/((sigx2)^2 *
+    exp(Wv) * pmusig) - (sigx2)^2 * dmusig/(((sigx2)^2 *
+    pmusig)^2 * sigmastar))/(sigma_sq) + (sigx4) * depsi) *
+    (epsilon) - (sigx3) * dmusigwu/((sigx2)^2 * pmusig)),
+    FUN = "*"), vHvar)
   hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + 1):(nXvar +
     nuZUvar)] <- crossprod(sweep(uHvar, MARGIN = 1, STATS = ((0.5/(sigma_sq)^2 +
     S * (0.5 * (sigx5epsi) - dmusig * (S * (sig2wu)^2 * (dmusig/pmusig -
@@ -179,8 +223,8 @@ chesshalfnormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
         exp(Wu) * (sigma_sq)/(sigx2)^2)) * sigmastar)/(sigx2)^2)/pmusig) *
       (epsilon)) * exp(Wu) + S * (depsisqx2 - sigx6) *
     (epsilon) - 0.5/(sigma_sq)) * exp(Wu), FUN = "*"), uHvar)
-  hessll[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar), (nXvar +
-    nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)] <- crossprod(sweep(vHvar,
+  hessll[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar),
+    (nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)] <- crossprod(sweep(vHvar,
     MARGIN = 1, STATS = ((0.5 * (wvsq) - 0.5)/(sigma_sq) +
       S * ((((0.5 * (wvsq) - 0.5 * (0.5 * (1 - wvsq) +
         wvsq)) * (1 - wvsq) + S^2 * (sigx3)^2 * exp(Wu) *
@@ -191,10 +235,10 @@ chesshalfnormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
         pmusig)^2)) * dmusigwu + S * (0.5 * ((sigx5) *
         exp(Wv)) + 0.5/(depsisq)) * depsi * (epsilon)) *
         (epsilon)) * exp(Wv), FUN = "*"), vHvar)
-  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + nuZUvar + 1):(nXvar +
-    nuZUvar + nvZVvar)] <- crossprod(sweep(uHvar, MARGIN = 1,
-    STATS = (0.5/(sigma_sq)^2 + S * (((((0.5 * (wuwvsq) -
-      S^2 * (sigx3) * (sig2wu) * exp(Wu) * (epsilon)^2)/(sigma_sq) +
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + nuZUvar +
+    1):(nXvar + nuZUvar + nvZVvar)] <- crossprod(sweep(uHvar,
+    MARGIN = 1, STATS = (0.5/(sigma_sq)^2 + S * (((((0.5 *
+      (wuwvsq) - S^2 * (sigx3) * (sig2wu) * exp(Wu) * (epsilon)^2)/(sigma_sq) +
       0.5 * ((wusq - 1) * wvsq + 1 - 0.5 * ((1 - wusq) *
         (1 - wvsq))) + 0.5 * (1 - wvsq)) * exp(Wu)/sigmastar +
       sigmastar)/((sigx2)^2 * pmusig) - (sigx3) * (2 *
@@ -209,7 +253,27 @@ chesshalfnormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
 }
 
 # Optimization using different algorithms ----------
-
+#' optimizations solve for halfnormal-normal distribution
+#' @param start starting value for optimization
+#' @param olsParam OLS coefficients
+#' @param dataTable dataframe contains id of observations
+#' @param nXvar number of main variables (inputs + env. var)
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @param Yvar vector of dependent variable
+#' @param Xvar matrix of main variables
+#' @param S integer for cost/prod estimation
+#' @param method algorithm for solver
+#' @param printInfo logical print info during optimization
+#' @param itermax maximum iteration
+#' @param stepmax stepmax for ucminf
+#' @param tol parameter tolerance
+#' @param gradtol gradient tolerance
+#' @param hessianType how hessian is computed
+#' @param qac qac option for maxLik
+#' @noRd
 halfnormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
   uHvar, nuZUvar, vHvar, nvZVvar, Yvar, Xvar, method, printInfo,
   itermax, stepmax, tol, gradtol, hessianType, qac) {
@@ -218,8 +282,8 @@ halfnormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
     S = S, uHvar = uHvar, nuZUvar = nuZUvar, vHvar = vHvar,
     nvZVvar = nvZVvar)
   startLoglik <- sum(chalfnormlike(startVal, nXvar = nXvar,
-    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
-    Yvar = Yvar, Xvar = Xvar, S = S))
+    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S))
   if (method %in% c("bfgs", "bhhh", "nr", "nm")) {
     maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
       bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
@@ -240,17 +304,17 @@ halfnormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
     finalHessian = if (hessianType == 2) "bhhh" else TRUE,
     control = list(printLevel = if (printInfo) 2 else 0,
       iterlim = itermax, reltol = tol, tol = tol, qac = qac),
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
-    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S), sr1 = trust.optim(x = startVal,
-    fn = function(parm) -sum(chalfnormlike(parm, nXvar = nXvar,
-      nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
-      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S)),
-    gr = function(parm) -colSums(cgradhalfnormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S)), method = "SR1", control = list(maxit = itermax,
-      cgtol = gradtol, stop.trust.radius = tol, prec = tol,
-      report.level = if (printInfo) 2 else 0, report.precision = 1L)),
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S), sr1 = trust.optim(x = startVal, fn = function(parm) -sum(chalfnormlike(parm,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S)), gr = function(parm) -colSums(cgradhalfnormlike(parm,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S)), method = "SR1", control = list(maxit = itermax,
+    cgtol = gradtol, stop.trust.radius = tol, prec = tol,
+    report.level = if (printInfo) 2 else 0, report.precision = 1L)),
     sparse = trust.optim(x = startVal, fn = function(parm) -sum(chalfnormlike(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -320,17 +384,20 @@ halfnormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
         S = S)
   }
   mleObj$logL_OBS <- chalfnormlike(parm = mlParam, nXvar = nXvar,
-    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
-    Yvar = Yvar, Xvar = Xvar, S = S)
+    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S)
   mleObj$gradL_OBS <- cgradhalfnormlike(parm = mlParam, nXvar = nXvar,
-    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
-    Yvar = Yvar, Xvar = Xvar, S = S)
+    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S)
   return(list(startVal = startVal, startLoglik = startLoglik,
     mleObj = mleObj, mlParam = mlParam))
 }
 
 # Conditional efficiencies estimation ----------
-
+#' efficiencies for halfnormal-normal distribution
+#' @param object object of class sfacross
+#' @param level level for confidence interval
+#' @noRd
 chalfnormeff <- function(object, level) {
   beta <- object$mlParam[1:(object$nXvar)]
   delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
@@ -372,7 +439,9 @@ chalfnormeff <- function(object, level) {
 }
 
 # Marginal effects on inefficiencies ----------
-
+#' marginal impact on efficiencies for halfnormal-normal distribution
+#' @param object object of class sfacross
+#' @noRd
 cmarghalfnorm_Eu <- function(object) {
   delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]

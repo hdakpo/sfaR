@@ -1,14 +1,29 @@
-########################################################
-#                                                      #
-# truncated normal + normal distributions + scaling    #
-#                                                      #
-#                                                      #
-########################################################
+################################################################################
+#                                                                              #
+# R internal functions for the sfaR package                                    #
+#                                                                              #
+################################################################################
+
+#------------------------------------------------------------------------------#
+# Data: Cross sectional data & Pooled data                                     #
+# Model: Standard Stochastic Frontier Analysis                                 #
+# Convolution: truncated normal (scaling) - normal                             #
+#------------------------------------------------------------------------------#
 
 # Log-likelihood ----------
-
-ctruncnormscalike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
-  vHvar, Yvar, Xvar, S) {
+#' log-likelihood for truncated normal (scaling)-normal distribution
+#' @param parm all parameters to be estimated
+#' @param nXvar number of main variables (inputs + env. var)
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @param Yvar vector of dependent variable
+#' @param Xvar matrix of main variables
+#' @param S integer for cost/prod estimation
+#' @noRd
+ctruncnormscalike <- function(parm, nXvar, nuZUvar, nvZVvar,
+  uHvar, vHvar, Yvar, Xvar, S) {
   beta <- parm[1:(nXvar)]
   delta <- parm[(nXvar + 1):(nXvar + nuZUvar - 1)]
   tau <- parm[nXvar + length(delta) + 1]
@@ -32,7 +47,15 @@ ctruncnormscalike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
 }
 
 # starting value for the log-likelihood ----------
-
+#' starting values for truncated normal (scaling)-normal distribution
+#' @param olsObj OLS object
+#' @param epsiRes residuals from OLS
+#' @param S integer for cost/prod estimation
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @noRd
 csttruncnormscal <- function(olsObj, epsiRes, S, nuZUvar, uHvar,
   nvZVvar, vHvar) {
   m2 <- moment(epsiRes, order = 2)
@@ -81,7 +104,17 @@ csttruncnormscal <- function(olsObj, epsiRes, S, nuZUvar, uHvar,
 }
 
 # Gradient of the likelihood function ----------
-
+#' gradient for truncated normal (scaling)-normal distribution
+#' @param parm all parameters to be estimated
+#' @param nXvar number of main variables (inputs + env. var)
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @param Yvar vector of dependent variable
+#' @param Xvar matrix of main variables
+#' @param S integer for cost/prod estimation
+#' @noRd
 cgradtruncnormscalike <- function(parm, nXvar, nuZUvar, nvZVvar,
   uHvar, vHvar, Yvar, Xvar, S) {
   beta <- parm[1:(nXvar)]
@@ -143,7 +176,17 @@ cgradtruncnormscalike <- function(parm, nXvar, nuZUvar, nvZVvar,
 }
 
 # Hessian of the likelihood function ----------
-
+#' hessian for truncated normal (scaling)-normal distribution
+#' @param parm all parameters to be estimated
+#' @param nXvar number of main variables (inputs + env. var)
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @param Yvar vector of dependent variable
+#' @param Xvar matrix of main variables
+#' @param S integer for cost/prod estimation
+#' @noRd
 chesstruncnormscalike <- function(parm, nXvar, nuZUvar, nvZVvar,
   uHvar, vHvar, Yvar, Xvar, S) {
   beta <- parm[1:(nXvar)]
@@ -232,18 +275,18 @@ chesstruncnormscalike <- function(parm, nXvar, nuZUvar, nvZVvar,
     (sigx7) * dmusig/((sigma_sq) * pmusigx2)) * exp(Wusca) -
     ((sigx7) * (muwvwu)/exp(Wvsca) + 1/sigmastar)/(sigma_sq)) *
     dpmusig) * exp(Wusca)) %*% Xvar
-  hessll[1:nXvar, (nXvar + (nuZUvar - 1) + 2 + 1):(nXvar + (nuZUvar -
-    1) + 2 + nvZVvar)] <- crossprod(sweep(Xvar, MARGIN = 1,
-    STATS = S * (sigx9 - ((sigx12) * exp(Wusca) + (muwvwu) *
-      (sigx8)/((sigma_sq) * exp(Wvsca))) * dpmusig) * exp(Wvsca),
-    FUN = "*"), vHvar)
+  hessll[1:nXvar, (nXvar + (nuZUvar - 1) + 2 + 1):(nXvar +
+    (nuZUvar - 1) + 2 + nvZVvar)] <- crossprod(sweep(Xvar,
+    MARGIN = 1, STATS = S * (sigx9 - ((sigx12) * exp(Wusca) +
+      (muwvwu) * (sigx8)/((sigma_sq) * exp(Wvsca))) * dpmusig) *
+      exp(Wvsca), FUN = "*"), vHvar)
   hessll[(nXvar + (nuZUvar - 1) + 2 + 1):(nXvar + (nuZUvar -
     1) + 2 + nvZVvar), 1:nXvar] <- t(hessll[1:nXvar, (nXvar +
     (nuZUvar - 1) + 2 + 1):(nXvar + (nuZUvar - 1) + 2 + nvZVvar)])
   hessll[(nXvar + 1):(nXvar + (nuZUvar - 1)), (nXvar + 1):(nXvar +
     (nuZUvar - 1))] <- crossprod(sweep(matrix(uHvar[, -1],
-    ncol = (nuZUvar - 1)), MARGIN = 1, STATS = (((muwv - ((sigx15)^2 *
-    (muwvwu) + 4 * (S * exp(Wusca) * (epsilon))))/(sigx2) -
+    ncol = (nuZUvar - 1)), MARGIN = 1, STATS = (((muwv -
+    ((sigx15)^2 * (muwvwu) + 4 * (S * exp(Wusca) * (epsilon))))/(sigx2) -
     ((((2 - 2 * (wusq)) * (wusq - 0.5 * (0.5 * (2 - 2 * (wusq)) +
       2 * (wusq))) * exp(Wvsca)/sigmastar + 2 * (sigx4)) *
       (muwvwu) + (sigx4) * (2 * (muwv) - (2 * ((sigx4) *
@@ -289,34 +332,35 @@ chesstruncnormscalike <- function(parm, nXvar, nuZUvar, nvZVvar,
     FUN = "*"), vHvar)
   hessll[(nXvar + (nuZUvar - 1) + 2 + 1):(nXvar + (nuZUvar -
     1) + 2 + nvZVvar), (nXvar + 1):(nXvar + (nuZUvar - 1))] <- t(hessll[(nXvar +
-    1):(nXvar + (nuZUvar - 1)), (nXvar + (nuZUvar - 1) + 2 +
-    1):(nXvar + (nuZUvar - 1) + 2 + nvZVvar)])
-  hessll[nXvar + (nuZUvar - 1) + 1, nXvar + (nuZUvar - 1) + 1] <- sum((dmu *
-    (dmu/(wupmu)^2 + musca/(exp((Wusca)/2)^3 * pmu)) - (((dmustar2/dmustar2 -
-    1) * (muepsi)^2/(sigma_sq) + 1) + ((muwvwu)/(exp(Wusca) *
-    pmusigx2) + dmusigwv/(pmusigx2)^2) * dmusig * wvsq)/(sigma_sq)) *
-    exp(Hsca)^2)
-  hessll[nXvar + (nuZUvar - 1) + 1, nXvar + (nuZUvar - 1) + 2] <- hessll[nXvar +
-    (nuZUvar - 1) + 2, nXvar + (nuZUvar - 1) + 1] <- sum(((sigx11 -
-    ((sigx6) * exp(Wvsca)/(sigx2)^2 - (sigx7) * ((muwvwu)/exp(Wusca) +
-      dmusigwv/(pmusigx2))/(sigma_sq)) * dpmusig) * exp(Wusca) +
-    0.5 * (((1 - tau^2 * exp(Hsca)^2/exp((Wusca)/2)^2)/(wupmu) -
-      tau * dmu * exp(Hsca)/(wupmu)^2) * dmu)) * exp(Hsca))
+    1):(nXvar + (nuZUvar - 1)), (nXvar + (nuZUvar - 1) +
+    2 + 1):(nXvar + (nuZUvar - 1) + 2 + nvZVvar)])
+  hessll[nXvar + (nuZUvar - 1) + 1, nXvar + (nuZUvar - 1) +
+    1] <- sum((dmu * (dmu/(wupmu)^2 + musca/(exp((Wusca)/2)^3 *
+    pmu)) - (((dmustar2/dmustar2 - 1) * (muepsi)^2/(sigma_sq) +
+    1) + ((muwvwu)/(exp(Wusca) * pmusigx2) + dmusigwv/(pmusigx2)^2) *
+    dmusig * wvsq)/(sigma_sq)) * exp(Hsca)^2)
+  hessll[nXvar + (nuZUvar - 1) + 1, nXvar + (nuZUvar - 1) +
+    2] <- hessll[nXvar + (nuZUvar - 1) + 2, nXvar + (nuZUvar -
+    1) + 1] <- sum(((sigx11 - ((sigx6) * exp(Wvsca)/(sigx2)^2 -
+    (sigx7) * ((muwvwu)/exp(Wusca) + dmusigwv/(pmusigx2))/(sigma_sq)) *
+    dpmusig) * exp(Wusca) + 0.5 * (((1 - tau^2 * exp(Hsca)^2/exp((Wusca)/2)^2)/(wupmu) -
+    tau * dmu * exp(Hsca)/(wupmu)^2) * dmu)) * exp(Hsca))
   hessll[nXvar + (nuZUvar - 1) + 1, (nXvar + (nuZUvar - 1) +
     2 + 1):(nXvar + (nuZUvar - 1) + 2 + nvZVvar)] <- hessll[(nXvar +
     (nuZUvar - 1) + 2 + 1):(nXvar + (nuZUvar - 1) + 2 + nvZVvar),
     nXvar + (nuZUvar - 1) + 1] <- ((((1/sigmastar - (muwvwu) *
     (sigx8)/exp(Wusca))/(sigma_sq) - (sigx12) * exp(Wvsca)) *
     dpmusig + sigx11) * exp(Hsca) * exp(Wvsca)) %*% vHvar
-  hessll[nXvar + (nuZUvar - 1) + 2, nXvar + (nuZUvar - 1) + 2] <- sum(((sigx13 *
-    exp(Wusca) + sigx14 - 0.5)/(sigma_sq) - (((sigx6) * (muwv -
-    (2 * ((sigx6) * sigx2 * mustar3) + 3 * (S * (epsilon))) *
-      exp(Wusca)) + (0.5 * (wusq) - 0.5 * (0.5 * (1 - wusq) +
-    wusq)) * (1 - wusq) * exp(Wvsca) * (muwvwu)/sigmastar)/(sigx2)^2 +
-    (sigx7)^2 * (sigx16) * exp(Wusca) + S * (epsilon)/(sigx2)) *
-    dpmusig) * exp(Wusca) + 0.5 * (tau * (0.5 * (tau^2 *
-    exp(Hsca)^2/(exp((Wusca)/2)^3 * pmu)) - (0.5 * (wupmu) -
-    0.5 * (tau * dmu * exp(Hsca)))/(wupmu)^2) * dmu * exp(Hsca)))
+  hessll[nXvar + (nuZUvar - 1) + 2, nXvar + (nuZUvar - 1) +
+    2] <- sum(((sigx13 * exp(Wusca) + sigx14 - 0.5)/(sigma_sq) -
+    (((sigx6) * (muwv - (2 * ((sigx6) * sigx2 * mustar3) +
+      3 * (S * (epsilon))) * exp(Wusca)) + (0.5 * (wusq) -
+      0.5 * (0.5 * (1 - wusq) + wusq)) * (1 - wusq) * exp(Wvsca) *
+      (muwvwu)/sigmastar)/(sigx2)^2 + (sigx7)^2 * (sigx16) *
+      exp(Wusca) + S * (epsilon)/(sigx2)) * dpmusig) *
+    exp(Wusca) + 0.5 * (tau * (0.5 * (tau^2 * exp(Hsca)^2/(exp((Wusca)/2)^3 *
+    pmu)) - (0.5 * (wupmu) - 0.5 * (tau * dmu * exp(Hsca)))/(wupmu)^2) *
+    dmu * exp(Hsca)))
   hessll[nXvar + (nuZUvar - 1) + 2, (nXvar + (nuZUvar - 1) +
     2 + 1):(nXvar + (nuZUvar - 1) + 2 + nvZVvar)] <- hessll[(nXvar +
     (nuZUvar - 1) + 2 + 1):(nXvar + (nuZUvar - 1) + 2 + nvZVvar),
@@ -342,7 +386,27 @@ chesstruncnormscalike <- function(parm, nXvar, nuZUvar, nvZVvar,
 }
 
 # Optimization using different algorithms ----------
-
+#' optimizations solve for truncated normal (scaling)-normal distribution
+#' @param start starting value for optimization
+#' @param olsParam OLS coefficients
+#' @param dataTable dataframe contains id of observations
+#' @param nXvar number of main variables (inputs + env. var)
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @param Yvar vector of dependent variable
+#' @param Xvar matrix of main variables
+#' @param S integer for cost/prod estimation
+#' @param method algorithm for solver
+#' @param printInfo logical print info during optimization
+#' @param itermax maximum iteration
+#' @param stepmax stepmax for ucminf
+#' @param tol parameter tolerance
+#' @param gradtol gradient tolerance
+#' @param hessianType how hessian is computed
+#' @param qac qac option for maxLik
+#' @noRd
 truncnormscalAlgOpt <- function(start, olsParam, dataTable, S,
   nXvar, uHvar, nuZUvar, vHvar, nvZVvar, Yvar, Xvar, method,
   printInfo, itermax, stepmax, tol, gradtol, hessianType, qac) {
@@ -351,8 +415,8 @@ truncnormscalAlgOpt <- function(start, olsParam, dataTable, S,
     S = S, uHvar = uHvar, nuZUvar = nuZUvar, vHvar = vHvar,
     nvZVvar = nvZVvar)
   startLoglik <- sum(ctruncnormscalike(startVal, nXvar = nXvar,
-    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
-    Yvar = Yvar, Xvar = Xvar, S = S))
+    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S))
   if (method %in% c("bfgs", "bhhh", "nr", "nm")) {
     maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
       bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
@@ -373,17 +437,17 @@ truncnormscalAlgOpt <- function(start, olsParam, dataTable, S,
     start = startVal, finalHessian = if (hessianType == 2) "bhhh" else TRUE,
     control = list(printLevel = if (printInfo) 2 else 0,
       iterlim = itermax, reltol = tol, tol = tol, qac = qac),
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
-    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S), sr1 = trust.optim(x = startVal,
-    fn = function(parm) -sum(ctruncnormscalike(parm, nXvar = nXvar,
-      nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
-      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S)),
-    gr = function(parm) -colSums(cgradtruncnormscalike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S)), method = "SR1", control = list(maxit = itermax,
-      cgtol = gradtol, stop.trust.radius = tol, prec = tol,
-      report.level = if (printInfo) 2 else 0, report.precision = 1L)),
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S), sr1 = trust.optim(x = startVal, fn = function(parm) -sum(ctruncnormscalike(parm,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S)), gr = function(parm) -colSums(cgradtruncnormscalike(parm,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S)), method = "SR1", control = list(maxit = itermax,
+    cgtol = gradtol, stop.trust.radius = tol, prec = tol,
+    report.level = if (printInfo) 2 else 0, report.precision = 1L)),
     sparse = trust.optim(x = startVal, fn = function(parm) -sum(ctruncnormscalike(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -453,17 +517,21 @@ truncnormscalAlgOpt <- function(start, olsParam, dataTable, S,
         S = S)
   }
   mleObj$logL_OBS <- ctruncnormscalike(parm = mlParam, nXvar = nXvar,
-    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
-    Yvar = Yvar, Xvar = Xvar, S = S)
-  mleObj$gradL_OBS <- cgradtruncnormscalike(parm = mlParam,
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
     vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S)
+  mleObj$gradL_OBS <- cgradtruncnormscalike(parm = mlParam,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S)
   return(list(startVal = startVal, startLoglik = startLoglik,
     mleObj = mleObj, mlParam = mlParam))
 }
 
 # Conditional efficiencies estimation ----------
-
+#' efficiencies for truncated normal (scaling)-normal distribution
+#' @param object object of class sfacross
+#' @param level level for confidence interval
+#' @noRd
 ctruncnormscaleff <- function(object, level) {
   beta <- object$mlParam[1:(object$nXvar)]
   delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
@@ -513,7 +581,9 @@ ctruncnormscaleff <- function(object, level) {
 }
 
 # Marginal effects on inefficiencies ----------
-
+#' marginal impact on efficiencies for truncated normal (scaling)-normal distribution
+#' @param object object of class sfacross
+#' @noRd
 cmargtruncnormscal_Eu <- function(object) {
   delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     (object$nuZUvar - 1))]

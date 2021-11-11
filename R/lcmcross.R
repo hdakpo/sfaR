@@ -1,15 +1,342 @@
-# LCM estimation for cross sectional data ----------
+################################################################################
+#                                                                              #
+# R functions for the sfaR package                                             #
+#                                                                              #
+################################################################################
 
-lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE, data, subset,
-                     S = 1L, udist = "hnormal", start = NULL, lcmClasses = 2,
-                     method = "bfgs", hessianType = 1, itermax = 2000L,
-                     printInfo = FALSE, tol = 1e-12, gradtol = 1e-06, stepmax = 0.1,
-                     qac = "marquardt", initStart = FALSE, initAlg = "nlminb",
-                     initIter = 100, initFactorLB = 0.5, initFactorUB = 1.5) {
+#------------------------------------------------------------------------------#
+# Model: Latent Class Stochastic Frontier Analysis                             #
+# Data: Cross sectional data & Pooled data                                     #
+#------------------------------------------------------------------------------#
+
+#' Latent class stochastic frontier using cross-section data
+#'
+#' @description
+#' \code{\link{lcmcross}} is a symbolic formula based function for the
+#' estimation of the latent class stochastic frontier model (LCM) in the case
+#' of cross-sectional or pooled cross-section data. The model is estimated
+#' using maximum likelihood (ML). See Orea and Kumbhakar (2004), Parmeter and
+#' Kumbhakar (2014, p282).
+#'
+#' Only the half-normal distribution is possible for the one-sided error term.
+#' Nine optimization algorithms are available.
+#'
+#' The function also accounts for heteroscedasticity in both one-sided and
+#' two-sided error terms, as in Reifschneider and Stevenson (1991), Caudill and
+#' Ford (1993), Caudill \emph{et al.} (1995) and Hadri (1999).
+#'
+#' The model can estimate up to five classes.
+#'
+#' @aliases lcmcross print.lcmcross
+#'
+#' @param formula A symbolic description of the model to be estimated based on
+#' the generic function \code{formula} (see section \sQuote{Details}).
+#' @param uhet A one-part formula to account for heteroscedasticity in the
+#' one-sided error variance (see section \sQuote{Details}).
+#' @param vhet A one-part formula to account for heteroscedasticity in the
+#' two-sided error variance (see section \sQuote{Details}).
+#' @param thet A one-part formula to account for technological heterogeneity in
+#' the construction of the classes.
+#' @param logDepVar Logical. Informs whether the dependent variable is logged
+#' (\code{TRUE}) or not (\code{FALSE}). Default = \code{TRUE}.
+#' @param data The data frame containing the data.
+#' @param subset An optional vector specifying a subset of observations to be
+#' used in the optimization process.
+#' @param S If \code{S = 1} (default), a production (profit) frontier is
+#' estimated: \eqn{\epsilon_i = v_i-u_i}. If \code{S = -1}, a cost frontier is
+#' estimated: \eqn{\epsilon_i = v_i+u_i}.
+#' @param udist Character string. Distribution specification for the one-sided
+#' error term. Only the half normal distribution \code{'hnormal'} (Aigner
+#' \emph{et al.}, 1977, Meeusen and Vandenbroeck, 1977) is currently
+#' implemented.
+#' @param start Numeric vector. Optional starting values for the maximum
+#' likelihood (ML) estimation.
+#' @param lcmClasses Number of classes to be estimated (default = \code{2}).  A
+#' maximum of five classes can be estimated.
+##' @param method Optimization algorithm used for the estimation.  Default =
+#' \code{'bfgs'}. 11 algorithms are available: \itemize{ \item \code{'bfgs'},
+#' for Broyden-Fletcher-Goldfarb-Shanno (see
+#' \code{\link[maxLik:maxBFGS]{maxBFGS}}) \item \code{'bhhh'}, for
+#' Berndt-Hall-Hall-Hausman (see \code{\link[maxLik:maxBHHH]{maxBHHH}}) \item
+#' \code{'nr'}, for Newton-Raphson (see \code{\link[maxLik:maxNR]{maxNR}}) \item,
+#' \item \code{'nm'}, for Nelder-Mead (see \code{\link[maxLik:maxNM]{maxNM}}) \item
+#' \code{'ucminf'}, implements a quasi-Newton type with BFGS updating of the
+#' inverse Hessian and soft line search with a trust region type monitoring of
+#' the input to the line search algorithm (see \code{\link[ucminf:ucminf]{ucminf}})
+#' \item \code{'mla'}, for general-purpose optimization based on
+#' Marquardt-Levenberg algorithm (see \code{\link[marqLevAlg:mla]{mla}})
+#' \item \code{'sr1'}, for Symmetric Rank 1 (see
+#' \code{\link[trustOptim:trust.optim]{trust.optim}}) \item \code{'sparse'}, for trust
+#' regions and sparse Hessian (see \code{\link[trustOptim:trust.optim]{trust.optim}}) \item
+#' \code{'nlminb'}, for optimization using PORT routines (see
+#' \code{\link[stats:nlminb]{nlminb}})}
+#' @param hessianType Integer. If \code{1} (default), analytic Hessian is
+#' returned for all the distributions except \code{'gamma'}, \code{'lognormal'}
+#' and \code{'weibull'} for which the numeric Hessian is returned. If \code{2},
+#' bhhh Hessian is estimated (\eqn{g'g}). If \code{3}, robust Hessian is
+#' computed (\eqn{H^{-1}GH^{-1}}).
+#' @param itermax Maximum number of iterations allowed for optimization.
+#' Default = \code{2000}.
+#' @param printInfo Logical. Print information during optimization. Default =
+#' \code{FALSE}.
+#' @param tol Numeric. Convergence tolerance. Default = \code{1e-12}.
+#' @param gradtol Numeric. Convergence tolerance for gradient. Default =
+#' \code{1e-06}.
+#' @param stepmax Numeric. Step max for \code{ucminf} algorithm. Default =
+#' \code{0.1}.
+#' @param qac Character. Quadratic Approximation Correction for \code{'bhhh'}
+#' and \code{'nr'} algorithms. If \code{'qac = stephalving'}, the step length
+#' is decreased but the direction is kept. If \code{'qac = marquardt'}
+#' (default), the step length is decreased while also moving closer to the pure
+#' gradient direction. See \code{\link[maxLik:maxBHHH]{maxBHHH}} and
+#' \code{\link[maxLik:maxNR]{maxNR}}.
+#' @param initStart Logical. If \code{TRUE}, the model is jump-started using an
+#' alternative algorithm (\code{'nlminb'}) within certain bounds. Default =
+#' \code{FALSE}.
+#' @param initAlg Character. Algorithm used to jump-start the latent class
+#' model. Only \code{'nlminb'} is currently available.
+#' @param initIter Maximum number of iterations for the algorihtm when
+#' \code{initStart = TRUE}. Default = \code{100}.
+#' @param initFactorLB A numeric value indicating by which factor the starting
+#' value should be multiplied to define the lower bounds for the jump-start
+#' algorithm. Default = \code{0.5}.
+#' @param initFactorUB A numeric value indicating by which factor the starting
+#' value should be multiplied to define the upper bounds for the jump-start
+#' algorithm. Default = \code{1.5}.
+#' @param x an object of class lcmcross (returned by the function \code{\link{lcmcross}}).
+#' @param ... additional arguments of frontier are passed to lcmcross; 
+#' additional arguments of the print method are currently ignored.
+#'
+#' #' @details
+#' LCM is an estimation of a finite mixture of production functions:
+#'
+#' \deqn{y_i = \alpha_j + x'_i\beta_j + v_{i|j} - Su_{i|j}}
+#'
+#' \deqn{\epsilon_{i|j} = v_{i|j} -Su_{i|j}}
+#'
+#' where \eqn{i} is the observation, \eqn{j} is the class, \eqn{y} is the
+#' output (cost, revenue, profit), \eqn{x} is the vector of main explanatory
+#' variables (inputs and other control variables), \eqn{u} is the one-sided
+#' error term with variance \eqn{\sigma_{u}^2}, and \eqn{v} is the two-sided
+#' error term with variance \eqn{\sigma_{v}^2}.
+#'
+#' \code{S = 1} in the case of production (profit) frontier function and
+#' \code{S = -1} in the case of cost frontier function.
+#'
+#' The contribution of observation \eqn{i} to the likelihood conditional on
+#' class \eqn{j} is defined as: \deqn{P(i|j) = \frac{2}{\sqrt{\sigma_{u|j}^2 +
+#' \sigma_{v|j}^2}} \phi\left(\frac{S\epsilon_{i|j}}{\sqrt{\sigma_{u|j}^2 +
+#' \sigma_{v|j}^2}}\right) \Phi\left(\frac{\mu_{i*|j}}{\sigma_{*|j}}\right)}
+#'
+#' where \deqn{\mu_{i*|j}=\frac{- S\epsilon_{i|j}\sigma_{u|j}^2}{\sigma_{u|j}^2
+#' + \sigma_{v|j}^2}}
+#'
+#' and \deqn{\sigma_*^2 = \frac{\sigma_{u|j}^2 \sigma_{v|j}^2}{\sigma_{u|j}^2 +
+#' \sigma_{v|j}^2}}
+#'
+#' The prior probability of using a particular technology can depend on some
+#' covariates (namely the variables separating the observations into classes)
+#' using a logit specification: \deqn{\pi(i,j) =
+#' \frac{\exp{(\theta_j'Z_h)}}{\sum_{m=1}^{J}\exp{(\theta_m'Z_h)}}}
+#'
+#' with \eqn{Z_h} the covariates, \eqn{\theta} the coefficients estimated for
+#' the covariates, and \eqn{\exp(\theta_J'Z_h)=1}.
+#'
+#' The unconditional likelihood of observation \eqn{i} is simply the average
+#' over the \eqn{J} classes:
+#'
+#' \eqn{P(i) = \sum_{m=1}^{J}\pi(i,m)P(i|m)}
+#'
+#' The number of classes can be retained based on information criterion (see
+#' for instance \code{\link[=ic.lcmcross]{ic}}).
+#'
+#' Class assignment is based on the largest posterior probability. This
+#' probability is obtained using Bayes' rule, as follows for class \eqn{j}:
+#' \deqn{w\left(j|i\right)=\frac{P\left(i|j\right)\pi\left(i,
+#' j\right)}{\sum_{m=1}^JP\left(i|m\right)\pi\left(i, m\right)}}
+#'
+#' To accommodate heteroscedasticity in the variance parameters of the error
+#' terms, a single part (right) formula can also be specified. To impose the
+#' positivity on these parameters, the variances are modelled respectively as:
+#' \eqn{\sigma^2_{u|j} = \exp{(\delta_j'Z_u)}} and \eqn{\sigma^2_{v|j} =
+#' \exp{(\phi_j'Z_v)}}, where \eqn{Z_u} and \eqn{Z_v} are the
+#' heteroscedasticity variables (inefficiency drivers in the case of \eqn{Z_u})
+#' and \eqn{\delta} and \eqn{\phi} the coefficients.  In the case of
+#' heterogeneity in the truncated mean \eqn{\mu}, it is modelled as
+#' \eqn{\mu=\omega'Z_{\mu}}.
+#'
+#' @return \code{\link{lcmcross}} returns a list of class \code{'lcmcross'}
+#' containing the following elements:
+#'
+#' \item{call}{The matched call.}
+#'
+#' \item{formula}{Multi parts formula describing the estimated model.}
+#'
+#' \item{S}{The argument \code{'S'}. See the section \sQuote{Arguments}.}
+#'
+#' \item{typeSfa}{Character string. 'Latent Class Production/Profit Frontier, e
+#' = v - u' when \code{S = 1} and 'Latent Class Cost Frontier, e = v + u' when
+#' \code{S = -1}.}
+#'
+#' \item{Nobs}{Number of observations used for optimization.}
+#'
+#' \item{nXvar}{Number of main explanatory variables.}
+#'
+#' \item{nZHvar}{Number of variables in the logit specification of the finite
+#' mixture model (i.e. number of covariates).}
+#'
+#' \item{logDepVar}{The argument \code{'logDepVar'}. See the section
+#' \sQuote{Arguments}.}
+#'
+#' \item{nuZUvar}{Number of variables explaining heteroscedasticity in the
+#' one-sided error term.}
+#'
+#' \item{nvZVvar}{Number of variables explaining heteroscedasticity in the
+#' two-sided error term.}
+#'
+#' \item{nParm}{Total number of parameters estimated.}
+#'
+#' \item{udist}{The argument \code{'udist'}. See the section
+#' \sQuote{Arguments}.}
+#'
+#' \item{startVal}{Numeric vector. Starting value for ML estimation.}
+#'
+#' \item{dataTable}{A data frame (tibble format) containing information on data
+#' used for optimization along with residuals and fitted values of the OLS and
+#' ML estimations, and the individual observation log-likelihood.}
+#'
+#' \item{InitHalf}{When \code{start = NULL}. Initial ML estimation with half
+#' normal distribution for the one-sided error term. Model to construct the
+#' starting values for the latent class estimation. Object of class
+#' \code{'maxLik'} and \code{'maxim'} returned.}
+#'
+#' \item{optType}{The optimization algorithm used.}
+#'
+#' \item{nIter}{Number of iterations of the ML estimation.}
+#'
+#' \item{optStatus}{An optimization algorithm termination message.}
+#'
+#' \item{startLoglik}{Log-likelihood at the starting values.}
+#'
+#' \item{nClasses}{The number of classes estimated.}
+#'
+#' \item{mlLoglik}{Log-likelihood value of the ML estimation.}
+#'
+#' \item{mlParam}{Numeric vector. Parameters obtained from ML estimation.}
+#'
+#' \item{gradient}{Numeric vector. Each variable gradient of the ML
+#' estimation.}
+#'
+#' \item{gradL_OBS}{Matrix. Each variable individual observation gradient of
+#' the ML estimation.}
+#'
+#' \item{gradientNorm}{Numeric. Gradient norm of the ML estimation.}
+#'
+#' \item{invHessian}{The covariance matrix of the parameters obtained from the
+#' ML estimation.}
+#'
+#' \item{hessianType}{The argument \code{'hessianType'}. See the section
+#' \sQuote{Arguments}.}
+#'
+#' \item{mlDate}{Date and time of the estimated model.}
+#'
+#' @note In the case of panel data, \code{\link{lcmcross}} estimates a pooled
+#' cross-section where the probability of belonging to a class a priori is not
+#' permanent (not fixed over time).
+#'
+#' @author K Hervé Dakpo, Yann Desjeux and Laure Latruffe
+#'
+#' @seealso \code{\link[=summary.lcmcross]{summary}} for creating and printing
+#' summary results.
+#'
+#' \code{\link[=coef.lcmcross]{coef}} for extracting coefficients of the
+#' estimation.
+#'
+#' \code{\link[=efficiencies.lcmcross]{efficiencies}} for computing
+#' (in-)efficiency estimates.
+#'
+#' \code{\link[=fitted.lcmcross]{fitted}} for extracting the fitted frontier
+#' values.
+#'
+#' \code{\link[=ic.lcmcross]{ic}} for extracting information criteria.
+#'
+#' \code{\link[=logLik.lcmcross]{logLik}} for extracting log-likelihood
+#' value(s) of the estimation.
+#'
+#' \code{\link[=marginal.lcmcross]{marginal}} for computing marginal effects of
+#' inefficiency drivers.
+#'
+#' \code{\link[=residuals.lcmcross]{residuals}} for extracting residuals of the
+#' estimation.
+#'
+#' \code{\link[=vcov.lcmcross]{vcov}} for computing the variance-covariance
+#' matrix of the coefficients.
+#'
+#' @references Aigner, D., Lovell, C. A. K., and P. Schmidt. 1977. Formulation
+#' and estimation of stochastic frontier production function models.
+#' \emph{Journal of Econometrics}, \bold{6}(1), 21--37.
+#'
+#' Caudill, S. B., and J. M. Ford. 1993. Biases in frontier estimation due to
+#' heteroscedasticity. \emph{Economics Letters}, \bold{41}(1), 17--20.
+#'
+#' Caudill, S. B., Ford, J. M., and D. M. Gropper. 1995. Frontier estimation
+#' and firm-specific inefficiency measures in the presence of
+#' heteroscedasticity. \emph{Journal of Business & Economic Statistics},
+#' \bold{13}(1), 105--111.
+#'
+#' Hadri, K. 1999. Estimation of a doubly heteroscedastic stochastic frontier
+#' cost function. \emph{Journal of Business & Economic Statistics},
+#' \bold{17}(3), 359--363.
+#'
+#' Meeusen, W., and J. Vandenbroeck. 1977. Efficiency estimation from
+#' Cobb-Douglas production functions with composed error. \emph{International
+#' Economic Review}, \bold{18}(2), 435--445.
+#'
+#' Orea, L., and S.C. Kumbhakar. 2004. Efficiency measurement using a latent
+#' class stochastic frontier model. \emph{Empirical Economics}, \bold{29},
+#' 169--183.
+#'
+#' Parmeter, C.F., and S.C. Kumbhakar. 2014. Efficiency analysis: A primer on
+#' recent advances. \emph{Foundations and Trends in Econometrics}, \bold{7},
+#' 191--385.
+#'
+#' Reifschneider, D., and R. Stevenson. 1991. Systematic departures from the
+#' frontier: A framework for the analysis of firm inefficiency.
+#' \emph{International Economic Review}, \bold{32}(3), 715--723.
+#'
+#' @keywords models optimize cross-section latent-class likelihood
+#'
+#' @examples
+#'
+#' ## Using data on eighty-two countries production (DGP)
+#' # LCM Cobb Douglas (production function) half normal distribution
+#' # Intercept and initStat used as separating variables
+#' cb_2c_h1 <- lcmcross(formula = ly ~ lk + ll + yr, thet = ~initStat, data = worldprod)
+#'   summary(cb_2c_h1)
+#'
+#' # summary of the initial ML model
+#'   summary(cb_2c_h1$InitHalf)
+#'
+#' # same result by jump-starting the estimation
+#' cb_2c_h2 <- lcmcross(formula = ly ~ lk + ll + yr, data = worldprod, initStart = TRUE)
+#'   summary(cb_2c_h2)
+#'
+#' # Only the intercept is used as the separating variable and only variable
+#' # initStat is used as inefficiency driver
+#' cb_2c_h3 <- lcmcross(formula = ly ~ lk + ll + yr, uhet = ~initStat, data = worldprod)
+#'   summary(cb_2c_h3)
+#'
+#' @export
+lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
+  data, subset, S = 1L, udist = "hnormal", start = NULL, lcmClasses = 2,
+  method = "bfgs", hessianType = 1, itermax = 2000L, printInfo = FALSE,
+  tol = 1e-12, gradtol = 1e-06, stepmax = 0.1, qac = "marquardt",
+  initStart = FALSE, initAlg = "nlminb", initIter = 100, initFactorLB = 0.5,
+  initFactorUB = 1.5) {
   # u distribution check -------
   udist <- tolower(udist)
   if (udist != "hnormal") {
-    stop("Currently latent class model only handles half-normal distribution ... ", 
+    stop("Currently latent class model only handles half-normal distribution ... ",
       call. = FALSE)
   }
   # Formula manipulation -------
@@ -37,7 +364,7 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE, data, subset,
   } else {
     thet <- ~1
   }
-  formula <- formDist_lcmcross(formula = formula, uhet = uhet, 
+  formula <- formDist_lcmcross(formula = formula, uhet = uhet,
     vhet = vhet, thet = thet)
   # Generate required datasets -------
   if (missing(data)) {
@@ -47,7 +374,7 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE, data, subset,
   mc$na.action <- na.pass
   mc[[1L]] <- quote(model.frame)
   mc <- eval(mc, parent.frame())
-  validObs <- rowSums(is.na(mc) | is.infinite.data.frame(mc)) == 
+  validObs <- rowSums(is.na(mc) | is.infinite.data.frame(mc)) ==
     0
   Yvar <- model.response(mc, "numeric")
   Yvar <- Yvar[validObs]
@@ -60,8 +387,8 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE, data, subset,
     stop("0 (non-NA) cases", call. = FALSE)
   }
   if (length(Yvar) != nrow(Xvar)) {
-    stop(paste("the number of observations of the dependent variable (", 
-      length(Yvar), ") must be the same to the number of observations of the exogenous variables (", 
+    stop(paste("the number of observations of the dependent variable (",
+      length(Yvar), ") must be the same to the number of observations of the exogenous variables (",
       nrow(Xvar), ")", sep = ""), call. = FALSE)
   }
   mtuH <- delete.response(terms(formula, data = data, rhs = 2))
@@ -79,7 +406,7 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE, data, subset,
   # Check other supplied options -------
   if (length(S) != 1 || !(S %in% c(-1L, 1L))) {
     stop("argument 'S' must equal either 1 or -1: 1 for production or profit frontier
-   and -1 for cost frontier", 
+   and -1 for cost frontier",
       call. = FALSE)
   }
   typeSfa <- if (S == 1L) {
@@ -88,24 +415,24 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE, data, subset,
     "Latent Class Cost Frontier, e = v + u"
   }
   if (length(logDepVar) != 1 || !is.logical(logDepVar[1])) {
-    stop("argument 'logDepVar' must be a single logical value", 
+    stop("argument 'logDepVar' must be a single logical value",
       call. = FALSE)
   }
   if (length(initStart) != 1 || !is.logical(initStart[1])) {
-    stop("argument 'initStart' must be a single logical value", 
+    stop("argument 'initStart' must be a single logical value",
       call. = FALSE)
   }
   if (!(lcmClasses %in% 2:5)) {
-    stop("argument 'lcmClasses' must be comprised between 2 and 5", 
+    stop("argument 'lcmClasses' must be comprised between 2 and 5",
       call. = FALSE)
   }
   # Number of parameters -------
-  nParm <- lcmClasses * (nXvar + nuZUvar + nvZVvar) + (lcmClasses - 
+  nParm <- lcmClasses * (nXvar + nuZUvar + nvZVvar) + (lcmClasses -
     1) * nZHvar
   # Checking starting values when provided -------
   if (!is.null(start)) {
     if (length(start) != nParm) {
-      stop("Wrong number of initial values: model has ", 
+      stop("Wrong number of initial values: model has ",
         nParm, " parameters", call. = FALSE)
     }
   }
@@ -114,24 +441,24 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE, data, subset,
   }
   # Check algorithms -------
   method <- tolower(method)
-  if (!(method %in% c("ucminf", "bfgs", "bhhh", "nr", "nm", 
-    "sr1", "mla", "sparse", "nlminb"))) {
-    stop("Unknown or non-available optimization algorithm: ", 
+  if (!(method %in% c("ucminf", "bfgs", "bhhh", "nr",
+    "nm", "sr1", "mla", "sparse", "nlminb"))) {
+    stop("Unknown or non-available optimization algorithm: ",
       paste(method), call. = FALSE)
   }
   initAlg <- tolower(initAlg)
   if (initAlg != "nlminb") {
     stop("Only 'nlminb' is available as initialization algorithm ")
   }
-  # Check hessian type
-  if (length(hessianType) != 1 || !(hessianType %in% c(1L, 
+  # Check hessian type -------
+  if (length(hessianType) != 1 || !(hessianType %in% c(1L,
     2L, 3L))) {
-    stop("argument 'hessianType' must equal either 1 or 2 or 3", 
+    stop("argument 'hessianType' must equal either 1 or 2 or 3",
       call. = FALSE)
   }
   # Other optimization options -------
   if (!is.numeric(itermax) || length(itermax) != 1) {
-    stop("argument 'itermax' must be a single numeric scalar", 
+    stop("argument 'itermax' must be a single numeric scalar",
       call. = FALSE)
   }
   if (itermax != round(itermax)) {
@@ -142,7 +469,7 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE, data, subset,
   }
   itermax <- as.integer(itermax)
   if (length(printInfo) != 1 || !is.logical(printInfo[1])) {
-    stop("argument 'printInfo' must be a single logical value", 
+    stop("argument 'printInfo' must be a single logical value",
       call. = FALSE)
   }
   if (!is.numeric(tol) || length(tol) != 1) {
@@ -164,11 +491,11 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE, data, subset,
     stop("argument 'stepmax' must be non-negative", call. = FALSE)
   }
   if (!(qac %in% c("marquardt", "stephalving"))) {
-    stop("argument 'qac' must be either 'marquardt' or 'stephalving'", 
+    stop("argument 'qac' must be either 'marquardt' or 'stephalving'",
       call. = FALSE)
   }
   if (!is.numeric(initIter) || length(initIter) != 1) {
-    stop("argument 'initIter' must be a single numeric scalar", 
+    stop("argument 'initIter' must be a single numeric scalar",
       call. = FALSE)
   }
   if (initIter != round(initIter)) {
@@ -178,14 +505,14 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE, data, subset,
     stop("argument 'initIter' must be positive", call. = FALSE)
   }
   initIter <- as.integer(initIter)
-  if (!is.numeric(initFactorLB) || length(initFactorLB) != 
+  if (!is.numeric(initFactorLB) || length(initFactorLB) !=
     1) {
-    stop("argument 'initFactorLB' must be a single numeric value", 
+    stop("argument 'initFactorLB' must be a single numeric value",
       call. = FALSE)
   }
-  if (!is.numeric(initFactorUB) || length(initFactorUB) != 
+  if (!is.numeric(initFactorUB) || length(initFactorUB) !=
     1) {
-    stop("argument 'initFactorUB' must be a single numeric value", 
+    stop("argument 'initFactorUB' must be a single numeric value",
       call. = FALSE)
   }
   # Step 1: OLS -------
@@ -195,105 +522,92 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE, data, subset,
     lm(Yvar ~ -1 + ., data = as.data.frame(Xvar))
   }
   if (any(is.na(olsRes$coefficients))) {
-    stop("at least one of the OLS coefficients is NA: ", 
-      paste(colnames(Xvar)[is.na(olsRes$coefficients)], 
+    stop("at least one of the OLS coefficients is NA: ",
+      paste(colnames(Xvar)[is.na(olsRes$coefficients)],
         collapse = ", "), "This may be due to a singular matrix
-   due to potential perfect multicollinearity", 
+   due to potential perfect multicollinearity",
       call. = FALSE)
   }
   olsParam <- c(olsRes$coefficients)
-  # olsSigmasq <- summary(olsRes)$sigma^2
-  # olsStder <- sqrt(diag(vcov(olsRes)))
-  # olsLoglik <- logLik(olsRes)[1]
   if (inherits(data, "plm.dim")) {
     dataTable <- data[validObs, 1:2]
   } else {
     dataTable <- data.frame(IdObs = c(1:sum(validObs)))
   }
   dataTable <- as_tibble(cbind(dataTable, data[validObs, all.vars(terms(formula))]))
-  dataTable <- mutate(dataTable, olsResiduals = residuals(olsRes), 
+  dataTable <- mutate(dataTable, olsResiduals = residuals(olsRes),
     olsFitted = fitted(olsRes))
   olsSkew <- skewness(dataTable[["olsResiduals"]])
-  # olsM3Okay <- if (S * olsSkew < 0) { 'Residuals have the
-  # 'right' skeweness' } else { 'Residuals have the 'wrong'
-  # skeweness' }
   if (S * olsSkew > 0) {
     warning("The residuals of the OLS are ", if (S == 1) {
       " right"
     } else {
       "left"
     }, "-skewed. This may indicate the absence of inefficiency or
-  model misspecification or sample 'bad luck'", 
+  model misspecification or sample 'bad luck'",
       call. = FALSE)
   }
-  # CoelliM3Test <- c(z = moment(dataTable[['olsResiduals']],
-  # order = 3)/sqrt(6 * moment(dataTable[['olsResiduals']],
-  # order = 2)^3/N), p.value = 2 *
-  # pnorm(-abs(moment(dataTable[['olsResiduals']], order =
-  # 3)/sqrt(6 * moment(dataTable[['olsResiduals']], order =
-  # 2)^3/N)))) AgostinoTest <-
-  # dagoTest(dataTable[['olsResiduals']])@test Step 2: MLE
   # arguments -------
-  FunArgs <- list(start = start, olsParam = olsParam, dataTable = dataTable, 
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, 
-    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Zvar = Zvar, 
-    nZHvar = nZHvar, Xvar = Xvar, S = S, method = method, 
-    printInfo = printInfo, itermax = itermax, stepmax = stepmax, 
-    tol = tol, gradtol = gradtol, hessianType = hessianType, 
-    qac = qac, initStart = initStart, initAlg = initAlg, 
+  FunArgs <- list(start = start, olsParam = olsParam, dataTable = dataTable,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Zvar = Zvar,
+    nZHvar = nZHvar, Xvar = Xvar, S = S, method = method,
+    printInfo = printInfo, itermax = itermax, stepmax = stepmax,
+    tol = tol, gradtol = gradtol, hessianType = hessianType,
+    qac = qac, initStart = initStart, initAlg = initAlg,
     initIter = initIter, initFactorLB = initFactorLB, initFactorUB = initFactorUB)
   ## MLE run -------
-  mleList <- tryCatch(switch(as.character(lcmClasses), `2` = do.call(LCM2ChnormAlgOpt, 
-    FunArgs), `3` = do.call(LCM3ChnormAlgOpt, FunArgs), `4` = do.call(LCM4ChnormAlgOpt, 
-    FunArgs), `5` = do.call(LCM5ChnormAlgOpt, FunArgs)), 
+  mleList <- tryCatch(switch(as.character(lcmClasses), `2` = do.call(LCM2ChnormAlgOpt,
+    FunArgs), `3` = do.call(LCM3ChnormAlgOpt, FunArgs), `4` = do.call(LCM4ChnormAlgOpt,
+    FunArgs), `5` = do.call(LCM5ChnormAlgOpt, FunArgs)),
     error = function(e) e)
   if (inherits(mleList, "error")) {
-    stop("The current error occurs during optimization:\n", 
+    stop("The current error occurs during optimization:\n",
       mleList$message, call. = FALSE)
   }
   # Inverse Hessian + other -------
-  mleList$invHessian <- vcovObj(mleObj = mleList$mleObj, hessianType = hessianType, 
+  mleList$invHessian <- vcovObj(mleObj = mleList$mleObj, hessianType = hessianType,
     method = method, nParm = nParm)
   mleList <- c(mleList, if (method == "ucminf") {
-    list(type = "ucminf maximization", nIter = unname(mleList$mleObj$info["neval"]), 
-      status = mleList$mleObj$message, mleLoglik = -mleList$mleObj$value, 
+    list(type = "ucminf maximization", nIter = unname(mleList$mleObj$info["neval"]),
+      status = mleList$mleObj$message, mleLoglik = -mleList$mleObj$value,
       gradient = mleList$mleObj$gradient)
   } else {
     if (method %in% c("bfgs", "bhhh", "nr", "nm")) {
-      list(type = mleList$mleObj$type, nIter = mleList$mleObj$iterations, 
-        status = mleList$mleObj$message, mleLoglik = mleList$mleObj$maximum, 
+      list(type = mleList$mleObj$type, nIter = mleList$mleObj$iterations,
+        status = mleList$mleObj$message, mleLoglik = mleList$mleObj$maximum,
         gradient = mleList$mleObj$gradient)
     } else {
       if (method == "sr1") {
-        list(type = "SR1 maximization", nIter = mleList$mleObj$iterations, 
-          status = mleList$mleObj$status, mleLoglik = -mleList$mleObj$fval, 
-          gradient = mleList$mleObj$gradient)
+        list(type = "SR1 maximization", nIter = mleList$mleObj$iterations,
+          status = mleList$mleObj$status, mleLoglik = -mleList$mleObj$fval,
+          gradient = -mleList$mleObj$gradient)
       } else {
         if (method == "mla") {
-          list(type = "Levenberg-Marquardt maximization", 
-          nIter = mleList$mleObj$ni, status = switch(mleList$mleObj$istop, 
-            `1` = "convergence criteria were satisfied", 
-            `2` = "maximum number of iterations was reached", 
-            `4` = "algorithm encountered a problem in the function computation"), 
-          mleLoglik = -mleList$mleObj$fn.value, gradient = mleList$mleObj$grad)
+          list(type = "Levenberg-Marquardt maximization",
+          nIter = mleList$mleObj$ni, status = switch(mleList$mleObj$istop,
+            `1` = "convergence criteria were satisfied",
+            `2` = "maximum number of iterations was reached",
+            `4` = "algorithm encountered a problem in the function computation"),
+          mleLoglik = -mleList$mleObj$fn.value, gradient = -mleList$mleObj$grad)
         } else {
           if (method == "sparse") {
-          list(type = "Sparse Hessian maximization", 
-            nIter = mleList$mleObj$iterations, status = mleList$mleObj$status, 
-            mleLoglik = -mleList$mleObj$fval, gradient = mleList$mleObj$gradient)
+          list(type = "Sparse Hessian maximization",
+            nIter = mleList$mleObj$iterations, status = mleList$mleObj$status,
+            mleLoglik = -mleList$mleObj$fval, gradient = -mleList$mleObj$gradient)
           } else {
           if (method == "nlminb") {
-            list(type = "nlminb maximization", nIter = mleList$mleObj$iterations, 
-            status = mleList$mleObj$message, mleLoglik = -mleList$mleObj$objective, 
+            list(type = "nlminb maximization", nIter = mleList$mleObj$iterations,
+            status = mleList$mleObj$message, mleLoglik = -mleList$mleObj$objective,
             gradient = mleList$mleObj$gradient)
-          }
+          } 
           }
         }
       }
     }
   })
   # quick renaming -------
-  names(mleList$startVal) <- fName_lcmcross(Xvar = Xvar, uHvar = uHvar, 
+  names(mleList$startVal) <- fName_lcmcross(Xvar = Xvar, uHvar = uHvar,
     vHvar = vHvar, Zvar = Zvar, nZHvar = nZHvar, lcmClasses = lcmClasses)
   names(mleList$mlParam) <- names(mleList$startVal)
   rownames(mleList$invHessian) <- colnames(mleList$invHessian) <- names(mleList$mlParam)
@@ -301,56 +615,56 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE, data, subset,
   colnames(mleList$mleObj$gradL_OBS) <- names(mleList$mlParam)
   # Return object -------
   mleDate <- format(Sys.time(), "Model was estimated on : %b %a %d, %Y at %H:%M")
-  dataTable$mlResiduals_c1 <- Yvar - as.numeric(crossprod(matrix(mleList$mlParam[1:nXvar]), 
+  dataTable$mlResiduals_c1 <- Yvar - as.numeric(crossprod(matrix(mleList$mlParam[1:nXvar]),
     t(Xvar)))
-  dataTable$mlFitted_c1 <- as.numeric(crossprod(matrix(mleList$mlParam[1:nXvar]), 
+  dataTable$mlFitted_c1 <- as.numeric(crossprod(matrix(mleList$mlParam[1:nXvar]),
     t(Xvar)))
-  dataTable$mlResiduals_c2 <- Yvar - as.numeric(crossprod(matrix(mleList$mlParam[(nXvar + 
-    nuZUvar + nvZVvar + 1):(2 * nXvar + nuZUvar + nvZVvar)]), 
+  dataTable$mlResiduals_c2 <- Yvar - as.numeric(crossprod(matrix(mleList$mlParam[(nXvar +
+    nuZUvar + nvZVvar + 1):(2 * nXvar + nuZUvar + nvZVvar)]),
     t(Xvar)))
-  dataTable$mlFitted_c2 <- as.numeric(crossprod(matrix(mleList$mlParam[(nXvar + 
-    nuZUvar + nvZVvar + 1):(2 * nXvar + nuZUvar + nvZVvar)]), 
+  dataTable$mlFitted_c2 <- as.numeric(crossprod(matrix(mleList$mlParam[(nXvar +
+    nuZUvar + nvZVvar + 1):(2 * nXvar + nuZUvar + nvZVvar)]),
     t(Xvar)))
   if (lcmClasses == 3) {
-    dataTable$mlResiduals_c3 <- Yvar - as.numeric(crossprod(matrix(mleList$mlParam[(2 * 
-      nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(3 * nXvar + 
+    dataTable$mlResiduals_c3 <- Yvar - as.numeric(crossprod(matrix(mleList$mlParam[(2 *
+      nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(3 * nXvar +
       2 * nuZUvar + 2 * nvZVvar)]), t(Xvar)))
-    dataTable$mlFitted_c3 <- as.numeric(crossprod(matrix(mleList$mlParam[(2 * 
-      nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(3 * nXvar + 
+    dataTable$mlFitted_c3 <- as.numeric(crossprod(matrix(mleList$mlParam[(2 *
+      nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(3 * nXvar +
       2 * nuZUvar + 2 * nvZVvar)]), t(Xvar)))
   } else {
     if (lcmClasses == 4) {
-      dataTable$mlResiduals_c3 <- Yvar - as.numeric(crossprod(matrix(mleList$mlParam[(2 * 
-        nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(3 * nXvar + 
+      dataTable$mlResiduals_c3 <- Yvar - as.numeric(crossprod(matrix(mleList$mlParam[(2 *
+        nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(3 * nXvar +
         2 * nuZUvar + 2 * nvZVvar)]), t(Xvar)))
-      dataTable$mlFitted_c3 <- as.numeric(crossprod(matrix(mleList$mlParam[(2 * 
-        nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(3 * nXvar + 
+      dataTable$mlFitted_c3 <- as.numeric(crossprod(matrix(mleList$mlParam[(2 *
+        nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(3 * nXvar +
         2 * nuZUvar + 2 * nvZVvar)]), t(Xvar)))
-      dataTable$mlResiduals_c4 <- Yvar - as.numeric(crossprod(matrix(mleList$mlParam[(3 * 
-        nXvar + 3 * nuZUvar + 3 * nvZVvar + 1):(4 * nXvar + 
+      dataTable$mlResiduals_c4 <- Yvar - as.numeric(crossprod(matrix(mleList$mlParam[(3 *
+        nXvar + 3 * nuZUvar + 3 * nvZVvar + 1):(4 * nXvar +
         3 * nuZUvar + 3 * nvZVvar)]), t(Xvar)))
-      dataTable$mlFitted_c4 <- as.numeric(crossprod(matrix(mleList$mlParam[(3 * 
-        nXvar + 3 * nuZUvar + 3 * nvZVvar + 1):(4 * nXvar + 
+      dataTable$mlFitted_c4 <- as.numeric(crossprod(matrix(mleList$mlParam[(3 *
+        nXvar + 3 * nuZUvar + 3 * nvZVvar + 1):(4 * nXvar +
         3 * nuZUvar + 3 * nvZVvar)]), t(Xvar)))
     } else {
       if (lcmClasses == 5) {
-        dataTable$mlResiduals_c3 <- Yvar - as.numeric(crossprod(matrix(mleList$mlParam[(2 * 
-          nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(3 * 
+        dataTable$mlResiduals_c3 <- Yvar - as.numeric(crossprod(matrix(mleList$mlParam[(2 *
+          nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(3 *
           nXvar + 2 * nuZUvar + 2 * nvZVvar)]), t(Xvar)))
-        dataTable$mlFitted_c3 <- as.numeric(crossprod(matrix(mleList$mlParam[(2 * 
-          nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(3 * 
+        dataTable$mlFitted_c3 <- as.numeric(crossprod(matrix(mleList$mlParam[(2 *
+          nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(3 *
           nXvar + 2 * nuZUvar + 2 * nvZVvar)]), t(Xvar)))
-        dataTable$mlResiduals_c4 <- Yvar - as.numeric(crossprod(matrix(mleList$mlParam[(3 * 
-          nXvar + 3 * nuZUvar + 3 * nvZVvar + 1):(4 * 
+        dataTable$mlResiduals_c4 <- Yvar - as.numeric(crossprod(matrix(mleList$mlParam[(3 *
+          nXvar + 3 * nuZUvar + 3 * nvZVvar + 1):(4 *
           nXvar + 3 * nuZUvar + 3 * nvZVvar)]), t(Xvar)))
-        dataTable$mlFitted_c4 <- as.numeric(crossprod(matrix(mleList$mlParam[(3 * 
-          nXvar + 3 * nuZUvar + 3 * nvZVvar + 1):(4 * 
+        dataTable$mlFitted_c4 <- as.numeric(crossprod(matrix(mleList$mlParam[(3 *
+          nXvar + 3 * nuZUvar + 3 * nvZVvar + 1):(4 *
           nXvar + 3 * nuZUvar + 3 * nvZVvar)]), t(Xvar)))
-        dataTable$mlResiduals_c5 <- Yvar - as.numeric(crossprod(matrix(mleList$mlParam[(4 * 
-          nXvar + 4 * nuZUvar + 4 * nvZVvar + 1):(5 * 
+        dataTable$mlResiduals_c5 <- Yvar - as.numeric(crossprod(matrix(mleList$mlParam[(4 *
+          nXvar + 4 * nuZUvar + 4 * nvZVvar + 1):(5 *
           nXvar + 4 * nuZUvar + 4 * nvZVvar)]), t(Xvar)))
-        dataTable$mlFitted_c5 <- as.numeric(crossprod(matrix(mleList$mlParam[(4 * 
-          nXvar + 4 * nuZUvar + 4 * nvZVvar + 1):(5 * 
+        dataTable$mlFitted_c5 <- as.numeric(crossprod(matrix(mleList$mlParam[(4 *
+          nXvar + 4 * nuZUvar + 4 * nvZVvar + 1):(5 *
           nXvar + 4 * nuZUvar + 4 * nvZVvar)]), t(Xvar)))
       }
     }
@@ -371,17 +685,9 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE, data, subset,
   returnObj$udist <- udist
   returnObj$startVal <- mleList$startVal
   returnObj$dataTable <- dataTable
-  # returnObj$olsParam <- olsParam
-  # returnObj$olsStder <- olsStder
-  # returnObj$olsSigmasq <- olsSigmasq
-  # returnObj$olsLoglik <- olsLoglik
-  # returnObj$olsSkew <- olsSkew
-  # returnObj$olsM3Okay <- olsM3Okay
   if (is.null(start)) {
     returnObj$InitHalf <- mleList$InitHalf
   }
-  # returnObj$CoelliM3Test <- CoelliM3Test
-  # returnObj$AgostinoTest <- AgostinoTest
   returnObj$optType <- mleList$type
   returnObj$nIter <- mleList$nIter
   returnObj$initStart <- initStart
@@ -408,18 +714,18 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE, data, subset,
   returnObj$mlDate <- mleDate
   rm(mleList)
   class(returnObj) <- "lcmcross"
-  # print.lcmcross(returnObj)
   return(returnObj)
 }
 
 # print for lcmcross ----------
-
+#' @rdname lcmcross
+#' @export
 print.lcmcross <- function(x, ...) {
   cat("Call:\n")
   cat(deparse(x$call, width.cutoff = 500))
   cat("\n\n")
   cat("Likelihood estimates using", x$optType, "\n")
-  cat("Normal-Half Normal Latent Class Stochastic Frontier Model", 
+  cat("Normal-Half Normal Latent Class Stochastic Frontier Model",
     "\n")
   cat("Status:", x$optStatus, "\n\n")
   cat(x$typeSfa, "\n")

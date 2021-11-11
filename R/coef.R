@@ -1,9 +1,94 @@
-# coefficients from sfacross ----
+################################################################################
+#                                                                              #
+# R functions for the sfaR package                                             #
+#                                                                              #
+################################################################################
 
+#------------------------------------------------------------------------------#
+# Coefficients extraction                                                      #
+# Models: -Standard Stochastic Frontier Analysis                               #
+#         -Latent Class Stochastic Frontier Analysis                           #
+# Data: Cross sectional data & Pooled data                                     #
+#------------------------------------------------------------------------------#
+
+#' @title Extract coefficients of classic or latent class stochastic models
+#'
+#' From an object of class \code{'summary.sfacross'} or
+#' \code{'summary.lcmcross'}, \code{\link{coef}} extracts the coefficients,
+#' their standard errors, z-values, and (asymptotic) P-values.
+#'
+#' From on object of class \code{'sfacross'} or \code{'lcmcross'}, it extracts
+#' only the estimated coefficients.
+#'
+#' @name coef
+#'
+#' @param object A classic or latent class stochastic frontier model returned
+#' by \code{\link{sfacross}} or \code{\link{lcmcross}}, or an object of class
+#' \code{'summary.sfacross'} or \code{'summary.lcmcross'}.
+#' @param extraPar Logical (default = \code{FALSE}). Only applies to objects of
+#' class \code{'sfacross'} or \code{'lcmcross'}. If \code{TRUE}, additional
+#' parameters are returned:
+#'
+#' \code{sigmaSq} = \code{sigmauSq} + \code{sigmavSq}
+#'
+#' \code{lambdaSq} = \code{sigmauSq}/\code{sigmavSq}
+#'
+#' \code{sigmauSq} = \eqn{\exp{(Wu)}} = \eqn{\exp{(\delta Z_u)}}
+#'
+#' \code{sigmavSq} = \eqn{\exp{(Wv)}} = \eqn{\exp{(\phi Z_v)}}
+#'
+#' \code{sigma} = \code{sigmaSq}^0.5
+#'
+#' \code{lambda} = \code{lambdaSq}^0.5
+#'
+#' \code{sigmau} = \code{sigmauSq}^0.5
+#'
+#' \code{sigmav} = \code{sigmavSq}^0.5
+#'
+#' \code{gamma} = \code{sigmauSq}/(\code{sigmauSq} + \code{sigmavSq})
+#' @param ... Currently ignored.
+#'
+#' @return For objects of class \code{'summary.sfacross'} or
+#' \code{'summary.lcmcross'}, \code{\link{coef}} returns a matrix with four
+#' columns. Namely, the estimated coefficients, their standard errors,
+#' z-values, and (asymptotic) P-values.
+#'
+#' For objects of class \code{'sfacross'} or \code{'lcmcross'},
+#' \code{\link{coef}} returns a numeric vector of the estimated coefficients.
+#' If \code{extraPar = TRUE}, additional parameters, detailed in the section
+#' \sQuote{Arguments}, are also returned. In the case of object of class
+#' \code{'lcmcross'}, each additional parameter terminates with \code{'#'} that
+#' represents the class number.
+#'
+#' @author K Hervé Dakpo, Yann Desjeux and Laure Latruffe
+#'
+#' @seealso \code{\link{sfacross}}, for the stochastic frontier analysis model
+#' fitting function.
+#'
+#' \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
+#' model fitting function.
+#'
+#' @keywords methods coefficients
+#'
+#' @examples
+#'
+#' ## Using data on fossil fuel fired steam electric power generation plants in the U.S.
+#' # Translog SFA (cost function) truncated normal with scaling property
+#' tl_u_ts <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
+#'     log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+#'     I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+#'     udist = 'tnormal', muhet = ~ regu, uhet = ~ regu, data = utility, S = -1,
+#'     scaling = TRUE, method = 'mla')
+#'   coef(tl_u_ts, extraPar = TRUE)
+#'   coef(summary(tl_u_ts))
+#'
+#' @aliases coef.sfacross
+#' @export
+# coefficients from sfacross ----------
 coef.sfacross <- function(object, extraPar = FALSE, ...) {
   if (length(extraPar) != 1 || !is.logical(extraPar[1]))
     stop("argument 'extraPar' must be a single logical value",
-         call. = FALSE)
+      call. = FALSE)
   cRes <- object$mlParam
   if (extraPar) {
     if (object$udist == "tnormal") {
@@ -83,8 +168,18 @@ coef.sfacross <- function(object, extraPar = FALSE, ...) {
   return(cRes)
 }
 
-# coefficients from lcmcross ----
+# coefficients from summary.sfacross ----------
+#' @rdname coef
+#' @aliases coef.summary.sfacross
+#' @export
+coef.summary.sfacross <- function(object, ...) {
+  object$mlRes
+}
 
+# coefficients from lcmcross ----------
+#' @rdname coef
+#' @aliases coef.lcmcross
+#' @export
 coef.lcmcross <- function(object, extraPar = FALSE, ...) {
   if (length(extraPar) != 1 || !is.logical(extraPar[1]))
     stop("argument 'extraPar' must be a single logical value",
@@ -111,8 +206,8 @@ coef.lcmcross <- function(object, extraPar = FALSE, ...) {
     Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
     if (object$nClasses == 3) {
       delta3 <- object$mlParam[(3 * object$nXvar + 2 *
-        object$nuZUvar + 2 * object$nvZVvar + 1):(3 * object$nXvar +
-        3 * object$nuZUvar + 2 * object$nvZVvar)]
+        object$nuZUvar + 2 * object$nvZVvar + 1):(3 *
+        object$nXvar + 3 * object$nuZUvar + 2 * object$nvZVvar)]
       phi3 <- object$mlParam[(3 * object$nXvar + 3 * object$nuZUvar +
         2 * object$nvZVvar + 1):(3 * object$nXvar + 3 *
         object$nuZUvar + 3 * object$nvZVvar)]
@@ -131,11 +226,13 @@ coef.lcmcross <- function(object, extraPar = FALSE, ...) {
       } else {
         if (object$nClasses == 5) {
           delta5 <- object$mlParam[(5 * object$nXvar +
-          4 * object$nuZUvar + 4 * object$nvZVvar + 1):(5 *
-          object$nXvar + 5 * object$nuZUvar + 4 * object$nvZVvar)]
+          4 * object$nuZUvar + 4 * object$nvZVvar +
+          1):(5 * object$nXvar + 5 * object$nuZUvar +
+          4 * object$nvZVvar)]
           phi5 <- object$mlParam[(5 * object$nXvar +
-          5 * object$nuZUvar + 4 * object$nvZVvar + 1):(5 *
-          object$nXvar + 5 * object$nuZUvar + 5 * object$nvZVvar)]
+          5 * object$nuZUvar + 4 * object$nvZVvar +
+          1):(5 * object$nXvar + 5 * object$nuZUvar +
+          5 * object$nvZVvar)]
           Wu5 <- as.numeric(crossprod(matrix(delta5),
           t(uHvar)))
           Wv5 <- as.numeric(crossprod(matrix(phi5), t(vHvar)))
@@ -207,4 +304,12 @@ coef.lcmcross <- function(object, extraPar = FALSE, ...) {
     }
   }
   return(cRes)
+}
+
+# coefficients from summary.lcmcross ----------
+#' @rdname coef
+#' @aliases coef.summary.lcmcross
+#' @export
+coef.summary.lcmcross <- function(object, ...) {
+  object$mlRes
 }

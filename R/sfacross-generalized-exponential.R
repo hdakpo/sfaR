@@ -1,12 +1,27 @@
-########################################################
-#                                                      #
-# Generalized-exponential + normal distributions       #
-#                                                      #
-#                                                      #
-########################################################
+################################################################################
+#                                                                              #
+# R internal functions for the sfaR package                                    #
+#                                                                              #
+################################################################################
+
+#------------------------------------------------------------------------------#
+# Data: Cross sectional data & Pooled data                                     #
+# Model: Standard Stochastic Frontier Analysis                                 #
+# Convolution: generalized exponential - normal                                #
+#------------------------------------------------------------------------------#
 
 # Log-likelihood ----------
-
+#' log-likelihood for generalized exponential-normal distribution
+#' @param parm all parameters to be estimated
+#' @param nXvar number of main variables (inputs + env. var)
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @param Yvar vector of dependent variable
+#' @param Xvar matrix of main variables
+#' @param S integer for cost/prod estimation
+#' @noRd
 cgenexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
   vHvar, Yvar, Xvar, S) {
   beta <- parm[1:(nXvar)]
@@ -25,7 +40,15 @@ cgenexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
 }
 
 # starting value for the log-likelihood ----------
-
+#' starting values for generalized exponential-normal distribution
+#' @param olsObj OLS object
+#' @param epsiRes residuals from OLS
+#' @param S integer for cost/prod estimation
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @noRd
 cstgenexponorm <- function(olsObj, epsiRes, S, nuZUvar, uHvar,
   nvZVvar, vHvar) {
   m2 <- moment(epsiRes, order = 2)
@@ -75,7 +98,17 @@ cstgenexponorm <- function(olsObj, epsiRes, S, nuZUvar, uHvar,
 }
 
 # Gradient of the likelihood function ----------
-
+#' gradient for generalized exponential-normal distribution
+#' @param parm all parameters to be estimated
+#' @param nXvar number of main variables (inputs + env. var)
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @param Yvar vector of dependent variable
+#' @param Xvar matrix of main variables
+#' @param S integer for cost/prod estimation
+#' @noRd
 cgradgenexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
   uHvar, vHvar, Yvar, Xvar, S) {
   beta <- parm[1:(nXvar)]
@@ -117,7 +150,17 @@ cgradgenexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
 }
 
 # Hessian of the likelihood function ----------
-
+#' hessian for generalized exponential-normal distribution
+#' @param parm all parameters to be estimated
+#' @param nXvar number of main variables (inputs + env. var)
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @param Yvar vector of dependent variable
+#' @param Xvar matrix of main variables
+#' @param S integer for cost/prod estimation
+#' @noRd
 chessgenexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
   uHvar, vHvar, Yvar, Xvar, S) {
   beta <- parm[1:(nXvar)]
@@ -166,14 +209,14 @@ chessgenexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
       (eC)/exp(Wv/2)) * db + (pb - 2 * (db * wvwu - (eC) *
       pb))/exp(Wu/2)) * eB + (sigx3) * (sigx1)/(pab)))/(pab),
     FUN = "*"), uHvar)
-  hessll[1:nXvar, (nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)] <- crossprod(sweep(Xvar,
-    MARGIN = 1, STATS = S * ((da * (exp(Wv)/(2 * exp(Wu)) -
-      ((epsiuv) * (wvwuepsi) + 0.5))/exp(Wv/2) - (exp(Wv) *
-      pa/(2 * exp(Wu)) - (epsiuv) * da)/exp(Wu/2)) * eA -
-      (((2 * (exp(Wv)/exp(Wu)) - ((wvwuepsix2) * (wvwu -
-        epsiv) + 0.5)) * db/exp(Wv/2) - 2 * ((sigx5)/exp(Wu/2))) *
-        eB + (sigx1) * (sigx4)/(pab)))/(pab), FUN = "*"),
-    vHvar)
+  hessll[1:nXvar, (nXvar + nuZUvar + 1):(nXvar + nuZUvar +
+    nvZVvar)] <- crossprod(sweep(Xvar, MARGIN = 1, STATS = S *
+    ((da * (exp(Wv)/(2 * exp(Wu)) - ((epsiuv) * (wvwuepsi) +
+      0.5))/exp(Wv/2) - (exp(Wv) * pa/(2 * exp(Wu)) - (epsiuv) *
+      da)/exp(Wu/2)) * eA - (((2 * (exp(Wv)/exp(Wu)) -
+      ((wvwuepsix2) * (wvwu - epsiv) + 0.5)) * db/exp(Wv/2) -
+      2 * ((sigx5)/exp(Wu/2))) * eB + (sigx1) * (sigx4)/(pab)))/(pab),
+    FUN = "*"), vHvar)
   hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + 1):(nXvar +
     nuZUvar)] <- crossprod(sweep(uHvar, MARGIN = 1, STATS = (((0.5 *
     (0.5 * (exp(Wv/2) * (wvwuepsi)/exp(Wu/2)) - 0.5) - 0.5 *
@@ -185,8 +228,8 @@ chessgenexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
     (epsilon)/exp(Wu/2)) + 2 * (exp(Wv)/exp(Wu))) * pb -
     (eC) * (db * wvwu - (eC) * pb)) * eB + (sigx3)^2/(pab)))/(pab),
     FUN = "*"), uHvar)
-  hessll[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar), (nXvar +
-    nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)] <- crossprod(sweep(vHvar,
+  hessll[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar),
+    (nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)] <- crossprod(sweep(vHvar,
     MARGIN = 1, STATS = ((((exp(Wv) * pa/(2 * exp(Wu)) -
       (epsiuv) * da)/2 + (pa - (epsiuv) * da)/2) * exp(Wv)/exp(Wu) -
       (0.25 * (wvwu) + 0.25 * (S * (epsilon)/exp(Wv/2)) -
@@ -195,23 +238,43 @@ chessgenexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
       (0.25 * (S * (epsilon)/exp(Wv/2)) + 0.5 * (wvwu) +
         b * (wvwu - epsiv)^2) * db) * eB + (sigx4)^2/(pab)))/(pab),
     FUN = "*"), vHvar)
-  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + nuZUvar + 1):(nXvar +
-    nuZUvar + nvZVvar)] <- crossprod(sweep(uHvar, MARGIN = 1,
-    STATS = (((da * exp(Wv/2)/(4 * (exp(Wu) * exp(Wu/2))) -
-      2 * (exp(Wu) * pa/(2 * exp(Wu))^2)) * exp(Wv) - ((0.5 *
-      ((epsiuv) * (wvwuepsi)) - 0.25) * da * wvwu + (sigx2) *
-      (exp(Wv) * pa/(2 * exp(Wu)) - (epsiuv) * da))) *
-      eA - ((sigx3) * (sigx4)/(pab) + (2 * ((db * wvwu -
-      pb) * exp(Wv)/exp(Wu)) - (((wvwuepsix2) * (wvwu -
-      epsiv) - 0.5) * db * wvwu + (sigx5) * (eC))) * eB))/(pab),
-    FUN = "*"), vHvar)
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + nuZUvar +
+    1):(nXvar + nuZUvar + nvZVvar)] <- crossprod(sweep(uHvar,
+    MARGIN = 1, STATS = (((da * exp(Wv/2)/(4 * (exp(Wu) *
+      exp(Wu/2))) - 2 * (exp(Wu) * pa/(2 * exp(Wu))^2)) *
+      exp(Wv) - ((0.5 * ((epsiuv) * (wvwuepsi)) - 0.25) *
+      da * wvwu + (sigx2) * (exp(Wv) * pa/(2 * exp(Wu)) -
+      (epsiuv) * da))) * eA - ((sigx3) * (sigx4)/(pab) +
+      (2 * ((db * wvwu - pb) * exp(Wv)/exp(Wu)) - (((wvwuepsix2) *
+        (wvwu - epsiv) - 0.5) * db * wvwu + (sigx5) *
+        (eC))) * eB))/(pab), FUN = "*"), vHvar)
   hessll[lower.tri(hessll)] <- t(hessll)[lower.tri(hessll)]
   # hessll <- (hessll + (hessll))/2
   return(hessll)
 }
 
 # Optimization using different algorithms ----------
-
+#' optimizations solve for generalized exponential-normal distribution
+#' @param start starting value for optimization
+#' @param olsParam OLS coefficients
+#' @param dataTable dataframe contains id of observations
+#' @param nXvar number of main variables (inputs + env. var)
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @param Yvar vector of dependent variable
+#' @param Xvar matrix of main variables
+#' @param S integer for cost/prod estimation
+#' @param method algorithm for solver
+#' @param printInfo logical print info during optimization
+#' @param itermax maximum iteration
+#' @param stepmax stepmax for ucminf
+#' @param tol parameter tolerance
+#' @param gradtol gradient tolerance
+#' @param hessianType how hessian is computed
+#' @param qac qac option for maxLik
+#' @noRd
 genexponormAlgOpt <- function(start, olsParam, dataTable, S,
   nXvar, uHvar, nuZUvar, vHvar, nvZVvar, Yvar, Xvar, method,
   printInfo, itermax, stepmax, tol, gradtol, hessianType, qac) {
@@ -220,8 +283,8 @@ genexponormAlgOpt <- function(start, olsParam, dataTable, S,
     S = S, uHvar = uHvar, nuZUvar = nuZUvar, vHvar = vHvar,
     nvZVvar = nvZVvar)
   startLoglik <- sum(cgenexponormlike(startVal, nXvar = nXvar,
-    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
-    Yvar = Yvar, Xvar = Xvar, S = S))
+    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S))
   if (method %in% c("bfgs", "bhhh", "nr", "nm")) {
     maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
       bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
@@ -242,17 +305,17 @@ genexponormAlgOpt <- function(start, olsParam, dataTable, S,
     start = startVal, finalHessian = if (hessianType == 2) "bhhh" else TRUE,
     control = list(printLevel = if (printInfo) 2 else 0,
       iterlim = itermax, reltol = tol, tol = tol, qac = qac),
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
-    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S), sr1 = trust.optim(x = startVal,
-    fn = function(parm) -sum(cgenexponormlike(parm, nXvar = nXvar,
-      nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
-      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S)),
-    gr = function(parm) -colSums(cgradgenexponormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S)), method = "SR1", control = list(maxit = itermax,
-      cgtol = gradtol, stop.trust.radius = tol, prec = tol,
-      report.level = if (printInfo) 2 else 0, report.precision = 1L)),
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S), sr1 = trust.optim(x = startVal, fn = function(parm) -sum(cgenexponormlike(parm,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S)), gr = function(parm) -colSums(cgradgenexponormlike(parm,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S)), method = "SR1", control = list(maxit = itermax,
+    cgtol = gradtol, stop.trust.radius = tol, prec = tol,
+    report.level = if (printInfo) 2 else 0, report.precision = 1L)),
     sparse = trust.optim(x = startVal, fn = function(parm) -sum(cgenexponormlike(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -322,17 +385,21 @@ genexponormAlgOpt <- function(start, olsParam, dataTable, S,
         S = S)
   }
   mleObj$logL_OBS <- cgenexponormlike(parm = mlParam, nXvar = nXvar,
-    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
-    Yvar = Yvar, Xvar = Xvar, S = S)
-  mleObj$gradL_OBS <- cgradgenexponormlike(parm = mlParam,
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
     vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S)
+  mleObj$gradL_OBS <- cgradgenexponormlike(parm = mlParam,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S)
   return(list(startVal = startVal, startLoglik = startLoglik,
     mleObj = mleObj, mlParam = mlParam))
 }
 
 # Conditional efficiencies estimation ----------
-
+#' efficiencies for generalized exponential-normal distribution
+#' @param object object of class sfacross
+#' @param level level for confidence interval
+#' @noRd
 cgenexponormeff <- function(object, level) {
   beta <- object$mlParam[1:(object$nXvar)]
   delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
@@ -370,7 +437,9 @@ cgenexponormeff <- function(object, level) {
 }
 
 # Marginal effects on inefficiencies ----------
-
+#' marginal impact on efficiencies for generalized exponential-normal distribution
+#' @param object object of class sfacross
+#' @noRd
 cmarggenexponorm_Eu <- function(object) {
   delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
