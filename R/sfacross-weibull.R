@@ -341,7 +341,6 @@ chessweibullnormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
   return(hessll)
 }
 
-
 # Optimization using different algorithms ----------
 #' optimizations solve for weibull-normal distribution
 #' @param start starting value for optimization
