@@ -1,5 +1,5 @@
 Package: sfaR
-Title: Stochastic Frontier Analysis using R
+Title: Stochastic Frontier Analysis Routines
 Version: 0.1.0
 Authors@R: 
     c(

@@ -11,7 +11,7 @@
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
 
-#' sfaR: An R package for estimating stochastic frontier models
+#' sfaR: A package for estimating stochastic frontier models
 #'
 #' The \pkg{sfaR} package provides a set of tools (maximum likelihood - ML and
 #' maximum simulated likelihood - MSL) for various specifications of stochastic
