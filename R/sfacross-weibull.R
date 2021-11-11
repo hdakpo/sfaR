@@ -470,7 +470,7 @@ weibullnormAlgOpt <- function(start, olsParam, dataTable, S,
   }
   if (hessianType != 2) {
     if (method %in% c("ucminf", "nlminb"))
-      mleObj$hessian <- mleObj$hessian <- chessweibullnormlike(parm = mleObj$par,
+      mleObj$hessian <- chessweibullnormlike(parm = mleObj$par,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, N = N, FiMat = FiMat)

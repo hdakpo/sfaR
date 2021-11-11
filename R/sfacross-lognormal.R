@@ -199,6 +199,179 @@ cgradlognormlike <- function(parm, nXvar, nmuZUvar, nuZUvar,
   return(gradll)
 }
 
+# Hessian of the likelihood function ----------
+#' hessian for lognormal-normal distribution
+#' @param parm all parameters to be estimated
+#' @param nXvar number of main variables (inputs + env. var)
+#' @param nmuZUvar number of Zmu variables
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param muHvar matrix of Zmu variables
+#' @param uHvar matrix of Zu variables
+#' @param vHvar matrix of Zv variables
+#' @param Yvar vector of dependent variable
+#' @param Xvar matrix of main variables
+#' @param S integer for cost/prod estimation
+#' @param N number of observations
+#' @param FiMat matrix of random draws
+#' @noRd
+chesslognormlike <- function(parm, nXvar, nmuZUvar, nuZUvar,
+  nvZVvar, muHvar, uHvar, vHvar, Yvar, Xvar, S, N, FiMat) {
+  beta <- parm[1:(nXvar)]
+  omega <- parm[(nXvar + 1):(nXvar + nmuZUvar)]
+  delta <- parm[(nXvar + nmuZUvar + 1):(nXvar + nmuZUvar +
+    nuZUvar)]
+  phi <- parm[(nXvar + nmuZUvar + nuZUvar + 1):(nXvar + nmuZUvar +
+    nuZUvar + nvZVvar)]
+  mu <- as.numeric(crossprod(matrix(omega), t(muHvar)))
+  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
+  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
+  ewu_h <- exp(Wu/2)
+  ewv_h <- exp(Wv/2)
+  qFimat <- qnorm(FiMat)
+  WuqFi <- sweep(qFimat, MARGIN = 1, STATS = ewu_h, FUN = "*")
+  WumuqFi <- sweep(WuqFi, MARGIN = 1, STATS = mu, FUN = "+")
+  WumuqFiepsi <- sweep(S * exp(WumuqFi), MARGIN = 1, STATS = epsilon,
+    FUN = "+")
+  WuWvmuqFiepsi_sq <- (WumuqFiepsi)/ewv_h^2
+  WuWvmuqFiepsi_cub <- (WumuqFiepsi)/ewv_h^3
+  WuWvmuqFiepsi <- sweep(WumuqFiepsi, MARGIN = 1, STATS = ewv_h,
+    FUN = "/")
+  dqFi <- dnorm(WuWvmuqFiepsi)
+  WvdqFi <- apply(sweep(dqFi, MARGIN = 1, STATS = ewv_h, FUN = "/"),
+    1, sum)
+  sigx1 <- sweep(dqFi * exp(WumuqFi) * qFimat * WuWvmuqFiepsi_cub,
+    MARGIN = 1, STATS = ewu_h, FUN = "*")
+  sigx2 <- sweep(dqFi * (WumuqFiepsi)^2, MARGIN = 1, STATS = (1/ewv_h^2),
+    FUN = "*")
+  sigx3 <- sweep((0.5 * sigx2 - 0.5 * dqFi), MARGIN = 1, STATS = 1/ewv_h,
+    FUN = "*")
+  gx <- matrix(nrow = N, ncol = nXvar)
+  for (k in 1:nXvar) {
+    gx[, k] <- apply(sweep(dqFi * WuWvmuqFiepsi_cub, MARGIN = 1,
+      STATS = Xvar[, k], FUN = "*"), 1, sum)
+  }
+  gmu <- matrix(nrow = N, ncol = nmuZUvar)
+  for (k in 1:nmuZUvar) {
+    gmu[, k] <- apply(sweep(-(S * dqFi * exp(WumuqFi) * WuWvmuqFiepsi_cub),
+      MARGIN = 1, STATS = muHvar[, k], FUN = "*"), 1, sum)
+  }
+  gu <- matrix(nrow = N, ncol = nuZUvar)
+  for (k in 1:nuZUvar) {
+    gu[, k] <- apply(sweep(-(0.5 * (S * sigx1)), MARGIN = 1,
+      STATS = uHvar[, k], FUN = "*"), 1, sum)
+  }
+  gv <- matrix(nrow = N, ncol = nvZVvar)
+  for (k in 1:nvZVvar) {
+    gv[, k] <- apply(sweep(sigx3, MARGIN = 1, STATS = vHvar[,
+      k], FUN = "*"), 1, sum)
+  }
+  Q <- dim(FiMat)[2]
+  sigx4 <- sweep(((WumuqFiepsi)^2), MARGIN = 1, STATS = 1/ewv_h^2,
+    FUN = "*") - 1
+  sigx5 <- sweep(sigx4 * dqFi, MARGIN = 1, STATS = 1/ewv_h^3,
+    FUN = "*")
+  sigx6 <- sweep(sigx4 * dqFi * exp(WumuqFi), MARGIN = 1, STATS = 1/ewv_h^3,
+    FUN = "*")
+  sigx7 <- sweep(sigx4 * dqFi * exp(WumuqFi) * qFimat, MARGIN = 1,
+    STATS = ewu_h/ewv_h^3, FUN = "*")
+  sigx8 <- sweep(((WumuqFiepsi)^2), MARGIN = 1, STATS = 1/ewv_h^2,
+    FUN = "*") - 2
+  sigx9 <- (0.5 * sigx8 - 0.5) * dqFi * WuWvmuqFiepsi_cub
+  sigx10 <- sweep(((1 - S * exp(WumuqFi) * WuWvmuqFiepsi_sq) *
+    (WumuqFiepsi) + S * exp(WumuqFi)) * dqFi * exp(WumuqFi),
+    MARGIN = 1, STATS = 1/ewv_h^3, FUN = "*")
+  sigx11 <- sweep(((1 - S * exp(WumuqFi) * WuWvmuqFiepsi_sq) *
+    (WumuqFiepsi) + S * exp(WumuqFi)) * dqFi * exp(WumuqFi) *
+    qFimat, MARGIN = 1, STATS = ewu_h/ewv_h^3, FUN = "*")
+  sigx12 <- sweep((WumuqFiepsi)^2, MARGIN = 1, STATS = 1/ewv_h^2,
+    FUN = "*")
+  sigx13 <- (0.5 + 0.5 * (2 - sigx12)) * dqFi * exp(WumuqFi) *
+    WuWvmuqFiepsi_cub
+  sigx14 <- sweep(exp(WumuqFi) * qFimat, MARGIN = 1, STATS = 0.5 *
+    (S * ewu_h), FUN = "*")
+  sigx15 <- sweep((((0.5 - 0.5 * (S * exp(WumuqFi) * WuWvmuqFiepsi_sq)) *
+    WuqFi + 0.5) * (WumuqFiepsi) + sigx14) * dqFi * exp(WumuqFi) *
+    qFimat, MARGIN = 1, STATS = ewu_h/ewv_h^3, FUN = "*")
+  sigx16 <- (0.25 + 0.5 * (1 - 0.5 * (sigx12))) * sigx1
+  sigx17 <- sweep(((0.5 * (0.5 * (sigx12) - 1) - 0.25) * dqFi *
+    sigx12 - 0.5 * (0.5 * sigx2 - 0.5 * dqFi)), MARGIN = 1,
+    STATS = 1/ewv_h, FUN = "*")
+  Xsq <- list()
+  Xmu <- list()
+  Xu <- list()
+  Xv <- list()
+  Musq <- list()
+  Muu <- list()
+  Muv <- list()
+  Usq <- list()
+  Uv <- list()
+  Vsq <- list()
+  for (r in 1:Q) {
+    Xsq[[r]] <- crossprod(sweep(Xvar, MARGIN = 1, STATS = sigx5[,
+      r]/WvdqFi, FUN = "*"), Xvar)
+    Xmu[[r]] <- crossprod(sweep(Xvar, MARGIN = 1, STATS = -(S *
+      sigx6)[, r]/WvdqFi, FUN = "*"), muHvar)
+    Xu[[r]] <- crossprod(sweep(Xvar, MARGIN = 1, STATS = -(0.5 *
+      (S * sigx7))[, r]/WvdqFi, FUN = "*"), uHvar)
+    Xv[[r]] <- crossprod(sweep(Xvar, MARGIN = 1, STATS = sigx9[,
+      r]/WvdqFi, FUN = "*"), vHvar)
+    Musq[[r]] <- crossprod(sweep(muHvar, MARGIN = 1, STATS = -(S *
+      sigx10)[, r]/WvdqFi, FUN = "*"), muHvar)
+    Muu[[r]] <- crossprod(sweep(muHvar, MARGIN = 1, STATS = -(0.5 *
+      (S * sigx11))[, r]/WvdqFi, FUN = "*"), uHvar)
+    Muv[[r]] <- crossprod(sweep(muHvar, MARGIN = 1, STATS = S *
+      sigx13[, r]/WvdqFi, FUN = "*"), vHvar)
+    Usq[[r]] <- crossprod(sweep(uHvar, MARGIN = 1, STATS = -(0.5 *
+      (S * sigx15))[, r]/WvdqFi, FUN = "*"), uHvar)
+    Uv[[r]] <- crossprod(sweep(uHvar, MARGIN = 1, STATS = S *
+      sigx16[, r]/WvdqFi, FUN = "*"), vHvar)
+    Vsq[[r]] <- crossprod(sweep(vHvar, MARGIN = 1, STATS = sigx17[,
+      r]/WvdqFi, FUN = "*"), vHvar)
+  }
+  hessll <- matrix(nrow = nXvar + nmuZUvar + nuZUvar + nvZVvar,
+    ncol = nXvar + nmuZUvar + nuZUvar + nvZVvar)
+  hessll[1:nXvar, 1:nXvar] <- Reduce("+", Xsq) - crossprod(sweep(gx,
+    MARGIN = 1, STATS = 1/WvdqFi^2, FUN = "*"), gx)
+  hessll[1:nXvar, (nXvar + 1):(nXvar + nmuZUvar)] <- Reduce("+",
+    Xmu) - crossprod(sweep(gx, MARGIN = 1, STATS = 1/WvdqFi^2,
+    FUN = "*"), gmu)
+  hessll[1:nXvar, (nXvar + nmuZUvar + 1):(nXvar + nmuZUvar +
+    nuZUvar)] <- Reduce("+", Xu) - crossprod(sweep(gx, MARGIN = 1,
+    STATS = 1/WvdqFi^2, FUN = "*"), gu)
+  hessll[1:nXvar, (nXvar + nmuZUvar + nuZUvar + 1):(nXvar +
+    nmuZUvar + nuZUvar + nvZVvar)] <- Reduce("+", Xv) - crossprod(sweep(gx,
+    MARGIN = 1, STATS = 1/WvdqFi^2, FUN = "*"), gv)
+  hessll[(nXvar + 1):(nXvar + nmuZUvar), (nXvar + 1):(nXvar +
+    nmuZUvar)] <- Reduce("+", Musq) - crossprod(sweep(gmu,
+    MARGIN = 1, STATS = 1/WvdqFi^2, FUN = "*"), gmu)
+  hessll[(nXvar + 1):(nXvar + nmuZUvar), (nXvar + nmuZUvar +
+    1):(nXvar + nmuZUvar + nuZUvar)] <- Reduce("+", Muu) -
+    crossprod(sweep(gmu, MARGIN = 1, STATS = 1/WvdqFi^2,
+      FUN = "*"), gu)
+  hessll[(nXvar + 1):(nXvar + nmuZUvar), (nXvar + nmuZUvar +
+    nuZUvar + 1):(nXvar + nmuZUvar + nuZUvar + nvZVvar)] <- Reduce("+",
+    Muv) - crossprod(sweep(gmu, MARGIN = 1, STATS = 1/WvdqFi^2,
+    FUN = "*"), gv)
+  hessll[(nXvar + nmuZUvar + 1):(nXvar + nmuZUvar + nuZUvar),
+    (nXvar + nmuZUvar + 1):(nXvar + nmuZUvar + nuZUvar)] <- Reduce("+",
+    Usq) - crossprod(sweep(gu, MARGIN = 1, STATS = 1/WvdqFi^2,
+    FUN = "*"), gu)
+  hessll[(nXvar + nmuZUvar + 1):(nXvar + nmuZUvar + nuZUvar),
+    (nXvar + nmuZUvar + nuZUvar + 1):(nXvar + nmuZUvar +
+      nuZUvar + nvZVvar)] <- Reduce("+", Uv) - crossprod(sweep(gu,
+    MARGIN = 1, STATS = 1/WvdqFi^2, FUN = "*"), gv)
+  hessll[(nXvar + nmuZUvar + nuZUvar + 1):(nXvar + nmuZUvar +
+    nuZUvar + nvZVvar), (nXvar + nmuZUvar + nuZUvar + 1):(nXvar +
+    nmuZUvar + nuZUvar + nvZVvar)] <- Reduce("+", Vsq) -
+    crossprod(sweep(gv, MARGIN = 1, STATS = 1/WvdqFi^2, FUN = "*"),
+      gv)
+  hessll[lower.tri(hessll)] <- t(hessll)[lower.tri(hessll)]
+  # hessll <- (hessll + (hessll))/2
+  return(hessll)
+}
+
 # Optimization using different algorithms ----------
 #' optimizations solve for lognormal-normal distribution
 #' @param start starting value for optimization
@@ -254,60 +427,80 @@ lognormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       FiMat = FiMat)), hessian = 0, control = list(trace = if (printInfo) 1 else 0,
       maxeval = itermax, stepmax = stepmax, xtol = tol,
       grtol = gradtol)), maxLikAlgo = maxRoutine(fn = clognormlike,
-    grad = cgradlognormlike, start = startVal, finalHessian = if (hessianType ==
-      2) "bhhh" else TRUE, control = list(printLevel = if (printInfo) 2 else 0,
+    grad = cgradlognormlike, hess = chesslognormlike, start = startVal,
+    finalHessian = if (hessianType == 2) {
+      "bhhh"
+    } else {
+      TRUE
+    }, control = list(printLevel = if (printInfo) 2 else 0,
       iterlim = itermax, reltol = tol, tol = tol, qac = qac),
     nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
     nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
     vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
-    FiMat = FiMat), sr1 = trust.optim(x = startVal, fn = function(parm) -sum(clognormlike(parm,
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-    nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
-    FiMat = FiMat)), gr = function(parm) -colSums(cgradlognormlike(parm,
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-    nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
-    FiMat = FiMat)), method = "SR1", control = list(maxit = itermax,
-    cgtol = gradtol, stop.trust.radius = tol, prec = tol,
-    report.level = if (printInfo) 2 else 0, report.precision = 1L)),
-    sparse = trust.optim(x = startVal, fn = function(parm) -sum(clognormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
-      FiMat = FiMat)), gr = function(parm) -colSums(cgradlognormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
-      FiMat = FiMat)), hs = function(parm) as(jacobian(function(parm) -colSums(cgradlognormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
-      FiMat = FiMat)), parm), "dgCMatrix"), method = "Sparse",
-      control = list(maxit = itermax, cgtol = gradtol,
-        stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
-        report.precision = 1L, preconditioner = 1L)),
-    mla = mla(b = startVal, fn = function(parm) -sum(clognormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
-      FiMat = FiMat)), gr = function(parm) -colSums(cgradlognormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
-      FiMat = FiMat)), print.info = printInfo, maxiter = itermax,
-      epsa = gradtol, epsb = gradtol), nlminb = nlminb(start = startVal,
-      objective = function(parm) -sum(clognormlike(parm,
-        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-        nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
-        N = N, FiMat = FiMat)), gradient = function(parm) -colSums(cgradlognormlike(parm,
-        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-        nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
-        N = N, FiMat = FiMat)), control = list(iter.max = itermax,
-        trace = if (printInfo) 1 else 0, eval.max = itermax,
-        rel.tol = tol, x.tol = tol)))
+    FiMat = FiMat), sr1 = trust.optim(x = startVal, fn = function(parm) {
+    -sum(clognormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+      nvZVvar = nvZVvar, nmuZUvar = nmuZUvar, muHvar = muHvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, N = N, FiMat = FiMat))
+  }, gr = function(parm) {
+    -colSums(cgradlognormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+      nvZVvar = nvZVvar, nmuZUvar = nmuZUvar, muHvar = muHvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, N = N, FiMat = FiMat))
+  }, method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
+    stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
+    report.precision = 1L)), sparse = trust.optim(x = startVal,
+    fn = function(parm) {
+      -sum(clognormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+        nvZVvar = nvZVvar, nmuZUvar = nmuZUvar, muHvar = muHvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, N = N, FiMat = FiMat))
+    }, gr = function(parm) {
+      -colSums(cgradlognormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+        nvZVvar = nvZVvar, nmuZUvar = nmuZUvar, muHvar = muHvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, N = N, FiMat = FiMat))
+    }, function(parm) {
+      as(-chesslognormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+        nvZVvar = nvZVvar, nmuZUvar = nmuZUvar, muHvar = muHvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, N = N, FiMat = FiMat), "dgCMatrix")
+    }, method = "Sparse", control = list(maxit = itermax,
+      cgtol = gradtol, stop.trust.radius = tol, prec = tol,
+      report.level = if (printInfo) 2 else 0, report.precision = 1L,
+      preconditioner = 1L)), mla = mla(b = startVal, fn = function(parm) {
+    -sum(clognormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+      nvZVvar = nvZVvar, nmuZUvar = nmuZUvar, muHvar = muHvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, N = N, FiMat = FiMat))
+  }, gr = function(parm) {
+    -colSums(cgradlognormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+      nvZVvar = nvZVvar, nmuZUvar = nmuZUvar, muHvar = muHvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, N = N, FiMat = FiMat))
+  }, hess = function(parm) {
+    -chesslognormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+      nvZVvar = nvZVvar, nmuZUvar = nmuZUvar, muHvar = muHvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, N = N, FiMat = FiMat)
+  }, print.info = printInfo, maxiter = itermax, epsa = gradtol,
+    epsb = gradtol), nlminb = nlminb(start = startVal, objective = function(parm) {
+    -sum(clognormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+      nvZVvar = nvZVvar, nmuZUvar = nmuZUvar, muHvar = muHvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, N = N, FiMat = FiMat))
+  }, gradient = function(parm) {
+    -colSums(cgradlognormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+      nvZVvar = nvZVvar, nmuZUvar = nmuZUvar, muHvar = muHvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, N = N, FiMat = FiMat))
+  }, hessian = function(parm) {
+    -chesslognormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+      nvZVvar = nvZVvar, nmuZUvar = nmuZUvar, muHvar = muHvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, N = N, FiMat = FiMat)
+  }, control = list(iter.max = itermax, trace = if (printInfo) 1 else 0,
+    eval.max = itermax, rel.tol = tol, x.tol = tol)))
   if (method %in% c("ucminf", "nlminb")) {
     mleObj$gradient <- colSums(cgradlognormlike(mleObj$par,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
@@ -333,17 +526,17 @@ lognormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
   }
   if (hessianType != 2) {
     if (method %in% c("ucminf", "nlminb"))
-      mleObj$hessian <- jacobian(function(parm) colSums(cgradlognormlike(parm,
+      mleObj$hessian <- chesslognormlike(parm = mleObj$par,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
         vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
-        N = N, FiMat = FiMat)), mleObj$par)
+        N = N, FiMat = FiMat)
     if (method == "sr1")
-      mleObj$hessian <- jacobian(function(parm) colSums(cgradlognormlike(parm,
+      mleObj$hessian <- chesslognormlike(parm = mleObj$solution,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
         vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
-        N = N, FiMat = FiMat)), mleObj$solution)
+        N = N, FiMat = FiMat)
   }
   mleObj$logL_OBS <- clognormlike(parm = mlParam, nXvar = nXvar,
     nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
