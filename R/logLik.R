@@ -73,11 +73,12 @@ logLik.sfacross <- function(object, individual = FALSE, ...) {
     LL[["logLik"]] <- object$dataTable$logL_OBS
     LL[["Nobs"]] <- object$Nobs
     LL[["df"]] <- object$nParm
+    return(LL)
   } else {
-    LL <- rbind(`logLik: ` = object$mlLoglik, `Nobs: ` = object$Nobs,
-      `df: ` = object$nParm)
+    cat("'log Lik.'", round(object$mlLoglik, 5), paste0("(df=", object$nParm, ")"))
+    # LL <- rbind(`logLik: ` = object$mlLoglik, `Nobs: ` = object$Nobs,
+    #   `df: ` = object$nParm)
   }
-  return(LL)
 }
 
 # log likelihood extraction for lcmcross ----------
@@ -93,9 +94,10 @@ logLik.lcmcross <- function(object, individual = FALSE, ...) {
     LL[["logLik"]] <- object$dataTable$logL_OBS
     LL[["Nobs"]] <- object$Nobs
     LL[["df"]] <- object$nParm
+    return(LL)
   } else {
-    LL <- rbind(`logLik: ` = object$mlLoglik, `Nobs: ` = object$Nobs,
-      `df: ` = object$nParm)
+    cat("'log Lik.'", round(object$mlLoglik, 5), paste0("(df=", object$nParm, ")"))
+    # LL <- rbind(`logLik: ` = object$mlLoglik, `Nobs: ` = object$Nobs,
+    #   `df: ` = object$nParm)
   }
-  return(LL)
 }
