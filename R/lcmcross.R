@@ -517,7 +517,11 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
   }
   # Step 1: OLS -------
   olsRes <- if (colnames(Xvar)[1] == "(Intercept)") {
-    lm(Yvar ~ ., data = as.data.frame(Xvar[, -1]))
+    if (dim(Xvar)[2] == 1) {
+      lm(Yvar ~ 1)
+    } else {
+      lm(Yvar ~ ., data = as.data.frame(Xvar[, -1]))
+    }
   } else {
     lm(Yvar ~ -1 + ., data = as.data.frame(Xvar))
   }
