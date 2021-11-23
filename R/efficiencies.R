@@ -85,6 +85,9 @@
 #' of (in-)efficiency confidence intervals (defaut = \code{0.95}). Only used
 #' when \code{udist} = \code{'hnormal'}, \code{'exponential'}, \code{'tnormal'}
 #' or \code{'uniform'} in \code{\link{sfacross}} or \code{\link{lcmcross}}.
+#' @param newData Optional data frame that is used to calculate the efficiency 
+#' estimates. If NULL (the default), the efficiency estimates are calculated 
+#' for the observations that were used in the estimation.
 #' @param ... Currently ignored.
 #'
 #' @return A data frame that contains individual (in-)efficiency estimates.
@@ -211,9 +214,17 @@
 #' @export
 #' @export efficiencies
 # conditional efficiencies sfacross ----------
-efficiencies.sfacross <- function(object, level = 0.95, ...) {
+efficiencies.sfacross <- function(object, level = 0.95, newData = NULL,
+  ...) {
   if (level < 0 || level > 0.9999) {
     stop("'level' must be between 0 and 0.9999", call. = FALSE)
+  }
+  if (!is.null(newData)) {
+    if (!is.data.frame(newData)) {
+      stop("argument 'newData' must be of class data.frame")
+    }
+    object$dataTable <- newData
+    object$Nobs <- dim(newData)[1]
   }
   if (object$udist == "hnormal") {
     EffRes <- chalfnormeff(object = object, level = level)
@@ -271,9 +282,17 @@ efficiencies.sfacross <- function(object, level = 0.95, ...) {
 #' @rdname efficiencies
 #' @aliases efficiencies.lcmcross
 #' @export
-efficiencies.lcmcross <- function(object, level = 0.95, ...) {
+efficiencies.lcmcross <- function(object, level = 0.95, newData = NULL,
+  ...) {
   if (level < 0 || level > 0.9999) {
     stop("'level' must be between 0 and 0.9999", call. = FALSE)
+  }
+  if (!is.null(newData)) {
+    if (!is.data.frame(newData)) {
+      stop("argument 'newData' must be of class data.frame")
+    }
+    object$dataTable <- newData
+    object$Nobs <- dim(newData)[1]
   }
   if (object$nClasses == 2) {
     EffRes <- cLCM2Chalfnormeff(object = object, level = level)

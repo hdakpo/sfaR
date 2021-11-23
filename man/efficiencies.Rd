@@ -7,9 +7,9 @@
 \title{Compute conditional (in-)efficiency estimates of classic or latent class
 stochastic models}
 \usage{
-\method{efficiencies}{sfacross}(object, level = 0.95, ...)
+\method{efficiencies}{sfacross}(object, level = 0.95, newData = NULL, ...)
 
-\method{efficiencies}{lcmcross}(object, level = 0.95, ...)
+\method{efficiencies}{lcmcross}(object, level = 0.95, newData = NULL, ...)
 }
 \arguments{
 \item{object}{A classic or latent class stochastic frontier model returned
@@ -19,6 +19,10 @@ by \code{\link{sfacross}} or \code{\link{lcmcross}}.}
 of (in-)efficiency confidence intervals (defaut = \code{0.95}). Only used
 when \code{udist} = \code{'hnormal'}, \code{'exponential'}, \code{'tnormal'}
 or \code{'uniform'} in \code{\link{sfacross}} or \code{\link{lcmcross}}.}
+
+\item{newData}{Optional data frame that is used to calculate the efficiency
+estimates. If NULL (the default), the efficiency estimates are calculated
+for the observations that were used in the estimation.}
 
 \item{...}{Currently ignored.}
 }

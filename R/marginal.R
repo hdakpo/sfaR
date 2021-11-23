@@ -34,6 +34,9 @@
 #'
 #' @param object A classic or latent class stochastic frontier model returned
 #' by \code{\link{sfacross}} or \code{\link{lcmcross}}.
+#' @param newData Optional data frame that is used to calculate the efficiency 
+#' estimates. If NULL (the default), the efficiency estimates are calculated 
+#' for the observations that were used in the estimation.
 #' @param ... Currently ignored.
 #'
 #' @name marginal
@@ -83,7 +86,14 @@
 #' @export
 #' @export marginal
 # marginal effects computation sfacross ----------
-marginal.sfacross <- function(object, ...) {
+marginal.sfacross <- function(object, newData = NULL, ...) {
+  if (!is.null(newData)) {
+    if (!is.data.frame(newData)) {
+      stop("argument 'newData' must be of class data.frame")
+    }
+    object$dataTable <- newData
+    object$Nobs <- dim(newData)[1]
+  }
   if (object$udist == "hnormal") {
     if (object$nuZUvar == 1) {
       stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
@@ -172,7 +182,14 @@ marginal.sfacross <- function(object, ...) {
 #' @rdname marginal
 #' @aliases marginal.lcmcross
 #' @export
-marginal.lcmcross <- function(object, ...) {
+marginal.lcmcross <- function(object, newData = NULL, ...) {
+  if (!is.null(newData)) {
+    if (!is.data.frame(newData)) {
+      stop("argument 'newData' must be of class data.frame")
+    }
+    object$dataTable <- newData
+    object$Nobs <- dim(newData)[1]
+  }
   if (object$nuZUvar == 1) {
     stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
       call. = FALSE)

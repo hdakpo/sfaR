@@ -4,7 +4,7 @@
 \name{sfaR-package}
 \alias{sfaR-package}
 \alias{sfaR}
-\title{sfaR: An R package for estimating stochastic frontier models}
+\title{sfaR: A package for estimating stochastic frontier models}
 \description{
 The \pkg{sfaR} package provides a set of tools (maximum likelihood - ML and
 maximum simulated likelihood - MSL) for various specifications of stochastic

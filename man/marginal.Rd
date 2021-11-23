@@ -7,13 +7,17 @@
 \title{Compute marginal effects of the inefficiency drivers in classic or latent
 class stochastic models}
 \usage{
-\method{marginal}{sfacross}(object, ...)
+\method{marginal}{sfacross}(object, newData = NULL, ...)
 
-\method{marginal}{lcmcross}(object, ...)
+\method{marginal}{lcmcross}(object, newData = NULL, ...)
 }
 \arguments{
 \item{object}{A classic or latent class stochastic frontier model returned
 by \code{\link{sfacross}} or \code{\link{lcmcross}}.}
+
+\item{newData}{Optional data frame that is used to calculate the efficiency
+estimates. If NULL (the default), the efficiency estimates are calculated
+for the observations that were used in the estimation.}
 
 \item{...}{Currently ignored.}
 }
