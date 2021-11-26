@@ -462,13 +462,13 @@ ctslnormeff <- function(object, level) {
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
     as.numeric(crossprod(matrix(beta), t(Xvar)))
-  A <- exp(Wv)/(2 * exp(Wu) + object$S * epsilon/exp(Wu/2))
-  B <- (1 + lambda)^2 * exp(Wv)/(2 * exp(Wu) + object$S * epsilon *
-    (1 + lambda)/exp(Wu/2))
+  A <- exp(Wv)/(2 * exp(Wu)) + object$S * epsilon/exp(Wu/2)
+  B <- (1 + lambda)^2 * exp(Wv)/(2 * exp(Wu)) + object$S * epsilon *
+    (1 + lambda)/exp(Wu/2)
   a <- -exp(Wv/2)/exp(Wu/2) - object$S * epsilon/exp(Wv/2)
   b <- -exp(Wv/2) * (1 + lambda)/exp(Wu/2) - object$S * epsilon/exp(Wv/2)
   u <- exp(Wv/2) * (2 * exp(A) * (dnorm(a) + a * pnorm(a)) -
-    exp(B) * (dnorm(b) + b * dnorm(b)))/(2 * exp(A) * pnorm(a) -
+    exp(B) * (dnorm(b) + b * pnorm(b)))/(2 * exp(A) * pnorm(a) -
     exp(B) * pnorm(b))
   if (object$logDepVar == TRUE) {
     teJLMS <- exp(-u)
