@@ -70,7 +70,6 @@
 #' @importFrom qrng ghalton
 #' @importFrom MASS ginv
 #' @importFrom gsl erf erfc
-#' @importFrom moments moment skewness
 #' @import maxLik
 #' @importFrom ucminf ucminf
 #' @importFrom trustOptim trust.optim

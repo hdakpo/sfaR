@@ -47,8 +47,8 @@ cuninormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
 #' @noRd
 cstuninorm <- function(olsObj, epsiRes, S, nuZUvar, uHvar, nvZVvar,
   vHvar) {
-  m2 <- moment(epsiRes, order = 2)
-  m4 <- moment(epsiRes, order = 4)
+  m2 <- sum(epsiRes^2)/length(epsiRes)
+  m4 <- sum(epsiRes^4)/length(epsiRes)
   if ((m2^2 - m4) < 0) {
     theta <- (abs(120 * (3 * m2^2 - m4)))^(1/4)
     varu <- theta^2/12

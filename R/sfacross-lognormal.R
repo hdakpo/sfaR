@@ -63,8 +63,8 @@ clognormlike <- function(parm, nXvar, nmuZUvar, nuZUvar, nvZVvar,
 #' @noRd
 cstlognorm <- function(olsObj, epsiRes, S, nmuZUvar, nuZUvar,
   uHvar, muHvar, nvZVvar, vHvar) {
-  m2 <- moment(epsiRes, order = 2)
-  m3 <- moment(epsiRes, order = 3)
+  m2 <- sum(epsiRes^2)/length(epsiRes)
+  m3 <- sum(epsiRes^3)/length(epsiRes)
   varu <- tryCatch((nleqslv(x = 0.01, fn = function(x) {
     -exp(9 * x^2/2) + 3 * exp(5 * x^2/2) - 2 * exp(3 * x^2/2) -
       S * m3

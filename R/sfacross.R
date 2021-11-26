@@ -458,17 +458,17 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE, data, subset,
   mc$drop.unused.levels <- TRUE
   formula <- interCheckMain(formula = formula)
   if (!missing(muhet)) {
-    muhet <- lhsCheck_mu(formula = muhet, scaling = scaling)
+    muhet <- clhsCheck_mu(formula = muhet, scaling = scaling)
   } else {
     muhet <- ~1
   }
   if (!missing(uhet)) {
-    uhet <- lhsCheck_u(formula = uhet, scaling = scaling)
+    uhet <- clhsCheck_u(formula = uhet, scaling = scaling)
   } else {
     uhet <- ~1
   }
   if (!missing(vhet)) {
-    vhet <- lhsCheck_v(formula = vhet)
+    vhet <- clhsCheck_v(formula = vhet)
   } else {
     vhet <- ~1
   }

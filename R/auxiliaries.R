@@ -22,11 +22,11 @@ interCheckMain <- function(formula) {
   return(formula)
 }
 
-# intercept check for heteroscedasticity in u ----------
+# intercept check for heteroscedasticity in u (cross-section) ----------
 #' @param formula formula for heteroscedasticity in inefficiency term
 #' @param scaling logical for scaling property
 #' @noRd
-lhsCheck_u <- function(formula, scaling) {
+clhsCheck_u <- function(formula, scaling) {
   terM <- terms(formula(formula))
   if (attr(terM, "response") == 1)
     formula[[2]] <- NULL
@@ -42,11 +42,30 @@ lhsCheck_u <- function(formula, scaling) {
   return(formula)
 }
 
-# intercept check for heterogeneity in mu ----------
+# intercept check for heteroscedasticity in u (panel data) ----------
+#' @param formula main formula of model
+#' @noRd
+plhsCheck_u <- function(formula) {
+  terM <- terms(formula(formula))
+  if (attr(terM, "response") == 1)
+    formula[[2]] <- NULL
+  if (length(attr(terM, "term.labels")) == 0 && attr(terM,
+    "intercept") == 0) {
+    stop("at least one exogenous variable is required for heteroscedasticity in u",
+      call. = FALSE)
+  } else {
+    if (attr(terM, "intercept") == 0)
+      warning("heteroscedasticity in u is estimated without intercept",
+        call. = FALSE)
+  }
+  return(formula)
+}
+
+# intercept check for heterogeneity in mu (cross section) ----------
 #' @param formula formula for heterogeneity in inefficiency term
 #' @param scaling logical for scaling property
 #' @noRd
-lhsCheck_mu <- function(formula, scaling) {
+clhsCheck_mu <- function(formula, scaling) {
   terM <- terms(formula(formula))
   if (attr(terM, "response") == 1)
     formula[[2]] <- NULL
@@ -62,10 +81,29 @@ lhsCheck_mu <- function(formula, scaling) {
   return(formula)
 }
 
+# intercept check for heterogeneity in mu (panel data) ----------
+#' @param formula formula for heterogeneity in inefficiency term
+#' @noRd
+plhsCheck_mu <- function(formula) {
+  terM <- terms(formula(formula))
+  if (attr(terM, "response") == 1)
+    formula[[2]] <- NULL
+  if (length(attr(terM, "term.labels")) == 0 && attr(terM,
+    "intercept") == 0) {
+    stop("at least one exogenous variable is required for heterogeneity in mu",
+      call. = FALSE)
+  } else {
+    if (attr(terM, "intercept") == 0)
+      warning("heterogeneity in mu is estimated without intercept",
+        call. = FALSE)
+  }
+  return(formula)
+}
+
 # intercept check for heteroscedasticity in v ----------
 #' @param formula formula for heteroscedasticity in noise component
 #' @noRd
-lhsCheck_v <- function(formula) {
+clhsCheck_v <- function(formula) {
   terM <- terms(formula(formula))
   if (attr(terM, "response") == 1)
     formula[[2]] <- NULL
@@ -84,7 +122,7 @@ lhsCheck_v <- function(formula) {
 # intercept check for separating variables in LCM ----------
 #' @param formula formula for logit form in LCM
 #' @noRd
-lhsCheck_t <- function(formula) {
+clhsCheck_t <- function(formula) {
   terM <- terms(formula(formula))
   if (attr(terM, "response") == 1)
     formula[[2]] <- NULL
@@ -195,6 +233,17 @@ fName_uv_sfacross <- function(Xvar, udist, uHvar, vHvar) {
 }
 
 #' @param Xvar variables in main formula (e.g. inputs/outputs)
+#' @param udist inefficiency distribution
+#' @param muHvar heterogeneity variables in mu
+#' @param uHvar heteroscedasticity variables in u
+#' @param vHvar heteroscedasticity variables in v
+#' @noRd
+fName_mu_sfapanel <- function(Xvar, udist, muHvar, uHvar, vHvar) {
+  c(colnames(Xvar), c(paste0("Zmu_", colnames(muHvar)), paste0("Zu_",
+    colnames(uHvar)), paste0("Zv_", colnames(vHvar))))
+}
+
+#' @param Xvar variables in main formula (e.g. inputs/outputs)
 #' @param uHvar heteroscedasticity variables in u
 #' @param vHvar heteroscedasticity variables in v
 #' @param Zvar separating variables in LCM
@@ -207,6 +256,14 @@ fName_lcmcross <- function(Xvar, uHvar, vHvar, Zvar, nZHvar,
     colnames(vHvar))), lcmClasses), paste0(rep(paste0("Cl",
     1:(lcmClasses - 1)), each = nZHvar), "_", rep(colnames(Zvar),
     lcmClasses - 1)))
+}
+
+# Compute skewness ----------
+#' @param x vector for which skewness is computed
+#' @noRd
+skewness <- function(x) {
+  n <- length(x)
+  (sum((x - mean(x))^3)/n)/(sum((x - mean(x))^2)/n)^(3/2)
 }
 
 # Halton sequence (code from mlogit) ----------
@@ -562,7 +619,7 @@ centerText <- function(x, width) {
   retval
 }
 
-# S3methods
+# S3methods ----------
 #' @param object sfacross, lcmcross ... objects
 #' @noRd
 efficiencies <- function(object, ...) {

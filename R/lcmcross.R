@@ -350,17 +350,17 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
   mc$drop.unused.levels <- TRUE
   formula <- interCheckMain(formula = formula)
   if (!missing(uhet)) {
-    uhet <- lhsCheck_u(formula = uhet, scaling = FALSE)
+    uhet <- clhsCheck_u(formula = uhet, scaling = FALSE)
   } else {
     uhet <- ~1
   }
   if (!missing(vhet)) {
-    vhet <- lhsCheck_v(formula = vhet)
+    vhet <- clhsCheck_v(formula = vhet)
   } else {
     vhet <- ~1
   }
   if (!missing(thet)) {
-    thet <- lhsCheck_t(formula = thet)
+    thet <- clhsCheck_t(formula = thet)
   } else {
     thet <- ~1
   }

@@ -49,8 +49,8 @@ chalfnormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
 #' @noRd
 csthalfnorm <- function(olsObj, epsiRes, S, nuZUvar, uHvar, nvZVvar,
   vHvar) {
-  m2 <- moment(epsiRes, order = 2)
-  m3 <- moment(epsiRes, order = 3)
+  m2 <- sum(epsiRes^2)/length(epsiRes)
+  m3 <- sum(epsiRes^3)/length(epsiRes)
   ## Coelli (1995) suggests 0.05 for gamma when wrong sign
   if (S * m3 > 0) {
     varu <- (abs(S * m3 * sqrt(pi/2)/(1 - 4/pi)))^(2/3)

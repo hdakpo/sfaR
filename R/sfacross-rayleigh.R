@@ -50,8 +50,8 @@ craynormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
 #' @noRd
 cstraynorm <- function(olsObj, epsiRes, S, nuZUvar, uHvar, nvZVvar,
   vHvar) {
-  m2 <- moment(epsiRes, order = 2)
-  m3 <- moment(epsiRes, order = 3)
+  m2 <- sum(epsiRes^2)/length(epsiRes)
+  m3 <- sum(epsiRes^3)/length(epsiRes)
   if (S * m3 > 0) {
     varu <- exp(1/2 * log(((2 * (S * m3)^2/(pi * (pi - 3)^2))^2)^(2/6)))
   } else {

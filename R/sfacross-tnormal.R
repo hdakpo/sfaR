@@ -59,8 +59,8 @@ ctruncnormlike <- function(parm, nXvar, nmuZUvar, nuZUvar, nvZVvar,
 #' @noRd
 csttruncnorm <- function(olsObj, epsiRes, S, nmuZUvar, nuZUvar,
   uHvar, muHvar, nvZVvar, vHvar) {
-  m2 <- moment(epsiRes, order = 2)
-  m3 <- moment(epsiRes, order = 3)
+  m2 <- sum(epsiRes^2)/length(epsiRes)
+  m3 <- sum(epsiRes^3)/length(epsiRes)
   if (S * m3 > 0) {
     ## Coelli (1995) suggests 0.05 for gamma
     varu <- (abs(S * m3 * sqrt(pi/2)/(1 - 4/pi)))^(2/3)
