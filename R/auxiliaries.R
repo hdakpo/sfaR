@@ -300,11 +300,11 @@ drawMat <- function(N, Nsim, simType, prime, burn, seed, antithetics) {
       idPrime <- which(prime == nthPrime)
       set.seed(seed)
       matDraw <- matrix(ghalton(n = Nsim * N, d = idPrime,
-        method = "generalized"))
+        method = "generalized"), nrow = N, ncol = Nsim, byrow = TRUE)
     } else {
       if (simType == "sobol") {
         matDraw <- matrix(sobol(n = Nsim * N, dim = 1,
-          scrambling = 3, seed = seed), nrow = N, ncol = Nsim,
+          scrambling = 1, seed = seed), nrow = N, ncol = Nsim,
           byrow = TRUE)
       } else {
         if (simType == "uniform") {
@@ -322,6 +322,7 @@ drawMat <- function(N, Nsim, simType, prime, burn, seed, antithetics) {
       }
     }
   }
+  return(matDraw)
 }
 
 # Inverse hessian ----------
