@@ -576,7 +576,7 @@ cweibullnormeff <- function(object, level) {
     u[i] <- hcubature(f = fnCondEffWeibull, lowerLimit = 0,
       upperLimit = Inf, maxEval = 100, fDim = 1, sigmaU = exp(Wu[i]/2),
       sigmaV = exp(Wv[i]/2), k = k, epsilon = epsilon[i],
-      S = object$S, vectorInterface = FALSE, tol = 1e-10)$integral/density_epsilon
+      S = object$S, vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon
   }
   if (object$logDepVar == TRUE) {
     teJLMS <- exp(-u)
@@ -589,12 +589,12 @@ cweibullnormeff <- function(object, level) {
       teBC[i] <- hcubature(f = fnCondBCEffWeibull, lowerLimit = 0,
         upperLimit = Inf, maxEval = 100, fDim = 1, sigmaU = exp(Wu[i]/2),
         sigmaV = exp(Wv[i]/2), k = k, epsilon = epsilon[i],
-        S = object$S, vectorInterface = FALSE, tol = 1e-10)$integral/density_epsilon
+        S = object$S, vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon
       teBC_reciprocal[i] <- hcubature(f = fnCondBCreciprocalEffWeibull,
         lowerLimit = 0, upperLimit = Inf, maxEval = 100,
         fDim = 1, sigmaU = exp(Wu[i]/2), sigmaV = exp(Wv[i]/2),
         k = k, epsilon = epsilon[i], S = object$S, vectorInterface = FALSE,
-        tol = 1e-10)$integral/density_epsilon
+        tol = 1e-15)$integral/density_epsilon
     }
     res <- bind_cols(u = u, teJLMS = teJLMS, teBC = teBC,
       teBC_reciprocal = teBC_reciprocal)
