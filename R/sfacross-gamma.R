@@ -426,10 +426,11 @@ gammanormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
     nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
     vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
     FiMat = FiMat, wHvar = wHvar))
-  if (method %in% c("bfgs", "bhhh", "nr", "nm")) {
+  if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
     maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
       bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
-      nm = function(...) maxNM(...))
+      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
+      sann = function(...) maxSANN(...))
     method <- "maxLikAlgo"
   }
   mleObj <- switch(method, ucminf = ucminf(par = startVal,
@@ -444,80 +445,60 @@ gammanormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       stepmax = stepmax, xtol = tol, grtol = gradtol)),
     maxLikAlgo = maxRoutine(fn = cgammanormlike, grad = cgradgammanormlike,
       hess = chessgammanormlike, start = startVal, finalHessian = if (hessianType ==
-        2) {
-        "bhhh"
-      } else {
-        TRUE
-      }, control = list(printLevel = if (printInfo) 2 else 0,
+        2) "bhhh" else TRUE, control = list(printLevel = if (printInfo) 2 else 0,
         iterlim = itermax, reltol = tol, tol = tol, qac = qac),
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, N = N, FiMat = FiMat, wHvar = wHvar), sr1 = trust.optim(x = startVal,
-      fn = function(parm) {
-        -sum(cgammanormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
-          nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
-          Yvar = Yvar, Xvar = Xvar, S = S, N = N, FiMat = FiMat,
-          wHvar = wHvar))
-      }, gr = function(parm) {
-        -colSums(cgradgammanormlike(parm, nXvar = nXvar,
-          nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
-          vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
-          N = N, FiMat = FiMat, wHvar = wHvar))
-      }, method = "SR1", control = list(maxit = itermax,
+      fn = function(parm) -sum(cgammanormlike(parm, nXvar = nXvar,
+        nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
+        N = N, FiMat = FiMat, wHvar = wHvar)), gr = function(parm) -colSums(cgradgammanormlike(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, N = N, FiMat = FiMat, wHvar = wHvar)),
+      method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
+        stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
+        report.precision = 1L)), sparse = trust.optim(x = startVal,
+      fn = function(parm) -sum(cgammanormlike(parm, nXvar = nXvar,
+        nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
+        N = N, FiMat = FiMat, wHvar = wHvar)), gr = function(parm) -colSums(cgradgammanormlike(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, N = N, FiMat = FiMat, wHvar = wHvar)),
+      hs = function(parm) as(-chessgammanormlike(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, N = N, FiMat = FiMat, wHvar = wHvar),
+        "dgCMatrix"), method = "Sparse", control = list(maxit = itermax,
         cgtol = gradtol, stop.trust.radius = tol, prec = tol,
-        report.level = if (printInfo) 2 else 0, report.precision = 1L)),
-    sparse = trust.optim(x = startVal, fn = function(parm) {
-      -sum(cgammanormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
-        nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
-        Yvar = Yvar, Xvar = Xvar, S = S, N = N, FiMat = FiMat,
-        wHvar = wHvar))
-    }, gr = function(parm) {
-      -colSums(cgradgammanormlike(parm, nXvar = nXvar,
+        report.level = if (printInfo) 2 else 0, report.precision = 1L,
+        preconditioner = 1L)), mla = mla(b = startVal,
+      fn = function(parm) -sum(cgammanormlike(parm, nXvar = nXvar,
         nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
         vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
-        N = N, FiMat = FiMat, wHvar = wHvar))
-    }, hs = function(parm) {
-      as(-chessgammanormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
-        nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
-        Yvar = Yvar, Xvar = Xvar, S = S, N = N, FiMat = FiMat,
-        wHvar = wHvar), "dgCMatrix")
-    }, method = "Sparse", control = list(maxit = itermax,
-      cgtol = gradtol, stop.trust.radius = tol, prec = tol,
-      report.level = if (printInfo) 2 else 0, report.precision = 1L,
-      preconditioner = 1L)), mla = mla(b = startVal, fn = function(parm) {
-      -sum(cgammanormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
-        nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
-        Yvar = Yvar, Xvar = Xvar, S = S, N = N, FiMat = FiMat,
-        wHvar = wHvar))
-    }, gr = function(parm) {
-      -colSums(cgradgammanormlike(parm, nXvar = nXvar,
+        N = N, FiMat = FiMat, wHvar = wHvar)), gr = function(parm) -colSums(cgradgammanormlike(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, N = N, FiMat = FiMat, wHvar = wHvar)),
+      hess = function(parm) -chessgammanormlike(parm, nXvar = nXvar,
         nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
         vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
-        N = N, FiMat = FiMat, wHvar = wHvar))
-    }, hess = function(parm) {
-      -chessgammanormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
-        nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
-        Yvar = Yvar, Xvar = Xvar, S = S, N = N, FiMat = FiMat,
-        wHvar = wHvar)
-    }, print.info = printInfo, maxiter = itermax, epsa = gradtol,
-      epsb = gradtol), nlminb = nlminb(start = startVal,
-      objective = function(parm) {
-        -sum(cgammanormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
-          nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
-          Yvar = Yvar, Xvar = Xvar, S = S, N = N, FiMat = FiMat,
-          wHvar = wHvar))
-      }, gradient = function(parm) {
-        -colSums(cgradgammanormlike(parm, nXvar = nXvar,
-          nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
-          vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
-          N = N, FiMat = FiMat, wHvar = wHvar))
-      }, hessian = function(parm) {
-        -chessgammanormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
-          nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
-          Yvar = Yvar, Xvar = Xvar, S = S, N = N, FiMat = FiMat,
-          wHvar = wHvar)
-      }, control = list(iter.max = itermax, trace = if (printInfo) 1 else 0,
-        eval.max = itermax, rel.tol = tol, x.tol = tol)))
+        N = N, FiMat = FiMat, wHvar = wHvar), print.info = printInfo,
+      maxiter = itermax, epsa = gradtol, epsb = gradtol),
+    nlminb = nlminb(start = startVal, objective = function(parm) -sum(cgammanormlike(parm,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, N = N, FiMat = FiMat, wHvar = wHvar)), gradient = function(parm) -colSums(cgradgammanormlike(parm,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, N = N, FiMat = FiMat, wHvar = wHvar)), hessian = function(parm) -chessgammanormlike(parm,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, N = N, FiMat = FiMat, wHvar = wHvar), control = list(iter.max = itermax,
+      trace = if (printInfo) 1 else 0, eval.max = itermax,
+      rel.tol = tol, x.tol = tol)))
   if (method %in% c("ucminf", "nlminb")) {
     mleObj$gradient <- colSums(cgradgammanormlike(mleObj$par,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,

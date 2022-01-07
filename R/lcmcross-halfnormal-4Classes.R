@@ -1521,10 +1521,11 @@ LCM4ChnormAlgOpt <- function(start, olsParam, dataTable, S, wHvar,
     nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
     vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar,
     Zvar = Zvar, nZHvar = nZHvar))
-  if (method %in% c("bfgs", "bhhh", "nr", "nm")) {
+  if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
     maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
-      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
-      nm = function(...) maxNM(...))
+                         bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
+                         nm = function(...) maxNM(...), cg = function(...) maxCG(...), 
+                         sann = function(...) maxSANN(...))
     method <- "maxLikAlgo"
   }
   cat("LCM 4 Classes Estimation...\n")

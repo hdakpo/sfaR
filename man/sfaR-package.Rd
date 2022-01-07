@@ -14,7 +14,7 @@ frontier analysis (SFA).
 Two categories of important functions are available: \code{\link{sfacross}}
 and \code{\link{lcmcross}}, which estimate different types of frontiers and
 offer eleven alternative optimization algorithms (i.e. "bfgs", "bhhh", "nr",
-"nm", "ucminf", "mla", "sr1", "sparse", "nlminb").
+"nm", "cg", "sann", "ucminf", "mla", "sr1", "sparse", "nlminb").
 }
 \section{lcmcross}{
  \code{\link{lcmcross}} estimates latent class stochastic
@@ -45,8 +45,7 @@ distribution, the scaling property can be estimated.
 
 \section{Bugreport}{
  Any bug or suggestion can be reported using the \code{sfaR}'\code{s}
-tracker facilities at: \url{https://r-forge.r-project.org/projects/sfar/} and
-\url{https://github.com/hdakpo/sfaR/issues}
+tracker facilities at: \url{https://github.com/hdakpo/sfaR/issues}
 }
 
 \author{

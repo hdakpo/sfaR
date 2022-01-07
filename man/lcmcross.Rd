@@ -85,9 +85,11 @@ maximum of five classes can be estimated.}
 for Broyden-Fletcher-Goldfarb-Shanno (see
 \code{\link[maxLik:maxBFGS]{maxBFGS}}) \item \code{'bhhh'}, for
 Berndt-Hall-Hall-Hausman (see \code{\link[maxLik:maxBHHH]{maxBHHH}}) \item
-\code{'nr'}, for Newton-Raphson (see \code{\link[maxLik:maxNR]{maxNR}}) \item,
-\item \code{'nm'}, for Nelder-Mead (see \code{\link[maxLik:maxNM]{maxNM}}) \item
-\code{'ucminf'}, implements a quasi-Newton type with BFGS updating of the
+\code{'nr'}, for Newton-Raphson (see \code{\link[maxLik:maxNR]{maxNR}})
+\item \code{'nm'}, for Nelder-Mead (see \code{\link[maxLik:maxNM]{maxNM}})
+\item \code{'cg'}, for Conjugate Gradient (see \code{\link[maxLik:maxCG]{maxCG}})
+\item \code{'sann'}, for Simulated Annealing (see \code{\link[maxLik:maxSANN]{maxSANN}})
+\item \code{'ucminf'}, implements a quasi-Newton type with BFGS updating of the
 inverse Hessian and soft line search with a trust region type monitoring of
 the input to the line search algorithm (see \code{\link[ucminf:ucminf]{ucminf}})
 \item \code{'mla'}, for general-purpose optimization based on
@@ -212,7 +214,14 @@ is scaled as
 
 \Sexpr[results=rd, stage=build]{
 katex::math_to_rd('new_{weights} = sample_{size} \\\times \\\frac{old_{weights}}{\\\sum(old_{weights})}')
-}}
+}
+
+For difficult problems, non-gradient methods (e.g. \code{nm} or \code{sann}) can be
+used to warm start the optimization and zoom in the neighborhood of the
+solution. Then a gradient-based methods is recommanded in the second step. In the case
+of \code{sann}, we recommand to significantly increase the iteration limit
+(e.g. \code{itermax = 20000}). The Conjugate Gradient (\code{cg}) can also be used
+in the first stage.}
 }
 \value{
 \code{\link{lcmcross}} returns a list of class \code{'lcmcross'}
