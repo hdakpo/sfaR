@@ -396,9 +396,11 @@ cexponormeff <- function(object, level) {
       sqrt(exp(Wv)))/pnorm(mustar/sqrt(exp(Wv)))
     teBCLB <- exp(-uUB)
     teBCUB <- exp(-uLB)
+    teBC_reciprocal <- exp(mustar + 1/2 * exp(Wv)) * pnorm(mustar/sqrt(exp(Wv)) +
+      sqrt(exp(Wv)))/pnorm(mustar/sqrt(exp(Wv)))
     res <- bind_cols(u = u, uLB = uLB, uUB = uUB, teJLMS = teJLMS,
       m = m, teMO = teMO, teBC = teBC, teBCLB = teBCLB,
-      teBCUB = teBCUB)
+      teBCUB = teBCUB, teBC_reciprocal = teBC_reciprocal)
   } else {
     res <- bind_cols(u = u, uLB = uLB, uUB = uUB, m = m)
   }

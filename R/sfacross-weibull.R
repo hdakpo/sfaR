@@ -501,8 +501,8 @@ fnExpUWeiNorm <- function(u, sigma, k) {
   exp(-u) * k/sigma * (u/sigma)^(k - 1) * exp(-(u/sigma)^k)
 }
 
-# integral to solve for conditional efficiencies ----------
-#' function to estimate unconditional efficiency (Battese and Coelli style)
+# fn conditional inefficiencies ----------
+#' function to estimate conditional efficiency (Battese and Coelli style)
 #' @param u inefficiency variable over which integration will be done
 #' @param sigmaU standard error of the weibull distribution
 #' @param sigmaV standard error of the two-sided error component
@@ -515,7 +515,7 @@ fnCondEffWeibull <- function(u, sigmaU, sigmaV, k, epsilon, S) {
     dnorm((epsilon + S * u)/sigmaV)
 }
 
-# fn to solve for conditional efficiencies ----------
+# fn conditional efficiencies ----------
 #' function to estimate unconditional efficiency (Battese and Coelli style)
 #' @param u inefficiency variable over which integration will be done
 #' @param sigmaU standard error of the weibull distribution
@@ -527,6 +527,21 @@ fnCondEffWeibull <- function(u, sigmaU, sigmaV, k, epsilon, S) {
 fnCondBCEffWeibull <- function(u, sigmaU, sigmaV, k, epsilon,
   S) {
   exp(-u) * k/(sigmaU * sigmaV) * (u/sigmaU)^(k - 1) * exp(-(u/sigmaU)^k) *
+    dnorm((epsilon + S * u)/sigmaV)
+}
+
+# fn reciprocal conditional efficiencies ----------
+#' function to estimate unconditional efficiency (Battese and Coelli style)
+#' @param u inefficiency variable over which integration will be done
+#' @param sigmaU standard error of the weibull distribution
+#' @param sigmaV standard error of the two-sided error component
+#' @param k location parameter
+#' @param epsilon composite noise
+#' @param S integer for cost/prod estimation
+#' @noRd
+fnCondBCreciprocalEffWeibull <- function(u, sigmaU, sigmaV, k,
+  epsilon, S) {
+  exp(u) * k/(sigmaU * sigmaV) * (u/sigmaU)^(k - 1) * exp(-(u/sigmaU)^k) *
     dnorm((epsilon + S * u)/sigmaV)
 }
 
@@ -561,7 +576,7 @@ cweibullnormeff <- function(object, level) {
     u[i] <- hcubature(f = fnCondEffWeibull, lowerLimit = 0,
       upperLimit = Inf, maxEval = 100, fDim = 1, sigmaU = exp(Wu[i]/2),
       sigmaV = exp(Wv[i]/2), k = k, epsilon = epsilon[i],
-      S = object$S, vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon
+      S = object$S, vectorInterface = FALSE, tol = 1e-10)$integral/density_epsilon
   }
   if (object$logDepVar == TRUE) {
     teJLMS <- exp(-u)
@@ -574,7 +589,12 @@ cweibullnormeff <- function(object, level) {
       teBC[i] <- hcubature(f = fnCondBCEffWeibull, lowerLimit = 0,
         upperLimit = Inf, maxEval = 100, fDim = 1, sigmaU = exp(Wu[i]/2),
         sigmaV = exp(Wv[i]/2), k = k, epsilon = epsilon[i],
-        S = object$S, vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon
+        S = object$S, vectorInterface = FALSE, tol = 1e-10)$integral/density_epsilon
+      teBC_reciprocal[i] <- hcubature(f = fnCondBCreciprocalEffWeibull,
+        lowerLimit = 0, upperLimit = Inf, maxEval = 100,
+        fDim = 1, sigmaU = exp(Wu[i]/2), sigmaV = exp(Wv[i]/2),
+        k = k, epsilon = epsilon[i], S = object$S, vectorInterface = FALSE,
+        tol = 1e-10)$integral/density_epsilon
     }
     res <- bind_cols(u = u, teJLMS = teJLMS, teBC = teBC,
       teBC_reciprocal = teBC_reciprocal)

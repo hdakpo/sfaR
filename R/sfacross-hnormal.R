@@ -429,9 +429,11 @@ chalfnormeff <- function(object, level) {
       sigmastar)/pnorm(mustar/sigmastar)
     teBCLB <- exp(-uUB)
     teBCUB <- exp(-uLB)
+    teBC_reciprocal <- exp(mustar + 1/2 * sigmastar^2) *
+      pnorm(mustar/sigmastar + sigmastar)/pnorm(mustar/sigmastar)
     res <- bind_cols(u = u, uLB = uLB, uUB = uUB, teJLMS = teJLMS,
       m = m, teMO = teMO, teBC = teBC, teBCLB = teBCLB,
-      teBCUB = teBCUB)
+      teBCUB = teBCUB, teBC_reciprocal = teBC_reciprocal)
   } else {
     res <- bind_cols(u = u, uLB = uLB, uUB = uUB, m = m)
   }

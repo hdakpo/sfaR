@@ -463,8 +463,8 @@ ctslnormeff <- function(object, level) {
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
     as.numeric(crossprod(matrix(beta), t(Xvar)))
   A <- exp(Wv)/(2 * exp(Wu)) + object$S * epsilon/exp(Wu/2)
-  B <- (1 + lambda)^2 * exp(Wv)/(2 * exp(Wu)) + object$S * epsilon *
-    (1 + lambda)/exp(Wu/2)
+  B <- (1 + lambda)^2 * exp(Wv)/(2 * exp(Wu)) + object$S *
+    epsilon * (1 + lambda)/exp(Wu/2)
   a <- -exp(Wv/2)/exp(Wu/2) - object$S * epsilon/exp(Wv/2)
   b <- -exp(Wv/2) * (1 + lambda)/exp(Wu/2) - object$S * epsilon/exp(Wv/2)
   u <- exp(Wv/2) * (2 * exp(A) * (dnorm(a) + a * pnorm(a)) -
@@ -476,7 +476,12 @@ ctslnormeff <- function(object, level) {
       pnorm(a - exp(Wv/2)) - exp(B) * exp(-b * exp(Wv/2) +
       exp(Wv)/2) * pnorm(b - exp(Wv/2)))/(2 * exp(A) *
       pnorm(a) - exp(B) * pnorm(b))
-    res <- bind_cols(u = u, teJLMS = teJLMS, teBC = teBC)
+    teBC_reciprocal <- (2 * exp(A) * exp(a * exp(Wv/2) +
+      exp(Wv)/2) * pnorm(a + exp(Wv/2)) - exp(B) * exp(b *
+      exp(Wv/2) + exp(Wv)/2) * pnorm(b + exp(Wv/2)))/(2 *
+      exp(A) * pnorm(a) - exp(B) * pnorm(b))
+    res <- bind_cols(u = u, teJLMS = teJLMS, teBC = teBC,
+      teBC_reciprocal = teBC_reciprocal)
   } else {
     res <- bind_cols(u = u)
   }

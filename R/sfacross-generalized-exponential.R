@@ -429,7 +429,12 @@ cgenexponormeff <- function(object, level) {
       exp(Wv/2)) - exp(B) * exp(-b * exp(Wv/2) + exp(Wv)/2) *
       pnorm(b - exp(Wv/2)))/(exp(A) * pnorm(a) - exp(B) *
       pnorm(b))
-    res <- bind_cols(u = u, teJLMS = teJLMS, teBC = teBC)
+    teBC_reciprocal <- (exp(A) * exp(a * exp(Wv/2) + exp(Wv)/2) *
+      pnorm(a + exp(Wv/2)) - exp(B) * exp(b * exp(Wv/2) +
+      exp(Wv)/2) * pnorm(b + exp(Wv/2)))/(exp(A) * pnorm(a) -
+      exp(B) * pnorm(b))
+    res <- bind_cols(u = u, teJLMS = teJLMS, teBC = teBC,
+      teBC_reciprocal = teBC_reciprocal)
   } else {
     res <- bind_cols(u = u)
   }

@@ -455,9 +455,13 @@ craynormeff <- function(object, level) {
       sigmastar) + (mustar - sigmastar^2) * pnorm(mustar/sigmastar -
       sigmastar))/(sigmastar * dnorm(mustar/sigmastar) +
       mustar * pnorm(mustar/sigmastar))
+    teBC_reciprocal <- exp(mustar + sigmastar^2/2) * (sigmastar *
+      dnorm(mustar/sigmastar + sigmastar) + (mustar + sigmastar^2) *
+      pnorm(mustar/sigmastar + sigmastar))/(sigmastar *
+      dnorm(mustar/sigmastar) + mustar * pnorm(mustar/sigmastar))
     teMO <- exp(-m)
     res <- bind_cols(u = u, teJLMS = teJLMS, teBC = teBC,
-      m = m, teMO = teMO)
+      m = m, teMO = teMO, teBC_reciprocal = teBC_reciprocal)
   } else {
     res <- bind_cols(u = u, m = m)
   }

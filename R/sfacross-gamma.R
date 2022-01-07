@@ -578,17 +578,28 @@ cgammanormeff <- function(object, level) {
     teJLMS <- exp(-u)
     mui_Gi <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu)) -
       exp(Wv)
+    mui_Ki <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu)) +
+      exp(Wv)
     Gi <- numeric(object$Nobs)
+    Ki <- numeric(object$Nobs)
     for (i in 1:object$Nobs) {
       Gi[i] <- mean((mui_Gi[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
         ] + (1 - object$FiMat[i, ]) * pnorm(-mui_Gi[i]/sqrt(exp(Wv[i])))))^(P -
+        1))
+      Ki[i] <- mean((mui_Ki[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+        ] + (1 - object$FiMat[i, ]) * pnorm(-mui_Ki[i]/sqrt(exp(Wv[i])))))^(P -
         1))
     }
     teBC <- exp(exp(Wv)/exp(Wu/2) + object$S * epsilon +
       exp(Wv)/2) * pnorm(-exp(Wv/2 - Wu/2) - object$S *
       epsilon/exp(Wv/2) - exp(Wv/2)) * Gi/(pnorm(-exp(Wv/2 -
       Wu/2) - object$S * epsilon/exp(Wv/2)) * Hi2)
-    res <- bind_cols(u = u, teJLMS = teJLMS, teBC = teBC)
+    teBC_reciprocal <- exp(-exp(Wv)/exp(Wu/2) - object$S *
+      epsilon + exp(Wv)/2) * pnorm(-exp(Wv/2 - Wu/2) -
+      object$S * epsilon/exp(Wv/2) + exp(Wv/2)) * Ki/(pnorm(-exp(Wv/2 -
+      Wu/2) - object$S * epsilon/exp(Wv/2)) * Hi2)
+    res <- bind_cols(u = u, teJLMS = teJLMS, teBC = teBC,
+      teBC_reciprocal = teBC_reciprocal)
   } else {
     res <- bind_cols(u = u)
   }

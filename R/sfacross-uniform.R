@@ -400,9 +400,18 @@ cuninormeff <- function(object, level) {
       epsilon/exp(Wv/2)))
     teBCLB <- exp(-uUB)
     teBCUB <- exp(-uLB)
+    teBC1_reciprocal <- exp(-object$S * epsilon + exp(Wv)/2) *
+      (pnorm((object$S * epsilon + theta)/exp(Wv/2) - exp(Wv/2)) -
+        pnorm(object$S * epsilon/exp(Wv/2) - exp(Wv/2)))/(pnorm((theta +
+      object$S * epsilon)/exp(Wv/2)) - pnorm(object$S *
+      epsilon/exp(Wv/2)))
+    teBC2_reciprocal <- exp(-object$S * epsilon + exp(Wv)/2) *
+      (1 - pnorm(object$S * epsilon/exp(Wv/2) - exp(Wv/2)))/(1 -
+      pnorm(object$S * epsilon/exp(Wv/2)))
     res <- bind_cols(u1 = u1, u2 = u2, uLB = uLB, uUB = uUB,
       teJLMS1 = teJLMS1, teJLMS2 = teJLMS2, m = m, teMO = teMO,
-      teBC1 = teBC1, teBC2 = teBC2, teBCLB = teBCLB, teBCUB = teBCUB)
+      teBC1 = teBC1, teBC2 = teBC2, teBCLB = teBCLB, teBCUB = teBCUB,
+      teBC1_reciprocal = teBC1_reciprocal, teBC2_reciprocal = teBC2_reciprocal)
   } else {
     res <- bind_cols(u1 = u1, u2 = u2, uLB = uLB, uUB = uUB,
       m = m)

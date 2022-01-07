@@ -561,7 +561,7 @@ fnExpULogNorm <- function(u, sigma, mu) {
     sigma^2) - u)
 }
 
-# integral to solve for conditional efficiencies ----------
+# fn conditional inefficiencies ----------
 #' function to estimate unconditional efficiency (Battese and Coelli style)
 #' @param u inefficiency variable over which integration will be done
 #' @param sigmaU standard error of the weibull distribution
@@ -576,6 +576,36 @@ fnCondEffLogNorm <- function(u, sigmaU, sigmaV, mu, epsilon,
     S * u)/sigmaV)
 }
 
+# fn conditional efficiencies ----------
+#' function to estimate unconditional efficiency (Battese and Coelli style)
+#' @param u inefficiency variable over which integration will be done
+#' @param sigmaU standard error of the weibull distribution
+#' @param sigmaV standard error of the two-sided error component
+#' @param mu location parameter
+#' @param epsilon composite noise
+#' @param S integer for cost/prod estimation
+#' @noRd
+fnCondBCEffLogNorm <- function(u, sigmaU, sigmaV, mu, epsilon,
+  S) {
+  exp(-u)/u * 1/(sigmaU * sigmaV) * dnorm((log(u) - mu)/sigmaU) *
+    dnorm((epsilon + S * u)/sigmaV)
+}
+
+# fn reciproccal conditional efficiencies ----------
+#' function to estimate unconditional efficiency (Battese and Coelli style)
+#' @param u inefficiency variable over which integration will be done
+#' @param sigmaU standard error of the weibull distribution
+#' @param sigmaV standard error of the two-sided error component
+#' @param mu location parameter
+#' @param epsilon composite noise
+#' @param S integer for cost/prod estimation
+#' @noRd
+fnCondBCreciprocalEffLogNorm <- function(u, sigmaU, sigmaV, mu,
+  epsilon, S) {
+  exp(u)/u * 1/(sigmaU * sigmaV) * dnorm((log(u) - mu)/sigmaU) *
+    dnorm((epsilon + S * u)/sigmaV)
+}
+
 # fn to solve for conditional efficiencies ----------
 #' function to estimate unconditional efficiency (Battese and Coelli style)
 #' @param u inefficiency variable over which integration will be done
@@ -588,6 +618,21 @@ fnCondEffLogNorm <- function(u, sigmaU, sigmaV, mu, epsilon,
 fnCondBCEffLogNorm <- function(u, sigmaU, sigmaV, mu, epsilon,
   S) {
   exp(-u)/u * 1/(sigmaU * sigmaV) * dnorm((log(u) - mu)/sigmaU) *
+    dnorm((epsilon + S * u)/sigmaV)
+}
+
+# fn to solve for conditional inefficiencies ----------
+#' function to estimate unconditional efficiency (Battese and Coelli style)
+#' @param u inefficiency variable over which integration will be done
+#' @param sigmaU standard error of the weibull distribution
+#' @param sigmaV standard error of the two-sided error component
+#' @param mu location parameter
+#' @param epsilon composite noise
+#' @param S integer for cost/prod estimation
+#' @noRd
+fnCondBCreciprocalEffLogNorm <- function(u, sigmaU, sigmaV, mu,
+  epsilon, S) {
+  exp(u)/u * 1/(sigmaU * sigmaV) * dnorm((log(u) - mu)/sigmaU) *
     dnorm((epsilon + S * u)/sigmaV)
 }
 
@@ -627,7 +672,7 @@ clognormeff <- function(object, level) {
     u[i] <- hcubature(f = fnCondEffLogNorm, lowerLimit = 0,
       upperLimit = Inf, maxEval = 100, fDim = 1, sigmaU = exp(Wu[i]/2),
       sigmaV = exp(Wv[i]/2), mu = mu[i], epsilon = epsilon[i],
-      S = object$S, vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon
+      S = object$S, vectorInterface = FALSE, tol = 1e-10)$integral/density_epsilon
   }
   if (object$logDepVar == TRUE) {
     teJLMS <- exp(-u)
@@ -641,7 +686,12 @@ clognormeff <- function(object, level) {
       teBC[i] <- hcubature(f = fnCondBCEffLogNorm, lowerLimit = 0,
         upperLimit = Inf, maxEval = 100, fDim = 1, sigmaU = exp(Wu[i]/2),
         sigmaV = exp(Wv[i]/2), mu = mu[i], epsilon = epsilon[i],
-        S = object$S, vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon
+        S = object$S, vectorInterface = FALSE, tol = 1e-10)$integral/density_epsilon
+      teBC_reciprocal[i] <- hcubature(f = fnCondBCreciprocalEffLogNorm,
+        lowerLimit = 0, upperLimit = Inf, maxEval = 100,
+        fDim = 1, sigmaU = exp(Wu[i]/2), sigmaV = exp(Wv[i]/2),
+        mu = mu[i], epsilon = epsilon[i], S = object$S,
+        vectorInterface = FALSE, tol = 1e-10)$integral/density_epsilon
     }
     res <- bind_cols(u = u, teJLMS = teJLMS, teBC = teBC,
       teBC_reciprocal = teBC_reciprocal)
@@ -650,7 +700,6 @@ clognormeff <- function(object, level) {
   }
   return(res)
 }
-
 
 # Marginal effects on inefficiencies ----------
 #' marginal impact on efficiencies for lognormal-normal distribution
