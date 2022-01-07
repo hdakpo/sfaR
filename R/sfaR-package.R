@@ -79,4 +79,5 @@
 #' @importFrom emdbook qchibarsq
 #' @importFrom fBasics dagoTest
 #' @importFrom cubature hcubature
+#' @importFrom katex math_to_rd
 NULL
