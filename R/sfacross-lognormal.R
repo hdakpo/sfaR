@@ -627,7 +627,7 @@ clognormeff <- function(object, level) {
     u[i] <- hcubature(f = fnCondEffLogNorm, lowerLimit = 0,
       upperLimit = Inf, maxEval = 100, fDim = 1, sigmaU = exp(Wu[i]/2),
       sigmaV = exp(Wv[i]/2), mu = mu[i], epsilon = epsilon[i],
-      S = object$S, vectorInterface = FALSE, tol = 1e-10)$integral/density_epsilon
+      S = object$S, vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon
   }
   if (object$logDepVar == TRUE) {
     teJLMS <- exp(-u)
@@ -641,7 +641,7 @@ clognormeff <- function(object, level) {
       teBC[i] <- hcubature(f = fnCondBCEffLogNorm, lowerLimit = 0,
         upperLimit = Inf, maxEval = 100, fDim = 1, sigmaU = exp(Wu[i]/2),
         sigmaV = exp(Wv[i]/2), mu = mu[i], epsilon = epsilon[i],
-        S = object$S, vectorInterface = FALSE, tol = 1e-10)$integral/density_epsilon
+        S = object$S, vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon
     }
     res <- bind_cols(u = u, teJLMS = teJLMS, teBC = teBC,
       teBC_reciprocal = teBC_reciprocal)
