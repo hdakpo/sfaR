@@ -61,7 +61,7 @@
 #' @importFrom stats model.matrix model.response nlminb
 #' @importFrom stats pnorm qnorm delete.response fitted
 #' @importFrom stats logLik residuals terms vcov formula
-#' @importFrom stats integrate runif
+#' @importFrom stats integrate runif model.weights
 #' @importFrom stats na.pass printCoefmat pt qt
 #' @importFrom methods as
 #' @importFrom Formula as.Formula Formula

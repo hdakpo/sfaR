@@ -22,10 +22,11 @@
 #' @param vHvar matrix of Zv variables
 #' @param Yvar vector of dependent variable
 #' @param Xvar matrix of main variables
+#' @param wHvar vector of weights (weighted likelihood)
 #' @param S integer for cost/prod estimation
 #' @noRd
 ctruncnormlike <- function(parm, nXvar, nmuZUvar, nuZUvar, nvZVvar,
-  muHvar, uHvar, vHvar, Yvar, Xvar, S) {
+  muHvar, uHvar, vHvar, Yvar, Xvar, S, wHvar) {
   beta <- parm[1:(nXvar)]
   omega <- parm[(nXvar + 1):(nXvar + nmuZUvar)]
   delta <- parm[(nXvar + nmuZUvar + 1):(nXvar + nmuZUvar +
@@ -42,7 +43,7 @@ ctruncnormlike <- function(parm, nXvar, nmuZUvar, nuZUvar, nvZVvar,
   ll <- (-1/2 * log(exp(Wu) + exp(Wv)) + dnorm((mu + S * epsilon)/sqrt(exp(Wu) +
     exp(Wv)), log = TRUE) + pnorm(mustar/sigmastar, log.p = TRUE) -
     pnorm(mu/sqrt(exp(Wu)), log.p = TRUE))
-  return(ll)
+  return(ll * wHvar)
 }
 
 # starting value for the log-likelihood ----------
@@ -77,7 +78,8 @@ csttruncnorm <- function(olsObj, epsiRes, S, nmuZUvar, nuZUvar,
   reg_hetu <- if (nuZUvar == 1) {
     lm(log(varu) ~ 1)
   } else {
-    lm(dep_u ~ ., data = as.data.frame(uHvar[, 2:nuZUvar]))
+    lm(dep_u ~ ., data = as.data.frame(uHvar[, 2:nuZUvar,
+      drop = FALSE]))
   }
   if (any(is.na(reg_hetu$coefficients)))
     stop("At least one of the OLS coefficients of 'uhet' is NA: ",
@@ -87,7 +89,8 @@ csttruncnorm <- function(olsObj, epsiRes, S, nmuZUvar, nuZUvar,
   reg_hetv <- if (nvZVvar == 1) {
     lm(log(varv) ~ 1)
   } else {
-    lm(dep_v ~ ., data = as.data.frame(vHvar[, 2:nvZVvar]))
+    lm(dep_v ~ ., data = as.data.frame(vHvar[, 2:nvZVvar,
+      drop = FALSE]))
   }
   if (any(is.na(reg_hetv$coefficients)))
     stop("at least one of the OLS coefficients of 'vhet' is NA: ",
@@ -97,7 +100,8 @@ csttruncnorm <- function(olsObj, epsiRes, S, nmuZUvar, nuZUvar,
   reg_hetmu <- if (nmuZUvar == 1) {
     lm(epsiRes ~ 1)
   } else {
-    lm(epsiRes ~ ., data = as.data.frame(muHvar[, 2:nmuZUvar]))
+    lm(epsiRes ~ ., data = as.data.frame(muHvar[, 2:nmuZUvar,
+      drop = FALSE]))
   }
   if (any(is.na(reg_hetmu$coefficients)))
     stop("at least one of the OLS coefficients of 'muhet' is NA: ",
@@ -130,10 +134,11 @@ csttruncnorm <- function(olsObj, epsiRes, S, nmuZUvar, nuZUvar,
 #' @param vHvar matrix of Zv variables
 #' @param Yvar vector of dependent variable
 #' @param Xvar matrix of main variables
+#' @param wHvar vector of weights (weighted likelihood)
 #' @param S integer for cost/prod estimation
 #' @noRd
 cgradtruncnormlike <- function(parm, nXvar, nmuZUvar, nuZUvar,
-  nvZVvar, muHvar, uHvar, vHvar, Yvar, Xvar, S) {
+  nvZVvar, muHvar, uHvar, vHvar, Yvar, Xvar, S, wHvar) {
   beta <- parm[1:(nXvar)]
   omega <- parm[(nXvar + 1):(nXvar + nmuZUvar)]
   delta <- parm[(nXvar + nmuZUvar + 1):(nXvar + nmuZUvar +
@@ -177,7 +182,7 @@ cgradtruncnormlike <- function(parm, nXvar, nmuZUvar, nuZUvar,
       dmusig/pmusig) * exp(Wu) + 0.5 * (mu * dmu/(pmuwu))),
       FUN = "*"), sweep(vHvar, MARGIN = 1, STATS = (dmustar2epsix3 +
       dmusig * (sigmu)/pmusig) * exp(Wv), FUN = "*")))
-  return(gradll)
+  return(sweep(gradll, MARGIN = 1, STATS = wHvar, FUN = "*"))
 }
 
 # Hessian of the likelihood function ----------
@@ -192,10 +197,11 @@ cgradtruncnormlike <- function(parm, nXvar, nmuZUvar, nuZUvar,
 #' @param vHvar matrix of Zv variables
 #' @param Yvar vector of dependent variable
 #' @param Xvar matrix of main variables
+#' @param wHvar vector of weights (weighted likelihood)
 #' @param S integer for cost/prod estimation
 #' @noRd
 chesstruncnormlike <- function(parm, nXvar, nmuZUvar, nuZUvar,
-  nvZVvar, muHvar, uHvar, vHvar, Yvar, Xvar, S) {
+  nvZVvar, muHvar, uHvar, vHvar, Yvar, Xvar, S, wHvar) {
   beta <- parm[1:(nXvar)]
   omega <- parm[(nXvar + 1):(nXvar + nmuZUvar)]
   delta <- parm[(nXvar + nmuZUvar + 1):(nXvar + nmuZUvar +
@@ -255,35 +261,36 @@ chesstruncnormlike <- function(parm, nXvar, nmuZUvar, nuZUvar,
   hessll <- matrix(nrow = nXvar + nmuZUvar + nuZUvar + nvZVvar,
     ncol = nXvar + nmuZUvar + nuZUvar + nvZVvar)
   hessll[1:nXvar, 1:nXvar] <- crossprod(sweep(Xvar, MARGIN = 1,
-    STATS = S^2 * ((0 - 1) - ((muwuepsi)/(exp(Wv) * pmusigx2) +
-      dmusig * exp(Wu)/(pmusigx2)^2) * dmusig * wusq)/(sigma_sq),
-    FUN = "*"), Xvar)
+    STATS = S^2 * wHvar * ((0 - 1) - ((muwuepsi)/(exp(Wv) *
+      pmusigx2) + dmusig * exp(Wu)/(pmusigx2)^2) * dmusig *
+      wusq)/(sigma_sq), FUN = "*"), Xvar)
   hessll[1:nXvar, (nXvar + 1):(nXvar + nmuZUvar)] <- crossprod(sweep(Xvar,
-    MARGIN = 1, STATS = -(S * ((0 - 1) + ((muwuepsi)/(pmusigx2) +
+    MARGIN = 1, STATS = -wHvar * (S * ((0 - 1) + ((muwuepsi)/(pmusigx2) +
       dmusig * exp(Wu) * exp(Wv)/(pmusigx2)^2) * dmusig/(sigma_sq))/(sigma_sq)),
     FUN = "*"), muHvar)
   hessll[1:nXvar, (nXvar + nmuZUvar + 1):(nXvar + nmuZUvar +
     nuZUvar)] <- crossprod(sweep(Xvar, MARGIN = 1, STATS = S *
-    (sigx7 - (((sigx10)/(sigx2)^2 - (sigx6) * dmusig/((sigma_sq) *
-      pmusigx2)) * exp(Wu) - ((sigx6) * (muwuepsi)/exp(Wv) +
-      1/sigmastar)/(sigma_sq)) * dmusig/pmusig) * exp(Wu),
+    wHvar * (sigx7 - (((sigx10)/(sigx2)^2 - (sigx6) * dmusig/((sigma_sq) *
+    pmusigx2)) * exp(Wu) - ((sigx6) * (muwuepsi)/exp(Wv) +
+    1/sigmastar)/(sigma_sq)) * dmusig/pmusig) * exp(Wu),
     FUN = "*"), uHvar)
   hessll[1:nXvar, (nXvar + nmuZUvar + nuZUvar + 1):(nXvar +
     nmuZUvar + nuZUvar + nvZVvar)] <- crossprod(sweep(Xvar,
-    MARGIN = 1, STATS = S * (sigx7 - (sigx14 * exp(Wu) +
+    MARGIN = 1, STATS = S * wHvar * (sigx7 - (sigx14 * exp(Wu) +
       (muwuepsi) * (sigmu)/((sigma_sq) * exp(Wv))) * dmusig/pmusig) *
       exp(Wv), FUN = "*"), vHvar)
   hessll[(nXvar + 1):(nXvar + nmuZUvar), (nXvar + 1):(nXvar +
-    nmuZUvar)] <- crossprod(sweep(muHvar, MARGIN = 1, STATS = (dmu *
-    (dmu/(pmuwu)^2 + mu/(exp(Wu/2)^3 * pmu)) - ((0 + 1) +
-    ((muwuepsi)/(exp(Wu) * pmusigx2) + dmusig * exp(Wv)/(pmusigx2)^2) *
-      dmusig * wvsq)/(sigma_sq)), FUN = "*"), muHvar)
+    nmuZUvar)] <- crossprod(sweep(muHvar, MARGIN = 1, STATS = wHvar *
+    (dmu * (dmu/(pmuwu)^2 + mu/(exp(Wu/2)^3 * pmu)) - ((0 +
+      1) + ((muwuepsi)/(exp(Wu) * pmusigx2) + dmusig *
+      exp(Wv)/(pmusigx2)^2) * dmusig * wvsq)/(sigma_sq)),
+    FUN = "*"), muHvar)
   hessll[(nXvar + nmuZUvar + 1):(nXvar + nmuZUvar + nuZUvar),
     (nXvar + nmuZUvar + 1):(nXvar + nmuZUvar + nuZUvar)] <- crossprod(sweep(uHvar,
-    MARGIN = 1, STATS = ((sigx13 - (((sigx10) * (mu * exp(Wv) -
-      (2 * ((sigx10) * sigx11) + 3 * (S * (epsilon))) *
-        exp(Wu)) + (0.5 * (wusq) - 0.5 * (0.5 * (1 -
-      wusq) + wusq)) * (1 - wusq) * exp(Wv) * sigmustar)/(sigx2)^2 +
+    MARGIN = 1, STATS = wHvar * ((sigx13 - (((sigx10) * (mu *
+      exp(Wv) - (2 * ((sigx10) * sigx11) + 3 * (S * (epsilon))) *
+      exp(Wu)) + (0.5 * (wusq) - 0.5 * (0.5 * (1 - wusq) +
+      wusq)) * (1 - wusq) * exp(Wv) * sigmustar)/(sigx2)^2 +
       (sigx6)^2 * (sigx9) * exp(Wu) + S * (epsilon)/(sigx2)) *
       dmusig/pmusig) * exp(Wu) + 0.5 * (mu * (0.5 * (mu^2/(exp(Wu/2)^3 *
       pmu)) - (0.5 * (pmuwu) - 0.5 * (mu * dmu))/(pmuwu)^2) *
@@ -291,7 +298,7 @@ chesstruncnormlike <- function(parm, nXvar, nmuZUvar, nuZUvar,
   hessll[(nXvar + nmuZUvar + nuZUvar + 1):(nXvar + nmuZUvar +
     nuZUvar + nvZVvar), (nXvar + nmuZUvar + nuZUvar + 1):(nXvar +
     nmuZUvar + nuZUvar + nvZVvar)] <- crossprod(sweep(vHvar,
-    MARGIN = 1, STATS = (sigx15 + dmusig * (mu/(sigx2) -
+    MARGIN = 1, STATS = wHvar * (sigx15 + dmusig * (mu/(sigx2) -
       ((((3 * (mu) - 2 * ((sigx3) * (sigma_sq) * (muwuepsi) *
         sigmastar/(sigx2)^2)) * exp(Wv) - S * exp(Wu) *
         (epsilon)) * (sigx3) + (0.5 * (exp(Wv)/(sigma_sq)) -
@@ -301,26 +308,26 @@ chesstruncnormlike <- function(parm, nXvar, nmuZUvar, nuZUvar,
       exp(Wv), FUN = "*"), vHvar)
   hessll[(nXvar + 1):(nXvar + nmuZUvar), (nXvar + nmuZUvar +
     1):(nXvar + nmuZUvar + nuZUvar)] <- crossprod(sweep(muHvar,
-    MARGIN = 1, STATS = ((sigx8 - ((sigx10) * exp(Wv)/(sigx2)^2 -
+    MARGIN = 1, STATS = wHvar * ((sigx8 - ((sigx10) * exp(Wv)/(sigx2)^2 -
       (sigx6) * ((muwuepsi)/exp(Wu) + dmusig * exp(Wv)/(pmusigx2))/(sigma_sq)) *
       dmusig/pmusig) * exp(Wu) + 0.5 * (((1 - mu^2/exp(Wu/2)^2)/(pmuwu) -
       mu * dmu/(pmuwu)^2) * dmu)), FUN = "*"), uHvar)
   hessll[(nXvar + 1):(nXvar + nmuZUvar), (nXvar + nmuZUvar +
     nuZUvar + 1):(nXvar + nmuZUvar + nuZUvar + nvZVvar)] <- crossprod(sweep(muHvar,
-    MARGIN = 1, STATS = (((1/sigmastar - (muwuepsi) * (sigmu)/exp(Wu))/(sigma_sq) -
-      sigx14 * exp(Wv)) * dmusig/pmusig + sigx8) * exp(Wv),
-    FUN = "*"), vHvar)
+    MARGIN = 1, STATS = wHvar * (((1/sigmastar - (muwuepsi) *
+      (sigmu)/exp(Wu))/(sigma_sq) - sigx14 * exp(Wv)) *
+      dmusig/pmusig + sigx8) * exp(Wv), FUN = "*"), vHvar)
   hessll[(nXvar + nmuZUvar + 1):(nXvar + nmuZUvar + nuZUvar),
     (nXvar + nmuZUvar + nuZUvar + 1):(nXvar + nmuZUvar +
       nuZUvar + nvZVvar)] <- crossprod(sweep(uHvar, MARGIN = 1,
-    STATS = (((sigx6) * (sigx9) * (sigmu) - ((0.5 * ((1 -
-      wusq) * wvsq) + 0.5 * ((wusq - 1) * wvsq + 1 - 0.5 *
-      ((1 - wusq) * (1 - wvsq)))) * sigmustar + mu * (sigx10) -
-      (sigx3) * (2 * ((sigx10) * sigx11) + S * (epsilon)))/(sigx2)^2) *
-      dmusig/pmusig + (0.5 * ((0.5 * ((mustar3)^2/(dmustar2 *
-      (sigma_sq)^3)) - (sigx12)/dmusqx2) * dmustar2epsi) -
-      dmustar2epsix3)/(sigma_sq)) * exp(Wu) * exp(Wv),
-    FUN = "*"), vHvar)
+    STATS = wHvar * (((sigx6) * (sigx9) * (sigmu) - ((0.5 *
+      ((1 - wusq) * wvsq) + 0.5 * ((wusq - 1) * wvsq +
+      1 - 0.5 * ((1 - wusq) * (1 - wvsq)))) * sigmustar +
+      mu * (sigx10) - (sigx3) * (2 * ((sigx10) * sigx11) +
+      S * (epsilon)))/(sigx2)^2) * dmusig/pmusig + (0.5 *
+      ((0.5 * ((mustar3)^2/(dmustar2 * (sigma_sq)^3)) -
+        (sigx12)/dmusqx2) * dmustar2epsi) - dmustar2epsix3)/(sigma_sq)) *
+      exp(Wu) * exp(Wv), FUN = "*"), vHvar)
   hessll[lower.tri(hessll)] <- t(hessll)[lower.tri(hessll)]
   # hessll <- (hessll + (hessll))/2
   return(hessll)
@@ -340,6 +347,7 @@ chesstruncnormlike <- function(parm, nXvar, nmuZUvar, nuZUvar,
 #' @param vHvar matrix of Zv variables
 #' @param Yvar vector of dependent variable
 #' @param Xvar matrix of main variables
+#' @param wHvar vector of weights (weighted likelihood)
 #' @param S integer for cost/prod estimation
 #' @param method algorithm for solver
 #' @param printInfo logical print info during optimization
@@ -352,8 +360,8 @@ chesstruncnormlike <- function(parm, nXvar, nmuZUvar, nuZUvar,
 #' @noRd
 truncnormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
   muHvar, nmuZUvar, uHvar, nuZUvar, vHvar, nvZVvar, Yvar, Xvar,
-  method, printInfo, itermax, stepmax, tol, gradtol, hessianType,
-  qac) {
+  wHvar, method, printInfo, itermax, stepmax, tol, gradtol,
+  hessianType, qac) {
   startVal <- if (!is.null(start))
     start else csttruncnorm(olsObj = olsParam, epsiRes = dataTable[["olsResiduals"]],
     S = S, uHvar = uHvar, nuZUvar = nuZUvar, vHvar = vHvar,
@@ -361,7 +369,7 @@ truncnormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
   startLoglik <- sum(ctruncnormlike(startVal, nXvar = nXvar,
     nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
     muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
-    Xvar = Xvar, S = S))
+    Xvar = Xvar, S = S, wHvar = wHvar))
   if (method %in% c("bfgs", "bhhh", "nr", "nm")) {
     maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
       bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
@@ -372,10 +380,10 @@ truncnormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
     fn = function(parm) -sum(ctruncnormlike(parm, nXvar = nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
       muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
-      Xvar = Xvar, S = S)), gr = function(parm) -colSums(cgradtruncnormlike(parm,
+      Xvar = Xvar, S = S, wHvar = wHvar)), gr = function(parm) -colSums(cgradtruncnormlike(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S)),
+      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar)),
     hessian = 0, control = list(trace = if (printInfo) 1 else 0,
       maxeval = itermax, stepmax = stepmax, xtol = tol,
       grtol = gradtol)), maxLikAlgo = maxRoutine(fn = ctruncnormlike,
@@ -385,62 +393,68 @@ truncnormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       iterlim = itermax, reltol = tol, tol = tol, qac = qac),
     nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
     nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S), sr1 = trust.optim(x = startVal,
-    fn = function(parm) -sum(ctruncnormlike(parm, nXvar = nXvar,
-      nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
-      muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
-      Xvar = Xvar, S = S)), gr = function(parm) -colSums(cgradtruncnormlike(parm,
+    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar),
+    sr1 = trust.optim(x = startVal, fn = function(parm) -sum(ctruncnormlike(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S)),
-    method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
-      stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
-      report.precision = 1L)), sparse = trust.optim(x = startVal,
-    fn = function(parm) -sum(ctruncnormlike(parm, nXvar = nXvar,
-      nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
-      muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
-      Xvar = Xvar, S = S)), gr = function(parm) -colSums(cgradtruncnormlike(parm,
+      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar)),
+      gr = function(parm) -colSums(cgradtruncnormlike(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
+        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
+        wHvar = wHvar)), method = "SR1", control = list(maxit = itermax,
+        cgtol = gradtol, stop.trust.radius = tol, prec = tol,
+        report.level = if (printInfo) 2 else 0, report.precision = 1L)),
+    sparse = trust.optim(x = startVal, fn = function(parm) -sum(ctruncnormlike(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S)),
-    hs = function(parm) as(-chesstruncnormlike(parm, nXvar = nXvar,
-      nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
-      muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
-      Xvar = Xvar, S = S), "dgCMatrix"), method = "Sparse",
-    control = list(maxit = itermax, cgtol = gradtol, stop.trust.radius = tol,
-      prec = tol, report.level = if (printInfo) 2 else 0,
-      report.precision = 1L, preconditioner = 1L)), mla = mla(b = startVal,
-    fn = function(parm) -sum(ctruncnormlike(parm, nXvar = nXvar,
-      nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
-      muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
-      Xvar = Xvar, S = S)), gr = function(parm) -colSums(cgradtruncnormlike(parm,
+      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar)),
+      gr = function(parm) -colSums(cgradtruncnormlike(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
+        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
+        wHvar = wHvar)), hs = function(parm) as(-chesstruncnormlike(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
+        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
+        wHvar = wHvar), "dgCMatrix"), method = "Sparse",
+      control = list(maxit = itermax, cgtol = gradtol,
+        stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
+        report.precision = 1L, preconditioner = 1L)),
+    mla = mla(b = startVal, fn = function(parm) -sum(ctruncnormlike(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S)),
-    hess = function(parm) -chesstruncnormlike(parm, nXvar = nXvar,
-      nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
-      muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
-      Xvar = Xvar, S = S), print.info = printInfo, maxiter = itermax,
-    epsa = gradtol, epsb = gradtol), nlminb = nlminb(start = startVal,
-    objective = function(parm) -sum(ctruncnormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S)),
-    gradient = function(parm) -colSums(cgradtruncnormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S)),
-    hessian = function(parm) -chesstruncnormlike(parm, nXvar = nXvar,
-      nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
-      muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
-      Xvar = Xvar, S = S), control = list(iter.max = itermax,
-      trace = if (printInfo) 1 else 0, eval.max = itermax,
-      rel.tol = tol, x.tol = tol)))
+      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar)),
+      gr = function(parm) -colSums(cgradtruncnormlike(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
+        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
+        wHvar = wHvar)), hess = function(parm) -chesstruncnormlike(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
+        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
+        wHvar = wHvar), print.info = printInfo, maxiter = itermax,
+      epsa = gradtol, epsb = gradtol), nlminb = nlminb(start = startVal,
+      objective = function(parm) -sum(ctruncnormlike(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
+        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
+        wHvar = wHvar)), gradient = function(parm) -colSums(cgradtruncnormlike(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
+        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
+        wHvar = wHvar)), hessian = function(parm) -chesstruncnormlike(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
+        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
+        wHvar = wHvar), control = list(iter.max = itermax,
+        trace = if (printInfo) 1 else 0, eval.max = itermax,
+        rel.tol = tol, x.tol = tol)))
   if (method %in% c("ucminf", "nlminb")) {
     mleObj$gradient <- colSums(cgradtruncnormlike(mleObj$par,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S))
+      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar))
   }
   mlParam <- if (method %in% c("ucminf", "nlminb")) {
     mleObj$par
@@ -463,21 +477,23 @@ truncnormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       mleObj$hessian <- chesstruncnormlike(parm = mleObj$par,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S)
+        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
+        wHvar = wHvar)
     if (method == "sr1")
       mleObj$hessian <- chesstruncnormlike(parm = mleObj$solution,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S)
+        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
+        wHvar = wHvar)
   }
   mleObj$logL_OBS <- ctruncnormlike(parm = mlParam, nXvar = nXvar,
     nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
     muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
-    Xvar = Xvar, S = S)
+    Xvar = Xvar, S = S, wHvar = wHvar)
   mleObj$gradL_OBS <- cgradtruncnormlike(parm = mlParam, nXvar = nXvar,
     nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
     muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
-    Xvar = Xvar, S = S)
+    Xvar = Xvar, S = S, wHvar = wHvar)
   return(list(startVal = startVal, startLoglik = startLoglik,
     mleObj = mleObj, mlParam = mlParam))
 }

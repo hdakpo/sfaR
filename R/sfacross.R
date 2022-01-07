@@ -43,6 +43,12 @@
 #' @param data The data frame containing the data.
 #' @param subset An optional vector specifying a subset of observations to be
 #' used in the optimization process.
+#' @param weights An optional vector of weights to be used for weighted log-likelihood.
+#' Should be \code{NULL} or numeric vector with positive values. When \code{NULL}, 
+#' a numeric vector of 1 is used.
+#' @param wscale Logical. When \code{weights} is not \code{NULL}, a scaling transformation
+#' is used such that the the \code{weights} sums to the sample size. Default \code{TRUE}.
+#' When \code{FALSE} no scaling is used.
 #' @param S If \code{S = 1} (default), a production (profit) frontier is
 #' estimated: \eqn{\epsilon_i = v_i-u_i}. If \code{S = -1}, a cost frontier is
 #' estimated: \eqn{\epsilon_i = v_i+u_i}.
@@ -170,6 +176,14 @@
 #'
 #' In the case of the half normal distribution the convolution is obtained by
 #' setting \eqn{\mu=0}.
+#' 
+#' \code{sfacross} allows for the maximization of weighted log-likelihood.
+#' When option \code{weights} is specified and \code{wscale = TRUE}, the weights
+#' is scaled as 
+#' 
+#' \Sexpr[results=rd, stage=build]{
+#' katex::math_to_rd('new_{weights} = sample_{size} \\\times \\\frac{old_{weights}}{\\\sum(old_{weights})}')
+#' }
 #'
 #' @return \code{\link{sfacross}} returns a list of class \code{'sfacross'}
 #' containing the following elements:
@@ -213,7 +227,8 @@
 #'
 #' \item{dataTable}{A data frame (tibble format) containing information on data
 #' used for optimization along with residuals and fitted values of the OLS and
-#' M(S)L estimations, and the individual observation log-likelihood.}
+#' M(S)L estimations, and the individual observation log-likelihood. When \code{weights}
+#' is specified an additional variable is also provided in \code{dataTable}.}
 #'
 #' \item{olsParam}{Numeric vector. OLS estimates.}
 #'
@@ -233,6 +248,9 @@
 #'
 #' \item{AgostinoTest}{D'Agostino's test for OLS residuals skewness. (See
 #' D'Agostino and Pearson, 1973).}
+#' 
+#' \item{isWeights}{Logical. If \code{TRUE} weighted log-likelihood is
+#' maximized.}
 #'
 #' \item{optType}{Optimization algorithm used.}
 #'
@@ -430,22 +448,19 @@
 #'   summary(tl_u_g)
 #'
 #' @export
-sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE, data, subset,
-                     S = 1L, udist = "hnormal", scaling = FALSE, start = NULL,
-                     method = "bfgs", hessianType = 1L, simType = "halton",
-                     Nsim = 100, prime = 2L, burn = 10, antithetics = FALSE, seed = 12345,
-                     itermax = 2000, printInfo = FALSE, tol = 1e-12, gradtol = 1e-06,
-                     stepmax = 0.1, qac = "marquardt") {
+sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
+  data, subset, weights, wscale = TRUE, S = 1L, udist = "hnormal",
+  scaling = FALSE, start = NULL, method = "bfgs", hessianType = 1L,
+  simType = "halton", Nsim = 100, prime = 2L, burn = 10, antithetics = FALSE,
+  seed = 12345, itermax = 2000, printInfo = FALSE, tol = 1e-12,
+  gradtol = 1e-06, stepmax = 0.1, qac = "marquardt") {
   # u distribution check -------
   udist <- tolower(udist)
-  if (!(udist %in% c(
-    "hnormal", "exponential", "tnormal", "rayleigh",
+  if (!(udist %in% c("hnormal", "exponential", "tnormal", "rayleigh",
     "uniform", "gamma", "lognormal", "weibull", "genexponential",
-    "tslaplace"
-  ))) {
+    "tslaplace"))) {
     stop("Unknown inefficiency distribution: ", paste(udist),
-      call. = FALSE
-    )
+      call. = FALSE)
   }
   # Formula manipulation -------
   if (length(Formula(formula))[2] != 1) {
@@ -453,7 +468,8 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE, data, subset,
   }
   cl <- match.call()
   mc <- match.call(expand.dots = FALSE)
-  m <- match(c("formula", "data", "subset"), names(mc), nomatch = 0L)
+  m <- match(c("formula", "data", "subset", "weights"), names(mc),
+    nomatch = 0L)
   mc <- mc[c(1L, m)]
   mc$drop.unused.levels <- TRUE
   formula <- interCheckMain(formula = formula)
@@ -472,10 +488,8 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE, data, subset,
   } else {
     vhet <- ~1
   }
-  formula <- formDist_sfacross(
-    udist = udist, formula = formula,
-    muhet = muhet, uhet = uhet, vhet = vhet
-  )
+  formula <- formDist_sfacross(udist = udist, formula = formula,
+    muhet = muhet, uhet = uhet, vhet = vhet)
   # Generate required datasets -------
   if (missing(data)) {
     data <- environment(formula)
@@ -496,18 +510,33 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE, data, subset,
   if (N == 0L) {
     stop("0 (non-NA) cases", call. = FALSE)
   }
+  wHvar <- as.vector(model.weights(mc))
+  if (length(wscale) != 1 || !is.logical(wscale[1])) {
+    stop("argument 'wscale' must be a single logical value",
+      call. = FALSE)
+  }
+  if (!is.null(wHvar)) {
+    if (!is.numeric(wHvar)) {
+      stop("'weights' must be a numeric vector", call. = FALSE)
+    } else {
+      if (any(wHvar < 0 | is.na(wHvar)))
+        stop("missing or negative weights not allowed",
+          call. = FALSE)
+    }
+    if (wscale) {
+      wHvar <- wHvar/sum(wHvar) * N
+    }
+  } else {
+    wHvar <- rep(1, N)
+  }
   if (length(Yvar) != nrow(Xvar)) {
     stop(paste("the number of observations of the dependent variable (",
       length(Yvar), ") must be the same to the number of observations of the exogenous variables (",
-      nrow(Xvar), ")",
-      sep = ""
-    ), call. = FALSE)
+      nrow(Xvar), ")", sep = ""), call. = FALSE)
   }
   if (udist %in% c("tnormal", "lognormal")) {
-    mtmuH <- delete.response(terms(formula,
-      data = data,
-      rhs = 2
-    ))
+    mtmuH <- delete.response(terms(formula, data = data,
+      rhs = 2))
     muHvar <- model.matrix(mtmuH, mc)
     muHvar <- muHvar[validObs, , drop = FALSE]
     nmuZUvar <- ncol(muHvar)
@@ -533,8 +562,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE, data, subset,
   if (length(S) != 1 || !(S %in% c(-1L, 1L))) {
     stop("argument 'S' must equal either 1 or -1: 1 for production or profit frontier
    and -1 for cost frontier",
-      call. = FALSE
-    )
+      call. = FALSE)
   }
   typeSfa <- if (S == 1L) {
     "Stochastic Production/Profit Frontier, e = v - u"
@@ -543,48 +571,38 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE, data, subset,
   }
   if (length(scaling) != 1 || !is.logical(scaling[1])) {
     stop("argument 'scaling' must be a single logical value",
-      call. = FALSE
-    )
+      call. = FALSE)
   }
   if (scaling) {
     if (udist != "tnormal") {
       stop("argument 'udist' must be 'tnormal' when scaling option is TRUE",
-        call. = FALSE
-      )
+        call. = FALSE)
     }
     if (nuZUvar != nmuZUvar) {
       stop("argument 'muhet' and 'uhet' must have the same length",
-        call. = FALSE
-      )
+        call. = FALSE)
     }
     if (!all(colnames(uHvar) == colnames(muHvar))) {
       stop("argument 'muhet' and 'uhet' must contain the same variables",
-        call. = FALSE
-      )
+        call. = FALSE)
     }
     if (nuZUvar == 1 || nmuZUvar == 1) {
-      if (attr(terms(muhet), "intercept") == 1 || attr(
-        terms(uhet),
-        "intercept"
-      ) == 1) {
+      if (attr(terms(muhet), "intercept") == 1 || attr(terms(uhet),
+        "intercept") == 1) {
         stop("at least one exogeneous variable must be provided for the scaling option",
-          call. = FALSE
-        )
+          call. = FALSE)
       }
     }
   }
   if (length(logDepVar) != 1 || !is.logical(logDepVar[1])) {
     stop("argument 'logDepVar' must be a single logical value",
-      call. = FALSE
-    )
+      call. = FALSE)
   }
   # Number of parameters -------
   nParm <- if (udist == "tnormal") {
     if (scaling) {
-      if (attr(terms(muhet), "intercept") == 1 || attr(
-        terms(uhet),
-        "intercept"
-      ) == 1) {
+      if (attr(terms(muhet), "intercept") == 1 || attr(terms(uhet),
+        "intercept") == 1) {
         nXvar + (nmuZUvar - 1) + 2 + nvZVvar
       } else {
         nXvar + nmuZUvar + 2 + nvZVvar
@@ -607,9 +625,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE, data, subset,
   if (!is.null(start)) {
     if (length(start) != nParm) {
       stop("Wrong number of initial values: model has ",
-        nParm, " parameters",
-        call. = FALSE
-      )
+        nParm, " parameters", call. = FALSE)
     }
   }
   if (nParm > N) {
@@ -617,52 +633,40 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE, data, subset,
   }
   # Check algorithms -------
   method <- tolower(method)
-  if (!(method %in% c(
-    "ucminf", "bfgs", "bhhh", "nr", "nm",
-    "sr1", "mla", "sparse", "nlminb"
-  ))) {
+  if (!(method %in% c("ucminf", "bfgs", "bhhh", "nr", "nm",
+    "sr1", "mla", "sparse", "nlminb"))) {
     stop("Unknown or non-available optimization algorithm: ",
-      paste(method),
-      call. = FALSE
-    )
+      paste(method), call. = FALSE)
   }
   # Check hessian type
-  if (length(hessianType) != 1 || !(hessianType %in% c(
-    1L,
-    2L, 3L
-  ))) {
+  if (length(hessianType) != 1 || !(hessianType %in% c(1L,
+    2L, 3L))) {
     stop("argument 'hessianType' must equal either 1 or 2 or 3",
-      call. = FALSE
-    )
+      call. = FALSE)
   }
   # Draws for SML -------
   if (udist %in% c("gamma", "lognormal", "weibull")) {
     if (!(simType %in% c("halton", "ghalton", "sobol", "uniform"))) {
       stop("Unknown or non-available random draws method",
-        call. = FALSE
-      )
+        call. = FALSE)
     }
     if (!is.numeric(Nsim) || length(Nsim) != 1) {
       stop("argument 'Nsim' must be a single numeric scalar",
-        call. = FALSE
-      )
+        call. = FALSE)
     }
     if (!is.numeric(burn) || length(burn) != 1) {
       stop("argument 'burn' must be a single numeric scalar",
-        call. = FALSE
-      )
+        call. = FALSE)
     }
     if (!is_prime(prime)) {
       stop("argument 'prime' must be a single prime number",
-        call. = FALSE
-      )
+        call. = FALSE)
     }
     if (length(antithetics) != 1 || !is.logical(antithetics[1])) {
       stop("argument 'antithetics' must be a single logical value",
-        call. = FALSE
-      )
+        call. = FALSE)
     }
-    if (antithetics && (Nsim %% 2) != 0) {
+    if (antithetics && (Nsim%%2) != 0) {
       Nsim <- Nsim + 1
     }
     simDist <- if (simType == "halton") {
@@ -675,23 +679,20 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE, data, subset,
           "Sobol"
         } else {
           if (simType == "uniform") {
-            "Uniform"
+          "Uniform"
           }
         }
       }
     }
     cat("Initialization of", Nsim, simDist, "draws per observation ...\n")
-    FiMat <- drawMat(
-      N = N, Nsim = Nsim, simType = simType,
+    FiMat <- drawMat(N = N, Nsim = Nsim, simType = simType,
       prime = prime, burn = burn + 1, antithetics = antithetics,
-      seed = seed
-    )
+      seed = seed)
   }
   # Other optimization options -------
   if (!is.numeric(itermax) || length(itermax) != 1) {
     stop("argument 'itermax' must be a single numeric scalar",
-      call. = FALSE
-    )
+      call. = FALSE)
   }
   if (itermax != round(itermax)) {
     stop("argument 'itermax' must be an integer", call. = FALSE)
@@ -702,8 +703,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE, data, subset,
   itermax <- as.integer(itermax)
   if (length(printInfo) != 1 || !is.logical(printInfo[1])) {
     stop("argument 'printInfo' must be a single logical value",
-      call. = FALSE
-    )
+      call. = FALSE)
   }
   if (!is.numeric(tol) || length(tol) != 1) {
     stop("argument 'tol' must be numeric", call. = FALSE)
@@ -725,27 +725,24 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE, data, subset,
   }
   if (!(qac %in% c("marquardt", "stephalving"))) {
     stop("argument 'qac' must be either 'marquardt' or 'stephalving'",
-      call. = FALSE
-    )
+      call. = FALSE)
   }
   # Step 1: OLS -------
   olsRes <- if (colnames(Xvar)[1] == "(Intercept)") {
     if (dim(Xvar)[2] == 1) {
       lm(Yvar ~ 1)
     } else {
-      lm(Yvar ~ ., data = as.data.frame(Xvar[, -1]))
+      lm(Yvar ~ ., data = as.data.frame(Xvar[, -1]), weights = wHvar)
     }
   } else {
-    lm(Yvar ~ -1 + ., data = as.data.frame(Xvar))
+    lm(Yvar ~ -1 + ., data = as.data.frame(Xvar), weights = wHvar)
   }
   if (any(is.na(olsRes$coefficients))) {
     stop("at least one of the OLS coefficients is NA: ",
       paste(colnames(Xvar)[is.na(olsRes$coefficients)],
-        collapse = ", "
-      ), "This may be due to a singular matrix
+        collapse = ", "), "This may be due to a singular matrix
    due to potential perfect multicollinearity",
-      call. = FALSE
-    )
+      call. = FALSE)
   }
   olsParam <- c(olsRes$coefficients)
   olsSigmasq <- summary(olsRes)$sigma^2
@@ -756,11 +753,10 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE, data, subset,
   } else {
     dataTable <- data.frame(IdObs = c(1:sum(validObs)))
   }
-  dataTable <- as_tibble(cbind(dataTable, data[validObs, all.vars(terms(formula))]))
-  dataTable <- mutate(dataTable,
-    olsResiduals = residuals(olsRes),
-    olsFitted = fitted(olsRes)
-  )
+  dataTable <- as_tibble(cbind(dataTable, data[, all.vars(terms(formula))],
+    weights = wHvar))
+  dataTable <- mutate(dataTable, olsResiduals = residuals(olsRes),
+    olsFitted = fitted(olsRes))
   olsSkew <- skewness(dataTable[["olsResiduals"]])
   olsM3Okay <- if (S * olsSkew < 0) {
     "Residuals have the expected skeweness"
@@ -774,159 +770,117 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE, data, subset,
       "left"
     }, "-skewed. This may indicate the absence of inefficiency or
   model misspecification or sample 'bad luck'",
-    call. = FALSE
-    )
+      call. = FALSE)
   }
-  CoelliM3Test <- c(z = moment(dataTable[["olsResiduals"]],
-    order = 3
-  ) / sqrt(6 * moment(dataTable[["olsResiduals"]],
-    order = 2
-  )^3 / N), p.value = 2 * pnorm(-abs(moment(dataTable[["olsResiduals"]],
-    order = 3
-  ) / sqrt(6 * moment(dataTable[["olsResiduals"]],
-    order = 2
-  )^3 / N))))
+  CoelliM3Test <- c(z = sum(dataTable[["olsResiduals"]]^3)/N/sqrt(6 *
+    (sum(dataTable[["olsResiduals"]]^2)/N)^3/N), p.value = 2 *
+    pnorm(-abs(sum(dataTable[["olsResiduals"]]^3)/N/sqrt(6 *
+      (sum(dataTable[["olsResiduals"]]^2)/N)^3/N))))
   AgostinoTest <- dagoTest(dataTable[["olsResiduals"]])
-    class(AgostinoTest) <- "dagoTest"
+  class(AgostinoTest) <- "dagoTest"
   # Step 2: MLE arguments -------
   FunArgs <- if (udist == "tnormal") {
     if (scaling) {
-      list(
-        start = start, olsParam = olsParam, dataTable = dataTable,
+      list(start = start, olsParam = olsParam, dataTable = dataTable,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-        S = S, method = method, printInfo = printInfo,
+        S = S, wHvar = wHvar, method = method, printInfo = printInfo,
         itermax = itermax, stepmax = stepmax, tol = tol,
         gradtol = gradtol, hessianType = hessianType,
-        qac = qac
-      )
+        qac = qac)
     } else {
-      list(
-        start = start, olsParam = olsParam, dataTable = dataTable,
+      list(start = start, olsParam = olsParam, dataTable = dataTable,
         nXvar = nXvar, nmuZUvar = nmuZUvar, nuZUvar = nuZUvar,
         nvZVvar = nvZVvar, muHvar = muHvar, uHvar = uHvar,
         vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
-        method = method, printInfo = printInfo, itermax = itermax,
-        stepmax = stepmax, tol = tol, gradtol = gradtol,
-        hessianType = hessianType, qac = qac
-      )
+        wHvar = wHvar, method = method, printInfo = printInfo,
+        itermax = itermax, stepmax = stepmax, tol = tol,
+        gradtol = gradtol, hessianType = hessianType,
+        qac = qac)
     }
   } else {
     if (udist == "lognormal") {
-      list(
-        start = start, olsParam = olsParam, dataTable = dataTable,
+      list(start = start, olsParam = olsParam, dataTable = dataTable,
         nXvar = nXvar, nmuZUvar = nmuZUvar, nuZUvar = nuZUvar,
         nvZVvar = nvZVvar, muHvar = muHvar, uHvar = uHvar,
         vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
-        N = N, FiMat = FiMat, method = method, printInfo = printInfo,
-        itermax = itermax, stepmax = stepmax, tol = tol,
-        gradtol = gradtol, hessianType = hessianType,
-        qac = qac
-      )
+        wHvar = wHvar, N = N, FiMat = FiMat, method = method,
+        printInfo = printInfo, itermax = itermax, stepmax = stepmax,
+        tol = tol, gradtol = gradtol, hessianType = hessianType,
+        qac = qac)
     } else {
       if (udist %in% c("gamma", "weibull")) {
-        list(
-          start = start, olsParam = olsParam, dataTable = dataTable,
+        list(start = start, olsParam = olsParam, dataTable = dataTable,
           nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
           uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
-          Xvar = Xvar, S = S, N = N, FiMat = FiMat, method = method,
+          Xvar = Xvar, S = S, wHvar = wHvar, N = N, FiMat = FiMat,
+          method = method, printInfo = printInfo, itermax = itermax,
+          stepmax = stepmax, tol = tol, gradtol = gradtol,
+          hessianType = hessianType, qac = qac)
+      } else {
+        list(start = start, olsParam = olsParam, dataTable = dataTable,
+          nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+          uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
+          Xvar = Xvar, S = S, wHvar = wHvar, method = method,
           printInfo = printInfo, itermax = itermax, stepmax = stepmax,
           tol = tol, gradtol = gradtol, hessianType = hessianType,
-          qac = qac
-        )
-      } else {
-        list(
-          start = start, olsParam = olsParam, dataTable = dataTable,
-          nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-          uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
-          Xvar = Xvar, S = S, method = method, printInfo = printInfo,
-          itermax = itermax, stepmax = stepmax, tol = tol,
-          gradtol = gradtol, hessianType = hessianType,
-          qac = qac
-        )
+          qac = qac)
       }
     }
   }
   ## MLE run -------
-  mleList <- tryCatch(switch(udist, hnormal = do.call(
-    halfnormAlgOpt,
-    FunArgs
-  ), exponential = do.call(exponormAlgOpt, FunArgs),
-  tnormal = if (scaling) {
-    do.call(truncnormscalAlgOpt, FunArgs)
-  } else {
-    do.call(
-      truncnormAlgOpt,
-      FunArgs
-    )
-  }, rayleigh = do.call(raynormAlgOpt, FunArgs),
-  gamma = do.call(gammanormAlgOpt, FunArgs), uniform = do.call(
-    uninormAlgOpt,
-    FunArgs
-  ), lognormal = do.call(lognormAlgOpt, FunArgs),
-  weibull = do.call(weibullnormAlgOpt, FunArgs), genexponential = do.call(
-    genexponormAlgOpt,
-    FunArgs
-  ), tslaplace = do.call(tslnormAlgOpt, FunArgs)
-  ),
-  error = function(e) e
-  )
+  mleList <- tryCatch(switch(udist, hnormal = do.call(halfnormAlgOpt,
+    FunArgs), exponential = do.call(exponormAlgOpt, FunArgs),
+    tnormal = if (scaling) {
+      do.call(truncnormscalAlgOpt, FunArgs)
+    } else {
+      do.call(truncnormAlgOpt, FunArgs)
+    }, rayleigh = do.call(raynormAlgOpt, FunArgs), gamma = do.call(gammanormAlgOpt,
+      FunArgs), uniform = do.call(uninormAlgOpt, FunArgs),
+    lognormal = do.call(lognormAlgOpt, FunArgs), weibull = do.call(weibullnormAlgOpt,
+      FunArgs), genexponential = do.call(genexponormAlgOpt,
+      FunArgs), tslaplace = do.call(tslnormAlgOpt, FunArgs)),
+    error = function(e) e)
   if (inherits(mleList, "error")) {
     stop("The current error occurs during optimization:\n",
-      mleList$message,
-      call. = FALSE
-    )
+      mleList$message, call. = FALSE)
   }
   # Inverse Hessian + other -------
-  mleList$invHessian <- vcovObj(
-    mleObj = mleList$mleObj, hessianType = hessianType,
-    method = method, nParm = nParm
-  )
+  mleList$invHessian <- vcovObj(mleObj = mleList$mleObj, hessianType = hessianType,
+    method = method, nParm = nParm)
   mleList <- c(mleList, if (method == "ucminf") {
-    list(
-      type = "ucminf max.", nIter = unname(mleList$mleObj$info["neval"]),
+    list(type = "ucminf max.", nIter = unname(mleList$mleObj$info["neval"]),
       status = mleList$mleObj$message, mleLoglik = -mleList$mleObj$value,
-      gradient = mleList$mleObj$gradient
-    )
+      gradient = mleList$mleObj$gradient)
   } else {
     if (method %in% c("bfgs", "bhhh", "nr", "nm")) {
-      list(
-        type = substr(mleList$mleObj$type, 1, 27), nIter = mleList$mleObj$iterations,
+      list(type = substr(mleList$mleObj$type, 1, 27), nIter = mleList$mleObj$iterations,
         status = mleList$mleObj$message, mleLoglik = mleList$mleObj$maximum,
-        gradient = mleList$mleObj$gradient
-      )
+        gradient = mleList$mleObj$gradient)
     } else {
       if (method == "sr1") {
-        list(
-          type = "SR1 max.", nIter = mleList$mleObj$iterations,
+        list(type = "SR1 max.", nIter = mleList$mleObj$iterations,
           status = mleList$mleObj$status, mleLoglik = -mleList$mleObj$fval,
-          gradient = mleList$mleObj$gradient
-        )
+          gradient = mleList$mleObj$gradient)
       } else {
         if (method == "mla") {
-          list(
-            type = "Lev. Marquardt max.", nIter = mleList$mleObj$ni,
-            status = switch(mleList$mleObj$istop, `1` = "convergence criteria were satisfied",
-              `2` = "maximum number of iterations was reached",
-              `4` = "algorithm encountered a problem in the function computation"
-            ),
-            mleLoglik = -mleList$mleObj$fn.value, gradient = mleList$mleObj$grad
-          )
+          list(type = "Lev. Marquardt max.", nIter = mleList$mleObj$ni,
+          statuS = S, wHvar = wHvarwitch(mleList$mleObj$istop,
+            `1` = "convergence criteria were satisfied",
+            `2` = "maximum number of iterations was reached",
+            `4` = "algorithm encountered a problem in the function computation"),
+          mleLoglik = -mleList$mleObj$fn.value, gradient = mleList$mleObj$grad)
         } else {
           if (method == "sparse") {
-            list(
-              type = "Sparse Hessian max.", nIter = mleList$mleObj$iterations,
-              status = mleList$mleObj$status, mleLoglik = -mleList$mleObj$fval,
-              gradient = mleList$mleObj$gradient
-            )
+          list(type = "Sparse Hessian max.", nIter = mleList$mleObj$iterations,
+            status = mleList$mleObj$status, mleLoglik = -mleList$mleObj$fval,
+            gradient = mleList$mleObj$gradient)
           } else {
-            if (method == "nlminb") {
-              list(
-                type = "nlminb max.", nIter = mleList$mleObj$iterations,
-                status = mleList$mleObj$message, mleLoglik = -mleList$mleObj$objective,
-                gradient = mleList$mleObj$gradient
-              )
-            }
+          if (method == "nlminb") {
+            list(type = "nlminb max.", nIter = mleList$mleObj$iterations,
+            status = mleList$mleObj$message, mleLoglik = -mleList$mleObj$objective,
+            gradient = mleList$mleObj$gradient)
+          }
           }
         }
       }
@@ -934,16 +888,12 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE, data, subset,
   })
   # quick renaming -------
   if (udist %in% c("tnormal", "lognormal")) {
-    names(mleList$startVal) <- fName_mu_sfacross(
-      Xvar = Xvar,
+    names(mleList$startVal) <- fName_mu_sfacross(Xvar = Xvar,
       udist = udist, muHvar = muHvar, uHvar = uHvar, vHvar = vHvar,
-      scaling = scaling
-    )
+      scaling = scaling)
   } else {
-    names(mleList$startVal) <- fName_uv_sfacross(
-      Xvar = Xvar,
-      udist = udist, uHvar = uHvar, vHvar = vHvar
-    )
+    names(mleList$startVal) <- fName_uv_sfacross(Xvar = Xvar,
+      udist = udist, uHvar = uHvar, vHvar = vHvar)
   }
   names(mleList$mlParam) <- names(mleList$startVal)
   rownames(mleList$invHessian) <- colnames(mleList$invHessian) <- names(mleList$mlParam)
@@ -951,14 +901,10 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE, data, subset,
   colnames(mleList$mleObj$gradL_OBS) <- names(mleList$mlParam)
   # Return object -------
   mlDate <- format(Sys.time(), "Model was estimated on : %b %a %d, %Y at %H:%M")
-  dataTable$mlResiduals <- Yvar - as.numeric(crossprod(
-    matrix(mleList$mlParam[1:nXvar]),
-    t(Xvar)
-  ))
-  dataTable$mlFitted <- as.numeric(crossprod(
-    matrix(mleList$mlParam[1:nXvar]),
-    t(Xvar)
-  ))
+  dataTable$mlResiduals <- Yvar - as.numeric(crossprod(matrix(mleList$mlParam[1:nXvar]),
+    t(Xvar)))
+  dataTable$mlFitted <- as.numeric(crossprod(matrix(mleList$mlParam[1:nXvar]),
+    t(Xvar)))
   dataTable$logL_OBS <- mleList$mleObj$logL_OBS
   returnObj <- list()
   returnObj$call <- cl
@@ -986,6 +932,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE, data, subset,
   returnObj$olsM3Okay <- olsM3Okay
   returnObj$CoelliM3Test <- CoelliM3Test
   returnObj$AgostinoTest <- AgostinoTest
+  returnObj$isWeights <- !all.equal(wHvar, rep(1, N))
   returnObj$optType <- mleList$type
   returnObj$nIter <- mleList$nIter
   returnObj$optStatus <- mleList$status
@@ -1015,7 +962,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE, data, subset,
   }
   rm(mleList)
   class(returnObj) <- "sfacross"
-  #print.sfacross(returnObj)
+  # print.sfacross(returnObj)
   return(returnObj)
 }
 
@@ -1024,12 +971,12 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE, data, subset,
 #' @export
 print.sfacross <- function(x, ...) {
   cat("Call:\n")
-  cat(deparse(x$call ))
+  cat(deparse(x$call))
   cat("\n\n")
   cat("Likelihood estimates using", x$optType, "\n")
   cat(sfadist(x$udist), "\n")
   cat("Status:", x$optStatus, "\n\n")
   cat(x$typeSfa, "\n")
- print.default(format(x$mlParam), print.gap = 2, quote = FALSE)
- invisible(x)
+  print.default(format(x$mlParam), print.gap = 2, quote = FALSE)
+  invisible(x)
 }

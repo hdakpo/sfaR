@@ -13,6 +13,8 @@ sfacross(
   logDepVar = TRUE,
   data,
   subset,
+  weights,
+  wscale = TRUE,
   S = 1L,
   udist = "hnormal",
   scaling = FALSE,
@@ -55,6 +57,14 @@ two-sided error variance (see section \sQuote{Details}).}
 
 \item{subset}{An optional vector specifying a subset of observations to be
 used in the optimization process.}
+
+\item{weights}{An optional vector of weights to be used for weighted log-likelihood.
+Should be \code{NULL} or numeric vector with positive values. When \code{NULL},
+a numeric vector of 1 is used.}
+
+\item{wscale}{Logical. When \code{weights} is not \code{NULL}, a scaling transformation
+is used such that the the \code{weights} sums to the sample size. Default \code{TRUE}.
+When \code{FALSE} no scaling is used.}
 
 \item{S}{If \code{S = 1} (default), a production (profit) frontier is
 estimated: \eqn{\epsilon_i = v_i-u_i}. If \code{S = -1}, a cost frontier is
@@ -201,7 +211,15 @@ and
 \deqn{\sigma_*^2 = \frac{\sigma_u^2 \sigma_v^2}{\sigma_u^2 + \sigma_v^2}}
 
 In the case of the half normal distribution the convolution is obtained by
-setting \eqn{\mu=0}.}
+setting \eqn{\mu=0}.
+
+\code{sfacross} allows for the maximization of weighted log-likelihood.
+When option \code{weights} is specified and \code{wscale = TRUE}, the weights
+is scaled as
+
+\Sexpr[results=rd, stage=build]{
+katex::math_to_rd('new_{weights} = sample_{size} \\\times \\\frac{old_{weights}}{\\\sum(old_{weights})}')
+}}
 }
 \value{
 \code{\link{sfacross}} returns a list of class \code{'sfacross'}
@@ -246,7 +264,8 @@ two-sided error term.}
 
 \item{dataTable}{A data frame (tibble format) containing information on data
 used for optimization along with residuals and fitted values of the OLS and
-M(S)L estimations, and the individual observation log-likelihood.}
+M(S)L estimations, and the individual observation log-likelihood. When \code{weights}
+is specified an additional variable is also provided in \code{dataTable}.}
 
 \item{olsParam}{Numeric vector. OLS estimates.}
 
@@ -266,6 +285,9 @@ estimation have the expected skewness.}
 
 \item{AgostinoTest}{D'Agostino's test for OLS residuals skewness. (See
 D'Agostino and Pearson, 1973).}
+
+\item{isWeights}{Logical. If \code{TRUE} weighted log-likelihood is
+maximized.}
 
 \item{optType}{Optimization algorithm used.}
 

@@ -42,6 +42,12 @@
 #' @param data The data frame containing the data.
 #' @param subset An optional vector specifying a subset of observations to be
 #' used in the optimization process.
+#' @param weights An optional vector of weights to be used for weighted log-likelihood.
+#' Should be \code{NULL} or numeric vector with positive values. When \code{NULL}, 
+#' a numeric vector of 1 is used.
+#' @param wscale Logical. When \code{weights} is not \code{NULL}, a scaling transformation
+#' is used such that the the \code{weights} sums to the sample size. Default \code{TRUE}.
+#' When \code{FALSE} no scaling is used.
 #' @param S If \code{S = 1} (default), a production (profit) frontier is
 #' estimated: \eqn{\epsilon_i = v_i-u_i}. If \code{S = -1}, a cost frontier is
 #' estimated: \eqn{\epsilon_i = v_i+u_i}.
@@ -164,6 +170,14 @@
 #' and \eqn{\delta} and \eqn{\phi} the coefficients.  In the case of
 #' heterogeneity in the truncated mean \eqn{\mu}, it is modelled as
 #' \eqn{\mu=\omega'Z_{\mu}}.
+#' 
+#' \code{sfacross} allows for the maximization of weighted log-likelihood.
+#' When option \code{weights} is specified and \code{wscale = TRUE}, the weights
+#' is scaled as 
+#' 
+#' \Sexpr[results=rd, stage=build]{
+#' katex::math_to_rd('new_{weights} = sample_{size} \\\times \\\frac{old_{weights}}{\\\sum(old_{weights})}')
+#' }
 #'
 #' @return \code{\link{lcmcross}} returns a list of class \code{'lcmcross'}
 #' containing the following elements:
@@ -203,12 +217,16 @@
 #'
 #' \item{dataTable}{A data frame (tibble format) containing information on data
 #' used for optimization along with residuals and fitted values of the OLS and
-#' ML estimations, and the individual observation log-likelihood.}
+#' ML estimations, and the individual observation log-likelihood. When \code{weights}
+#' is specified an additional variable is also provided in \code{dataTable}.}
 #'
 #' \item{InitHalf}{When \code{start = NULL}. Initial ML estimation with half
 #' normal distribution for the one-sided error term. Model to construct the
 #' starting values for the latent class estimation. Object of class
 #' \code{'maxLik'} and \code{'maxim'} returned.}
+#' 
+#' \item{isWeights}{Logical. If \code{TRUE} weighted log-likelihood is
+#' maximized.}
 #'
 #' \item{optType}{The optimization algorithm used.}
 #'
@@ -328,11 +346,11 @@
 #'
 #' @export
 lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
-  data, subset, S = 1L, udist = "hnormal", start = NULL, lcmClasses = 2,
-  method = "bfgs", hessianType = 1, itermax = 2000L, printInfo = FALSE,
-  tol = 1e-12, gradtol = 1e-06, stepmax = 0.1, qac = "marquardt",
-  initStart = FALSE, initAlg = "nlminb", initIter = 100, initFactorLB = 0.5,
-  initFactorUB = 1.5) {
+  data, subset, weights, wscale = TRUE, S = 1L, udist = "hnormal",
+  start = NULL, lcmClasses = 2, method = "bfgs", hessianType = 1,
+  itermax = 2000L, printInfo = FALSE, tol = 1e-12, gradtol = 1e-06,
+  stepmax = 0.1, qac = "marquardt", initStart = FALSE, initAlg = "nlminb",
+  initIter = 100, initFactorLB = 0.5, initFactorUB = 1.5) {
   # u distribution check -------
   udist <- tolower(udist)
   if (udist != "hnormal") {
@@ -345,7 +363,8 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
   }
   cl <- match.call()
   mc <- match.call(expand.dots = FALSE)
-  m <- match(c("formula", "data", "subset"), names(mc), nomatch = 0L)
+  m <- match(c("formula", "data", "subset", "weights"), names(mc),
+    nomatch = 0L)
   mc <- mc[c(1L, m)]
   mc$drop.unused.levels <- TRUE
   formula <- interCheckMain(formula = formula)
@@ -385,6 +404,25 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
   N <- nrow(Xvar)
   if (N == 0L) {
     stop("0 (non-NA) cases", call. = FALSE)
+  }
+  wHvar <- as.vector(model.weights(mc))
+  if (length(wscale) != 1 || !is.logical(wscale[1])) {
+    stop("argument 'wscale' must be a single logical value",
+      call. = FALSE)
+  }
+  if (!is.null(wHvar)) {
+    if (!is.numeric(wHvar)) {
+      stop("'weights' must be a numeric vector", call. = FALSE)
+    } else {
+      if (any(wHvar < 0 | is.na(wHvar)))
+        stop("missing or negative weights not allowed",
+          call. = FALSE)
+    }
+    if (wscale) {
+      wHvar <- wHvar/sum(wHvar) * N
+    }
+  } else {
+    wHvar <- rep(1, N)
   }
   if (length(Yvar) != nrow(Xvar)) {
     stop(paste("the number of observations of the dependent variable (",
@@ -441,8 +479,8 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
   }
   # Check algorithms -------
   method <- tolower(method)
-  if (!(method %in% c("ucminf", "bfgs", "bhhh", "nr",
-    "nm", "sr1", "mla", "sparse", "nlminb"))) {
+  if (!(method %in% c("ucminf", "bfgs", "bhhh", "nr", "nm",
+    "sr1", "mla", "sparse", "nlminb"))) {
     stop("Unknown or non-available optimization algorithm: ",
       paste(method), call. = FALSE)
   }
@@ -520,10 +558,10 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
     if (dim(Xvar)[2] == 1) {
       lm(Yvar ~ 1)
     } else {
-      lm(Yvar ~ ., data = as.data.frame(Xvar[, -1]))
+      lm(Yvar ~ ., data = as.data.frame(Xvar[, -1]), weights = wHvar)
     }
   } else {
-    lm(Yvar ~ -1 + ., data = as.data.frame(Xvar))
+    lm(Yvar ~ -1 + ., data = as.data.frame(Xvar), weights = wHvar)
   }
   if (any(is.na(olsRes$coefficients))) {
     stop("at least one of the OLS coefficients is NA: ",
@@ -538,7 +576,8 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
   } else {
     dataTable <- data.frame(IdObs = c(1:sum(validObs)))
   }
-  dataTable <- as_tibble(cbind(dataTable, data[validObs, all.vars(terms(formula))]))
+  dataTable <- as_tibble(cbind(dataTable, data[, all.vars(terms(formula))],
+    weights = wHvar))
   dataTable <- mutate(dataTable, olsResiduals = residuals(olsRes),
     olsFitted = fitted(olsRes))
   olsSkew <- skewness(dataTable[["olsResiduals"]])
@@ -555,7 +594,7 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
   FunArgs <- list(start = start, olsParam = olsParam, dataTable = dataTable,
     nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
     uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Zvar = Zvar,
-    nZHvar = nZHvar, Xvar = Xvar, S = S, method = method,
+    nZHvar = nZHvar, Xvar = Xvar, S = S, wHvar = wHvar, method = method,
     printInfo = printInfo, itermax = itermax, stepmax = stepmax,
     tol = tol, gradtol = gradtol, hessianType = hessianType,
     qac = qac, initStart = initStart, initAlg = initAlg,
@@ -589,7 +628,7 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
       } else {
         if (method == "mla") {
           list(type = "Levenberg-Marquardt maximization",
-          nIter = mleList$mleObj$ni, status = switch(mleList$mleObj$istop,
+          nIter = mleList$mleObj$ni, statuS = S, wHvar = wHvarwitch(mleList$mleObj$istop,
             `1` = "convergence criteria were satisfied",
             `2` = "maximum number of iterations was reached",
             `4` = "algorithm encountered a problem in the function computation"),
@@ -604,7 +643,7 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
             list(type = "nlminb maximization", nIter = mleList$mleObj$iterations,
             status = mleList$mleObj$message, mleLoglik = -mleList$mleObj$objective,
             gradient = mleList$mleObj$gradient)
-          } 
+          }
           }
         }
       }
@@ -692,6 +731,7 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
   if (is.null(start)) {
     returnObj$InitHalf <- mleList$InitHalf
   }
+  returnObj$isWeights <- !all.equal(wHvar, rep(1, N))
   returnObj$optType <- mleList$type
   returnObj$nIter <- mleList$nIter
   returnObj$initStart <- initStart

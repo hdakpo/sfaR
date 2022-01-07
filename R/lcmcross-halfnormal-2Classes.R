@@ -22,11 +22,12 @@
 #' @param Yvar vector of dependent variable
 #' @param Xvar matrix of main variables
 #' @param S integer for cost/prod estimation
+#' @param wHvar vector of weights (weighted likelihood)
 #' @param Zvar matrix of separating variables
 #' @param nZHvar number of separating variables
 #' @noRd
 cLCMhalfnormlike2C <- function(parm, nXvar, nuZUvar, nvZVvar,
-  uHvar, vHvar, Yvar, Xvar, S, Zvar, nZHvar) {
+  uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
   beta1 <- parm[1:(nXvar)]
   delta1 <- parm[(nXvar + 1):(nXvar + nuZUvar)]
   phi1 <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
@@ -56,7 +57,7 @@ cLCMhalfnormlike2C <- function(parm, nXvar, nuZUvar, nvZVvar,
   Probc1 <- exp(Wz)/(1 + exp(Wz))
   Probc2 <- 1 - Probc1
   L <- Probc1 * Pi1 + Probc2 * Pi2
-  ifelse(L <= 0, return(NA), return(log(L)))
+  ifelse(L <= 0, return(NA), return(wHvar * log(L)))
 }
 
 
@@ -72,6 +73,7 @@ cLCMhalfnormlike2C <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param Yvar vector of dependent variable
 #' @param Xvar matrix of main variables
 #' @param nXvar number of main variables (inputs + env. var)
+#' @param wHvar vector of weights (weighted likelihood)
 #' @param Zvar matrix of separating variables
 #' @param nZHvar number of separating variables
 #' @param printInfo logical print info during optimization
@@ -79,8 +81,8 @@ cLCMhalfnormlike2C <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param tol parameter tolerance
 #' @noRd
 csLCMfhalfnorm2C <- function(olsObj, epsiRes, nXvar, nuZUvar,
-  nvZVvar, uHvar, vHvar, Yvar, Xvar, S, Zvar, nZHvar, itermax,
-  printInfo, tol) {
+  nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar,
+  itermax, printInfo, tol) {
   cat("Initialization: SFA + lcm 2 classes halfnormal - normal distribution...\n")
   initHalf <- maxLik(logLik = chalfnormlike, start = csthalfnorm(olsObj = olsObj,
     epsiRes = epsiRes, S = S, nuZUvar = 1, uHvar = as.matrix(uHvar[,
@@ -89,7 +91,7 @@ csLCMfhalfnorm2C <- function(olsObj, epsiRes, nXvar, nuZUvar,
       printLevel = if (printInfo) 2 else 0, reltol = tol),
     nXvar = nXvar, nuZUvar = 1, nvZVvar = 1, uHvar = as.matrix(uHvar[,
       1]), vHvar = as.matrix(vHvar[, 1]), Yvar = Yvar,
-    Xvar = Xvar, S = S)
+    Xvar = Xvar, S = S, wHvar = wHvar)
   Esti <- initHalf$estimate
   StartVal <- c(Esti[1:(nXvar)], Esti[nXvar + 1], if (nuZUvar >
     1) rep(0, nuZUvar - 1), Esti[nXvar + 2], if (nvZVvar >
@@ -116,11 +118,12 @@ csLCMfhalfnorm2C <- function(olsObj, epsiRes, nXvar, nuZUvar,
 #' @param Yvar vector of dependent variable
 #' @param Xvar matrix of main variables
 #' @param S integer for cost/prod estimation
+#' @param wHvar vector of weights (weighted likelihood)
 #' @param Zvar matrix of separating variables
 #' @param nZHvar number of separating variables
 #' @noRd
 cgradLCMhalfnormlike2C <- function(parm, nXvar, nuZUvar, nvZVvar,
-  uHvar, vHvar, Yvar, Xvar, S, Zvar, nZHvar) {
+  uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
   beta1 <- parm[1:(nXvar)]
   delta1 <- parm[(nXvar + 1):(nXvar + nuZUvar)]
   phi1 <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
@@ -205,7 +208,7 @@ cgradLCMhalfnormlike2C <- function(parm, nXvar, nuZUvar, nvZVvar,
       sigx12/sigsq_2), FUN = "*"), sweep(vHvar, MARGIN = 1,
       STATS = 2 * (prC * exp(Wv2) * sigx13/sigsq_2), FUN = "*"),
     sweep(Zvar, MARGIN = 1, STATS = sigx15/sigx4, FUN = "*"))
-  return(gradll)
+  return(sweep(gradll, MARGIN = 1, STATS = wHvar, FUN = "*"))
 }
 
 # Hessian of the likelihood function ----------
@@ -219,11 +222,12 @@ cgradLCMhalfnormlike2C <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param Yvar vector of dependent variable
 #' @param Xvar matrix of main variables
 #' @param S integer for cost/prod estimation
+#' @param wHvar vector of weights (weighted likelihood)
 #' @param Zvar matrix of separating variables
 #' @param nZHvar number of separating variables
 #' @noRd
 chessLCMhalfnormlike2C <- function(parm, nXvar, nuZUvar, nvZVvar,
-  uHvar, vHvar, Yvar, Xvar, S, Zvar, nZHvar) {
+  uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
   beta1 <- parm[1:(nXvar)]
   delta1 <- parm[(nXvar + 1):(nXvar + nuZUvar)]
   phi1 <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
@@ -338,59 +342,61 @@ chessLCMhalfnormlike2C <- function(parm, nXvar, nuZUvar, nvZVvar,
     nZHvar, ncol = 2 * nXvar + 2 * nuZUvar + 2 * nvZVvar +
     nZHvar)
   hessll[1:nXvar, 1:nXvar] <- crossprod(sweep(Xvar, MARGIN = 1,
-    STATS = 2 * (S^2 * ((depsisq1 * sigx16 + S * sigx29/sqsq1)/sigx5 -
-      2 * (sigx1_1^2 * exp(Wz)/sigx5^2)) * exp(Wz)), FUN = "*"),
-    Xvar)
+    STATS = wHvar * 2 * (S^2 * ((depsisq1 * sigx16 + S *
+      sigx29/sqsq1)/sigx5 - 2 * (sigx1_1^2 * exp(Wz)/sigx5^2)) *
+      exp(Wz)), FUN = "*"), Xvar)
   hessll[1:nXvar, (nXvar + 1):(nXvar + nuZUvar)] <- crossprod(sweep(Xvar,
-    MARGIN = 1, STATS = 2 * (S * (((sigx31 + S * (sigx18 -
-      S * (sigx30) * dmusig1 * (depsisq1 * exp(Wu1)/exp(Wv1) +
+    MARGIN = 1, STATS = wHvar * 2 * (S * (((sigx31 + S *
+      (sigx18 - S * (sigx30) * dmusig1 * (depsisq1 * exp(Wu1)/exp(Wv1) +
         depsisq1) * (epsilon1)) * (epsilon1)/(sigma_sq1))/wzdeno -
       sigx19)/sigsq_1 - 2 * (sigx1_1 * exp(Wz) * sigx6/(sigsq_1^2 *
       wzdeno * (sigma_sq1)))) * exp(Wu1) * exp(Wz)), FUN = "*"),
     uHvar)
   hessll[1:nXvar, (nXvar + nuZUvar + 1):(nXvar + nuZUvar +
-    nvZVvar)] <- crossprod(sweep(Xvar, MARGIN = 1, STATS = 2 *
-    (S * (((S * (sigx18 + S * sigx3_1 * sigx29/sqsq1^2) *
-      (epsilon1)/(sigma_sq1) - sigx3_1 * dmusig1 * depsisq1 *
-      wusqx2)/wzdeno - sigx19)/sigsq_1 - 2 * (sigx1_1 *
-      exp(Wz) * sigx26/(sigsq_1^2 * wzdeno * (sigma_sq1)))) *
-      exp(Wv1) * exp(Wz)), FUN = "*"), vHvar)
+    nvZVvar)] <- crossprod(sweep(Xvar, MARGIN = 1, STATS = wHvar *
+    2 * (S * (((S * (sigx18 + S * sigx3_1 * sigx29/sqsq1^2) *
+    (epsilon1)/(sigma_sq1) - sigx3_1 * dmusig1 * depsisq1 *
+    wusqx2)/wzdeno - sigx19)/sigsq_1 - 2 * (sigx1_1 * exp(Wz) *
+    sigx26/(sigsq_1^2 * wzdeno * (sigma_sq1)))) * exp(Wv1) *
+    exp(Wz)), FUN = "*"), vHvar)
   hessll[1:nXvar, (nXvar + nuZUvar + nvZVvar + 1):(2 * nXvar +
     nuZUvar + nvZVvar)] <- crossprod(sweep(Xvar, MARGIN = 1,
     STATS = -(4 * (S^2 * prC * sigx1_1 * sigx1_2 * (sigma_sq2) *
       exp(Wz) * sqrt(sigma_sq2)/((s3q)^2 * wzdeno * (sigma_sq1) *
-      sqrt(sigma_sq1)))), FUN = "*"), Xvar)
+      sqrt(sigma_sq1)))) * wHvar, FUN = "*"), Xvar)
   hessll[1:nXvar, (2 * nXvar + nuZUvar + nvZVvar + 1):(2 *
     nXvar + 2 * nuZUvar + nvZVvar)] <- crossprod(sweep(Xvar,
     MARGIN = 1, STATS = -(4 * (S * prC * sigx1_1 * exp(Wu2) *
       exp(Wz) * sigx12 * sqrt(sigma_sq2)/(sigsq_2^2 * wzdeno *
-      (sigma_sq1) * sqrt(sigma_sq1)))), FUN = "*"), uHvar)
+      (sigma_sq1) * sqrt(sigma_sq1)))) * wHvar, FUN = "*"),
+    uHvar)
   hessll[1:nXvar, (2 * nXvar + 2 * nuZUvar + nvZVvar + 1):(2 *
     nXvar + 2 * nuZUvar + 2 * nvZVvar)] <- crossprod(sweep(Xvar,
     MARGIN = 1, STATS = -(4 * (S * prC * sigx1_1 * exp(Wv2) *
       exp(Wz) * sigx13 * sqrt(sigma_sq2)/(sigsq_2^2 * wzdeno *
-      (sigma_sq1) * sqrt(sigma_sq1)))), FUN = "*"), vHvar)
+      (sigma_sq1) * sqrt(sigma_sq1)))) * wHvar, FUN = "*"),
+    vHvar)
   hessll[1:nXvar, (2 * nXvar + 2 * nuZUvar + 2 * nvZVvar +
     1):(2 * nXvar + 2 * nuZUvar + 2 * nvZVvar + nZHvar)] <- crossprod(sweep(Xvar,
-    MARGIN = 1, STATS = S * (2 * sigx8 - 2 * (sigx15/(wzdeno *
+    MARGIN = 1, STATS = wHvar * S * (2 * sigx8 - 2 * (sigx15/(wzdeno *
       sigx4 * sqrt(sigma_sq1)))) * sigx1_1 * exp(Wz)/(sigx4 *
       (sigma_sq1)), FUN = "*"), Zvar)
   hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + 1):(nXvar +
-    nuZUvar)] <- crossprod(sweep(uHvar, MARGIN = 1, STATS = 2 *
-    (((exp(Wu1) * (S * (sigx20 - (0.5 * (S^2 * (sigx30) *
-      depsisq1 * (epsilon1)^2/(sigma_sq1)^2) - (((0.5 *
-      (wusq1) + 1 - 0.5 * (0.5 * (1 - wusq1) + wusq1)) *
-      (1 - wusq1) * exp(Wv1)/sigmastar1 + (2 - 2 * (sigx2_1^2 *
-      exp(Wu1) * (sigma_sq1)/sqsq1^2)) * sigmastar1)/sqsq1^2 +
-      S^2 * (sigx30)^2 * exp(Wu1) * (epsilon1)^2/sqsq1) *
-      depsisq1) * dmusig1) * (epsilon1)/wzdeno - sigx28) +
-      S * (0.5 * dpepsisq - sigx31) * (epsilon1)/wzdeno -
-      0.5 * wdpdsq)/sigsq_1 - sigx36 * exp(Wu1) * sigx6/sigsq_1^2) *
-      exp(Wu1) * exp(Wz)), FUN = "*"), uHvar)
+    nuZUvar)] <- crossprod(sweep(uHvar, MARGIN = 1, STATS = wHvar *
+    2 * (((exp(Wu1) * (S * (sigx20 - (0.5 * (S^2 * (sigx30) *
+    depsisq1 * (epsilon1)^2/(sigma_sq1)^2) - (((0.5 * (wusq1) +
+    1 - 0.5 * (0.5 * (1 - wusq1) + wusq1)) * (1 - wusq1) *
+    exp(Wv1)/sigmastar1 + (2 - 2 * (sigx2_1^2 * exp(Wu1) *
+    (sigma_sq1)/sqsq1^2)) * sigmastar1)/sqsq1^2 + S^2 * (sigx30)^2 *
+    exp(Wu1) * (epsilon1)^2/sqsq1) * depsisq1) * dmusig1) *
+    (epsilon1)/wzdeno - sigx28) + S * (0.5 * dpepsisq - sigx31) *
+    (epsilon1)/wzdeno - 0.5 * wdpdsq)/sigsq_1 - sigx36 *
+    exp(Wu1) * sigx6/sigsq_1^2) * exp(Wu1) * exp(Wz)), FUN = "*"),
+    uHvar)
   hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + nuZUvar +
     1):(nXvar + nuZUvar + nvZVvar)] <- crossprod(sweep(uHvar,
-    MARGIN = 1, STATS = 2 * (((S * (((((0.5 * ((1 - wusq1) *
-      exp(Wv1)) - S^2 * sigx3_1 * (sigx30) * exp(Wu1) *
+    MARGIN = 1, STATS = wHvar * 2 * (((S * (((((0.5 * ((1 -
+      wusq1) * exp(Wv1)) - S^2 * sigx3_1 * (sigx30) * exp(Wu1) *
       (epsilon1)^2)/(sigma_sq1) + 0.5 * ((wusq1 - 1) *
       wvsq1 + 1 - 0.5 * ((1 - wusq1) * (1 - wvsq1)))) *
       depsisq1/sigmastar1 + 0.5 * (S^2 * sigx3_1 * depsisq1 *
@@ -403,32 +409,32 @@ chessLCMhalfnormlike2C <- function(parm, nXvar, nuZUvar, nvZVvar,
     nvZVvar + 1):(2 * nXvar + nuZUvar + nvZVvar)] <- crossprod(sweep(uHvar,
     MARGIN = 1, STATS = -(4 * (S * prC * sigx1_2 * exp(Wu1) *
       (sigma_sq2) * exp(Wz) * sigx6 * sqrt(sigma_sq2)/((s3q)^2 *
-      sqrt(sigma_sq1)))), FUN = "*"), Xvar)
+      sqrt(sigma_sq1)))) * wHvar, FUN = "*"), Xvar)
   hessll[(nXvar + 1):(nXvar + nuZUvar), (2 * nXvar + nuZUvar +
     nvZVvar + 1):(2 * nXvar + 2 * nuZUvar + nvZVvar)] <- crossprod(sweep(uHvar,
     MARGIN = 1, STATS = -(4 * (prC * exp(Wu1) * exp(Wu2) *
       exp(Wz) * sigx6 * sigx12 * sqrt(sigma_sq2)/(sigsq_2^2 *
-      sqrt(sigma_sq1)))), FUN = "*"), uHvar)
+      sqrt(sigma_sq1)))) * wHvar, FUN = "*"), uHvar)
   hessll[(nXvar + 1):(nXvar + nuZUvar), (2 * nXvar + 2 * nuZUvar +
     nvZVvar + 1):(2 * nXvar + 2 * nuZUvar + 2 * nvZVvar)] <- crossprod(sweep(uHvar,
     MARGIN = 1, STATS = -(4 * (prC * exp(Wu1) * exp(Wv2) *
       exp(Wz) * sigx13 * sigx6 * sqrt(sigma_sq2)/(sigsq_2^2 *
-      sqrt(sigma_sq1)))), FUN = "*"), vHvar)
+      sqrt(sigma_sq1)))) * wHvar, FUN = "*"), vHvar)
   hessll[(nXvar + 1):(nXvar + nuZUvar), (2 * nXvar + 2 * nuZUvar +
     2 * nvZVvar + 1):(2 * nXvar + 2 * nuZUvar + 2 * nvZVvar +
-    nZHvar)] <- crossprod(sweep(uHvar, MARGIN = 1, STATS = (2 *
-    ((0.5 * (S^2 * sigx8 * depsisq1 * (epsilon1)^2/(sigma_sq1)^2) -
+    nZHvar)] <- crossprod(sweep(uHvar, MARGIN = 1, STATS = wHvar *
+    (2 * ((0.5 * (S^2 * sigx8 * depsisq1 * (epsilon1)^2/(sigma_sq1)^2) -
       ((0.5/sqrt(sigma_sq1) - wzdeno^2 * sqrt(sigma_sq1)/wzdsq1^2) *
         exp(Wz) + 0.5 * (wzdeno/sqrt(sigma_sq1))) * depsisq1/wzdsq1^2) *
       pmusig1 - S * sigx8 * sigx31 * (epsilon1)) - 2 *
-    (sigx15 * sigx6/sigsq_1)) * exp(Wu1) * exp(Wz)/sigx4,
+      (sigx15 * sigx6/sigsq_1)) * exp(Wu1) * exp(Wz)/sigx4,
     FUN = "*"), Zvar)
   hessll[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar),
     (nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)] <- crossprod(sweep(vHvar,
-    MARGIN = 1, STATS = 2 * (((S * ((((0.5 * (wvsq1) - 0.5 *
-      (0.5 * (1 - wvsq1) + wvsq1)) * (1 - wvsq1) + S^2 *
-      sigx3_1^2 * exp(Wu1) * exp(Wv1) * (epsilon1)^2/(sqsq1^2 *
-      (sigma_sq1))) * depsisq1 * exp(Wu1)/sigmastar1 +
+    MARGIN = 1, STATS = wHvar * 2 * (((S * ((((0.5 * (wvsq1) -
+      0.5 * (0.5 * (1 - wvsq1) + wvsq1)) * (1 - wvsq1) +
+      S^2 * sigx3_1^2 * exp(Wu1) * exp(Wv1) * (epsilon1)^2/(sqsq1^2 *
+        (sigma_sq1))) * depsisq1 * exp(Wu1)/sigmastar1 +
       ((0.5 * (S^2 * depsisq1 * (epsilon1)^2/(sigma_sq1)^2) -
         2 * (sigx3_1 * depsisq1 * (sigma_sq1) * sigmastar1/sqsq1^2)) *
         exp(Wv1) + depsisq1) * sigx3_1) * dmusig1 * wusqx2 +
@@ -445,25 +451,25 @@ chessLCMhalfnormlike2C <- function(parm, nXvar, nuZUvar, nvZVvar,
     (nXvar + nuZUvar + nvZVvar + 1):(2 * nXvar + nuZUvar +
       nvZVvar)] <- crossprod(sweep(vHvar, MARGIN = 1, STATS = -(4 *
     (S * prC * sigx1_2 * (sigma_sq2) * exp(Wv1) * exp(Wz) *
-      sigx26 * sqrt(sigma_sq2)/((s3q)^2 * sqrt(sigma_sq1)))),
-    FUN = "*"), Xvar)
+      sigx26 * sqrt(sigma_sq2)/((s3q)^2 * sqrt(sigma_sq1)))) *
+    wHvar, FUN = "*"), Xvar)
   hessll[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar),
     (2 * nXvar + nuZUvar + nvZVvar + 1):(2 * nXvar + 2 *
       nuZUvar + nvZVvar)] <- crossprod(sweep(vHvar, MARGIN = 1,
     STATS = -(4 * (prC * exp(Wu2) * exp(Wv1) * exp(Wz) *
-      sigx26 * sigx12 * sqrt(sigma_sq2)/(sigsq_2^2 * sqrt(sigma_sq1)))),
-    FUN = "*"), uHvar)
+      sigx26 * sigx12 * sqrt(sigma_sq2)/(sigsq_2^2 * sqrt(sigma_sq1)))) *
+      wHvar, FUN = "*"), uHvar)
   hessll[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar),
     (2 * nXvar + 2 * nuZUvar + nvZVvar + 1):(2 * nXvar +
       2 * nuZUvar + 2 * nvZVvar)] <- crossprod(sweep(vHvar,
     MARGIN = 1, STATS = -(4 * (prC * exp(Wv1) * exp(Wv2) *
       exp(Wz) * sigx26 * sigx13 * sqrt(sigma_sq2)/(sigsq_2^2 *
-      sqrt(sigma_sq1)))), FUN = "*"), vHvar)
+      sqrt(sigma_sq1)))) * wHvar, FUN = "*"), vHvar)
   hessll[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar),
     (2 * nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(2 * nXvar +
       2 * nuZUvar + 2 * nvZVvar + nZHvar)] <- crossprod(sweep(vHvar,
-    MARGIN = 1, STATS = (2 * ((0.5 * (S^2 * sigx8 * depsisq1 *
-      (epsilon1)^2/(sigma_sq1)^2) - ((0.5/sqrt(sigma_sq1) -
+    MARGIN = 1, STATS = wHvar * (2 * ((0.5 * (S^2 * sigx8 *
+      depsisq1 * (epsilon1)^2/(sigma_sq1)^2) - ((0.5/sqrt(sigma_sq1) -
       wzdeno^2 * sqrt(sigma_sq1)/wzdsq1^2) * exp(Wz) +
       0.5 * (wzdeno/sqrt(sigma_sq1))) * depsisq1/wzdsq1^2) *
       pmusig1 + S * sigx3_1 * sigx8 * dmusig1 * depsisq1 *
@@ -472,23 +478,23 @@ chessLCMhalfnormlike2C <- function(parm, nXvar, nuZUvar, nvZVvar,
   hessll[(nXvar + nuZUvar + nvZVvar + 1):(2 * nXvar + nuZUvar +
     nvZVvar), (nXvar + nuZUvar + nvZVvar + 1):(2 * nXvar +
     nuZUvar + nvZVvar)] <- crossprod(sweep(Xvar, MARGIN = 1,
-    STATS = 2 * (S^2 * ((depsisq2 * sigx25 + S * sigx32/sqsq2)/(s3q) -
-      2 * (prC * sigx1_2^2/(s3q)^2)) * prC), FUN = "*"),
-    Xvar)
+    STATS = wHvar * 2 * (S^2 * ((depsisq2 * sigx25 + S *
+      sigx32/sqsq2)/(s3q) - 2 * (prC * sigx1_2^2/(s3q)^2)) *
+      prC), FUN = "*"), Xvar)
   hessll[(nXvar + nuZUvar + nvZVvar + 1):(2 * nXvar + nuZUvar +
     nvZVvar), (2 * nXvar + nuZUvar + nvZVvar + 1):(2 * nXvar +
     2 * nuZUvar + nvZVvar)] <- crossprod(sweep(Xvar, MARGIN = 1,
-    STATS = 2 * (S * ((sigx10 * dmusig2 * depsisq2 + (S *
-      ((0.5 * sigx25 - 0.5 * pmusig2) * depsisq2/(sigma_sq2) -
+    STATS = wHvar * 2 * (S * ((sigx10 * dmusig2 * depsisq2 +
+      (S * ((0.5 * sigx25 - 0.5 * pmusig2) * depsisq2/(sigma_sq2) -
         S * sigx10 * dmusig2 * (depsisq2 * exp(Wu2)/exp(Wv2) +
           depsisq2) * (epsilon2)) * (epsilon2) - 0.5 *
-      (sigx1_2/(sigma_sq2)))/(sigma_sq2))/sigsq_2 - 2 *
-      (prC * sigx1_2 * sigx12/(sigsq_2^2 * (sigma_sq2)))) *
+        (sigx1_2/(sigma_sq2)))/(sigma_sq2))/sigsq_2 -
+      2 * (prC * sigx1_2 * sigx12/(sigsq_2^2 * (sigma_sq2)))) *
       prC * exp(Wu2)), FUN = "*"), uHvar)
   hessll[(nXvar + nuZUvar + nvZVvar + 1):(2 * nXvar + nuZUvar +
     nvZVvar), (2 * nXvar + 2 * nuZUvar + nvZVvar + 1):(2 *
     nXvar + 2 * nuZUvar + 2 * nvZVvar)] <- crossprod(sweep(Xvar,
-    MARGIN = 1, STATS = 2 * (S * (((S * ((0.5 * sigx25 -
+    MARGIN = 1, STATS = wHvar * 2 * (S * (((S * ((0.5 * sigx25 -
       0.5 * pmusig2) * depsisq2/(sigma_sq2) + S * sigx3_2 *
       sigx32/sqsq2^2) * (epsilon2) - 0.5 * (sigx1_2/(sigma_sq2)))/(sigma_sq2) -
       sigx3_2 * dmusig2 * depsisq2 * exp(Wu2)/sqsq2^2)/sigsq_2 -
@@ -498,12 +504,12 @@ chessLCMhalfnormlike2C <- function(parm, nXvar, nuZUvar, nvZVvar,
     nvZVvar), (2 * nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(2 *
     nXvar + 2 * nuZUvar + 2 * nvZVvar + nZHvar)] <- crossprod(sweep(Xvar,
     MARGIN = 1, STATS = -(S * prC * (2 * ((2 * (sigx9) -
-      2 * sigx14)/sigx4) + 2/wzdeno) * sigx1_2 * exp(Wz)/(s3q)),
-    FUN = "*"), Zvar)
+      2 * sigx14)/sigx4) + 2/wzdeno) * sigx1_2 * exp(Wz)/(s3q)) *
+      wHvar, FUN = "*"), Zvar)
   hessll[(2 * nXvar + nuZUvar + nvZVvar + 1):(2 * nXvar + 2 *
     nuZUvar + nvZVvar), (2 * nXvar + nuZUvar + nvZVvar +
     1):(2 * nXvar + 2 * nuZUvar + nvZVvar)] <- crossprod(sweep(uHvar,
-    MARGIN = 1, STATS = 2 * (((exp(Wu2) * (S * (sigx35 -
+    MARGIN = 1, STATS = wHvar * 2 * (((exp(Wu2) * (S * (sigx35 -
       (0.5 * (S^2 * sigx10 * sigx27) - (((0.5 * (wusq2) +
         1 - 0.5 * (0.5 * (1 - wusq2) + wusq2)) * (1 -
         wusq2) * exp(Wv2)/sigmastar2 + (2 - 2 * (sigx2_2^2 *
@@ -516,29 +522,30 @@ chessLCMhalfnormlike2C <- function(parm, nXvar, nuZUvar, nvZVvar,
   hessll[(2 * nXvar + nuZUvar + nvZVvar + 1):(2 * nXvar + 2 *
     nuZUvar + nvZVvar), (2 * nXvar + 2 * nuZUvar + nvZVvar +
     1):(2 * nXvar + 2 * nuZUvar + 2 * nvZVvar)] <- crossprod(sweep(uHvar,
-    MARGIN = 1, STATS = 2 * (((S * (((((0.5 * ((1 - wusq2) *
-      exp(Wv2)) - S^2 * sigx3_2 * sigx10 * exp(Wu2) * (epsilon2)^2)/(sigma_sq2) +
-      0.5 * ((wusq2 - 1) * wvsq2 + 1 - 0.5 * ((1 - wusq2) *
-        (1 - wvsq2)))) * depsisq2/sigmastar2 + 0.5 *
-      (S^2 * sigx3_2 * sigx27)) * exp(Wu2) + sigx3_2 *
-      (1 - 2 * (sigx2_2 * exp(Wu2) * (sigma_sq2) * sigmastar2/sqsq2^2)) *
-      depsisq2) * dmusig2/sqsq2^2 + sigx35) * (epsilon2) -
-      sigx24)/sigsq_2 - sigx33 * sigx13/sigsq_2^2) * prC *
-      exp(Wu2) * exp(Wv2)), FUN = "*"), vHvar)
+    MARGIN = 1, STATS = wHvar * 2 * (((S * (((((0.5 * ((1 -
+      wusq2) * exp(Wv2)) - S^2 * sigx3_2 * sigx10 * exp(Wu2) *
+      (epsilon2)^2)/(sigma_sq2) + 0.5 * ((wusq2 - 1) *
+      wvsq2 + 1 - 0.5 * ((1 - wusq2) * (1 - wvsq2)))) *
+      depsisq2/sigmastar2 + 0.5 * (S^2 * sigx3_2 * sigx27)) *
+      exp(Wu2) + sigx3_2 * (1 - 2 * (sigx2_2 * exp(Wu2) *
+      (sigma_sq2) * sigmastar2/sqsq2^2)) * depsisq2) *
+      dmusig2/sqsq2^2 + sigx35) * (epsilon2) - sigx24)/sigsq_2 -
+      sigx33 * sigx13/sigsq_2^2) * prC * exp(Wu2) * exp(Wv2)),
+    FUN = "*"), vHvar)
   hessll[(2 * nXvar + nuZUvar + nvZVvar + 1):(2 * nXvar + 2 *
     nuZUvar + nvZVvar), (2 * nXvar + 2 * nuZUvar + 2 * nvZVvar +
     1):(2 * nXvar + 2 * nuZUvar + 2 * nvZVvar + nZHvar)] <- crossprod(sweep(uHvar,
     MARGIN = 1, STATS = -(prC * (2 * ((2 * (sigx9) - 2 *
       sigx14) * sigx12/sigx4) + 2 * (S * sigx23 * (epsilon2)/wzdeno -
-      sigx21)) * exp(Wu2) * exp(Wz)/sigsq_2), FUN = "*"),
+      sigx21)) * exp(Wu2) * exp(Wz)/sigsq_2) * wHvar, FUN = "*"),
     Zvar)
   hessll[(2 * nXvar + 2 * nuZUvar + nvZVvar + 1):(2 * nXvar +
     2 * nuZUvar + 2 * nvZVvar), (2 * nXvar + 2 * nuZUvar +
     nvZVvar + 1):(2 * nXvar + 2 * nuZUvar + 2 * nvZVvar)] <- crossprod(sweep(vHvar,
-    MARGIN = 1, STATS = 2 * (((S * ((((0.5 * (wvsq2) - 0.5 *
-      (0.5 * (1 - wvsq2) + wvsq2)) * (1 - wvsq2) + S^2 *
-      sigx3_2^2 * exp(Wu2) * exp(Wv2) * (epsilon2)^2/(sqsq2^2 *
-      (sigma_sq2))) * depsisq2 * exp(Wu2)/sigmastar2 +
+    MARGIN = 1, STATS = wHvar * 2 * (((S * ((((0.5 * (wvsq2) -
+      0.5 * (0.5 * (1 - wvsq2) + wvsq2)) * (1 - wvsq2) +
+      S^2 * sigx3_2^2 * exp(Wu2) * exp(Wv2) * (epsilon2)^2/(sqsq2^2 *
+        (sigma_sq2))) * depsisq2 * exp(Wu2)/sigmastar2 +
       ((0.5 * (S^2 * sigx27) - 2 * (sigx3_2 * depsisq2 *
         (sigma_sq2) * sigmastar2/sqsq2^2)) * exp(Wv2) +
         depsisq2) * sigx3_2) * dmusig2 * exp(Wu2)/sqsq2^2 +
@@ -557,12 +564,12 @@ chessLCMhalfnormlike2C <- function(parm, nXvar, nuZUvar, nvZVvar,
     nZHvar)] <- crossprod(sweep(vHvar, MARGIN = 1, STATS = -(prC *
     (2 * ((2 * (sigx9) - 2 * sigx14) * sigx13/sigx4) + 2 *
       (S * sigx22 * (epsilon2)/wzdeno - sigx21)) * exp(Wv2) *
-    exp(Wz)/sigsq_2), FUN = "*"), Zvar)
+    exp(Wz)/sigsq_2) * wHvar, FUN = "*"), Zvar)
   hessll[(2 * nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(2 * nXvar +
     2 * nuZUvar + 2 * nvZVvar + nZHvar), (2 * nXvar + 2 *
     nuZUvar + 2 * nvZVvar + 1):(2 * nXvar + 2 * nuZUvar +
     2 * nvZVvar + nZHvar)] <- crossprod(sweep(Zvar, MARGIN = 1,
-    STATS = ((2 * (prC * (1/(wzdeno^2 * sqrt(sigma_sq2)) +
+    STATS = wHvar * ((2 * (prC * (1/(wzdeno^2 * sqrt(sigma_sq2)) +
       sqrt(sigma_sq2)/wzdsq2^2) * depsisq2 * pmusig2) -
       ((2 * (sigx9) - 2 * sigx14)^2/sigx4 + 2 * ((2 - 2 *
         (wzdeno * (sigma_sq1) * exp(Wz)/wzdsq1^2)) *
@@ -589,6 +596,7 @@ chessLCMhalfnormlike2C <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param Zvar matrix of separating variables
 #' @param nZHvar number of separating variables
 #' @param S integer for cost/prod estimation
+#' @param wHvar vector of weights (weighted likelihood)
 #' @param method algorithm for solver
 #' @param printInfo logical print info during optimization
 #' @param itermax maximum iteration
@@ -603,18 +611,19 @@ chessLCMhalfnormlike2C <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param initFactorLB jump-start lower bound
 #' @param initFactorUB jump-start upper bound
 #' @noRd
-LCM2ChnormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
-  uHvar, nuZUvar, vHvar, nvZVvar, Zvar, nZHvar, Yvar, Xvar,
-  method, printInfo, itermax, stepmax, tol, gradtol, hessianType,
-  qac, initStart, initAlg, initIter, initFactorLB, initFactorUB) {
+LCM2ChnormAlgOpt <- function(start, olsParam, dataTable, S, wHvar,
+  nXvar, uHvar, nuZUvar, vHvar, nvZVvar, Zvar, nZHvar, Yvar,
+  Xvar, method, printInfo, itermax, stepmax, tol, gradtol,
+  hessianType, qac, initStart, initAlg, initIter, initFactorLB,
+  initFactorUB) {
   if (!is.null(start)) {
     startVal <- start
   } else {
     start_st <- csLCMfhalfnorm2C(olsObj = olsParam, epsiRes = dataTable[["olsResiduals"]],
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S, Zvar = Zvar, nZHvar = nZHvar, itermax = itermax,
-      tol = tol, printInfo = printInfo)
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar,
+      itermax = itermax, tol = tol, printInfo = printInfo)
     InitHalf <- start_st$initHalf
     startVal <- start_st$StartVal
   }
@@ -629,98 +638,109 @@ LCM2ChnormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
     initModel <- nlminb(start = startVal, objective = function(parm) -sum(cLCMhalfnormlike2C(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S, Zvar = Zvar, nZHvar = nZHvar)), gradient = function(parm) -colSums(cgradLCMhalfnormlike2C(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S, Zvar = Zvar, nZHvar = nZHvar)), hessian = function(parm) -chessLCMhalfnormlike2C(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S, Zvar = Zvar, nZHvar = nZHvar), lower = startMat[,
-      6], upper = startMat[, 7], control = list(iter.max = initIter,
-      trace = if (printInfo) 1 else 0, eval.max = initIter,
-      rel.tol = tol, x.tol = tol))
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      gradient = function(parm) -colSums(cgradLCMhalfnormlike2C(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      hessian = function(parm) -chessLCMhalfnormlike2C(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
+      lower = startMat[, 6], upper = startMat[, 7], control = list(iter.max = initIter,
+        trace = if (printInfo) 1 else 0, eval.max = initIter,
+        rel.tol = tol, x.tol = tol))
     startVal <- initModel$par
   }
   startLoglik <- sum(cLCMhalfnormlike2C(startVal, nXvar = nXvar,
     nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
-    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, Zvar = Zvar,
-    nZHvar = nZHvar))
+    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar,
+    Zvar = Zvar, nZHvar = nZHvar))
   if (method %in% c("bfgs", "bhhh", "nr", "nm")) {
     maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
       bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
       nm = function(...) maxNM(...))
     method <- "maxLikAlgo"
   }
+  cat("LCM 2 Classes Estimation...\n")
   mleObj <- switch(method, ucminf = ucminf(par = startVal,
     fn = function(parm) -sum(cLCMhalfnormlike2C(parm, nXvar = nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
-      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, Zvar = Zvar,
-      nZHvar = nZHvar)), gr = function(parm) -colSums(cgradLCMhalfnormlike2C(parm,
+      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar,
+      Zvar = Zvar, nZHvar = nZHvar)), gr = function(parm) -colSums(cgradLCMhalfnormlike2C(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S, Zvar = Zvar, nZHvar = nZHvar)), hessian = 0,
-    control = list(trace = if (printInfo) 1 else 0, maxeval = itermax,
-      stepmax = stepmax, xtol = tol, grtol = gradtol)),
-    maxLikAlgo = maxRoutine(fn = cLCMhalfnormlike2C, grad = cgradLCMhalfnormlike2C,
-      hess = chessLCMhalfnormlike2C, start = startVal,
-      finalHessian = if (hessianType == 2) "bhhh" else TRUE,
-      control = list(printLevel = if (printInfo) 2 else 0,
-        iterlim = itermax, reltol = tol, tol = tol, qac = qac),
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+    hessian = 0, control = list(trace = if (printInfo) 1 else 0,
+      maxeval = itermax, stepmax = stepmax, xtol = tol,
+      grtol = gradtol)), maxLikAlgo = maxRoutine(fn = cLCMhalfnormlike2C,
+    grad = cgradLCMhalfnormlike2C, hess = chessLCMhalfnormlike2C,
+    start = startVal, finalHessian = if (hessianType == 2) "bhhh" else TRUE,
+    control = list(printLevel = if (printInfo) 2 else 0,
+      iterlim = itermax, reltol = tol, tol = tol, qac = qac),
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
+    sr1 = trust.optim(x = startVal, fn = function(parm) -sum(cLCMhalfnormlike2C(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S, Zvar = Zvar, nZHvar = nZHvar), sr1 = trust.optim(x = startVal,
-      fn = function(parm) -sum(cLCMhalfnormlike2C(parm,
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      gr = function(parm) -colSums(cgradLCMhalfnormlike2C(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-        S = S, Zvar = Zvar, nZHvar = nZHvar)), gr = function(parm) -colSums(cgradLCMhalfnormlike2C(parm,
-        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-        S = S, Zvar = Zvar, nZHvar = nZHvar)), method = "SR1",
-      control = list(maxit = itermax, cgtol = gradtol,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
         stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
         report.precision = 1L)), sparse = trust.optim(x = startVal,
       fn = function(parm) -sum(cLCMhalfnormlike2C(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-        S = S, Zvar = Zvar, nZHvar = nZHvar)), gr = function(parm) -colSums(cgradLCMhalfnormlike2C(parm,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      gr = function(parm) -colSums(cgradLCMhalfnormlike2C(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-        S = S, Zvar = Zvar, nZHvar = nZHvar)), hs = function(parm) as(-chessLCMhalfnormlike2C(parm,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      hs = function(parm) as(-chessLCMhalfnormlike2C(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-        S = S, Zvar = Zvar, nZHvar = nZHvar), "dgCMatrix"),
-      method = "Sparse", control = list(maxit = itermax,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
+        "dgCMatrix"), method = "Sparse", control = list(maxit = itermax,
         cgtol = gradtol, stop.trust.radius = tol, prec = tol,
         report.level = if (printInfo) 2 else 0, report.precision = 1L,
         preconditioner = 1L)), mla = mla(b = startVal,
       fn = function(parm) -sum(cLCMhalfnormlike2C(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-        S = S, Zvar = Zvar, nZHvar = nZHvar)), gr = function(parm) -colSums(cgradLCMhalfnormlike2C(parm,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      gr = function(parm) -colSums(cgradLCMhalfnormlike2C(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-        S = S, Zvar = Zvar, nZHvar = nZHvar)), hess = function(parm) -chessLCMhalfnormlike2C(parm,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      hess = function(parm) -chessLCMhalfnormlike2C(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-        S = S, Zvar = Zvar, nZHvar = nZHvar), print.info = printInfo,
-      maxiter = itermax, epsa = gradtol, epsb = gradtol),
-    nlminb = nlminb(start = startVal, objective = function(parm) -sum(cLCMhalfnormlike2C(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S, Zvar = Zvar, nZHvar = nZHvar)), gradient = function(parm) -colSums(cgradLCMhalfnormlike2C(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S, Zvar = Zvar, nZHvar = nZHvar)), hessian = function(parm) -chessLCMhalfnormlike2C(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S, Zvar = Zvar, nZHvar = nZHvar), control = list(iter.max = itermax,
-      trace = if (printInfo) 1 else 0, eval.max = itermax,
-      rel.tol = tol, x.tol = tol)))
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
+      print.info = printInfo, maxiter = itermax, epsa = gradtol,
+      epsb = gradtol), nlminb = nlminb(start = startVal,
+      objective = function(parm) -sum(cLCMhalfnormlike2C(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      gradient = function(parm) -colSums(cgradLCMhalfnormlike2C(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      hessian = function(parm) -chessLCMhalfnormlike2C(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
+      control = list(iter.max = itermax, trace = if (printInfo) 1 else 0,
+        eval.max = itermax, rel.tol = tol, x.tol = tol)))
   if (method %in% c("ucminf", "nlminb")) {
     mleObj$gradient <- colSums(cgradLCMhalfnormlike2C(mleObj$par,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S, Zvar = Zvar, nZHvar = nZHvar))
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar))
   }
   mlParam <- if (method %in% c("ucminf", "nlminb")) {
     mleObj$par
@@ -743,21 +763,21 @@ LCM2ChnormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       mleObj$hessian <- chessLCMhalfnormlike2C(parm = mleObj$par,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-        S = S, Zvar = Zvar, nZHvar = nZHvar)
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
     if (method == "sr1")
       mleObj$hessian <- chessLCMhalfnormlike2C(parm = mleObj$solution,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-        S = S, Zvar = Zvar, nZHvar = nZHvar)
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
   }
   mleObj$logL_OBS <- cLCMhalfnormlike2C(parm = mlParam, nXvar = nXvar,
     nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
-    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, Zvar = Zvar,
-    nZHvar = nZHvar)
+    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar,
+    Zvar = Zvar, nZHvar = nZHvar)
   mleObj$gradL_OBS <- cgradLCMhalfnormlike2C(parm = mlParam,
     nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
     uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-    S = S, Zvar = Zvar, nZHvar = nZHvar)
+    S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
   return(list(startVal = startVal, startLoglik = startLoglik,
     mleObj = mleObj, mlParam = mlParam, if (is.null(start)) InitHalf = InitHalf))
 }

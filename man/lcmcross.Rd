@@ -13,6 +13,8 @@ lcmcross(
   logDepVar = TRUE,
   data,
   subset,
+  weights,
+  wscale = TRUE,
   S = 1L,
   udist = "hnormal",
   start = NULL,
@@ -54,6 +56,14 @@ the construction of the classes.}
 
 \item{subset}{An optional vector specifying a subset of observations to be
 used in the optimization process.}
+
+\item{weights}{An optional vector of weights to be used for weighted log-likelihood.
+Should be \code{NULL} or numeric vector with positive values. When \code{NULL},
+a numeric vector of 1 is used.}
+
+\item{wscale}{Logical. When \code{weights} is not \code{NULL}, a scaling transformation
+is used such that the the \code{weights} sums to the sample size. Default \code{TRUE}.
+When \code{FALSE} no scaling is used.}
 
 \item{S}{If \code{S = 1} (default), a production (profit) frontier is
 estimated: \eqn{\epsilon_i = v_i-u_i}. If \code{S = -1}, a cost frontier is
@@ -194,7 +204,15 @@ positivity on these parameters, the variances are modelled respectively as:
 heteroscedasticity variables (inefficiency drivers in the case of \eqn{Z_u})
 and \eqn{\delta} and \eqn{\phi} the coefficients.  In the case of
 heterogeneity in the truncated mean \eqn{\mu}, it is modelled as
-\eqn{\mu=\omega'Z_{\mu}}.}
+\eqn{\mu=\omega'Z_{\mu}}.
+
+\code{sfacross} allows for the maximization of weighted log-likelihood.
+When option \code{weights} is specified and \code{wscale = TRUE}, the weights
+is scaled as
+
+\Sexpr[results=rd, stage=build]{
+katex::math_to_rd('new_{weights} = sample_{size} \\\times \\\frac{old_{weights}}{\\\sum(old_{weights})}')
+}}
 }
 \value{
 \code{\link{lcmcross}} returns a list of class \code{'lcmcross'}
@@ -235,12 +253,16 @@ two-sided error term.}
 
 \item{dataTable}{A data frame (tibble format) containing information on data
 used for optimization along with residuals and fitted values of the OLS and
-ML estimations, and the individual observation log-likelihood.}
+ML estimations, and the individual observation log-likelihood. When \code{weights}
+is specified an additional variable is also provided in \code{dataTable}.}
 
 \item{InitHalf}{When \code{start = NULL}. Initial ML estimation with half
 normal distribution for the one-sided error term. Model to construct the
 starting values for the latent class estimation. Object of class
 \code{'maxLik'} and \code{'maxim'} returned.}
+
+\item{isWeights}{Logical. If \code{TRUE} weighted log-likelihood is
+maximized.}
 
 \item{optType}{The optimization algorithm used.}
 
