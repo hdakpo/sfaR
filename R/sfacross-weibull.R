@@ -515,6 +515,21 @@ fnCondEffWeibull <- function(u, sigmaU, sigmaV, k, epsilon, S) {
     dnorm((epsilon + S * u)/sigmaV)
 }
 
+# fn to solve for conditional efficiencies ----------
+#' function to estimate unconditional efficiency (Battese and Coelli style)
+#' @param u inefficiency variable over which integration will be done
+#' @param sigmaU standard error of the weibull distribution
+#' @param sigmaV standard error of the two-sided error component
+#' @param k location parameter
+#' @param epsilon composite noise
+#' @param S integer for cost/prod estimation
+#' @noRd
+fnCondBCEffWeibull <- function(u, sigmaU, sigmaV, k, epsilon,
+  S) {
+  exp(-u) * k/(sigmaU * sigmaV) * (u/sigmaU)^(k - 1) * exp(-(u/sigmaU)^k) *
+    dnorm((epsilon + S * u)/sigmaV)
+}
+
 # Conditional efficiencies estimation ----------
 #' efficiencies for weibull-normal distribution
 #' @param object object of class sfacross
@@ -539,18 +554,30 @@ cweibullnormeff <- function(object, level) {
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
     as.numeric(crossprod(matrix(beta), t(Xvar)))
   u <- numeric(object$Nobs)
-  for (i in 1:object$Nobs) {
+  for (i in seq_along(1:object$Nobs)) {
     ur <- exp(Wu[i]/2) * (-log(1 - object$FiMat[i, ]))^(1/k)
     density_epsilon <- mean(1/exp(Wv[i]/2) * dnorm((epsilon[i] +
       object$S * ur)/exp(Wv[i]/2)))
-    u[i] <- integrate(f = fnCondEffWeibull, lower = 0, upper = Inf,
-      sigmaU = exp(Wu[i]/2), sigmaV = exp(Wv[i]/2), k = k,
-      epsilon = epsilon[i], S = object$S, rel.tol = 1e-10,
-      stop.on.error = FALSE)$value/density_epsilon
+    u[i] <- hcubature(f = fnCondEffWeibull, lowerLimit = 0,
+      upperLimit = Inf, maxEval = 100, fDim = 1, sigmaU = exp(Wu[i]/2),
+      sigmaV = exp(Wv[i]/2), k = k, epsilon = epsilon[i],
+      S = object$S, vectorInterface = FALSE, tol = 1e-10)$integral/density_epsilon
   }
   if (object$logDepVar == TRUE) {
     teJLMS <- exp(-u)
-    res <- bind_cols(u = u, teJLMS = teJLMS)
+    teBC <- numeric(object$Nobs)
+    teBC_reciprocal <- numeric(object$Nobs)
+    for (i in seq_along(1:object$Nobs)) {
+      ur <- exp(Wu[i]/2) * (-log(1 - object$FiMat[i, ]))^(1/k)
+      density_epsilon <- mean(1/exp(Wv[i]/2) * dnorm((epsilon[i] +
+        object$S * ur)/exp(Wv[i]/2)))
+      teBC[i] <- hcubature(f = fnCondBCEffWeibull, lowerLimit = 0,
+        upperLimit = Inf, maxEval = 100, fDim = 1, sigmaU = exp(Wu[i]/2),
+        sigmaV = exp(Wv[i]/2), k = k, epsilon = epsilon[i],
+        S = object$S, vectorInterface = FALSE, tol = 1e-10)$integral/density_epsilon
+    }
+    res <- bind_cols(u = u, teJLMS = teJLMS, teBC = teBC,
+      teBC_reciprocal = teBC_reciprocal)
   } else {
     res <- bind_cols(u = u)
   }

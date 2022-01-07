@@ -79,4 +79,5 @@
 #' @importFrom nleqslv nleqslv
 #' @importFrom emdbook qchibarsq
 #' @importFrom fBasics dagoTest
+#' @importFrom cubature hcubature
 NULL

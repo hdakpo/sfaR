@@ -576,7 +576,19 @@ cgammanormeff <- function(object, level) {
   u <- Hi1/Hi2
   if (object$logDepVar == TRUE) {
     teJLMS <- exp(-u)
-    res <- bind_cols(u = u, teJLMS = teJLMS)
+    mui_Gi <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu)) -
+      exp(Wv)
+    Gi <- numeric(object$Nobs)
+    for (i in 1:object$Nobs) {
+      Gi[i] <- mean((mui_Gi[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+        ] + (1 - object$FiMat[i, ]) * pnorm(-mui_Gi[i]/sqrt(exp(Wv[i])))))^(P -
+        1))
+    }
+    teBC <- exp(exp(Wv)/exp(Wu/2) + object$S * epsilon +
+      exp(Wv)/2) * pnorm(-exp(Wv/2 - Wu/2) - object$S *
+      epsilon/exp(Wv/2) - exp(Wv/2)) * Gi/(pnorm(-exp(Wv/2 -
+      Wu/2) - object$S * epsilon/exp(Wv/2)) * Hi2)
+    res <- bind_cols(u = u, teJLMS = teJLMS, teBC = teBC)
   } else {
     res <- bind_cols(u = u)
   }
