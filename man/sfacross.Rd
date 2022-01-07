@@ -161,74 +161,7 @@ direction. See \code{\link[maxLik:maxBHHH]{maxBHHH}} and
 \item{x}{an object of class sfacross (returned by the function \code{\link{sfacross}}).}
 
 \item{...}{additional arguments of frontier are passed to sfacross;
-additional arguments of the print method are currently ignored.
-
-#' @details
-The stochastic frontier model is defined as: \deqn{y_i = \alpha +
-\mathbf{x}'_i\beta + v_i - Su_i} \deqn{\epsilon_i = v_i -Su_i}
-
-where \eqn{i} is the observation, \eqn{j} is the class, \eqn{y} is the
-output (cost, revenue, profit), \eqn{x} is the vector of main explanatory
-variables (inputs and other control variables), \eqn{u} is the one-sided
-error term with variance \eqn{\sigma_{u}^2}, and \eqn{v} is the two-sided
-error term with variance \eqn{\sigma_{v}^2}.
-
-\code{S = 1} in the case of production (profit) frontier function and
-\code{S = -1} in the case of cost frontier function.
-
-The model is estimated using maximum likelihood (ML) for most distributions
-except the Gamma, Weibull and log-normal distributions for which maximum
-simulated likelihood (MSL) is used. For this latter, several draws can be
-implemented namely Halton, Generalized Halton, Sobol and uniform. In the
-case of uniform draws, antithetics can also be computed: first \code{Nsim/2}
-draws are obtained, then the \code{Nsim/2} other draws are obtained as
-counterpart of one (\code{1-draw}).
-
-To account for heteroscedasticity in the variance parameters of the error
-terms, a single part (right) formula can also be specified. To impose the
-positivity to these parameters, the variances are modelled as:
-\eqn{\sigma^2_u = \exp{(\delta'Z_u)}} or \eqn{\sigma^2_v =
-\exp{(\phi'Z_v)}}, where \eqn{Z_u} and \eqn{Z_v} are the heteroscedasticity
-variables (inefficiency drivers in the case of \eqn{Z_u}) and \eqn{\delta}
-and \eqn{\phi} the coefficients.  In the case of heterogeneity in the
-truncated mean \eqn{\mu}, it is modelled as \eqn{\mu=\omega'Z_{\mu}}. The
-scaling property can be applied for the truncated normal distribution:
-\eqn{u \sim h(Z_u, \delta)u} where \eqn{u} follows a truncated normal
-distribution \eqn{N^+(\tau, \exp{(cu)})}.
-
-In the case of the truncated normal distribution, the convolution of
-\eqn{u_i} and \eqn{v_i} is:
-
-\deqn{f(\epsilon_i)=\frac{1}{\sqrt{\sigma_u^2 + \sigma_v^2}}
-\phi\left(\frac{S\epsilon_i + \mu}{\sqrt{\sigma_u^2 + \sigma_v^2}}\right)
-\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)/\Phi\left(\frac{\mu}{\sigma_u}\right)}
-
-where
-
-\deqn{\mu_{i*}=\frac{\mu\sigma_v^2 - S\epsilon_i\sigma_u^2}{\sigma_u^2 +
-\sigma_v^2}}
-
-and
-
-\deqn{\sigma_*^2 = \frac{\sigma_u^2 \sigma_v^2}{\sigma_u^2 + \sigma_v^2}}
-
-In the case of the half normal distribution the convolution is obtained by
-setting \eqn{\mu=0}.
-
-\code{sfacross} allows for the maximization of weighted log-likelihood.
-When option \code{weights} is specified and \code{wscale = TRUE}, the weights
-is scaled as
-
-\Sexpr[results=rd, stage=build]{
-katex::math_to_rd('new_{weights} = sample_{size} \\\times \\\frac{old_{weights}}{\\\sum(old_{weights})}')
-}
-
-For difficult problems, non-gradient methods (e.g. \code{nm} or \code{sann}) can be
-used to warm start the optimization and zoom in the neighborhood of the
-solution. Then a gradient-based methods is recommanded in the second step. In the case
-of \code{sann}, we recommand to significantly increase the iteration limit
-(e.g. \code{itermax = 20000}). The Conjugate Gradient (\code{cg}) can also be used
-in the first stage.}
+additional arguments of the print method are currently ignored.}
 }
 \value{
 \code{\link{sfacross}} returns a list of class \code{'sfacross'}
@@ -352,6 +285,73 @@ optimization algorithms are available.
 
 The truncated normal - normal distribution with scaling property as in Wang
 and Schmidt (2002) is also implemented.
+}
+\details{
+The stochastic frontier model is defined as: \deqn{y_i = \alpha +
+\mathbf{x}'_i\beta + v_i - Su_i} \deqn{\epsilon_i = v_i -Su_i}
+
+where \eqn{i} is the observation, \eqn{j} is the class, \eqn{y} is the
+output (cost, revenue, profit), \eqn{x} is the vector of main explanatory
+variables (inputs and other control variables), \eqn{u} is the one-sided
+error term with variance \eqn{\sigma_{u}^2}, and \eqn{v} is the two-sided
+error term with variance \eqn{\sigma_{v}^2}.
+
+\code{S = 1} in the case of production (profit) frontier function and
+\code{S = -1} in the case of cost frontier function.
+
+The model is estimated using maximum likelihood (ML) for most distributions
+except the Gamma, Weibull and log-normal distributions for which maximum
+simulated likelihood (MSL) is used. For this latter, several draws can be
+implemented namely Halton, Generalized Halton, Sobol and uniform. In the
+case of uniform draws, antithetics can also be computed: first \code{Nsim/2}
+draws are obtained, then the \code{Nsim/2} other draws are obtained as
+counterpart of one (\code{1-draw}).
+
+To account for heteroscedasticity in the variance parameters of the error
+terms, a single part (right) formula can also be specified. To impose the
+positivity to these parameters, the variances are modelled as:
+\eqn{\sigma^2_u = \exp{(\delta'Z_u)}} or \eqn{\sigma^2_v =
+\exp{(\phi'Z_v)}}, where \eqn{Z_u} and \eqn{Z_v} are the heteroscedasticity
+variables (inefficiency drivers in the case of \eqn{Z_u}) and \eqn{\delta}
+and \eqn{\phi} the coefficients.  In the case of heterogeneity in the
+truncated mean \eqn{\mu}, it is modelled as \eqn{\mu=\omega'Z_{\mu}}. The
+scaling property can be applied for the truncated normal distribution:
+\eqn{u \sim h(Z_u, \delta)u} where \eqn{u} follows a truncated normal
+distribution \eqn{N^+(\tau, \exp{(cu)})}.
+
+In the case of the truncated normal distribution, the convolution of
+\eqn{u_i} and \eqn{v_i} is:
+
+\deqn{f(\epsilon_i)=\frac{1}{\sqrt{\sigma_u^2 + \sigma_v^2}}
+\phi\left(\frac{S\epsilon_i + \mu}{\sqrt{\sigma_u^2 + \sigma_v^2}}\right)
+\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)/\Phi\left(\frac{\mu}{\sigma_u}\right)}
+
+where
+
+\deqn{\mu_{i*}=\frac{\mu\sigma_v^2 - S\epsilon_i\sigma_u^2}{\sigma_u^2 +
+\sigma_v^2}}
+
+and
+
+\deqn{\sigma_*^2 = \frac{\sigma_u^2 \sigma_v^2}{\sigma_u^2 + \sigma_v^2}}
+
+In the case of the half normal distribution the convolution is obtained by
+setting \eqn{\mu=0}.
+
+\code{sfacross} allows for the maximization of weighted log-likelihood.
+When option \code{weights} is specified and \code{wscale = TRUE}, the weights
+is scaled as
+
+\Sexpr[results=rd, stage=build]{
+katex::math_to_rd('new_{weights} = sample_{size} \\\times \\\frac{old_{weights}}{\\\sum(old_{weights})}')
+}
+
+For difficult problems, non-gradient methods (e.g. \code{nm} or \code{sann}) can be
+used to warm start the optimization and zoom in the neighborhood of the
+solution. Then a gradient-based methods is recommanded in the second step. In the case
+of \code{sann}, we recommand to significantly increase the iteration limit
+(e.g. \code{itermax = 20000}). The Conjugate Gradient (\code{cg}) can also be used
+in the first stage.
 }
 \note{
 For the Halton draws, the code is adapted from the \pkg{mlogit}

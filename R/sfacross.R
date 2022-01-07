@@ -127,7 +127,7 @@
 #' @param ... additional arguments of frontier are passed to sfacross; 
 #' additional arguments of the print method are currently ignored.
 #'
-#' #' @details
+#' @details
 #' The stochastic frontier model is defined as: \deqn{y_i = \alpha +
 #' \mathbf{x}'_i\beta + v_i - Su_i} \deqn{\epsilon_i = v_i -Su_i}
 #'

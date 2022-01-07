@@ -115,7 +115,7 @@
 #' @param ... additional arguments of frontier are passed to lcmcross; 
 #' additional arguments of the print method are currently ignored.
 #'
-#' #' @details
+#' @details
 #' LCM is an estimation of a finite mixture of production functions:
 #'
 #' \deqn{y_i = \alpha_j + x'_i\beta_j + v_{i|j} - Su_{i|j}}

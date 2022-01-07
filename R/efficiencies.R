@@ -11,12 +11,10 @@
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
 
-#' Compute conditional (in-)efficiency estimates of classic or latent class
-#' stochastic models
+#' Compute conditional (in-)efficiency estimates of stochastic frontier models
 #'
-#' \code{\link{efficiencies}} returns (in-)efficiency estimates from classic or
-#' latent class stochastic frontier models estimated with
-#' \code{\link{sfacross}} or \code{\link{lcmcross}.}
+#' \code{\link{efficiencies}} returns (in-)efficiency estimates of models estimated with
+#' \code{\link{sfacross}} or \code{\link{lcmcross}}.
 #' 
 #' @name efficiencies
 #'
@@ -42,10 +40,16 @@
 #' and
 #'
 #' \deqn{\sigma_*^2 = \frac{\sigma_u^2 \sigma_v^2}{\sigma_u^2 + \sigma_v^2}}
+#' 
 #' \itemize{ \item The Battese and Coelli (1988) conditional efficiency is
 #' obtained by: } \deqn{E\left[\exp{\left(-u_i\right)}|\epsilon_i\right] =
 #' \exp{\left(-\mu_{i*}+\frac{1}{2}\sigma_*^2\right)}
 #' \frac{\Phi\left(\frac{\mu_{i*}}{\sigma_*}-\sigma_*\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)}}
+#' 
+#' \itemize{ \item The reciprocal of the Battese and Coelli (1988) conditional efficiency is
+#' obtained by: } \deqn{E\left[\exp{\left(u_i\right)}|\epsilon_i\right] =
+#' \exp{\left(\mu_{i*}+\frac{1}{2}\sigma_*^2\right)}
+#' \frac{\Phi\left(\frac{\mu_{i*}}{\sigma_*}+\sigma_*\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)}}
 #'
 #' \itemize{ \item The conditional mode is computed using: }
 #'
@@ -79,7 +83,7 @@
 #' \exp{\left(-LB_i\right)}}
 #'
 #'
-#' @param object A classic or latent class stochastic frontier model returned
+#' @param object A stochastic frontier model returned
 #' by \code{\link{sfacross}} or \code{\link{lcmcross}}.
 #' @param level A number between between 0 and 0.9999 used for the computation
 #' of (in-)efficiency confidence intervals (defaut = \code{0.95}). Only used
@@ -111,9 +115,9 @@
 #' \code{udist} of \link{sfacross} is set to \code{'hnormal'},
 #' \code{'exponential'}, \code{'tnormal'} or \code{'uniform'}.}
 #'
-#' \item{teJLMS}{\eqn{\exp{(-u)}}. When the argument \code{udist} of
+#' \item{teJLMS}{\eqn{\exp{(-E[u|\epsilon])}}. When the argument \code{udist} of
 #' \link{sfacross} is set to \code{'uniform'}, \code{teJLMS1} =
-#' \eqn{\exp{(-u1)}} and \code{teJLMS2} = \eqn{\exp{(-u2)}}. Only when
+#' \eqn{\exp{(-E[u_1|\epsilon])}} and \code{teJLMS2} = \eqn{\exp{(-E[u_2|\epsilon])}}. Only when
 #' \code{logDepVar = TRUE}.}
 #'
 #' \item{m}{Conditional model. Only when the argument \code{udist} of
@@ -125,13 +129,14 @@
 #' \code{'tnormal'}, \code{'uniform'}, or \code{'rayleigh'}.}
 #'
 #' \item{teBC}{Battese and Coelli (1988) conditional efficiency. Only when, in
-#' the function \link{sfacross}, \code{logDepVar = TRUE} and \code{udist =
-#' 'hnormal'}, \code{'exponential'}, \code{'tnormal'}, \code{'genexponential'},
-#' \code{'rayleigh'}, or \code{'tslaplace'}. In the case \code{udist =
+#' the function \link{sfacross}, \code{logDepVar = TRUE}. In the case \code{udist =
 #' 'uniform'}, two conditional efficiency estimates are returned: \code{teBC1}
 #' which is the classic conditional efficiency following Battese and Coelli
 #' (1988) and \code{teBC2} when \eqn{\theta/\sigma_v \longrightarrow \infty}
 #' (see Nguyen, 2010).}
+#' 
+#' \item{teBC_reciprocal}{Reciprocal of Battese and Coelli (1988) conditional efficiency. 
+#' Similar to \code{teBC} except that it is computed as \eqn{E\left[\exp{(u)}|\epsilon\right]}.}
 #'
 #' \item{teBCLB}{Lower bound for Battese and Coelli (1988) conditional
 #' efficiency. Only when, in the function \link{sfacross}, \code{logDepVar =
@@ -146,24 +151,43 @@
 #' \bold{- For object of class \code{'lcmcross'} the following elements are
 #' returned:}
 #'
-#' \item{Group_c}{Most probable class of each observation.}
+#' \item{Group_c}{Most probable class for each observation.}
 #'
 #' \item{PosteriorProb_c}{Highest posterior probability.}
+#' 
+#' \item{u_c}{Conditional inefficiency of the most probable class given the
+#' posterior probability.}
+#' 
+#' \item{teJLMS_c}{\eqn{\exp{(-E[u_c|\epsilon_c])}}. Only when, in the function
+#' \link{lcmcross}, \code{logDepVar = TRUE}.}
+#' 
+#' \item{teBC_c}{\eqn{E\left[\exp{(-u_c)}|\epsilon_c\right]}. Only when, in the function
+#' \link{lcmcross}, \code{logDepVar = TRUE}.}
+#' 
+#' \item{teBC_reciprocal_c}{\eqn{E\left[\exp{(u_c)}|\epsilon_c\right]}. Only when, in the function
+#' \link{lcmcross}, \code{logDepVar = TRUE}.}
 #'
 #' \item{PosteriorProb_c#}{Posterior probability of class #.}
 #'
 #' \item{PriorProb_c#}{Prior probability of class #.}
 #'
-#' \item{u_c}{Conditional inefficiency of the most probable class given the
-#' posterior probability.}
-#'
-#' \item{teJLMS_c}{\eqn{\exp{(-u_c)}}. Only when, in the function
-#' \link{lcmcross}, \code{logDepVar = TRUE}.}
-#'
 #' \item{u_c#}{Conditional inefficiency associated to class #, regardless of
 #' \code{Group_c}.}
+#' 
+#' \item{teBC_c#}{Conditional efficiency (\eqn{E\left[\exp{(-u_c)}|\epsilon_c\right]}) associated to class #, regardless of
+#' \code{Group_c}. Only when, in the function \link{lcmcross}, \code{logDepVar = TRUE}.}
+#' 
+#' \item{teBC_reciprocal_c#}{Reciprocal conditional efficiency (\eqn{E\left[\exp{(u_c)}|\epsilon_c\right]}) 
+#' associated to class #, regardless of \code{Group_c}. 
+#' Only when, in the function \link{lcmcross}, \code{logDepVar = TRUE}.}
 #'
 #' \item{ineff_c#}{Conditional inefficiency (\code{u_c}) for observations in
+#' class # only.}
+#' 
+#' \item{effBC_c#}{Conditional efficiency (\code{teBC_c}) for observations in
+#' class # only.}
+#' 
+#' \item{ReffBC_c#}{Reciprocal conditional efficiency (\code{teBC_reciprocal_c}) for observations in
 #' class # only.}
 #'
 #' @author K Hervé Dakpo, Yann Desjeux and Laure Latruffe

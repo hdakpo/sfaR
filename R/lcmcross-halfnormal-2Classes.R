@@ -658,9 +658,9 @@ LCM2ChnormAlgOpt <- function(start, olsParam, dataTable, S, wHvar,
     Zvar = Zvar, nZHvar = nZHvar))
   if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
     maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
-                         bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
-                         nm = function(...) maxNM(...), cg = function(...) maxCG(...), 
-                         sann = function(...) maxSANN(...))
+      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
+      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
+      sann = function(...) maxSANN(...))
     method <- "maxLikAlgo"
   }
   cat("LCM 2 Classes Estimation...\n")
@@ -844,16 +844,37 @@ cLCM2Chalfnormeff <- function(object, level) {
   ineff_c2 <- ifelse(Group_c == 2, u_c2, NA)
   if (object$logDepVar == TRUE) {
     teJLMS_c <- exp(-u_c)
+    teBC_c1 <- exp(-mustar1 + 1/2 * sigmastar1^2) * pnorm(mustar1/sigmastar1 -
+      sigmastar1)/pnorm(mustar1/sigmastar1)
+    teBC_c2 <- exp(-mustar2 + 1/2 * sigmastar2^2) * pnorm(mustar2/sigmastar2 -
+      sigmastar2)/pnorm(mustar2/sigmastar2)
+    teBC_c <- ifelse(Group_c == 1, teBC_c1, teBC_c2)
+    effBC_c1 <- ifelse(Group_c == 1, teBC_c1, NA)
+    effBC_c2 <- ifelse(Group_c == 2, teBC_c2, NA)
+    teBC_reciprocal_c1 <- exp(mustar1 + 1/2 * sigmastar1^2) *
+      pnorm(mustar1/sigmastar1 + sigmastar1)/pnorm(mustar1/sigmastar1)
+    teBC_reciprocal_c2 <- exp(mustar2 + 1/2 * sigmastar2^2) *
+      pnorm(mustar2/sigmastar2 + sigmastar2)/pnorm(mustar2/sigmastar2)
+    teBC_reciprocal_c <- ifelse(Group_c == 1, teBC_reciprocal_c1,
+      teBC_reciprocal_c2)
+    ReffBC_c1 <- ifelse(Group_c == 1, teBC_reciprocal_c1,
+      NA)
+    ReffBC_c2 <- ifelse(Group_c == 2, teBC_reciprocal_c2,
+      NA)
     res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
-      PosteriorProb_c1 = Pcond_c1, PosteriorProb_c2 = Pcond_c2,
-      PriorProb_c1 = Probc1, PriorProb_c2 = Probc2, u_c = u_c,
-      teJLMS_c = teJLMS_c, u_c1 = u_c1, u_c2 = u_c2, ineff_c1 = ineff_c1,
-      ineff_c2 = ineff_c2)
+      u_c = u_c, teJLMS_c = teJLMS_c, teBC_c = teBC_c,
+      teBC_reciprocal_c = teBC_reciprocal_c, PosteriorProb_c1 = Pcond_c1,
+      PriorProb_c1 = Probc1, u_c1 = u_c1, teBC_c1 = teBC_c1,
+      teBC_reciprocal_c1 = teBC_reciprocal_c1, PosteriorProb_c2 = Pcond_c2,
+      PriorProb_c2 = Probc2, u_c2 = u_c2, teBC_c2 = teBC_c2,
+      teBC_reciprocal_c2 = teBC_reciprocal_c2, ineff_c1 = ineff_c1,
+      ineff_c2 = ineff_c2, effBC_c1 = effBC_c1, effBC_c2 = effBC_c2,
+      ReffBC_c1 = ReffBC_c1, ReffBC_c2 = ReffBC_c2)
   } else {
     res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
-      PosteriorProb_c1 = Pcond_c1, PosteriorProb_c2 = Pcond_c2,
-      PriorProb_c1 = Probc1, PriorProb_c2 = Probc2, u_c = u_c,
-      u_c1 = u_c1, u_c2 = u_c2, ineff_c1 = ineff_c1, ineff_c2 = ineff_c2)
+      u_c = u_c, PosteriorProb_c1 = Pcond_c1, PriorProb_c1 = Probc1,
+      u_c1 = u_c1, PosteriorProb_c2 = Pcond_c2, PriorProb_c2 = Probc2,
+      u_c2 = u_c2, ineff_c1 = ineff_c1, ineff_c2 = ineff_c2)
   }
   return(res)
 }

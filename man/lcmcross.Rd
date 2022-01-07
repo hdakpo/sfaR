@@ -148,80 +148,7 @@ algorithm. Default = \code{1.5}.}
 \item{x}{an object of class lcmcross (returned by the function \code{\link{lcmcross}}).}
 
 \item{...}{additional arguments of frontier are passed to lcmcross;
-additional arguments of the print method are currently ignored.
-
-#' @details
-LCM is an estimation of a finite mixture of production functions:
-
-\deqn{y_i = \alpha_j + x'_i\beta_j + v_{i|j} - Su_{i|j}}
-
-\deqn{\epsilon_{i|j} = v_{i|j} -Su_{i|j}}
-
-where \eqn{i} is the observation, \eqn{j} is the class, \eqn{y} is the
-output (cost, revenue, profit), \eqn{x} is the vector of main explanatory
-variables (inputs and other control variables), \eqn{u} is the one-sided
-error term with variance \eqn{\sigma_{u}^2}, and \eqn{v} is the two-sided
-error term with variance \eqn{\sigma_{v}^2}.
-
-\code{S = 1} in the case of production (profit) frontier function and
-\code{S = -1} in the case of cost frontier function.
-
-The contribution of observation \eqn{i} to the likelihood conditional on
-class \eqn{j} is defined as: \deqn{P(i|j) = \frac{2}{\sqrt{\sigma_{u|j}^2 +
-\sigma_{v|j}^2}} \phi\left(\frac{S\epsilon_{i|j}}{\sqrt{\sigma_{u|j}^2 +
-\sigma_{v|j}^2}}\right) \Phi\left(\frac{\mu_{i*|j}}{\sigma_{*|j}}\right)}
-
-where \deqn{\mu_{i*|j}=\frac{- S\epsilon_{i|j}\sigma_{u|j}^2}{\sigma_{u|j}^2
-+ \sigma_{v|j}^2}}
-
-and \deqn{\sigma_*^2 = \frac{\sigma_{u|j}^2 \sigma_{v|j}^2}{\sigma_{u|j}^2 +
-\sigma_{v|j}^2}}
-
-The prior probability of using a particular technology can depend on some
-covariates (namely the variables separating the observations into classes)
-using a logit specification: \deqn{\pi(i,j) =
-\frac{\exp{(\theta_j'Z_h)}}{\sum_{m=1}^{J}\exp{(\theta_m'Z_h)}}}
-
-with \eqn{Z_h} the covariates, \eqn{\theta} the coefficients estimated for
-the covariates, and \eqn{\exp(\theta_J'Z_h)=1}.
-
-The unconditional likelihood of observation \eqn{i} is simply the average
-over the \eqn{J} classes:
-
-\eqn{P(i) = \sum_{m=1}^{J}\pi(i,m)P(i|m)}
-
-The number of classes can be retained based on information criterion (see
-for instance \code{\link[=ic.lcmcross]{ic}}).
-
-Class assignment is based on the largest posterior probability. This
-probability is obtained using Bayes' rule, as follows for class \eqn{j}:
-\deqn{w\left(j|i\right)=\frac{P\left(i|j\right)\pi\left(i,
-j\right)}{\sum_{m=1}^JP\left(i|m\right)\pi\left(i, m\right)}}
-
-To accommodate heteroscedasticity in the variance parameters of the error
-terms, a single part (right) formula can also be specified. To impose the
-positivity on these parameters, the variances are modelled respectively as:
-\eqn{\sigma^2_{u|j} = \exp{(\delta_j'Z_u)}} and \eqn{\sigma^2_{v|j} =
-\exp{(\phi_j'Z_v)}}, where \eqn{Z_u} and \eqn{Z_v} are the
-heteroscedasticity variables (inefficiency drivers in the case of \eqn{Z_u})
-and \eqn{\delta} and \eqn{\phi} the coefficients.  In the case of
-heterogeneity in the truncated mean \eqn{\mu}, it is modelled as
-\eqn{\mu=\omega'Z_{\mu}}.
-
-\code{sfacross} allows for the maximization of weighted log-likelihood.
-When option \code{weights} is specified and \code{wscale = TRUE}, the weights
-is scaled as
-
-\Sexpr[results=rd, stage=build]{
-katex::math_to_rd('new_{weights} = sample_{size} \\\times \\\frac{old_{weights}}{\\\sum(old_{weights})}')
-}
-
-For difficult problems, non-gradient methods (e.g. \code{nm} or \code{sann}) can be
-used to warm start the optimization and zoom in the neighborhood of the
-solution. Then a gradient-based methods is recommanded in the second step. In the case
-of \code{sann}, we recommand to significantly increase the iteration limit
-(e.g. \code{itermax = 20000}). The Conjugate Gradient (\code{cg}) can also be used
-in the first stage.}
+additional arguments of the print method are currently ignored.}
 }
 \value{
 \code{\link{lcmcross}} returns a list of class \code{'lcmcross'}
@@ -318,6 +245,79 @@ two-sided error terms, as in Reifschneider and Stevenson (1991), Caudill and
 Ford (1993), Caudill \emph{et al.} (1995) and Hadri (1999).
 
 The model can estimate up to five classes.
+}
+\details{
+LCM is an estimation of a finite mixture of production functions:
+
+\deqn{y_i = \alpha_j + x'_i\beta_j + v_{i|j} - Su_{i|j}}
+
+\deqn{\epsilon_{i|j} = v_{i|j} -Su_{i|j}}
+
+where \eqn{i} is the observation, \eqn{j} is the class, \eqn{y} is the
+output (cost, revenue, profit), \eqn{x} is the vector of main explanatory
+variables (inputs and other control variables), \eqn{u} is the one-sided
+error term with variance \eqn{\sigma_{u}^2}, and \eqn{v} is the two-sided
+error term with variance \eqn{\sigma_{v}^2}.
+
+\code{S = 1} in the case of production (profit) frontier function and
+\code{S = -1} in the case of cost frontier function.
+
+The contribution of observation \eqn{i} to the likelihood conditional on
+class \eqn{j} is defined as: \deqn{P(i|j) = \frac{2}{\sqrt{\sigma_{u|j}^2 +
+\sigma_{v|j}^2}} \phi\left(\frac{S\epsilon_{i|j}}{\sqrt{\sigma_{u|j}^2 +
+\sigma_{v|j}^2}}\right) \Phi\left(\frac{\mu_{i*|j}}{\sigma_{*|j}}\right)}
+
+where \deqn{\mu_{i*|j}=\frac{- S\epsilon_{i|j}\sigma_{u|j}^2}{\sigma_{u|j}^2
++ \sigma_{v|j}^2}}
+
+and \deqn{\sigma_*^2 = \frac{\sigma_{u|j}^2 \sigma_{v|j}^2}{\sigma_{u|j}^2 +
+\sigma_{v|j}^2}}
+
+The prior probability of using a particular technology can depend on some
+covariates (namely the variables separating the observations into classes)
+using a logit specification: \deqn{\pi(i,j) =
+\frac{\exp{(\theta_j'Z_h)}}{\sum_{m=1}^{J}\exp{(\theta_m'Z_h)}}}
+
+with \eqn{Z_h} the covariates, \eqn{\theta} the coefficients estimated for
+the covariates, and \eqn{\exp(\theta_J'Z_h)=1}.
+
+The unconditional likelihood of observation \eqn{i} is simply the average
+over the \eqn{J} classes:
+
+\eqn{P(i) = \sum_{m=1}^{J}\pi(i,m)P(i|m)}
+
+The number of classes can be retained based on information criterion (see
+for instance \code{\link[=ic.lcmcross]{ic}}).
+
+Class assignment is based on the largest posterior probability. This
+probability is obtained using Bayes' rule, as follows for class \eqn{j}:
+\deqn{w\left(j|i\right)=\frac{P\left(i|j\right)\pi\left(i,
+j\right)}{\sum_{m=1}^JP\left(i|m\right)\pi\left(i, m\right)}}
+
+To accommodate heteroscedasticity in the variance parameters of the error
+terms, a single part (right) formula can also be specified. To impose the
+positivity on these parameters, the variances are modelled respectively as:
+\eqn{\sigma^2_{u|j} = \exp{(\delta_j'Z_u)}} and \eqn{\sigma^2_{v|j} =
+\exp{(\phi_j'Z_v)}}, where \eqn{Z_u} and \eqn{Z_v} are the
+heteroscedasticity variables (inefficiency drivers in the case of \eqn{Z_u})
+and \eqn{\delta} and \eqn{\phi} the coefficients.  In the case of
+heterogeneity in the truncated mean \eqn{\mu}, it is modelled as
+\eqn{\mu=\omega'Z_{\mu}}.
+
+\code{sfacross} allows for the maximization of weighted log-likelihood.
+When option \code{weights} is specified and \code{wscale = TRUE}, the weights
+is scaled as
+
+\Sexpr[results=rd, stage=build]{
+katex::math_to_rd('new_{weights} = sample_{size} \\\times \\\frac{old_{weights}}{\\\sum(old_{weights})}')
+}
+
+For difficult problems, non-gradient methods (e.g. \code{nm} or \code{sann}) can be
+used to warm start the optimization and zoom in the neighborhood of the
+solution. Then a gradient-based methods is recommanded in the second step. In the case
+of \code{sann}, we recommand to significantly increase the iteration limit
+(e.g. \code{itermax = 20000}). The Conjugate Gradient (\code{cg}) can also be used
+in the first stage.
 }
 \note{
 In the case of panel data, \code{\link{lcmcross}} estimates a pooled
