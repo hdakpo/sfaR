@@ -675,7 +675,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
       stop("argument 'antithetics' must be a single logical value",
         call. = FALSE)
     }
-    if (antithetics && (Nsim%%2) != 0) {
+    if (antithetics && (Nsim %% 2) != 0) {
       Nsim <- Nsim + 1
     }
     simDist <- if (simType == "halton") {
@@ -874,7 +874,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
       } else {
         if (method == "mla") {
           list(type = "Lev. Marquardt max.", nIter = mleList$mleObj$ni,
-          statuS = S, wHvar = wHvarwitch(mleList$mleObj$istop,
+          status = switch(mleList$mleObj$istop,
             `1` = "convergence criteria were satisfied",
             `2` = "maximum number of iterations was reached",
             `4` = "algorithm encountered a problem in the function computation"),
