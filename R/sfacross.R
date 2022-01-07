@@ -862,7 +862,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
       status = mleList$mleObj$message, mleLoglik = -mleList$mleObj$value,
       gradient = mleList$mleObj$gradient)
   } else {
-    if (method %in% c("bfgs", "bhhh", "nr", "nm")) {
+    if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
       list(type = substr(mleList$mleObj$type, 1, 27), nIter = mleList$mleObj$iterations,
         status = mleList$mleObj$message, mleLoglik = mleList$mleObj$maximum,
         gradient = mleList$mleObj$gradient)
