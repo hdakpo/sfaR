@@ -140,7 +140,7 @@ cLCMhalfnormlike5C <- function(parm, nXvar, nuZUvar, nvZVvar,
 csLCMfhalfnorm5C <- function(olsObj, epsiRes, nXvar, nuZUvar,
   nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar,
   itermax, printInfo, tol) {
-  cat("Initialization: SFA + halfnormal - normal distribution...\n")
+  cat("Initialization: SFA halfnormal - normal distribution...\n")
   initHalf <- maxLik(logLik = chalfnormlike, start = csthalfnorm(olsObj = olsObj,
     epsiRes = epsiRes, S = S, nuZUvar = 1, uHvar = as.matrix(uHvar[,
       1]), nvZVvar = 1, vHvar = as.matrix(vHvar[, 1])),
