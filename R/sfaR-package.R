@@ -56,7 +56,7 @@
 #'
 #' @author K Hervé Dakpo, Yann Desjeux and Laure Latruffe
 #'
-#' @importFrom stats coefficients dnorm lm model.frame
+#' @importFrom stats coefficients dnorm lm model.frame gsub
 #' @importFrom stats model.matrix model.response nlminb
 #' @importFrom stats pnorm qnorm delete.response fitted
 #' @importFrom stats logLik residuals terms vcov formula

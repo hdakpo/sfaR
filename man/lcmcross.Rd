@@ -217,6 +217,8 @@ maximized.}
 
 \item{mlParam}{Numeric vector. Parameters obtained from ML estimation.}
 
+\item{mlParamMatrix}{Double. Matrix of ML parameters by class.}
+
 \item{gradient}{Numeric vector. Each variable gradient of the ML
 estimation.}
 

@@ -257,6 +257,8 @@
 #' \item{mlLoglik}{Log-likelihood value of the ML estimation.}
 #'
 #' \item{mlParam}{Numeric vector. Parameters obtained from ML estimation.}
+#' 
+#' \item{mlParamMatrix}{Double. Matrix of ML parameters by class.}
 #'
 #' \item{gradient}{Numeric vector. Each variable gradient of the ML
 #' estimation.}
@@ -758,6 +760,13 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
   returnObj$nClasses <- lcmClasses
   returnObj$mlLoglik <- mleList$mleLoglik
   returnObj$mlParam <- mleList$mlParam
+  returnObj$mlParamMatrix <- rbind(matrix(mleList$mlParam[1:(lcmClasses * (nXvar + nuZUvar + nvZVvar))], 
+                                    ncol = lcmClasses), 
+  cbind(matrix(mleList$mlParam[(lcmClasses * (nXvar + nuZUvar + nvZVvar) + 1):(lcmClasses * (nXvar + nuZUvar + nvZVvar) + (lcmClasses -
+                1) * nZHvar)], ncol = lcmClasses - 1), NA))
+  colnames(returnObj$mlParamMatrix) <- paste0("Class", 1:lcmClasses)
+  d1names <- names(mleList$mlParam)[c(1:(nXvar + nuZUvar + nvZVvar), (lcmClasses * (nXvar + nuZUvar + nvZVvar) + 1):(lcmClasses * (nXvar + nuZUvar + nvZVvar) + nZHvar))]
+  rownames(returnObj$mlParamMatrix) <- gsub("Cl1", "Cl", d1names)
   returnObj$gradient <- mleList$gradient
   returnObj$gradL_OBS <- mleList$mleObj$gradL_OBS
   returnObj$gradientNorm <- sqrt(sum(mleList$gradient^2))
