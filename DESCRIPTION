@@ -40,5 +40,7 @@ Imports:
     qrng,
     randtoolbox,
     trustOptim,
-    ucminf
+    ucminf,
+    sandwich,
+    lmtest
 URL: https://github.com/hdakpo/sfaR

@@ -79,10 +79,7 @@
 #' \code{'nlminb'}, for optimization using PORT routines (see
 #' \code{\link[stats:nlminb]{nlminb}})}
 #' @param hessianType Integer. If \code{1} (default), analytic Hessian is
-#' returned for all the distributions except \code{'gamma'}, \code{'lognormal'}
-#' and \code{'weibull'} for which the numeric Hessian is returned. If \code{2},
-#' bhhh Hessian is estimated (\eqn{g'g}). If \code{3}, robust Hessian is
-#' computed (\eqn{H^{-1}GH^{-1}}).
+#' returned. If \code{2}, bhhh Hessian is estimated (\eqn{g'g}).
 #' @param itermax Maximum number of iterations allowed for optimization.
 #' Default = \code{2000}.
 #' @param printInfo Logical. Print information during optimization. Default =
@@ -187,6 +184,16 @@
 #' of \code{sann}, we recommand to significantly increase the iteration limit 
 #' (e.g. \code{itermax = 20000}). The Conjugate Gradient (\code{cg}) can also be used
 #' in the first stage.
+#' 
+#' A set of extractor functions for fitted model objects is available for objects of class
+#' \code{'lcmcross'} including methods to the generic functions \code{\link[=print.lcmcross]{print}},
+#' \code{\link[=summary.lcmcross]{summary}}, \code{\link[=coef.lcmcross]{coef}}, 
+#' \code{\link[=fitted.lcmcross]{fitted}}, \code{\link[=logLik.lcmcross]{logLik}}, 
+#' \code{\link[=residuals.lcmcross]{residuals}}, \code{\link[=vcov.lcmcross]{vcov}}, 
+#' \code{\link[=efficiencies.lcmcross]{efficiencies}}, \code{\link[=ic.lcmcross]{ic}}, 
+#' \code{\link[=marginal.lcmcross]{marginal}}, \code{\link[=estfun.lcmcross]{estfun}} and 
+#' \code{\link[=bread.lcmcross]{bread}} (from the \pkg{sandwich} package), 
+#' \code{\link[=coeftest.lcmcross]{coeftest}} (from the \pkg{lmtest} package).
 #'
 #' @return \code{\link{lcmcross}} returns a list of class \code{'lcmcross'}
 #' containing the following elements:
@@ -273,7 +280,9 @@
 #'
 #' @author K Hervé Dakpo, Yann Desjeux and Laure Latruffe
 #'
-#' @seealso \code{\link[=summary.lcmcross]{summary}} for creating and printing
+#' @seealso \code{\link[=print.lcmcross]{print}} for printing \code{lcmcross} object.
+#' 
+#' \code{\link[=summary.lcmcross]{summary}} for creating and printing
 #' summary results.
 #'
 #' \code{\link[=coef.lcmcross]{coef}} for extracting coefficients of the
@@ -500,7 +509,7 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
   # Check hessian type -------
   if (length(hessianType) != 1 || !(hessianType %in% c(1L,
     2L, 3L))) {
-    stop("argument 'hessianType' must equal either 1 or 2 or 3",
+    stop("argument 'hessianType' must equal either 1 or 2",
       call. = FALSE)
   }
   # Other optimization options -------
@@ -784,4 +793,58 @@ print.lcmcross <- function(x, ...) {
   cat(x$typeSfa, "\n")
   print.default(format(x$mlParam), print.gap = 2, quote = FALSE)
   invisible(x)
+}
+
+# Bread for Sandwich Estimator ----------
+#' @rdname lcmcross
+#' @export
+bread.lcmcross <- function(x, ...) {
+  if (x$hessianType == "Analytic Hessian") {
+    return(x$invHessian * x$Nobs)
+  } else {
+    Yvar <- model.response(model.frame(x$formula, data = x$dataTable))
+    Xvar <- model.matrix(x$formula, rhs = 1, data = x$dataTable)
+    uHvar <- model.matrix(x$formula, rhs = 2, data = x$dataTable)
+    vHvar <- model.matrix(x$formula, rhs = 3, data = x$dataTable)
+    Zvar <- model.matrix(x$formula, rhs = 4, data = x$dataTable)
+    if (x$nClasses == 2) {
+      hessAnalytical <- chessLCMhalfnormlike2C(parm = x$mlParam,
+        nXvar = ncol(Xvar), nuZUvar = ncol(uHvar), nvZVvar = ncol(vHvar),
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        wHvar = x$dataTable$weights, S = x$S, Zvar = Zvar,
+        nZHvar = ncol(Zvar))
+    } else {
+      if (x$nClasses == 3) {
+        hessAnalytical <- chessLCMhalfnormlike3C(parm = x$mlParam,
+          nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
+          nvZVvar = ncol(vHvar), uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, wHvar = x$dataTable$weights,
+          S = x$S, Zvar = Zvar, nZHvar = ncol(Zvar))
+      } else {
+        if (x$nClasses == 4) {
+          hessAnalytical <- chessLCMhalfnormlike4C(parm = x$mlParam,
+          nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
+          nvZVvar = ncol(vHvar), uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, wHvar = x$dataTable$weights,
+          S = x$S, Zvar = Zvar, nZHvar = ncol(Zvar))
+        } else {
+          if (x$nClasses == 5) {
+          hessAnalytical <- chessLCMhalfnormlike5C(parm = x$mlParam,
+            nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
+            nvZVvar = ncol(vHvar), uHvar = uHvar, vHvar = vHvar,
+            Yvar = Yvar, Xvar = Xvar, wHvar = x$dataTable$weights,
+            S = x$S, Zvar = Zvar, nZHvar = ncol(Zvar))
+          }
+        }
+      }
+    }
+    return(invHess_fun(hess = -hessAnalytical))
+  }
+}
+
+# Gradients Evaluated at each Observation ----------
+#' @rdname lcmcross
+#' @export
+estfun.lcmcross <- function(x, ...) {
+  return(x$gradL_OBS)
 }

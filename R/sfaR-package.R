@@ -80,4 +80,6 @@
 #' @importFrom fBasics dagoTest
 #' @importFrom cubature hcubature
 #' @importFrom katex math_to_rd
+#' @importFrom lmtest coeftest coeftest.default
+#' @importFrom sandwich bread estfun
 NULL

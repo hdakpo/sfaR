@@ -92,8 +92,7 @@
 #' \code{\link[stats:nlminb]{nlminb}})}
 #' @param hessianType Integer. If \code{1} (Default), analytic Hessian is
 #' returned for all the distributions. If \code{2},
-#' bhhh Hessian is estimated (\eqn{g'g}). If \code{3}, robust Hessian is
-#' computed (\eqn{H^{-1}GH^{-1}}).
+#' bhhh Hessian is estimated (\eqn{g'g}).
 #' @param simType Character string. If \code{simType = 'halton'} (Default),
 #' Halton draws are used for maximum simulated likelihood (MSL). If
 #' \code{simType = 'ghalton'}, Generalized-Halton draws are used for MSL. If
@@ -193,6 +192,17 @@
 #' of \code{sann}, we recommand to significantly increase the iteration limit 
 #' (e.g. \code{itermax = 20000}). The Conjugate Gradient (\code{cg}) can also be used
 #' in the first stage.
+#' 
+#' A set of extractor functions for fitted model objects is available for objects of class
+#' \code{'sfacross'} including methods to the generic functions \code{\link[=print.sfacross]{print}},
+#' \code{\link[=summary.sfacross]{summary}}, \code{\link[=coef.sfacross]{coef}}, 
+#' \code{\link[=fitted.sfacross]{fitted}}, \code{\link[=logLik.sfacross]{logLik}}, 
+#' \code{\link[=residuals.sfacross]{residuals}}, \code{\link[=vcov.sfacross]{vcov}}, 
+#' \code{\link[=efficiencies.sfacross]{efficiencies}}, \code{\link[=ic.sfacross]{ic}}, 
+#' \code{\link[=marginal.sfacross]{marginal}}, \code{\link[=skewnessTest.sfacross]{skewnessTest}}, 
+#' \code{\link[=estfun.sfacross]{estfun}} and 
+#' \code{\link[=bread.sfacross]{bread}} (from the \pkg{sandwich} package), 
+#' \code{\link[=coeftest.sfacross]{coeftest}} (from the \pkg{lmtest} package).
 #'
 #' @return \code{\link{sfacross}} returns a list of class \code{'sfacross'}
 #' containing the following elements:
@@ -304,7 +314,9 @@
 #'
 #' @author K Hervé Dakpo, Yann Desjeux and Laure Latruffe
 #'
-#' @seealso \code{\link[=summary.sfacross]{summary}} for creating and printing
+#' @seealso \code{\link[=print.sfacross]{print}} for printing \code{sfacross} object.
+#' 
+#' \code{\link[=summary.sfacross]{summary}} for creating and printing
 #' summary results.
 #'
 #' \code{\link[=coef.sfacross]{coef}} for extracting coefficients of the
@@ -326,6 +338,9 @@
 #'
 #' \code{\link[=residuals.sfacross]{residuals}} for extracting residuals of the
 #' estimation.
+#' 
+#' \code{\link[=skewnessTest.sfacross]{skewnessTest}} for conducting residuals
+#' skewness test.
 #'
 #' \code{\link[=vcov.sfacross]{vcov}} for computing the variance-covariance
 #' matrix of the coefficients.
@@ -649,8 +664,8 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
   }
   # Check hessian type
   if (length(hessianType) != 1 || !(hessianType %in% c(1L,
-    2L, 3L))) {
-    stop("argument 'hessianType' must equal either 1 or 2 or 3",
+    2L))) {
+    stop("argument 'hessianType' must equal either 1 or 2",
       call. = FALSE)
   }
   # Draws for SML -------
@@ -675,7 +690,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
       stop("argument 'antithetics' must be a single logical value",
         call. = FALSE)
     }
-    if (antithetics && (Nsim %% 2) != 0) {
+    if (antithetics && (Nsim%%2) != 0) {
       Nsim <- Nsim + 1
     }
     simDist <- if (simType == "halton") {
@@ -874,8 +889,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
       } else {
         if (method == "mla") {
           list(type = "Lev. Marquardt max.", nIter = mleList$mleObj$ni,
-          status = switch(mleList$mleObj$istop,
-            `1` = "convergence criteria were satisfied",
+          status = switch(mleList$mleObj$istop, `1` = "convergence criteria were satisfied",
             `2` = "maximum number of iterations was reached",
             `4` = "algorithm encountered a problem in the function computation"),
           mleLoglik = -mleList$mleObj$fn.value, gradient = mleList$mleObj$grad)
@@ -953,14 +967,10 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
   returnObj$gradientNorm <- sqrt(sum(mleList$gradient^2))
   returnObj$invHessian <- mleList$invHessian
   returnObj$hessianType <- if (hessianType == 1) {
-    "Analytic/Numeric Hessian"
+    "Analytic Hessian"
   } else {
     if (hessianType == 2) {
       "BHHH Hessian"
-    } else {
-      if (hessianType == 3) {
-        "Robust Hessian"
-      }
     }
   }
   returnObj$mlDate <- mlDate
@@ -971,7 +981,6 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
   }
   rm(mleList)
   class(returnObj) <- "sfacross"
-  # print.sfacross(returnObj)
   return(returnObj)
 }
 
@@ -989,3 +998,123 @@ print.sfacross <- function(x, ...) {
   print.default(format(x$mlParam), print.gap = 2, quote = FALSE)
   invisible(x)
 }
+
+# Bread for Sandwich Estimator ----------
+#' @rdname sfacross
+#' @export
+bread.sfacross <- function(x, ...) {
+  if (x$hessianType == "Analytic Hessian") {
+    return(x$invHessian * x$Nobs)
+  } else {
+    Yvar <- model.response(model.frame(x$formula, data = x$dataTable))
+    Xvar <- model.matrix(x$formula, rhs = 1, data = x$dataTable)
+    if (x$udist %in% c("tnormal", "lognormal")) {
+      muHvar <- model.matrix(x$formula, rhs = 2, data = x$dataTable)
+      uHvar <- model.matrix(x$formula, rhs = 3, data = x$dataTable)
+      vHvar <- model.matrix(x$formula, rhs = 4, data = x$dataTable)
+    } else {
+      uHvar <- model.matrix(x$formula, rhs = 2, data = x$dataTable)
+      vHvar <- model.matrix(x$formula, rhs = 3, data = x$dataTable)
+    }
+    if (x$udist == "hnormal") {
+      hessAnalytical <- chesshalfnormlike(parm = x$mlParam,
+        nXvar = ncol(Xvar), nuZUvar = ncol(uHvar), nvZVvar = ncol(vHvar),
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        wHvar = x$dataTable$weights, S = x$S)
+    } else {
+      if (x$udist == "exponential") {
+        hessAnalytical <- chessexponormlike(parm = x$mlParam,
+          nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
+          nvZVvar = ncol(vHvar), uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, wHvar = x$dataTable$weights,
+          S = x$S)
+      } else {
+        if (x$udist == "tnormal") {
+          if (x$scaling == TRUE) {
+          hessAnalytical <- chesstruncnormscalike(parm = x$mlParam,
+            nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
+            nvZVvar = ncol(vHvar), uHvar = uHvar, vHvar = vHvar,
+            Yvar = Yvar, Xvar = Xvar, wHvar = x$dataTable$weights,
+            S = x$S)
+          } else {
+          hessAnalytical <- chesstruncnormlike(parm = x$mlParam,
+            nXvar = ncol(Xvar), nmuZUvar = ncol(muHvar),
+            nuZUvar = ncol(uHvar), nvZVvar = ncol(vHvar),
+            muHvar = muHvar, uHvar = uHvar, vHvar = vHvar,
+            Yvar = Yvar, Xvar = Xvar, wHvar = x$dataTable$weights,
+            S = x$S)
+          }
+        } else {
+          if (x$udist == "rayleigh") {
+          hessAnalytical <- chessraynormlike(parm = x$mlParam,
+            nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
+            nvZVvar = ncol(vHvar), uHvar = uHvar, vHvar = vHvar,
+            Yvar = Yvar, Xvar = Xvar, wHvar = x$dataTable$weights,
+            S = x$S)
+          } else {
+          if (x$udist == "uniform") {
+            hessAnalytical <- chessuninormlike(parm = x$mlParam,
+            nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
+            nvZVvar = ncol(vHvar), uHvar = uHvar,
+            vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+            wHvar = x$dataTable$weights, S = x$S)
+          } else {
+            if (x$udist == "genexponential") {
+            hessAnalytical <- chessgenexponormlike(parm = x$mlParam,
+              nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
+              nvZVvar = ncol(vHvar), uHvar = uHvar,
+              vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+              wHvar = x$dataTable$weights, S = x$S)
+            } else {
+            if (x$udist == "tslaplace") {
+              hessAnalytical <- chesstslnormlike(parm = x$mlParam,
+              nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
+              nvZVvar = ncol(vHvar), uHvar = uHvar,
+              vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+              wHvar = x$dataTable$weights, S = x$S)
+            } else {
+              if (x$udist == "gamma") {
+              hessAnalytical <- chessgammanormlike(parm = x$mlParam,
+                nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
+                nvZVvar = ncol(vHvar), uHvar = uHvar,
+                vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+                wHvar = x$dataTable$weights, S = x$S,
+                N = x$Nobs, FiMat = x$FiMat)
+              } else {
+              if (x$udist == "weibull") {
+                hessAnalytical <- chessweibullnormlike(parm = x$mlParam,
+                nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
+                nvZVvar = ncol(vHvar), uHvar = uHvar,
+                vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+                wHvar = x$dataTable$weights,
+                S = x$S, N = x$Nobs, FiMat = x$FiMat)
+              } else {
+                if (x$udist == "lognormal") {
+                hessAnalytical <- chesslognormlike(parm = x$mlParam,
+                  nXvar = ncol(Xvar), nmuZUvar = ncol(muHvar),
+                  nuZUvar = ncol(uHvar), nvZVvar = ncol(vHvar),
+                  muHvar = muHvar, uHvar = uHvar,
+                  vHvar = vHvar, Yvar = Yvar,
+                  Xvar = Xvar, wHvar = x$dataTable$weights,
+                  S = x$S, N = x$Nobs, FiMat = x$FiMat)
+                }
+              }
+              }
+            }
+            }
+          }
+          }
+        }
+      }
+    }
+    return(invHess_fun(hess = -hessAnalytical))
+  }
+}
+
+# Gradients Evaluated at each Observation ----------
+#' @rdname sfacross
+#' @export
+estfun.sfacross <- function(x, ...) {
+  return(x$gradL_OBS)
+}
+

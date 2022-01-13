@@ -3,6 +3,8 @@
 \name{sfacross}
 \alias{sfacross}
 \alias{print.sfacross}
+\alias{bread.sfacross}
+\alias{estfun.sfacross}
 \title{Stochastic frontier estimation using cross-section data}
 \usage{
 sfacross(
@@ -36,6 +38,10 @@ sfacross(
 )
 
 \method{print}{sfacross}(x, ...)
+
+\method{bread}{sfacross}(x, ...)
+
+\method{estfun}{sfacross}(x, ...)
 }
 \arguments{
 \item{formula}{A symbolic description of the model to be estimated based on
@@ -114,8 +120,7 @@ regions and sparse Hessian (see \code{\link[trustOptim:trust.optim]{trust.optim}
 
 \item{hessianType}{Integer. If \code{1} (Default), analytic Hessian is
 returned for all the distributions. If \code{2},
-bhhh Hessian is estimated (\eqn{g'g}). If \code{3}, robust Hessian is
-computed (\eqn{H^{-1}GH^{-1}}).}
+bhhh Hessian is estimated (\eqn{g'g}).}
 
 \item{simType}{Character string. If \code{simType = 'halton'} (Default),
 Halton draws are used for maximum simulated likelihood (MSL). If
@@ -352,6 +357,17 @@ solution. Then a gradient-based methods is recommanded in the second step. In th
 of \code{sann}, we recommand to significantly increase the iteration limit
 (e.g. \code{itermax = 20000}). The Conjugate Gradient (\code{cg}) can also be used
 in the first stage.
+
+A set of extractor functions for fitted model objects is available for objects of class
+\code{'sfacross'} including methods to the generic functions \code{\link[=print.sfacross]{print}},
+\code{\link[=summary.sfacross]{summary}}, \code{\link[=coef.sfacross]{coef}},
+\code{\link[=fitted.sfacross]{fitted}}, \code{\link[=logLik.sfacross]{logLik}},
+\code{\link[=residuals.sfacross]{residuals}}, \code{\link[=vcov.sfacross]{vcov}},
+\code{\link[=efficiencies.sfacross]{efficiencies}}, \code{\link[=ic.sfacross]{ic}},
+\code{\link[=marginal.sfacross]{marginal}}, \code{\link[=skewnessTest.sfacross]{skewnessTest}},
+\code{\link[=estfun.sfacross]{estfun}} and
+\code{\link[=bread.sfacross]{bread}} (from the \pkg{sandwich} package),
+\code{\link[=coeftest.sfacross]{coeftest}} (from the \pkg{lmtest} package).
 }
 \note{
 For the Halton draws, the code is adapted from the \pkg{mlogit}
@@ -482,6 +498,8 @@ Wang, J. 2012. A normal truncated skewed-Laplace model in stochastic
 frontier analysis. Master thesis, Western Kentucky University, May.
 }
 \seealso{
+\code{\link[=print.sfacross]{print}} for printing \code{sfacross} object.
+
 \code{\link[=summary.sfacross]{summary}} for creating and printing
 summary results.
 
@@ -504,6 +522,9 @@ inefficiency drivers.
 
 \code{\link[=residuals.sfacross]{residuals}} for extracting residuals of the
 estimation.
+
+\code{\link[=skewnessTest.sfacross]{skewnessTest}} for conducting residuals
+skewness test.
 
 \code{\link[=vcov.sfacross]{vcov}} for computing the variance-covariance
 matrix of the coefficients.

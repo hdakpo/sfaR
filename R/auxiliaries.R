@@ -22,7 +22,8 @@ interCheckMain <- function(formula) {
   return(formula)
 }
 
-# intercept check for heteroscedasticity in u (cross-section) ----------
+# intercept check for heteroscedasticity in u
+# (cross-section) ----------
 #' @param formula formula for heteroscedasticity in inefficiency term
 #' @param scaling logical for scaling property
 #' @noRd
@@ -42,7 +43,8 @@ clhsCheck_u <- function(formula, scaling) {
   return(formula)
 }
 
-# intercept check for heteroscedasticity in u (panel data) ----------
+# intercept check for heteroscedasticity in u (panel data)
+# ----------
 #' @param formula main formula of model
 #' @noRd
 plhsCheck_u <- function(formula) {
@@ -61,7 +63,8 @@ plhsCheck_u <- function(formula) {
   return(formula)
 }
 
-# intercept check for heterogeneity in mu (cross section) ----------
+# intercept check for heterogeneity in mu (cross section)
+# ----------
 #' @param formula formula for heterogeneity in inefficiency term
 #' @param scaling logical for scaling property
 #' @noRd
@@ -81,7 +84,8 @@ clhsCheck_mu <- function(formula, scaling) {
   return(formula)
 }
 
-# intercept check for heterogeneity in mu (panel data) ----------
+# intercept check for heterogeneity in mu (panel data)
+# ----------
 #' @param formula formula for heterogeneity in inefficiency term
 #' @noRd
 plhsCheck_mu <- function(formula) {
@@ -119,7 +123,8 @@ clhsCheck_v <- function(formula) {
   return(formula)
 }
 
-# intercept check for separating variables in LCM ----------
+# intercept check for separating variables in LCM
+# ----------
 #' @param formula formula for logit form in LCM
 #' @noRd
 clhsCheck_t <- function(formula) {
@@ -133,6 +138,26 @@ clhsCheck_t <- function(formula) {
   } else {
     if (attr(terM, "intercept") == 0)
       warning("logit form in LCM is estimated without intercept",
+        call. = FALSE)
+  }
+  return(formula)
+}
+
+# intercept check for separating variables in ZISF
+# ----------
+#' @param formula formula for logit form in ZISF
+#' @noRd
+clhsCheck_q <- function(formula) {
+  terM <- terms(formula(formula))
+  if (attr(terM, "response") == 1)
+    formula[[2]] <- NULL
+  if (length(attr(terM, "term.labels")) == 0 && attr(terM,
+    "intercept") == 0) {
+    stop("at least one exogenous variable is required in the logit form in ZISF ",
+      call. = FALSE)
+  } else {
+    if (attr(terM, "intercept") == 0)
+      warning("logit form in ZISF is estimated without intercept",
         call. = FALSE)
   }
   return(formula)
@@ -154,7 +179,6 @@ formDist_sfacross <- function(udist, formula, muhet, uhet, vhet) {
   return(formula)
 }
 
-#' @param udist inefficiency term distribution
 #' @param formula formula for model
 #' @param uhet heteroscedasticity in u
 #' @param vhet heteroscedasticity in v
@@ -162,6 +186,22 @@ formDist_sfacross <- function(udist, formula, muhet, uhet, vhet) {
 #' @noRd
 formDist_lcmcross <- function(formula, uhet, vhet, thet) {
   formula <- as.Formula(formula, uhet, vhet, thet)
+  return(formula)
+}
+
+#' @param udist inefficiency term distribution
+#' @param formula formula for model
+#' @param uhet heteroscedasticity in u
+#' @param vhet heteroscedasticity in v
+#' @param qhet separating variables for ZISF
+#' @noRd
+formDist_zisfcross <- function(udist, formula, muhet, uhet, vhet,
+  qhet) {
+  if (udist %in% c("tnormal", "lognormal")) {
+    formula <- as.Formula(formula, muhet, uhet, vhet, qhet)
+  } else {
+    formula <- as.Formula(formula, uhet, vhet, qhet)
+  }
   return(formula)
 }
 
@@ -258,6 +298,48 @@ fName_lcmcross <- function(Xvar, uHvar, vHvar, Zvar, nZHvar,
     lcmClasses - 1)))
 }
 
+#' @param Xvar variables in main formula (e.g. inputs/outputs)
+#' @param muHvar heterogeneity variables in mu
+#' @param uHvar heteroscedasticity variables in u
+#' @param vHvar heteroscedasticity variables in v
+#' @param Zvar separating variables in ZISF
+#' @noRd
+fName_mu_zisfcross <- function(Xvar, muHvar, uHvar, vHvar, Zvar) {
+  c(colnames(Xvar), c(paste0("Zmu_", colnames(muHvar)), paste0("Zu_",
+    colnames(uHvar)), paste0("Zv_", colnames(vHvar)), paste0("SF_",
+    colnames(Zvar))))
+}
+
+#' @param Xvar variables in main formula (e.g. inputs/outputs)
+#' @param udist inefficiency distribution
+#' @param uHvar heteroscedasticity variables in u
+#' @param vHvar heteroscedasticity variables in v
+#' @param Zvar separating variables in ZISF
+#' @noRd
+fName_uv_zisfcross <- function(Xvar, udist, uHvar, vHvar, Zvar) {
+  c(colnames(Xvar), if (udist == "gamma") {
+    c(paste0("Zu_", colnames(uHvar)), paste0("Zv_", colnames(vHvar)),
+      "P", paste0("SF_",
+                  colnames(Zvar)))
+  } else {
+    if (udist == "weibull") {
+      c(paste0("Zu_", colnames(uHvar)), paste0("Zv_", colnames(vHvar)),
+        "k", paste0("SF_",
+                    colnames(Zvar)))
+    } else {
+      if (udist == "tslaplace") {
+        c(paste0("Zu_", colnames(uHvar)), paste0("Zv_",
+                                                 colnames(vHvar)), "lambda", paste0("Cl_",
+                                                                                    colnames(Zvar)))
+      } else {
+        c(paste0("Zu_", colnames(uHvar)), paste0("Zv_",
+                                                 colnames(vHvar)), paste0("SF_",
+                                                                          colnames(Zvar)))
+      }
+    }
+  })
+}
+
 # Compute skewness ----------
 #' @param x vector for which skewness is computed
 #' @noRd
@@ -300,7 +382,8 @@ drawMat <- function(N, Nsim, simType, prime, burn, seed, antithetics) {
       idPrime <- which(prime == nthPrime)
       set.seed(seed)
       matDraw <- matrix(ghalton(n = Nsim * N, d = idPrime,
-        method = "generalized"), nrow = N, ncol = Nsim, byrow = TRUE)
+        method = "generalized"), nrow = N, ncol = Nsim,
+        byrow = TRUE)
     } else {
       if (simType == "sobol") {
         matDraw <- matrix(sobol(n = Nsim * N, dim = 1,
@@ -381,28 +464,7 @@ vcovObj <- function(mleObj, hessianType, method, nParm) {
         hess <- -crossprod(mleObj$gradL_OBS)
         invhess <- invHess_fun(hess = hess)
       }
-    } else {
-      if (hessianType == 3) {
-        if (method == "mla") {
-          invhess <- matrix(nrow = nParm, ncol = nParm)
-          invhess[upper.tri(invhess, diag = TRUE)] <- mleObj$v
-          invhess[lower.tri(invhess)] <- t(invhess)[lower.tri(invhess)]
-          invhess <- (invhess + t(invhess))/2
-          invhess <- invhess %*% crossprod(mleObj$gradL_OBS) %*%
-          invhess  # H^(-1)GH^(-1) G: outer product of gradient
-        } else {
-          if (method %in% c("sparse", "trust")) {
-          invhess <- invHess_fun(hess = -mleObj$hessian)
-          invhess <- invhess %*% crossprod(mleObj$gradL_OBS) %*%
-            invhess
-          } else {
-          invhess <- invHess_fun(hess = mleObj$hessian)
-          invhess <- invhess %*% crossprod(mleObj$gradL_OBS) %*%
-            invhess
-          }
-        }
-      }
-    }
+    } 
   }
   invhess
 }
@@ -411,15 +473,32 @@ vcovObj <- function(mleObj, hessianType, method, nParm) {
 #' @param udist inefficiency distribution
 #' @noRd
 sfadist <- function(udist) {
-  switch(udist, tnormal = "Truncated-Normal Normal Stochastic Frontier Model",
-    hnormal = "Normal-Half Normal Stochastic Frontier Model",
-    exponential = "Exponential Normal Stochastic Frontier Model",
-    rayleigh = "Rayleigh Normal Stochastic Frontier Model",
-    uniform = "Uniform Normal Stochastic Frontier Model",
-    gamma = "Gamma Normal Stochastic Frontier Model", lognormal = "Log-Normal Normal Stochastic Frontier Model",
-    weibull = "Weibull Normal Stochastic Frontier Model",
-    genexponential = "Generalized-Exponential Normal Stochastic Frontier Model",
-    tslaplace = "Truncated Skewed-Laplace Normal Stochastic Frontier Model")
+  switch(udist, tnormal = "Truncated-Normal Normal SF Model",
+    hnormal = "Normal-Half Normal SF Model",
+    exponential = "Exponential Normal SF Model",
+    rayleigh = "Rayleigh Normal SF Model",
+    uniform = "Uniform Normal SF Model",
+    gamma = "Gamma Normal SF Model", 
+    lognormal = "Log-Normal Normal SF Model",
+    weibull = "Weibull Normal SF Model",
+    genexponential = "Generalized-Exponential Normal SF Model",
+    tslaplace = "Truncated Skewed-Laplace Normal SF Model")
+}
+
+# ZISF + distribution ----------
+#' @param udist inefficiency distribution
+#' @noRd
+zisfdist <- function(udist) {
+  switch(udist, tnormal = "Truncated-Normal Normal ZISF model",
+         hnormal = "Normal-Half Normal ZISF Model",
+         exponential = "Exponential Normal ZISF model",
+         rayleigh = "Rayleigh Normal ZISF model",
+         uniform = "Uniform Normal ZISF model",
+         gamma = "Gamma Normal ZISF model", 
+         lognormal = "Log-Normal Normal ZISF model",
+         weibull = "Weibull Normal ZISF model",
+         genexponential = "Generalized-Exponential Normal ZISF model",
+         tslaplace = "Truncated Skewed-Laplace Normal ZISF model")
 }
 
 # variance of u ----------
@@ -596,7 +675,8 @@ eExpuFun <- function(object, mu, P, lambda, k) {
   }
 }
 
-# Center text strings (adapted from gdata package) ----------
+# Center text strings (adapted from gdata package)
+# ----------
 #' @param s string
 #' @noRd
 trimChar <- function(s, recode.factor = TRUE, ...) {

@@ -3,6 +3,8 @@
 \name{lcmcross}
 \alias{lcmcross}
 \alias{print.lcmcross}
+\alias{bread.lcmcross}
+\alias{estfun.lcmcross}
 \title{Latent class stochastic frontier using cross-section data}
 \usage{
 lcmcross(
@@ -35,6 +37,10 @@ lcmcross(
 )
 
 \method{print}{lcmcross}(x, ...)
+
+\method{bread}{lcmcross}(x, ...)
+
+\method{estfun}{lcmcross}(x, ...)
 }
 \arguments{
 \item{formula}{A symbolic description of the model to be estimated based on
@@ -101,10 +107,7 @@ regions and sparse Hessian (see \code{\link[trustOptim:trust.optim]{trust.optim}
 \code{\link[stats:nlminb]{nlminb}})}}
 
 \item{hessianType}{Integer. If \code{1} (default), analytic Hessian is
-returned for all the distributions except \code{'gamma'}, \code{'lognormal'}
-and \code{'weibull'} for which the numeric Hessian is returned. If \code{2},
-bhhh Hessian is estimated (\eqn{g'g}). If \code{3}, robust Hessian is
-computed (\eqn{H^{-1}GH^{-1}}).}
+returned. If \code{2}, bhhh Hessian is estimated (\eqn{g'g}).}
 
 \item{itermax}{Maximum number of iterations allowed for optimization.
 Default = \code{2000}.}
@@ -318,6 +321,16 @@ solution. Then a gradient-based methods is recommanded in the second step. In th
 of \code{sann}, we recommand to significantly increase the iteration limit
 (e.g. \code{itermax = 20000}). The Conjugate Gradient (\code{cg}) can also be used
 in the first stage.
+
+A set of extractor functions for fitted model objects is available for objects of class
+\code{'lcmcross'} including methods to the generic functions \code{\link[=print.lcmcross]{print}},
+\code{\link[=summary.lcmcross]{summary}}, \code{\link[=coef.lcmcross]{coef}},
+\code{\link[=fitted.lcmcross]{fitted}}, \code{\link[=logLik.lcmcross]{logLik}},
+\code{\link[=residuals.lcmcross]{residuals}}, \code{\link[=vcov.lcmcross]{vcov}},
+\code{\link[=efficiencies.lcmcross]{efficiencies}}, \code{\link[=ic.lcmcross]{ic}},
+\code{\link[=marginal.lcmcross]{marginal}}, \code{\link[=estfun.lcmcross]{estfun}} and
+\code{\link[=bread.lcmcross]{bread}} (from the \pkg{sandwich} package),
+\code{\link[=coeftest.lcmcross]{coeftest}} (from the \pkg{lmtest} package).
 }
 \note{
 In the case of panel data, \code{\link{lcmcross}} estimates a pooled
@@ -379,6 +392,8 @@ frontier: A framework for the analysis of firm inefficiency.
 \emph{International Economic Review}, \bold{32}(3), 715--723.
 }
 \seealso{
+\code{\link[=print.lcmcross]{print}} for printing \code{lcmcross} object.
+
 \code{\link[=summary.lcmcross]{summary}} for creating and printing
 summary results.
 
