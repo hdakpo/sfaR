@@ -4,15 +4,18 @@
 \alias{logLik}
 \alias{logLik.sfacross}
 \alias{logLik.lcmcross}
-\title{Extract log-likelihood value of classic or latent class stochastic models}
+\alias{logLik.selectioncross}
+\title{Extract log-likelihood value of stochastic frontier models}
 \usage{
 \method{logLik}{sfacross}(object, individual = FALSE, ...)
 
 \method{logLik}{lcmcross}(object, individual = FALSE, ...)
+
+\method{logLik}{selectioncross}(object, individual = FALSE, ...)
 }
 \arguments{
-\item{object}{A classic or latent class stochastic frontier model returned
-by \code{\link{sfacross}} or \code{\link{lcmcross}}.}
+\item{object}{A stochastic frontier model returned
+by \code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.}
 
 \item{individual}{Logical. If \code{FALSE} (default), the sum of all
 observations' log-likelihood values is returned. If \code{TRUE}, a vector of
@@ -32,7 +35,7 @@ number of free parameters (\code{df}), when \code{individual = TRUE}.
 \description{
 \code{\link{logLik}} extracts the log-likelihood value(s) from classic or
 latent class stochastic frontier models estimated with
-\code{\link{sfacross}} or \code{\link{lcmcross}}.
+\code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.
 }
 \examples{
 
@@ -57,9 +60,12 @@ fitting function.
 
 \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 model fitting function.
+
+\code{\link{selectioncross}} for sample selection in stochastic frontier model
+fitting function.
 }
 \author{
-K Hervé Dakpo, Yann Desjeux and Laure Latruffe
+K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
 }
 \keyword{likelihood}
 \keyword{methods}

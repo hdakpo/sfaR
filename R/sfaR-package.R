@@ -8,6 +8,7 @@
 # sfaR package overview                                                        #
 # Models: -Standard Stochastic Frontier Analysis                               #
 #         -Latent Class Stochastic Frontier Analysis                           #
+#         -Sample selection correction                                         #
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
 
@@ -17,8 +18,8 @@
 #' maximum simulated likelihood - MSL) for various specifications of stochastic
 #' frontier analysis (SFA).
 #'
-#' Two categories of important functions are available: \code{\link{sfacross}}
-#' and \code{\link{lcmcross}}, which estimate different types of frontiers and
+#' Three categories of important functions are available: \code{\link{sfacross}}, 
+#' \code{\link{lcmcross}}, and \code{\link{selectioncross}}, which estimate different types of frontiers and
 #' offer eleven alternative optimization algorithms (i.e. "bfgs", "bhhh", "nr",
 #' "nm", "cg", "sann", "ucminf", "mla", "sr1", "sparse", "nlminb").
 #'
@@ -50,13 +51,23 @@
 #'   heterogeneity in the truncated mean parameter in the case of the truncated
 #'   normal and lognormal distributions. In addition, in the case of the truncated normal
 #'   distribution, the scaling property can be estimated.
+#'   
+#' @section selectioncross: \code{\link{selectioncross}} estimates the frontier for cross-sectional data
+#' in the presence of sample selection. The model solves the selection bias due to
+#' the correlation between the two-sided errors terms in both the selection and the 
+#' frontier equations. The likelihood can be estimated using five different
+#' possibilities: Gauss-Kronrod quadrature, adaptive integration over hypercubes 
+#' (hcubature and pcubature), Gauss-Hermite quadrature, and
+#'  maximum simulated likelihood. Only the half normal
+#' distribution is available for the one-sided error term. Heteroscedasticity
+#' in both error terms is possible.
 #'
 #' @section Bugreport: Any bug or suggestion can be reported using the \code{sfaR}'\code{s}
 #' tracker facilities at: \url{https://github.com/hdakpo/sfaR/issues}
 #'
-#' @author K Hervé Dakpo, Yann Desjeux and Laure Latruffe
+#' @author K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
 #'
-#' @importFrom stats coefficients dnorm lm model.frame gsub
+#' @importFrom stats coefficients dnorm lm model.frame
 #' @importFrom stats model.matrix model.response nlminb
 #' @importFrom stats pnorm qnorm delete.response fitted
 #' @importFrom stats logLik residuals terms vcov formula
@@ -82,4 +93,6 @@
 #' @importFrom katex math_to_rd
 #' @importFrom lmtest coeftest coeftest.default
 #' @importFrom sandwich bread estfun
+#' @importFrom fastGHQuad gaussHermiteData
+#' @importFrom cubature hcubature pcubature
 NULL

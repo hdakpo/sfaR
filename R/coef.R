@@ -8,25 +8,27 @@
 # Coefficients extraction                                                      #
 # Models: -Standard Stochastic Frontier Analysis                               #
 #         -Latent Class Stochastic Frontier Analysis                           #
+#         -Sample selection correction                                         #
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
 
-#' @title Extract coefficients of classic or latent class stochastic models
-#'
-#' From an object of class \code{'summary.sfacross'} or
-#' \code{'summary.lcmcross'}, \code{\link{coef}} extracts the coefficients,
+#' Extract coefficients of stochastic frontier models
+#' 
+#' @description
+#' From an object of class \code{'summary.sfacross'}, \code{'summary.lcmcross'}
+#' or \code{'summary.selectioncross'}, \code{\link{coef}} extracts the coefficients,
 #' their standard errors, z-values, and (asymptotic) P-values.
 #'
-#' From on object of class \code{'sfacross'} or \code{'lcmcross'}, it extracts
+#' From on object of class \code{'sfacross'}, \code{'lcmcross'} or \code{'selectioncross'}, it extracts
 #' only the estimated coefficients.
 #'
 #' @name coef
 #'
-#' @param object A classic or latent class stochastic frontier model returned
-#' by \code{\link{sfacross}} or \code{\link{lcmcross}}, or an object of class
-#' \code{'summary.sfacross'} or \code{'summary.lcmcross'}.
+#' @param object A stochastic frontier model returned
+#' by \code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}, or an object of class
+#' \code{'summary.sfacross'}, \code{'summary.lcmcross'} or \code{'summary.selectioncross'} .
 #' @param extraPar Logical (default = \code{FALSE}). Only applies to objects of
-#' class \code{'sfacross'} or \code{'lcmcross'}. If \code{TRUE}, additional
+#' class \code{'sfacross'}, \code{'lcmcross'} or \code{'selectioncross'}. If \code{TRUE}, additional
 #' parameters are returned:
 #'
 #' \code{sigmaSq} = \code{sigmauSq} + \code{sigmavSq}
@@ -48,25 +50,28 @@
 #' \code{gamma} = \code{sigmauSq}/(\code{sigmauSq} + \code{sigmavSq})
 #' @param ... Currently ignored.
 #'
-#' @return For objects of class \code{'summary.sfacross'} or
-#' \code{'summary.lcmcross'}, \code{\link{coef}} returns a matrix with four
+#' @return For objects of class \code{'summary.sfacross'},
+#' \code{'summary.lcmcross'} or \code{'summary.selectioncross'}, \code{\link{coef}} returns a matrix with four
 #' columns. Namely, the estimated coefficients, their standard errors,
 #' z-values, and (asymptotic) P-values.
 #'
-#' For objects of class \code{'sfacross'} or \code{'lcmcross'},
+#' For objects of class \code{'sfacross'}, \code{'lcmcross'} or \code{'selectioncross'},
 #' \code{\link{coef}} returns a numeric vector of the estimated coefficients.
 #' If \code{extraPar = TRUE}, additional parameters, detailed in the section
 #' \sQuote{Arguments}, are also returned. In the case of object of class
 #' \code{'lcmcross'}, each additional parameter terminates with \code{'#'} that
 #' represents the class number.
 #'
-#' @author K Hervé Dakpo, Yann Desjeux and Laure Latruffe
+#' @author K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
 #'
 #' @seealso \code{\link{sfacross}}, for the stochastic frontier analysis model
 #' fitting function.
 #'
 #' \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 #' model fitting function.
+#' 
+#' \code{\link{selectioncross}} for sample selection in stochastic frontier model
+#' fitting function.
 #'
 #' @keywords methods coefficients
 #'
@@ -311,5 +316,45 @@ coef.lcmcross <- function(object, extraPar = FALSE, ...) {
 #' @aliases coef.summary.lcmcross
 #' @export
 coef.summary.lcmcross <- function(object, ...) {
+  object$mlRes
+}
+
+# coefficients from selectioncross ----------
+#' @rdname coef
+#' @aliases coef.selectioncross
+#' @export
+coef.selectioncross <- function(object, extraPar = FALSE, ...) {
+  if (length(extraPar) != 1 || !is.logical(extraPar[1]))
+    stop("argument 'extraPar' must be a single logical value",
+      call. = FALSE)
+  cRes <- object$mlParam
+  if (extraPar) {
+    delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+      object$nuZUvar)]
+    phi <- object$mlParam[(object$nXvar + object$nuZUvar +
+      1):(object$nXvar + object$nuZUvar + object$nvZVvar)]
+    uHvar <- model.matrix(object$formula, data = object$dataTable,
+      rhs = 2)
+    vHvar <- model.matrix(object$formula, data = object$dataTable,
+      rhs = 3)
+    Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+    Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
+    if (object$nuZUvar > 1 || object$nvZVvar > 1)
+      cat("Variances averaged over observations     \n\n")
+    cRes <- c(cRes, sigmaSq = mean(exp(Wu)) + mean(exp(Wv)),
+      lambdaSq = mean(exp(Wu))/mean(exp(Wv)), sigmauSq = mean(exp(Wu)),
+      sigmavSq = mean(exp(Wv)), sigma = sqrt(mean(exp(Wu)) +
+        mean(exp(Wv))), lambda = sqrt(mean(exp(Wu))/mean(exp(Wv))),
+      sigmau = sqrt(mean(exp(Wu))), sigmav = sqrt(mean(exp(Wv))),
+      gamma = mean(exp(Wu))/(mean(exp(Wu)) + mean(exp(Wv))))
+  }
+  return(cRes)
+}
+
+# coefficients from summary.selectioncross ----------
+#' @rdname coef
+#' @aliases coef.summary.selectioncross
+#' @export
+coef.summary.selectioncross <- function(object, ...) {
   object$mlRes
 }

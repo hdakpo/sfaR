@@ -4,20 +4,23 @@
 \alias{residuals}
 \alias{residuals.sfacross}
 \alias{residuals.lcmcross}
-\title{Extract residuals of classic or latent class stochastic models}
+\alias{residuals.selectioncross}
+\title{Extract residuals of stochastic frontier models}
 \usage{
 \method{residuals}{sfacross}(object, ...)
 
 \method{residuals}{lcmcross}(object, ...)
+
+\method{residuals}{selectioncross}(object, ...)
 }
 \arguments{
-\item{object}{A classic or latent class stochastic frontier model returned
-by \code{\link{sfacross}} or \code{\link{lcmcross}}.}
+\item{object}{A stochastic frontier model returned
+by \code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.}
 
 \item{...}{Currently ignored.}
 }
 \value{
-When the \code{object} is of class \code{'sfacross'},
+When the \code{object} is of class \code{'sfacross'} or \code{'selectioncross'},
 \code{\link{residuals}} returns a vector of residuals values.
 
 When the \code{object} is of class \code{'lcmcross'},
@@ -27,8 +30,8 @@ for each latent class, where each variable terminates with \code{"_c#"},
 }
 \description{
 This function returns the residuals' values from classic or latent class
-stochastic frontier models estimated with \code{\link{sfacross}} or
-\code{\link{lcmcross}}.
+stochastic frontier models estimated with \code{\link{sfacross}},
+\code{\link{lcmcross}} or \code{\link{selectioncross}}.
 }
 \note{
 The residuals values are ordered in the same way as the corresponding
@@ -59,9 +62,12 @@ fitting function.
 
 \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 model fitting function.
+
+\code{\link{selectioncross}} for sample selection in stochastic frontier model
+fitting function.
 }
 \author{
-K Hervé Dakpo, Yann Desjeux and Laure Latruffe
+K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
 }
 \keyword{methods}
 \keyword{residuals}

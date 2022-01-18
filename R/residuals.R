@@ -8,23 +8,24 @@
 # Residuals of model (v - S * u)                                               #
 # Models: -Standard Stochastic Frontier Analysis                               #
 #         -Latent Class Stochastic Frontier Analysis                           #
+#         -Sample selection correction                                         #
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
 
-#' Extract residuals of classic or latent class stochastic models
+#' Extract residuals of stochastic frontier models
 #'
 #' This function returns the residuals' values from classic or latent class
-#' stochastic frontier models estimated with \code{\link{sfacross}} or
-#' \code{\link{lcmcross}}.
+#' stochastic frontier models estimated with \code{\link{sfacross}},
+#' \code{\link{lcmcross}} or \code{\link{selectioncross}}.
 #'
 #'
-#' @param object A classic or latent class stochastic frontier model returned
-#' by \code{\link{sfacross}} or \code{\link{lcmcross}}.
+#' @param object A stochastic frontier model returned
+#' by \code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.
 #' @param ... Currently ignored.
 #'
 #' @name residuals
 #'
-#' @return When the \code{object} is of class \code{'sfacross'},
+#' @return When the \code{object} is of class \code{'sfacross'} or \code{'selectioncross'},
 #' \code{\link{residuals}} returns a vector of residuals values.
 #'
 #' When the \code{object} is of class \code{'lcmcross'},
@@ -35,13 +36,16 @@
 #' @note The residuals values are ordered in the same way as the corresponding
 #' observations in the dataset used for the estimation.
 #'
-#' @author K Hervé Dakpo, Yann Desjeux and Laure Latruffe
+#' @author K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
 #'
 #' @seealso \code{\link{sfacross}}, for the stochastic frontier analysis model
 #' fitting function.
 #'
 #' \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 #' model fitting function.
+#' 
+#' \code{\link{selectioncross}} for sample selection in stochastic frontier model
+#' fitting function.
 #'
 #' @keywords methods residuals
 #'
@@ -96,4 +100,12 @@ residuals.lcmcross <- function(object, ...) {
       }
     }
   }
+}
+
+# residuals from selectioncross ----------
+#' @rdname residuals
+#' @aliases residuals.selectioncross
+#' @export
+residuals.selectioncross <- function(object, ...) {
+  object$dataTable$mlResiduals
 }

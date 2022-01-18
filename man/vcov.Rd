@@ -4,16 +4,18 @@
 \alias{vcov}
 \alias{vcov.sfacross}
 \alias{vcov.lcmcross}
-\title{Compute variance-covariance matrix of classic or latent class stochastic
-models}
+\alias{vcov.selectioncross}
+\title{Compute variance-covariance matrix of stochastic frontier models}
 \usage{
 \method{vcov}{sfacross}(object, extraPar = FALSE, ...)
 
 \method{vcov}{lcmcross}(object, ...)
+
+\method{vcov}{selectioncross}(object, extraPar = FALSE, ...)
 }
 \arguments{
-\item{object}{A classic or latent class stochastic frontier model returned
-by \code{\link{sfacross}} or \code{\link{lcmcross}}}
+\item{object}{A stochastic frontier model returned
+by \code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}}
 
 \item{extraPar}{Logical. Only available for non heteroscedastic models
 returned by \code{\link{sfacross}}. Default = \code{FALSE}. If \code{TRUE},
@@ -46,13 +48,12 @@ coefficients is returned.
 \description{
 \code{\link{vcov}} computes the variance-covariance matrix of the maximum
 likelihood (ML) coefficients of classic or latent class stochastic frontier
-models estimated by \code{\link{sfacross}} or \code{\link{lcmcross}}.
+models estimated by \code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.
 }
 \details{
 The variance-covariance matrix is obtained by the inversion of the negative
 Hessian matrix. Depending on the distribution and the \code{'hessianType'}
-option, the analytical/numeric Hessian or the bhhh Hessian or the robust
-Hessian matrix is evaluated.
+option, the analytical/numeric Hessian or the bhhh Hessian is evaluated.
 
 The argument \code{extraPar}, is currently available for objects of class
 \code{'sfacross'}.  When \code{'extraPar = TRUE'}, the variance-covariance
@@ -66,7 +67,36 @@ cb_s_h <- sfacross(formula = YIT ~ X1 + X2 + X3 + X4, udist = 'hnormal',
     data = dairyspain, S = 1, method = 'bfgs')
   vcov(cb_s_h)
   vcov(cb_s_h, extraPar = TRUE)
-
+ 
+ # Other variance-covariance matrices can be obtained using the sandwich package
+ 
+ # Robust variance-covariance matrix
+ 
+ library(sandwich)
+ 
+ vcovCL(cb_s_h)
+ 
+ # Coefficients and standard error can be obtained using lmtest package
+ 
+ library(lmtest)
+ 
+ coeftest(cb_s_h, vcov. = vcovCL)
+ 
+ # Clustered Standard errors
+ 
+ coeftest(cb_s_h, vcov. = vcovCL, cluster = ~ FARM)
+ 
+ # Doubly clustered standard errors
+ 
+ coeftest(cb_s_h, vcov. = vcovCL, cluster = ~ FARM + YEAR)
+ 
+ # BHHH standard errors can also be obtained using
+ 
+ coeftest(cb_s_h, vcov. = vcovOPG)
+ 
+ # Adjusted BHHH standard errors is obtained by
+ 
+ coeftest(cb_s_h, vcov. = vcovOPG, adjust = TRUE)
 
 ## Using data on eighty-two countries production (DGP)
 # LCM Cobb Douglas (production function) half normal distribution
@@ -81,9 +111,12 @@ fitting function.
 
 \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 model fitting function.
+
+\code{\link{selectioncross}} for sample selection in stochastic frontier model
+fitting function.
 }
 \author{
-K Hervé Dakpo, Yann Desjeux and Laure Latruffe
+K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
 }
 \keyword{methods}
 \keyword{vcov}

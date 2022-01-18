@@ -4,20 +4,24 @@
 \alias{efficiencies}
 \alias{efficiencies.sfacross}
 \alias{efficiencies.lcmcross}
+\alias{efficiencies.selectioncross}
 \title{Compute conditional (in-)efficiency estimates of stochastic frontier models}
 \usage{
 \method{efficiencies}{sfacross}(object, level = 0.95, newData = NULL, ...)
 
 \method{efficiencies}{lcmcross}(object, level = 0.95, newData = NULL, ...)
+
+\method{efficiencies}{selectioncross}(object, level = 0.95, newData = NULL, ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{sfacross}} or \code{\link{lcmcross}}.}
+by \code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.}
 
 \item{level}{A number between between 0 and 0.9999 used for the computation
 of (in-)efficiency confidence intervals (defaut = \code{0.95}). Only used
 when \code{udist} = \code{'hnormal'}, \code{'exponential'}, \code{'tnormal'}
-or \code{'uniform'} in \code{\link{sfacross}} or \code{\link{lcmcross}}.}
+or \code{'uniform'} in \code{\link{sfacross}}. The option is also available for
+\code{\link{lcmcross}}, or \code{\link{selectioncross}}.}
 
 \item{newData}{Optional data frame that is used to calculate the efficiency
 estimates. If NULL (the default), the efficiency estimates are calculated
@@ -121,10 +125,26 @@ class # only.}
 
 \item{ReffBC_c#}{Reciprocal conditional efficiency (\code{teBC_reciprocal_c}) for observations in
 class # only.}
+
+\bold{- For object of class \code{'selectioncross'} the following elements are
+returned:}
+
+\item{u}{Conditional inefficiency.}
+\item{uLB}{Lower bound for conditional inefficiency.}
+\item{uUB}{Upper bound for conditional inefficiency.}
+\item{teJLMS}{\eqn{\exp{(-u)}}. Only when \code{logDepVar = TRUE}.}
+\item{m}{Conditional mode.}
+\item{teMO}{\eqn{\exp{(-m)}}. Only when \code{logDepVar = TRUE}.}
+\item{teBC}{Battese and Coelli (1988) conditional efficiency. Only when
+\code{logDepVar = TRUE}.}
+\item{teBCLB}{Lower bound for Battese and Coelli (1988) conditional
+efficiency. Only when \code{logDepVar = TRUE}.}
+\item{teBCUB}{Upper bound for Battese and Coelli (1988) conditional
+efficiency. Only when \code{logDepVar = TRUE}.}
 }
 \description{
 \code{\link{efficiencies}} returns (in-)efficiency estimates of models estimated with
-\code{\link{sfacross}} or \code{\link{lcmcross}}.
+\code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.
 }
 \details{
 The conditional inefficiency is obtained following Jondrow \emph{et al.}
@@ -136,60 +156,77 @@ and Schmidt (1996), Hjalmarsson \emph{et al.} (1996), or Berra and Sharma
 
 In the case of the half normal distribution for the one-sided error term,
 the formulae are as follows (for notations, see the \sQuote{Details} section
-of \code{\link{sfacross}} or \code{\link{lcmcross}}):
+of \code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}):
 
 \itemize{ \item The conditional inefficiency is }
-\deqn{E\left[u_i|\epsilon_i\right]=\mu_{i*} +
-\sigma_*\frac{\phi\left(\frac{\mu_{i*}}{\sigma_*}\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)}}
+
+\Sexpr[results=rd, stage=build]{
+katex::math_to_rd("E\\\\left\\\\lbrack u_i|\\\epsilon_i\\\\right\\\\rbrack=\\\mu_{i\\\ast} + \\\sigma_\\\ast\\\frac{\\\phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)}{\\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)}")
+}
 
 where
 
-\deqn{\mu_{i*}=\frac{-S\epsilon_i\sigma_u^2}{\sigma_u^2 + \sigma_v^2}}
+\Sexpr[results=rd, stage=build]{
+katex::math_to_rd("\\\mu_{i\\\ast}=\\\frac{-S\\\epsilon_i\\\sigma_u^2}{\\\sigma_u^2 + \\\sigma_v^2}")
+}
 
 and
 
-\deqn{\sigma_*^2 = \frac{\sigma_u^2 \sigma_v^2}{\sigma_u^2 + \sigma_v^2}}
+\Sexpr[results=rd, stage=build]{
+katex::math_to_rd("\\\sigma_\\\ast^2 = \\\frac{\\\sigma_u^2 \\\sigma_v^2}{\\\sigma_u^2 + \\\sigma_v^2}")
+}
 
 \itemize{ \item The Battese and Coelli (1988) conditional efficiency is
-obtained by: } \deqn{E\left[\exp{\left(-u_i\right)}|\epsilon_i\right] =
-\exp{\left(-\mu_{i*}+\frac{1}{2}\sigma_*^2\right)}
-\frac{\Phi\left(\frac{\mu_{i*}}{\sigma_*}-\sigma_*\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)}}
+obtained by: }
+
+\Sexpr[results=rd, stage=build]{
+katex::math_to_rd("E\\\\left\\\\lbrack\\\exp{\\\\left(-u_i\\\\right)}|\\\\epsilon_i\\\\right\\\\rbrack = \\\exp{\\\\left(-\\\mu_{i\\\ast}+\\\frac{1}{2}\\\sigma_\\\ast^2\\\\right)}\\\frac{\\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}-\\\sigma_\\\ast\\\\right)}{\\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\right)}")
+}
 
 \itemize{ \item The reciprocal of the Battese and Coelli (1988) conditional efficiency is
-obtained by: } \deqn{E\left[\exp{\left(u_i\right)}|\epsilon_i\right] =
-\exp{\left(\mu_{i*}+\frac{1}{2}\sigma_*^2\right)}
-\frac{\Phi\left(\frac{\mu_{i*}}{\sigma_*}+\sigma_*\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)}}
+obtained by: }
+
+\Sexpr[results=rd, stage=build]{
+katex::math_to_rd("E\\\\left\\\\lbrack\\\exp{\\\\left(u_i\\\\right)}|\\\epsilon_i\\\\right\\\\rbrack = \\\exp{\\\\left(\\\mu_{i\\\ast}+\\\frac{1}{2}\\\sigma_\\\ast^2\\\\right)} \\\frac{\\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}+\\\sigma_\\\ast\\\\right)}{\\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)}")
+}
 
 \itemize{ \item The conditional mode is computed using: }
 
-\deqn{M\left[u_i|\epsilon_i\right]= \mu_{i*} \quad For \quad \mu_{i*} > 0}
+\Sexpr[results=rd, stage=build]{
+katex::math_to_rd("M\\\\left\\\\lbrack u_i|\\\epsilon_i\\\\right\\\\rbrack= \\\mu_{i\\\ast} \\\quad \\\hbox{For} \\\quad \\\mu_{i\\\ast} > 0")
+}
 
 and
 
-\deqn{M\left[u_i|\epsilon_i\right]= 0 \quad For \quad \mu_{i*} \leq 0}
+\Sexpr[results=rd, stage=build]{
+katex::math_to_rd("M\\\\left\\\\lbrack u_i|\\\epsilon_i\\\\right\\\\rbrack= 0 \\\quad \\\hbox{For} \\\quad \\\mu_{i\\\ast} \\\\leq 0")
+}
+
 \itemize{ \item The confidence intervals are obtained with: }
 
-\deqn{\mu_{i*} + I_L\sigma_* \leq E\left[u_i|\epsilon_i\right] \leq \mu_{i*}
-+ I_U\sigma_*}
+\Sexpr[results=rd, stage=build]{
+katex::math_to_rd("\\\mu_{i\\\ast} + I_L\\\sigma_\\\ast \\\\leq E\\\\left\\\\lbrack u_i|\\\epsilon_i\\\\right\\\\rbrack \\\\leq \\\mu_{i\\\ast} + I_U\\\sigma_\\\ast")
+}
 
-with \eqn{LB_i = \mu_{i*} + I_L\sigma_*} and \eqn{UB_i = \mu_{i*} +
-I_U\sigma_*}
-
-and
-
-\deqn{I_L = \Phi^{-1}\left\{1 -
-\left(1-\frac{\alpha}{2}\right)\left[1-\Phi\left(-\frac{\mu_{i*}}{\sigma_*}\right)\right]\right\}}
+with \eqn{LB_i = \mu_{i*} + I_L\sigma_*} and \eqn{UB_i = \mu_{i*} + I_U\sigma_*}
 
 and
 
-\deqn{I_U =
-\Phi^{-1}\left\{1-\frac{\alpha}{2}\left[1-\Phi\left(-\frac{\mu_{i*}}{\sigma_*}\right)\right]\right\}}
+\Sexpr[results=rd, stage=build]{
+katex::math_to_rd("I_L = \\\Phi^{-1}\\\\left\\\\lbrace 1 -\\\\left(1-\\\frac{\\\alpha}{2}\\\\right)\\\\left\\\\lbrack 1-\\\Phi\\\\left(-\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)\\\\right\\\\rbrack\\\\right\\\\rbrace")
+}
+
+and
+
+\Sexpr[results=rd, stage=build]{
+katex::math_to_rd("I_U = \\\Phi^{-1}\\\\left\\\\lbrace 1-\\\frac{\\\alpha}{2}\\\\left\\\\lbrack 1-\\\Phi\\\\left(-\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)\\\\right\\\\rbrack\\\\right\\\\rbrace")
+}
 
 Thus
 
-\deqn{\exp{\left(-UB_i\right)} \leq
-E\left[\exp{\left(-u_i\right)}|\epsilon_i\right] \leq
-\exp{\left(-LB_i\right)}}
+\Sexpr[results=rd, stage=build]{
+katex::math_to_rd("\\\exp{\\\\left(-UB_i\\\\right)} \\\\leq E\\\\left\\\\lbrack\\\exp{\\\\left(-u_i\\\\right)}|\\\epsilon_i\\\\right\\\\rbrack \\\\leq\\\exp{\\\\left(-LB_i\\\\right)}")
+}
 }
 \examples{
 
@@ -233,9 +270,12 @@ fitting function.
 
 \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 model fitting function.
+
+\code{\link{selectioncross}} for sample selection in stochastic frontier model
+fitting function.
 }
 \author{
-K Hervé Dakpo, Yann Desjeux and Laure Latruffe
+K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
 }
 \keyword{efficiencies}
 \keyword{methods}

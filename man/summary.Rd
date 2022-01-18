@@ -6,7 +6,9 @@
 \alias{print.summary.sfacross}
 \alias{summary.lcmcross}
 \alias{print.summary.lcmcross}
-\title{Summary of results for classic or latent class stochastic models}
+\alias{summary.selectioncross}
+\alias{print.summary.selectioncross}
+\title{Summary of results for stochastic frontier models}
 \usage{
 \method{summary}{sfacross}(object, grad = FALSE, ci = FALSE, ...)
 
@@ -15,11 +17,16 @@
 \method{summary}{lcmcross}(object, grad = FALSE, ci = FALSE, ...)
 
 \method{print}{summary.lcmcross}(x, digits = max(3, getOption("digits") - 2), ...)
+
+\method{summary}{selectioncross}(object, grad = FALSE, ci = FALSE, ...)
+
+\method{print}{summary.selectioncross}(x, digits = max(3, getOption("digits") - 2), ...)
 }
 \arguments{
-\item{object}{An object of either class \code{'sfacross'}, returned by the
-function \code{\link{sfacross}}, or class \code{'lcmcross'}, returned by the
-function \code{\link{lcmcross}}.}
+\item{object}{An object of either class \code{'sfacross'} returned by the
+function \code{\link{sfacross}}, or class \code{'lcmcross'} returned by the
+function \code{\link{lcmcross}}, or class \code{'selectioncross'} returned by the
+function \code{\link{selectioncross}}.}
 
 \item{grad}{Logical. Default = \code{FALSE}. If \code{TRUE}, the gradient
 for the maximum likelihood (ML) estimates of the different parameters is
@@ -31,16 +38,16 @@ returned.}
 
 \item{...}{Currently ignored.}
 
-\item{x}{An object of either class \code{'summary.sfacross'} or
-\code{'summary.lcmcross'}.}
+\item{x}{An object of either class \code{'summary.sfacross'},
+\code{'summary.lcmcross'} or \code{'summary.selectioncross'}.}
 
 \item{digits}{Numeric. Number of digits displayed in values.}
 }
 \value{
 The \code{\link{summary}} method returns a list of class
-\code{'summary.sfacross'} or \code{'summary.lcmcross'} that contains the
-same elements as an object returned by \code{\link{sfacross}} or
-\code{\link{lcmcross}} with the following additional elements:
+\code{'summary.sfacross'}, \code{'summary.lcmcross'} or \code{'summary.selectioncross'}
+that contains the same elements as an object returned by \code{\link{sfacross}},
+\code{\link{lcmcross}} or \code{\link{selectioncross}} with the following additional elements:
 
 \item{AIC}{Akaike information criterion.}
 
@@ -48,28 +55,32 @@ same elements as an object returned by \code{\link{sfacross}} or
 
 \item{HQIC}{Hannan-Quinn information criterion.}
 
-\item{sigmavSq}{For \code{object} of class \code{'sfacross'}. Variance of
+\item{sigmavSq}{For \code{object} of class \code{'sfacross'} or \code{'selectioncross'}. Variance of
 the two-sided error term (\eqn{\sigma_v^2}).}
 
-\item{sigmauSq}{For \code{object} of class \code{'sfacross'}.
+\item{sigmauSq}{For \code{object} of class \code{'sfacross'} or \code{'selectioncross'}.
 Parametrization of the variance of the one-sided error term
 (\eqn{\sigma_u^2}).}
 
-\item{Varu}{For \code{object} of class \code{'sfacross'}. Variance of the
+\item{Varu}{For \code{object} of class \code{'sfacross'} or \code{'selectioncross'}. Variance of the
 one-sided error term.}
 
 \item{THETA}{For \code{object} of class \code{'sfacross'} with \code{'udist
 = uniform'}.  \eqn{\Theta} value in the case the uniform distribution is
 defined as: \eqn{u_i \in [0, \Theta]}.}
 
-\item{Eu}{For \code{object} of class \code{'sfacross'}. Expected
+\item{Eu}{For \code{object} of class \code{'sfacross'} or \code{'selectioncross'}. Expected
 unconditional inefficiency.}
 
-\item{Expu}{For \code{object} of class \code{'sfacross'}. Expected
+\item{Expu}{For \code{object} of class \code{'sfacross'} or \code{'selectioncross'}. Expected
 unconditional efficiency.}
 
 \item{olsRes}{For \code{object} of class \code{'sfacross'}. Matrix of OLS
 estimates, their standard errors, t-values, P-values, and when \code{ci =
+TRUE} their confidence intervals.}
+
+\item{ols2StepRes}{For \code{object} of class \code{'selectioncross'}. Matrix of OLS
+2 step estimates, their standard errors, t-values, P-values, and when \code{ci =
 TRUE} their confidence intervals.}
 
 \item{mlRes}{Matrix of ML estimates, their standard errors, z-values,
@@ -82,8 +93,8 @@ statistics of the difference between the stochastic frontier and the OLS.}
 \item{df}{Degree of freedom for the inefficiency model.}
 }
 \description{
-Create and print summary results for classic or latent class stochastic
-models returned by \code{\link{sfacross}} and \code{\link{lcmcross}}.
+Create and print summary results for stochastic frontier models returned by
+\code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.
 }
 \examples{
 
@@ -103,6 +114,11 @@ fitting function.
 
 \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 model fitting function.
+
+\code{\link{selectioncross}} for sample selection in stochastic frontier model
+fitting function.
+
+\code{\link[=print.sfacross]{print}} for printing \code{sfacross} object.
 
 \code{\link[=coef.sfacross]{coef}} for extracting coefficients of the
 estimation.
@@ -127,7 +143,15 @@ estimation.
 \code{\link[=vcov.sfacross]{vcov}} for computing the variance-covariance
 matrix of the coefficients.
 
+\code{\link[=bread.sfacross]{bread}} for bread for sandwich estimator.
+
+\code{\link[=estfun.sfacross]{estfun}} for gradient extraction for each
+observation.
+
 \code{\link{skewnessTest}} for implementing skewness test.
+}
+\author{
+K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
 }
 \keyword{methods}
 \keyword{summary}

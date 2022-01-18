@@ -4,15 +4,17 @@ Version: 1.0.0.9000
 Authors@R: 
     c(
    person("K Hervé", "Dakpo", email = "k-herve.dakpo@inrae.fr", role = c("aut", "cre")),
-   person("Yann", "Desjeux", email = "yann.desjeux@inrae.fr", role = "aut"),
-   person("Laure", "Latruffe", role = "aut"))
+   person("Yann", "Desjeux", role = "aut"),
+   person("Laure", "Latruffe", role = "aut"), 
+   person("Arne", "Henningsen", role = "ctb"))
 Description: Maximum likelihood estimation for stochastic frontier analysis 
     (SFA) of production (profit) and cost functions. The package includes 
     several distributions for the one-sided error term (i.e. Rayleigh, 
     Gamma, Weibull, lognormal, uniform, generalized exponential and 
-    truncated skewed Laplace) as well as the latent class stochastic frontier 
+    truncated skewed Laplace) the latent class stochastic frontier 
     model (LCM) as described in Dakpo et al. (2021) 
-    <doi:10.1111/1477-9552.12422>. Several possibilities in terms of 
+    <doi:10.1111/1477-9552.12422> as well as the sample selection model used in 
+    Dakpo et al. (2021) <doi:10.1111/agec.12683>. Several possibilities in terms of 
     optimization algorithms are proposed. 
 Depends: R (>= 3.5.0)
 BugReports: https://github.com/hdakpo/sfaR/issues
@@ -43,5 +45,5 @@ Imports:
     ucminf,
     sandwich,
     lmtest,
-    fastGHQuad
+    fastGHQuad,
 URL: https://github.com/hdakpo/sfaR

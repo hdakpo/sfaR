@@ -4,16 +4,18 @@
 \alias{marginal}
 \alias{marginal.sfacross}
 \alias{marginal.lcmcross}
-\title{Compute marginal effects of the inefficiency drivers in classic or latent
-class stochastic models}
+\alias{marginal.selectioncross}
+\title{Marginal effects of the inefficiency drivers in stochastic frontier models}
 \usage{
 \method{marginal}{sfacross}(object, newData = NULL, ...)
 
 \method{marginal}{lcmcross}(object, newData = NULL, ...)
+
+\method{marginal}{selectioncross}(object, newData = NULL, ...)
 }
 \arguments{
-\item{object}{A classic or latent class stochastic frontier model returned
-by \code{\link{sfacross}} or \code{\link{lcmcross}}.}
+\item{object}{A stochastic frontier model returned
+by \code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.}
 
 \item{newData}{Optional data frame that is used to calculate the efficiency
 estimates. If NULL (the default), the efficiency estimates are calculated
@@ -34,7 +36,7 @@ In the case of the latent class model (LCM), each variable terminates with
 \description{
 This function returns marginal effects of the inefficiency drivers from
 classic or latent class stochastic frontier models estimated with
-\code{\link{sfacross}} or \code{\link{lcmcross}.}
+\code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.
 }
 \details{
 \code{\link{marginal}} operates in the presence of exogenous variables that
@@ -82,9 +84,12 @@ fitting function.
 
 \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 model fitting function.
+
+\code{\link{selectioncross}} for sample selection in stochastic frontier model
+fitting function.
 }
 \author{
-K Hervé Dakpo, Yann Desjeux and Laure Latruffe
+K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
 }
 \keyword{marginal}
 \keyword{methods}

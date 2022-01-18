@@ -8,15 +8,15 @@
 # Marginal impact of Z variables on inefficiency                               #
 # Models: -Standard Stochastic Frontier Analysis                               #
 #         -Latent Class Stochastic Frontier Analysis                           #
+#         -Sample selection correction                                         #
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
 
-#' Compute marginal effects of the inefficiency drivers in classic or latent
-#' class stochastic models
+#' Marginal effects of the inefficiency drivers in stochastic frontier models
 #'
 #' This function returns marginal effects of the inefficiency drivers from
 #' classic or latent class stochastic frontier models estimated with
-#' \code{\link{sfacross}} or \code{\link{lcmcross}.}
+#' \code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.
 #'
 #' @details \code{\link{marginal}} operates in the presence of exogenous variables that
 #' explain inefficiency, namely the inefficiency drivers (\eqn{uhet = ~ Z_u} or
@@ -32,8 +32,8 @@
 #' parameterization accounts for non-monotonic relationships between the
 #' inefficiency and its drivers.
 #'
-#' @param object A classic or latent class stochastic frontier model returned
-#' by \code{\link{sfacross}} or \code{\link{lcmcross}}.
+#' @param object A stochastic frontier model returned
+#' by \code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.
 #' @param newData Optional data frame that is used to calculate the efficiency 
 #' estimates. If NULL (the default), the efficiency estimates are calculated 
 #' for the observations that were used in the estimation.
@@ -49,13 +49,16 @@
 #' In the case of the latent class model (LCM), each variable terminates with
 #' \code{'_c#'} where \code{'#'} is the class number
 #' .
-#' @author K Hervé Dakpo, Yann Desjeux and Laure Latruffe
+#' @author K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
 #'
 #' @seealso \code{\link{sfacross}}, for the stochastic frontier analysis model
 #' fitting function.
 #'
 #' \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 #' model fitting function.
+#' 
+#' \code{\link{selectioncross}} for sample selection in stochastic frontier model
+#' fitting function.
 #'
 #' @references Wang, H.J. 2002. Heteroscedasticity and non-monotonic efficiency
 #' effects of a stochastic frontier model. \emph{Journal of Productivity
@@ -213,6 +216,28 @@ marginal.lcmcross <- function(object, newData = NULL, ...) {
         }
       }
     }
+  }
+  return(data.frame(EffMarg))
+}
+
+# marginal effects computation selectioncross ----------
+#' @rdname marginal
+#' @aliases marginal.selectioncross
+#' @export
+marginal.selectioncross <- function(object, newData = NULL, ...) {
+  if (!is.null(newData)) {
+    if (!is.data.frame(newData)) {
+      stop("argument 'newData' must be of class data.frame")
+    }
+    object$dataTable <- newData
+    object$Nobs <- dim(newData)[1]
+  }
+  if (object$nuZUvar == 1) {
+    stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+         call. = FALSE)
+  } else {
+    EffMarg <- bind_cols(as_tibble(cmarghalfnorm_Eu_ss(object = object)),
+                         as_tibble(cmarghalfnorm_Vu_ss(object = object)))
   }
   return(data.frame(EffMarg))
 }

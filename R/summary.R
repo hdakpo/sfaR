@@ -8,17 +8,19 @@
 # Summary of optimization objects                                              #
 # Models: -Standard Stochastic Frontier Analysis                               #
 #         -Latent Class Stochastic Frontier Analysis                           #
+#         -Sample selection correction                                         #
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
 
-#' Summary of results for classic or latent class stochastic models
+#' Summary of results for stochastic frontier models
 #'
-#' Create and print summary results for classic or latent class stochastic
-#' models returned by \code{\link{sfacross}} and \code{\link{lcmcross}}.
+#' Create and print summary results for stochastic frontier models returned by 
+#' \code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.
 #'
-#' @param object An object of either class \code{'sfacross'}, returned by the
-#' function \code{\link{sfacross}}, or class \code{'lcmcross'}, returned by the
-#' function \code{\link{lcmcross}}.
+#' @param object An object of either class \code{'sfacross'} returned by the
+#' function \code{\link{sfacross}}, or class \code{'lcmcross'} returned by the
+#' function \code{\link{lcmcross}}, or class \code{'selectioncross'} returned by the
+#' function \code{\link{selectioncross}}.
 #' @param grad Logical. Default = \code{FALSE}. If \code{TRUE}, the gradient
 #' for the maximum likelihood (ML) estimates of the different parameters is
 #' returned.
@@ -26,16 +28,16 @@
 #' confidence interval for the different parameters (OLS and ML estimates) is
 #' returned.
 #' @param ... Currently ignored.
-#' @param x An object of either class \code{'summary.sfacross'} or
-#' \code{'summary.lcmcross'}.
+#' @param x An object of either class \code{'summary.sfacross'},
+#' \code{'summary.lcmcross'} or \code{'summary.selectioncross'}.
 #' @param digits Numeric. Number of digits displayed in values.
 #'
 #' @name summary
 #'
 #' @return The \code{\link{summary}} method returns a list of class
-#' \code{'summary.sfacross'} or \code{'summary.lcmcross'} that contains the
-#' same elements as an object returned by \code{\link{sfacross}} or
-#' \code{\link{lcmcross}} with the following additional elements:
+#' \code{'summary.sfacross'}, \code{'summary.lcmcross'} or \code{'summary.selectioncross'}
+#' that contains the same elements as an object returned by \code{\link{sfacross}},
+#' \code{\link{lcmcross}} or \code{\link{selectioncross}} with the following additional elements:
 #'
 #' \item{AIC}{Akaike information criterion.}
 #'
@@ -43,28 +45,32 @@
 #'
 #' \item{HQIC}{Hannan-Quinn information criterion.}
 #'
-#' \item{sigmavSq}{For \code{object} of class \code{'sfacross'}. Variance of
+#' \item{sigmavSq}{For \code{object} of class \code{'sfacross'} or \code{'selectioncross'}. Variance of
 #' the two-sided error term (\eqn{\sigma_v^2}).}
 #'
-#' \item{sigmauSq}{For \code{object} of class \code{'sfacross'}.
+#' \item{sigmauSq}{For \code{object} of class \code{'sfacross'} or \code{'selectioncross'}.
 #' Parametrization of the variance of the one-sided error term
 #' (\eqn{\sigma_u^2}).}
 #'
-#' \item{Varu}{For \code{object} of class \code{'sfacross'}. Variance of the
+#' \item{Varu}{For \code{object} of class \code{'sfacross'} or \code{'selectioncross'}. Variance of the
 #' one-sided error term.}
 #'
 #' \item{THETA}{For \code{object} of class \code{'sfacross'} with \code{'udist
 #' = uniform'}.  \eqn{\Theta} value in the case the uniform distribution is
 #' defined as: \eqn{u_i \in [0, \Theta]}.}
 #'
-#' \item{Eu}{For \code{object} of class \code{'sfacross'}. Expected
+#' \item{Eu}{For \code{object} of class \code{'sfacross'} or \code{'selectioncross'}. Expected
 #' unconditional inefficiency.}
 #'
-#' \item{Expu}{For \code{object} of class \code{'sfacross'}. Expected
+#' \item{Expu}{For \code{object} of class \code{'sfacross'} or \code{'selectioncross'}. Expected
 #' unconditional efficiency.}
 #'
 #' \item{olsRes}{For \code{object} of class \code{'sfacross'}. Matrix of OLS
 #' estimates, their standard errors, t-values, P-values, and when \code{ci =
+#' TRUE} their confidence intervals.}
+#' 
+#' \item{ols2StepRes}{For \code{object} of class \code{'selectioncross'}. Matrix of OLS
+#' 2 step estimates, their standard errors, t-values, P-values, and when \code{ci =
 #' TRUE} their confidence intervals.}
 #'
 #' \item{mlRes}{Matrix of ML estimates, their standard errors, z-values,
@@ -75,11 +81,19 @@
 #' statistics of the difference between the stochastic frontier and the OLS.}
 #'
 #' \item{df}{Degree of freedom for the inefficiency model.}
+#' 
+#' @author K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
+#' 
 #' @seealso \code{\link{sfacross}}, for the stochastic frontier analysis model
 #' fitting function.
 #'
 #' \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 #' model fitting function.
+#' 
+#' \code{\link{selectioncross}} for sample selection in stochastic frontier model
+#' fitting function.
+#' 
+#' \code{\link[=print.sfacross]{print}} for printing \code{sfacross} object.
 #'
 #' \code{\link[=coef.sfacross]{coef}} for extracting coefficients of the
 #' estimation.
@@ -103,6 +117,11 @@
 #'
 #' \code{\link[=vcov.sfacross]{vcov}} for computing the variance-covariance
 #' matrix of the coefficients.
+#' 
+#'  \code{\link[=bread.sfacross]{bread}} for bread for sandwich estimator.
+#' 
+#' \code{\link[=estfun.sfacross]{estfun}} for gradient extraction for each 
+#' observation.
 #'
 #' \code{\link{skewnessTest}} for implementing skewness test.
 #'
@@ -428,7 +447,7 @@ print.summary.sfacross <- function(x, digits = max(3, getOption("digits") -
       }
     }
   }
-  lengthSum <- nchar(sfadist(x$udist)) + 10
+  lengthSum <- nchar(sfadist(x$udist)) + 27
   dimCoefTable <- as.character(dim(x$mlRes)[2])
   cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
     `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
@@ -450,10 +469,13 @@ print.summary.sfacross <- function(x, digits = max(3, getOption("digits") -
     nchar("Log likelihood gradient norm:") - nchar(formatC(x$gradientNorm,
     digits = digits, format = "e"))), collapse = ""), formatC(x$gradientNorm,
     digits = digits, format = "e"), "\n")
-  cat("Estimation based on:", paste0(rep(" ", lengthSum - nchar("Estimation based on:") -
+  cat("Estimation based on:", if (lengthSum - nchar("Estimation based on:") -
     nchar(x$Nobs) - nchar(x$nParm) - nchar("N = ") - nchar("and K = ") -
-    3), collapse = ""), "N = ", x$Nobs, "and K = ", x$nParm,
-    "\n")
+    3 > 0)
+    paste0(rep(" ", lengthSum - nchar("Estimation based on:") -
+      nchar(x$Nobs) - nchar(x$nParm) - nchar("N = ") -
+      nchar("and K = ") - 3), collapse = ""), "N = ", x$Nobs,
+    "and K = ", x$nParm, "\n")
   cat("Inf. Cr:", paste0(rep(" ", lengthSum - nchar("Inf. Cr:") -
     nchar("AIC  = ") - nchar(formatC(x$AIC, digits = 1, format = "f")) -
     nchar("AIC/N  = ") - nchar(formatC(x$AIC/x$Nobs, digits = 3,
@@ -981,10 +1003,6 @@ print.summary.lcmcross <- function(x, digits = max(3, getOption("digits") -
   }
   row.names(mlRes) <- formatC(row.names(mlRes), width = max(nchar(row.names(mlRes))),
     flag = "-")
-  mlRes1 <- mlRes[1:x$nXvar, ]
-  mlRes2 <- mlRes[(x$nXvar + 1):(x$nXvar + x$nuZUvar), , drop = FALSE]
-  mlRes3 <- mlRes[(x$nXvar + x$nuZUvar + 1):(x$nXvar + x$nuZUvar +
-    x$nvZVvar), , drop = FALSE]
   sfaModel <- "Normal-Half Normal Latent Class Stochastic Frontier Model"
   lengthSum <- nchar(sfaModel)  # + 10
   dimCoefTable <- as.character(dim(x$mlRes)[2])
@@ -1008,10 +1026,13 @@ print.summary.lcmcross <- function(x, digits = max(3, getOption("digits") -
     nchar("Log likelihood gradient norm:") - nchar(formatC(x$gradientNorm,
     digits = digits, format = "e"))), collapse = ""), formatC(x$gradientNorm,
     digits = digits, format = "e"), "\n")
-  cat("Estimation based on:", paste0(rep(" ", lengthSum - nchar("Estimation based on:") -
+  cat("Estimation based on:", if (lengthSum - nchar("Estimation based on:") -
     nchar(x$Nobs) - nchar(x$nParm) - nchar("N = ") - nchar("and K = ") -
-    3), collapse = ""), "N = ", x$Nobs, "and K = ", x$nParm,
-    "\n")
+    3 > 0)
+    paste0(rep(" ", lengthSum - nchar("Estimation based on:") -
+      nchar(x$Nobs) - nchar(x$nParm) - nchar("N = ") -
+      nchar("and K = ") - 3), collapse = ""), "N = ", x$Nobs,
+    "and K = ", x$nParm, "\n")
   cat("Inf. Cr:", paste0(rep(" ", lengthSum - nchar("Inf. Cr:") -
     nchar("AIC  = ") - nchar(formatC(x$AIC, digits = 1, format = "f")) -
     nchar("AIC/N  = ") - nchar(formatC(x$AIC/x$Nobs, digits = 3,
@@ -1419,6 +1440,348 @@ print.summary.lcmcross <- function(x, digits = max(3, getOption("digits") -
       }
     }
   }
+  cat(x$mlDate, "\n")
+  cat("Log likelihood status:", x$optStatus, "\n")
+  cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+    `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+    "\n")
+  invisible(x)
+}
+
+# summary for selectioncross ----------
+#' @rdname summary
+#' @aliases summary.selectioncross
+#' @export
+summary.selectioncross <- function(object, grad = FALSE, ci = FALSE,
+  ...) {
+  if (length(grad) != 1 || !is.logical(grad[1])) {
+    stop("argument 'grad' must be a single logical value",
+      call. = FALSE)
+  }
+  if (length(ci) != 1 || !is.logical(ci[1])) {
+    stop("argument 'ci' must be a single logical value",
+      call. = FALSE)
+  }
+  object$AIC <- -2 * object$mlLoglik + 2 * object$nParm
+  object$BIC <- -2 * object$mlLoglik + log(object$Nobs) * object$nParm
+  object$HQIC <- -2 * object$mlLoglik + 2 * log(log(object$Nobs)) *
+    object$nParm
+  delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+    object$nuZUvar)]
+  phi <- object$mlParam[(object$nXvar + object$nuZUvar + 1):(object$nXvar +
+    object$nuZUvar + object$nvZVvar)]
+  uHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 2)
+  vHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 3)
+  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
+  object$sigmavSq <- mean(exp(Wv))
+  object$sigmauSq <- mean(exp(Wu))
+  object$Varu <- varuFun(object = object, mu = NULL, P = NULL,
+    k = NULL, lambda = NULL)
+  object$Eu <- euFun(object = object, mu = NULL, P = NULL,
+    k = NULL, lambda = NULL)
+  object$Expu <- eExpuFun(object = object, mu = NULL, P = NULL,
+    k = NULL, lambda = NULL)
+  # OLS 2 Step estimates and stder, p-values, CI
+  dfOLS <- object$Nobs - object$nXvar
+  if (ci) {
+    ols2StepRes <- matrix(nrow = object$nXvar + 2, ncol = 6)
+    colnames(ols2StepRes) <- c("Coefficient", "Std. Error",
+      "binf", "bsup", "t value", "Pr(>|t|)")
+    ols2StepRes[, 1] <- c(object$ols2stepParam, object$ols2stepSigmasq)
+    ols2StepRes[, 2] <- c(object$ols2stepStder, NA)
+    ols2StepRes[, 3] <- ols2StepRes[, 1] - qt(0.975, df = dfOLS) *
+      ols2StepRes[, 2]
+    ols2StepRes[, 4] <- ols2StepRes[, 1] + qt(0.975, df = dfOLS) *
+      ols2StepRes[, 2]
+    ols2StepRes[, 5] <- ols2StepRes[, 1]/ols2StepRes[, 2]
+    ols2StepRes[, 6] <- 2 * pt(-abs(ols2StepRes[, 5]), df = dfOLS)
+  } else {
+    ols2StepRes <- matrix(nrow = object$nXvar + 2, ncol = 4)
+    colnames(ols2StepRes) <- c("Coefficient", "Std. Error",
+      "t value", "Pr(>|t|)")
+    ols2StepRes[, 1] <- c(object$ols2stepParam, object$ols2stepSigmasq)
+    ols2StepRes[, 2] <- c(object$ols2stepStder, NA)
+    ols2StepRes[, 3] <- ols2StepRes[, 1]/ols2StepRes[, 2]
+    ols2StepRes[, 4] <- 2 * pt(-abs(ols2StepRes[, 3]), df = dfOLS)
+  }
+  row.names(ols2StepRes) <- c(names(object$ols2stepParam),
+    "sigmaSq")
+  object$ols2StepRes <- ols2StepRes
+  # MLE estimates and stder, p-values, CI, Gradient
+  if (grad && ci) {
+    mlRes <- matrix(nrow = object$nParm, ncol = 7)
+    colnames(mlRes) <- c("Coefficient", "Std. Error", "binf",
+      "bsup", "gradient", "z-value", "Pr(>|z|)")
+    mlRes[, 1] <- object$mlParam
+    mlRes[, 2] <- sqrt(diag(object$invHessian))
+    mlRes[, 3] <- mlRes[, 1] - qnorm(0.975) * mlRes[, 2]
+    mlRes[, 4] <- mlRes[, 1] + qnorm(0.975) * mlRes[, 2]
+    mlRes[, 5] <- object$gradient
+    mlRes[, 6] <- mlRes[, 1]/mlRes[, 2]
+    mlRes[, 7] <- 2 * pnorm(-abs(mlRes[, 6]))
+  } else {
+    if (grad == TRUE && ci == FALSE) {
+      mlRes <- matrix(nrow = object$nParm, ncol = 5)
+      colnames(mlRes) <- c("Coefficient", "Std. Error",
+        "gradient", "z-value", "Pr(>|z|)")
+      mlRes[, 1] <- object$mlParam
+      mlRes[, 2] <- sqrt(diag(object$invHessian))
+      mlRes[, 3] <- object$gradient
+      mlRes[, 4] <- mlRes[, 1]/mlRes[, 2]
+      mlRes[, 5] <- 2 * pnorm(-abs(mlRes[, 4]))
+    } else {
+      if (grad == FALSE && ci == TRUE) {
+        mlRes <- matrix(nrow = object$nParm, ncol = 6)
+        colnames(mlRes) <- c("Coefficient", "Std. Error",
+          "binf", "bsup", "z-value", "Pr(>|z|)")
+        mlRes[, 1] <- object$mlParam
+        mlRes[, 2] <- sqrt(diag(object$invHessian))
+        mlRes[, 3] <- mlRes[, 1] - qnorm(0.975) * mlRes[,
+          2]
+        mlRes[, 4] <- mlRes[, 1] + qnorm(0.975) * mlRes[,
+          2]
+        mlRes[, 5] <- mlRes[, 1]/mlRes[, 2]
+        mlRes[, 6] <- 2 * pnorm(-abs(mlRes[, 5]))
+      } else {
+        mlRes <- matrix(nrow = object$nParm, ncol = 4)
+        colnames(mlRes) <- c("Coefficient", "Std. Error",
+          "z value", "Pr(>|z|)")
+        mlRes[, 1] <- object$mlParam
+        mlRes[, 2] <- sqrt(diag(object$invHessian))
+        mlRes[, 3] <- mlRes[, 1]/mlRes[, 2]
+        mlRes[, 4] <- 2 * pnorm(-abs(mlRes[, 3]))
+      }
+    }
+  }
+  row.names(mlRes) <- names(object$startVal)
+  object$mlRes <- mlRes
+  object$df <- object$nParm - object$nClasses * object$nXvar -
+    object$nClasses * object$nvZVvar - object$nZHvar * (object$nClasses -
+    1)
+  class(object) <- "summary.selectioncross"
+  return(object)
+}
+
+# print summary for selectioncross ----------
+#' @rdname summary
+#' @aliases print.summary.selectioncross
+#' @export
+print.summary.selectioncross <- function(x, digits = max(3, getOption("digits") -
+  2), ...) {
+  mlRes <- x$mlRes
+  if (dim(mlRes)[2] == 4) {
+    mlRes[, 1] <- as.numeric(formatC(x$mlRes[, 1], digits = digits,
+      format = "f"))
+    mlRes[, 2] <- as.numeric(formatC(x$mlRes[, 2], digits = digits,
+      format = "f"))
+    mlRes[, 3] <- as.numeric(formatC(x$mlRes[, 3], digits = digits,
+      format = "f"))
+    mlRes[, 4] <- as.numeric(formatC(x$mlRes[, 4], digits = digits,
+      format = "e"))
+  } else {
+    if (dim(mlRes)[2] == 5) {
+      mlRes[, 1] <- as.numeric(formatC(x$mlRes[, 1], digits = digits,
+        format = "f"))
+      mlRes[, 2] <- as.numeric(formatC(x$mlRes[, 2], digits = digits,
+        format = "f"))
+      mlRes[, 3] <- as.numeric(formatC(x$mlRes[, 3], digits = digits,
+        format = "e"))
+      mlRes[, 4] <- as.numeric(formatC(x$mlRes[, 4], digits = digits,
+        format = "f"))
+      mlRes[, 5] <- as.numeric(formatC(x$mlRes[, 5], digits = digits,
+        format = "e"))
+    } else {
+      if (dim(mlRes)[2] == 6) {
+        mlRes[, 1] <- as.numeric(formatC(x$mlRes[, 1],
+          digits = digits, format = "f"))
+        mlRes[, 2] <- as.numeric(formatC(x$mlRes[, 2],
+          digits = digits, format = "f"))
+        mlRes[, 3] <- as.numeric(formatC(x$mlRes[, 3],
+          digits = digits, format = "f"))
+        mlRes[, 4] <- as.numeric(formatC(x$mlRes[, 4],
+          digits = digits, format = "f"))
+        mlRes[, 5] <- as.numeric(formatC(x$mlRes[, 5],
+          digits = digits, format = "f"))
+        mlRes[, 6] <- as.numeric(formatC(x$mlRes[, 6],
+          digits = digits, format = "e"))
+      } else {
+        if (dim(mlRes)[2] == 7) {
+          mlRes[, 1] <- as.numeric(formatC(x$mlRes[,
+          1], digits = digits, format = "f"))
+          mlRes[, 2] <- as.numeric(formatC(x$mlRes[,
+          2], digits = digits, format = "f"))
+          mlRes[, 3] <- as.numeric(formatC(x$mlRes[,
+          3], digits = digits, format = "f"))
+          mlRes[, 4] <- as.numeric(formatC(x$mlRes[,
+          4], digits = digits, format = "f"))
+          mlRes[, 5] <- as.numeric(formatC(x$mlRes[,
+          5], digits = digits, format = "e"))
+          mlRes[, 6] <- as.numeric(formatC(x$mlRes[,
+          6], digits = digits, format = "f"))
+          mlRes[, 7] <- as.numeric(formatC(x$mlRes[,
+          7], digits = digits, format = "e"))
+        }
+      }
+    }
+  }
+  row.names(mlRes) <- formatC(row.names(mlRes), width = max(nchar(row.names(mlRes))),
+    flag = "-")
+  mlRes1 <- mlRes[1:x$nXvar, ]
+  mlRes2 <- mlRes[(x$nXvar + 1):(x$nXvar + x$nuZUvar), , drop = FALSE]
+  mlRes3 <- mlRes[(x$nXvar + x$nuZUvar + 1):(x$nXvar + x$nuZUvar +
+    x$nvZVvar), , drop = FALSE]
+  mlRes4 <- mlRes[x$nXvar + x$nuZUvar + x$nvZVvar + 1, , drop = FALSE]
+  sfaModel <- "Sample Selection Correction Stochastic Frontier Model"
+  lengthSum <- nchar(sfaModel)
+  dimCoefTable <- as.character(dim(x$mlRes)[2])
+  cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+    `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+    "\n")
+  cat(sfaModel, "\n")
+  cat("Dependent Variable:", paste0(rep(" ", lengthSum - nchar("Dependent Variable:") -
+    nchar(paste0(attr(x$formula, "lhs")))), collapse = ""),
+    paste0(attr(x$formula, "lhs")), "\n")
+  cat("Log likelihood solver:", paste0(rep(" ", lengthSum -
+    nchar("Log likelihood solver:") - nchar(x$optType)),
+    collapse = ""), x$optType, "\n")
+  cat("Log likelihood iter:", paste0(rep(" ", lengthSum - nchar("Log likelihood iter:") -
+    nchar(x$nIter)), collapse = ""), x$nIter, "\n")
+  cat("Log likelihood value:", paste0(rep(" ", lengthSum -
+    nchar("Log likelihood value:") - nchar(formatC(x$mlLoglik,
+    digits = digits, format = "f"))), collapse = ""), formatC(x$mlLoglik,
+    digits = digits, format = "f"), "\n")
+  cat("Log likelihood gradient norm:", paste0(rep(" ", lengthSum -
+    nchar("Log likelihood gradient norm:") - nchar(formatC(x$gradientNorm,
+    digits = digits, format = "e"))), collapse = ""), formatC(x$gradientNorm,
+    digits = digits, format = "e"), "\n")
+  cat("Estimation based on:", if (lengthSum - nchar("Estimation based on:") -
+    nchar(x$Nobs) - nchar(x$nParm) - nchar("N = ") - nchar("of") -
+    nchar(x$Ninit) - nchar("obs.") - nchar("and K = ") -
+    6 > 0)
+    paste0(rep(" ", lengthSum - nchar("Estimation based on:") -
+      nchar(x$Nobs) - nchar(x$nParm) - nchar("N = ") -
+      nchar("of") - nchar(x$Ninit) - nchar("obs.") - nchar("and K = ") -
+      6), collapse = ""), "N = ", x$Nobs, "of", x$Ninit,
+    "obs.", "and K = ", x$nParm, "\n")
+  cat("Inf. Cr:", paste0(rep(" ", lengthSum - nchar("Inf. Cr:") -
+    nchar("AIC  = ") - nchar(formatC(x$AIC, digits = 1, format = "f")) -
+    nchar("AIC/N  = ") - nchar(formatC(x$AIC/x$Nobs, digits = 3,
+    format = "f")) - 3), collapse = ""), "AIC  = ", formatC(x$AIC,
+    digits = 1, format = "f"), "AIC/N  = ", formatC(x$AIC/x$Nobs,
+    digits = 3, format = "f"), "\n")
+  cat(paste0(rep(" ", lengthSum - nchar("BIC  = ") - nchar(formatC(x$BIC,
+    digits = 1, format = "f")) - nchar("BIC/N  = ") - nchar(formatC(x$BIC/x$Nobs,
+    digits = 3, format = "f")) - 2), collapse = ""), "BIC  = ",
+    formatC(x$BIC, digits = 1, format = "f"), "BIC/N  = ",
+    formatC(x$BIC/x$Nobs, digits = 3, format = "f"), "\n")
+  cat(paste0(rep(" ", lengthSum - nchar("HQIC = ") - nchar(formatC(x$HQIC,
+    digits = 1, format = "f")) - nchar("HQIC/N = ") - nchar(formatC(x$HQIC/x$Nobs,
+    digits = 3, format = "f")) - 2), collapse = ""), "HQIC = ",
+    formatC(x$HQIC, digits = 1, format = "f"), "HQIC/N = ",
+    formatC(x$HQIC/x$Nobs, digits = 3, format = "f"), "\n")
+  cat(paste0(rep("-", lengthSum + 2), collapse = ""), "\n")
+  cat("Variances: Sigma-squared(v)   = ", paste0(rep(" ", lengthSum -
+    nchar("Variances: Sigma-squared(v)   = ") - nchar(formatC(x$sigmavSq,
+    digits = digits, format = "f"))), collapse = ""), formatC(x$sigmavSq,
+    digits = digits, format = "f"), "\n")
+  cat("           Sigma(v)           = ", paste0(rep(" ", lengthSum -
+    nchar("Variances: Sigma-squared(v)   = ") - nchar(formatC(sqrt(x$sigmavSq),
+    digits = digits, format = "f"))), collapse = ""), formatC(sqrt(x$sigmavSq),
+    digits = digits, format = "f"), "\n")
+  cat("           Sigma-squared(u)   = ", paste0(rep(" ", lengthSum -
+    nchar("Variances: Sigma-squared(u)   = ") - nchar(formatC(x$sigmauSq,
+    digits = digits, format = "f"))), collapse = ""), formatC(x$sigmauSq,
+    digits = digits, format = "f"), "\n")
+  cat("           Sigma(u)           = ", paste0(rep(" ", lengthSum -
+    nchar("Variances: Sigma-squared(u)   = ") - nchar(formatC(sqrt(x$sigmauSq),
+    digits = digits, format = "f"))), collapse = ""), formatC(sqrt(x$sigmauSq),
+    digits = digits, format = "f"), "\n")
+  cat("Sigma = Sqrt[(s^2(u)+s^2(v))] = ", paste0(rep(" ", lengthSum -
+    nchar("Sigma = Sqrt[(s^2(u)+s^2(v))] = ") - nchar(formatC(sqrt(x$sigmavSq +
+    x$sigmauSq), digits = digits, format = "f"))), collapse = ""),
+    formatC(sqrt(x$sigmavSq + x$sigmauSq), digits = digits,
+      format = "f"), "\n")
+  cat("Gamma = sigma(u)^2/sigma^2    = ", paste0(rep(" ", lengthSum -
+    nchar("Gamma = sigma(u)^2/sigma^2    = ") - nchar(formatC(x$sigmauSq/(x$sigmavSq +
+    x$sigmauSq), digits = digits, format = "f"))), collapse = ""),
+    formatC(x$sigmauSq/(x$sigmavSq + x$sigmauSq), digits = digits,
+      format = "f"), "\n")
+  cat("Lambda = sigma(u)/sigma(v)    = ", paste0(rep(" ", lengthSum -
+    nchar("Lambda = sigma(u)/sigma(v)    = ") - nchar(formatC(sqrt(x$sigmauSq/x$sigmavSq),
+    digits = digits, format = "f"))), collapse = ""), formatC(sqrt(x$sigmauSq/x$sigmavSq),
+    digits = digits, format = "f"), "\n")
+  cat("Var[u]/{Var[u]+Var[v]}        = ", paste0(rep(" ", lengthSum -
+    nchar("Var[u]/{Var[u]+Var[v]}        = ") - nchar(formatC(x$Varu/(x$Varu +
+    x$sigmavSq), digits = digits, format = "f"))), collapse = ""),
+    formatC(x$Varu/(x$Varu + x$sigmavSq), digits = digits,
+      format = "f"), "\n")
+  cat("Var[e]                        = ", paste0(rep(" ", lengthSum -
+    nchar("Var[e]                        = ") - nchar(formatC(x$Varu +
+    x$sigmavSq, digits = digits, format = "f"))), collapse = ""),
+    formatC(x$Varu + x$sigmavSq, digits = digits, format = "f"),
+    "\n")
+  if (x$nuZUvar > 1 || x$nvZVvar > 1) {
+    cat("Variances averaged over observations \n")
+  }
+  cat(paste0(rep("-", lengthSum + 2), collapse = ""), "\n")
+  cat("Average inefficiency E[u]     = ", paste0(rep(" ", lengthSum -
+    nchar("Average inefficiency E[u]     = ") - nchar(formatC(x$Eu,
+    digits = digits, format = "f"))), collapse = ""), formatC(x$Eu,
+    digits = digits, format = "f"), "\n")
+  cat("Average efficiency E[exp(-u)] = ", paste0(rep(" ", lengthSum -
+    nchar("Average efficiency E[exp(-u)] = ") - nchar(formatC(x$Expu,
+    digits = digits, format = "f"))), collapse = ""), formatC(x$Expu,
+    digits = digits, format = "f"), "\n")
+  cat(paste0(rep("-", lengthSum + 2), collapse = ""), "\n")
+  cat(x$typeSfa, "\n")
+  cat("Estimator is 2 step Maximum Likelihood \n")
+  cat("final maximum likelihood estimates \n")
+  cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+    `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+    "\n")
+  cat(centerText("Deterministic Component of SFA", width = lengthSum +
+    2 + switch(dimCoefTable, `4` = 18, `5` = 31, `6` = 43,
+    `7` = 57)), "\n")
+  cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+    `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+    "\n")
+  printCoefmat(mlRes1, P.values = TRUE, digits = digits, signif.legend = FALSE)
+  cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+    `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+    "\n")
+  cat(centerText("Parameter in variance of u (one-sided error)",
+    width = lengthSum + 2 + switch(dimCoefTable, `4` = 18,
+      `5` = 31, `6` = 43, `7` = 57)), "\n")
+  cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+    `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+    "\n")
+  printCoefmat(mlRes2, P.values = TRUE, digits = digits, signif.legend = FALSE)
+  cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+    `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+    "\n")
+  cat(centerText("Parameters in variance of v (two-sided error)",
+    width = lengthSum + 2 + switch(dimCoefTable, `4` = 18,
+      `5` = 31, `6` = 43, `7` = 57)), "\n")
+  cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+    `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+    "\n")
+  printCoefmat(mlRes3, P.values = TRUE, digits = digits, signif.legend = FALSE)
+  cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+    `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+    "\n")
+  cat(centerText("Selection bias parameter", width = lengthSum +
+    2 + switch(dimCoefTable, `4` = 18, `5` = 31, `6` = 43,
+    `7` = 57)), "\n")
+  cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+    `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+    "\n")
+  printCoefmat(mlRes4, P.values = TRUE, digits = digits, signif.legend = TRUE)
+  cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+    `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+    "\n")
   cat(x$mlDate, "\n")
   cat("Log likelihood status:", x$optStatus, "\n")
   cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,

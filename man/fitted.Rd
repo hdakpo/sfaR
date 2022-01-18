@@ -4,20 +4,23 @@
 \alias{fitted}
 \alias{fitted.sfacross}
 \alias{fitted.lcmcross}
-\title{Extract fitted frontier values of classic or latent class stochastic models}
+\alias{fitted.selectioncross}
+\title{Extract fitted values of stochastic frontier models}
 \usage{
 \method{fitted}{sfacross}(object, ...)
 
 \method{fitted}{lcmcross}(object, ...)
+
+\method{fitted}{selectioncross}(object, ...)
 }
 \arguments{
-\item{object}{A classic or latent class stochastic frontier model returned
-by \code{\link{sfacross}} or \code{\link{lcmcross}}.}
+\item{object}{A stochastic frontier model returned
+by \code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.}
 
 \item{...}{Currently ignored.}
 }
 \value{
-In the case of an object of class \code{'sfacross'}, a vector of
+In the case of an object of class \code{'sfacross'} or \code{'selectioncross'}, a vector of
 fitted values is returned.
 
 In the case of an object of class \code{'lcmcross'}, a data frame containing
@@ -27,7 +30,7 @@ with \code{'_c#'}, \code{'#'} being the class number.
 \description{
 \code{\link{fitted}} returns the fitted frontier values from classic or
 latent class stochastic frontier models estimated with
-\code{\link{sfacross}} or \code{\link{lcmcross}}.
+\code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.
 }
 \note{
 The fitted values are ordered in the same way as the corresponding
@@ -48,9 +51,12 @@ fitting function.
 
 \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 model fitting function.
+
+\code{\link{selectioncross}} for sample selection in stochastic frontier model
+fitting function.
 }
 \author{
-K Hervé Dakpo, Yann Desjeux and Laure Latruffe
+K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
 }
 \keyword{fitted}
 \keyword{methods}

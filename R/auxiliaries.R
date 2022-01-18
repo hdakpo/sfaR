@@ -22,6 +22,24 @@ interCheckMain <- function(formula) {
   return(formula)
 }
 
+# Intercept check for selection formula ----------
+#' @param formula main formula of model
+#' @noRd
+interCheckSelection <- function(formula) {
+  terM <- terms(formula(formula))
+  if (attr(terM, "response") == 0)
+    stop("'formula' has no left hand side", call. = FALSE)
+  if (length(attr(terM, "term.labels")) == 0 && attr(terM,
+    "intercept") == 0) {
+    stop("at least one exogenous variable is required", call. = FALSE)
+  } else {
+    if (attr(terM, "intercept") == 0)
+      warning("Selection model is estimated without intercept",
+        call. = FALSE)
+  }
+  return(formula)
+}
+
 # intercept check for heteroscedasticity in u
 # (cross-section) ----------
 #' @param formula formula for heteroscedasticity in inefficiency term
@@ -193,6 +211,16 @@ formDist_lcmcross <- function(formula, uhet, vhet, thet) {
 #' @param formula formula for model
 #' @param uhet heteroscedasticity in u
 #' @param vhet heteroscedasticity in v
+#' @noRd
+formDist_selectioncross <- function(udist, formula, uhet, vhet) {
+  formula <- as.Formula(formula, uhet, vhet)
+  return(formula)
+}
+
+#' @param udist inefficiency term distribution
+#' @param formula formula for model
+#' @param uhet heteroscedasticity in u
+#' @param vhet heteroscedasticity in v
 #' @param qhet separating variables for ZISF
 #' @noRd
 formDist_zisfcross <- function(udist, formula, muhet, uhet, vhet,
@@ -299,6 +327,15 @@ fName_lcmcross <- function(Xvar, uHvar, vHvar, Zvar, nZHvar,
 }
 
 #' @param Xvar variables in main formula (e.g. inputs/outputs)
+#' @param uHvar heteroscedasticity variables in u
+#' @param vHvar heteroscedasticity variables in v
+#' @noRd
+fName_uvr_selectioncross <- function(Xvar, uHvar, vHvar) {
+  c(colnames(Xvar), c(paste0("Zu_", colnames(uHvar)), paste0("Zv_",
+    colnames(vHvar)), "rho"))
+}
+
+#' @param Xvar variables in main formula (e.g. inputs/outputs)
 #' @param muHvar heterogeneity variables in mu
 #' @param uHvar heteroscedasticity variables in u
 #' @param vHvar heteroscedasticity variables in v
@@ -319,22 +356,18 @@ fName_mu_zisfcross <- function(Xvar, muHvar, uHvar, vHvar, Zvar) {
 fName_uv_zisfcross <- function(Xvar, udist, uHvar, vHvar, Zvar) {
   c(colnames(Xvar), if (udist == "gamma") {
     c(paste0("Zu_", colnames(uHvar)), paste0("Zv_", colnames(vHvar)),
-      "P", paste0("SF_",
-                  colnames(Zvar)))
+      "P", paste0("SF_", colnames(Zvar)))
   } else {
     if (udist == "weibull") {
       c(paste0("Zu_", colnames(uHvar)), paste0("Zv_", colnames(vHvar)),
-        "k", paste0("SF_",
-                    colnames(Zvar)))
+        "k", paste0("SF_", colnames(Zvar)))
     } else {
       if (udist == "tslaplace") {
         c(paste0("Zu_", colnames(uHvar)), paste0("Zv_",
-                                                 colnames(vHvar)), "lambda", paste0("Cl_",
-                                                                                    colnames(Zvar)))
+          colnames(vHvar)), "lambda", paste0("Cl_", colnames(Zvar)))
       } else {
         c(paste0("Zu_", colnames(uHvar)), paste0("Zv_",
-                                                 colnames(vHvar)), paste0("SF_",
-                                                                          colnames(Zvar)))
+          colnames(vHvar)), paste0("SF_", colnames(Zvar)))
       }
     }
   })
@@ -464,7 +497,7 @@ vcovObj <- function(mleObj, hessianType, method, nParm) {
         hess <- -crossprod(mleObj$gradL_OBS)
         invhess <- invHess_fun(hess = hess)
       }
-    } 
+    }
   }
   invhess
 }
@@ -474,14 +507,10 @@ vcovObj <- function(mleObj, hessianType, method, nParm) {
 #' @noRd
 sfadist <- function(udist) {
   switch(udist, tnormal = "Truncated-Normal Normal SF Model",
-    hnormal = "Normal-Half Normal SF Model",
-    exponential = "Exponential Normal SF Model",
-    rayleigh = "Rayleigh Normal SF Model",
-    uniform = "Uniform Normal SF Model",
-    gamma = "Gamma Normal SF Model", 
-    lognormal = "Log-Normal Normal SF Model",
-    weibull = "Weibull Normal SF Model",
-    genexponential = "Generalized-Exponential Normal SF Model",
+    hnormal = "Normal-Half Normal SF Model", exponential = "Exponential Normal SF Model",
+    rayleigh = "Rayleigh Normal SF Model", uniform = "Uniform Normal SF Model",
+    gamma = "Gamma Normal SF Model", lognormal = "Log-Normal Normal SF Model",
+    weibull = "Weibull Normal SF Model", genexponential = "Generalized-Exponential Normal SF Model",
     tslaplace = "Truncated Skewed-Laplace Normal SF Model")
 }
 
@@ -490,15 +519,11 @@ sfadist <- function(udist) {
 #' @noRd
 zisfdist <- function(udist) {
   switch(udist, tnormal = "Truncated-Normal Normal ZISF model",
-         hnormal = "Normal-Half Normal ZISF Model",
-         exponential = "Exponential Normal ZISF model",
-         rayleigh = "Rayleigh Normal ZISF model",
-         uniform = "Uniform Normal ZISF model",
-         gamma = "Gamma Normal ZISF model", 
-         lognormal = "Log-Normal Normal ZISF model",
-         weibull = "Weibull Normal ZISF model",
-         genexponential = "Generalized-Exponential Normal ZISF model",
-         tslaplace = "Truncated Skewed-Laplace Normal ZISF model")
+    hnormal = "Normal-Half Normal ZISF Model", exponential = "Exponential Normal ZISF model",
+    rayleigh = "Rayleigh Normal ZISF model", uniform = "Uniform Normal ZISF model",
+    gamma = "Gamma Normal ZISF model", lognormal = "Log-Normal Normal ZISF model",
+    weibull = "Weibull Normal ZISF model", genexponential = "Generalized-Exponential Normal ZISF model",
+    tslaplace = "Truncated Skewed-Laplace Normal ZISF model")
 }
 
 # variance of u ----------
@@ -673,6 +698,21 @@ eExpuFun <- function(object, mu, P, lambda, k) {
       }
     }
   }
+}
+
+# Likelihood for probit model ----------
+
+## Likelihood ----------
+probit_likelihood <- function(beta, Xvar, Yvar, wHvar) {
+  Z <- as.numeric(crossprod(matrix(beta), t(Xvar)))
+  wHvar * (Yvar * log(pnorm(Z)) + (1 - Yvar) * log(pnorm(-Z)))
+}
+
+## Gradient ----------
+probit_gradient <- function(beta, Xvar, Yvar, wHvar) {
+  Z <- as.numeric(crossprod(matrix(beta), t(Xvar)))
+  gx <- wHvar * (Yvar * dnorm(Z)/pnorm(Z) - (1 - Yvar) * dnorm(-Z)/pnorm(-Z))
+  sweep(Xvar, MARGIN = 1, STATS = gx, FUN = "*")
 }
 
 # Center text strings (adapted from gdata package)
