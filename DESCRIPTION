@@ -45,5 +45,5 @@ Imports:
     ucminf,
     sandwich,
     lmtest,
-    fastGHQuad,
+    fastGHQuad
 URL: https://github.com/hdakpo/sfaR
