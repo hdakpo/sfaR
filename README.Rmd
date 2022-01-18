@@ -25,7 +25,11 @@ frontier analysis.
 Three categories of models are available in *sfaR*:
 
 * **Classic Stochastic Frontier Model**: This model allows the estimation of 
-the frontier for a cross-sectional or pooled data. 
+the frontier for a cross-sectional or pooled data. Basically we have
+
+\begin{equation}
+y_i = \mathbf{x_i'}\boldsymbol{\beta} + v_i - Su_i
+\end{equation}
 
 * **Latent Class Stochastic Frontier Model** (LCM): This model accounts for 
 technological heterogeneity by splitting the observations into a maximum number of five classes. The
@@ -52,7 +56,7 @@ devtools::install_github("hdakpo/sfaR")
 Install the current version on CRAN with
 
 ```{r}
-install.packages("sfaR")
+# install.packages("sfaR")
 ```
 
 

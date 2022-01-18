@@ -13,6 +13,7 @@ Three categories of models are available in *sfaR*:
 
 -   **Classic Stochastic Frontier Model**: This model allows the
     estimation of the frontier for a cross-sectional or pooled data.
+    Basically we have
 
 -   **Latent Class Stochastic Frontier Model** (LCM): This model
     accounts for technological heterogeneity by splitting the
@@ -43,13 +44,7 @@ devtools::install_github("hdakpo/sfaR")
 Install the current version on CRAN with
 
 ``` r
-install.packages("sfaR")
-#> Installation du package dans 'C:/Users/Dakpo/AppData/Local/Temp/RtmpoNSUnI/temp_libpath9d010ca2ffe'
-#> (car 'lib' n'est pas spécifié)
-#> package 'sfaR' successfully unpacked and MD5 sums checked
-#> 
-#> The downloaded binary packages are in
-#>  C:\Users\Dakpo\AppData\Local\Temp\RtmpGiJWtA\downloaded_packages
+# install.packages("sfaR")
 ```
 
 ## Example
@@ -60,10 +55,10 @@ features of *sfaR*.
 ``` r
 library(sfaR)
 #> * Please cite the 'sfaR' package as:
-#>   Dakpo KH., Desjeux Y. and Latruffe L. (2021). sfaR: Stochastic Frontier Analysis using R. R package version 0.1.0.
+#>   Dakpo KH., Desjeux Y., and Latruffe L. (2022). sfaR: Stochastic Frontier Analysis Routines. R package version 1.0.0.
 #> See also: citation("sfaR")
 #> 
 #> * For any questions, suggestions, or comments on the 'sfaR' package, please make use of Tracker facilities at:
-#>   https://r-forge.r-project.org/projects/sfar/
+#>   https://github.com/hdakpo/sfaR/issues
 ## basic example code
 ```
