@@ -115,9 +115,13 @@
 #' @details
 #' LCM is an estimation of a finite mixture of production functions:
 #'
-#' \deqn{y_i = \alpha_j + x'_i\beta_j + v_{i|j} - Su_{i|j}}
+#' \Sexpr[results=rd, stage=build]{
+#' katex::math_to_rd("y_i = \\\alpha_j + \\\mathbf{x_i^{\\\prime}} \\\bm{\\\beta_j} + v_{i|j} - Su_{i|j}")
+#' }
 #'
-#' \deqn{\epsilon_{i|j} = v_{i|j} -Su_{i|j}}
+#' \Sexpr[results=rd, stage=build]{
+#' katex::math_to_rd("\\\epsilon_{i|j} = v_{i|j} - Su_{i|j}")
+#' }
 #'
 #' where \eqn{i} is the observation, \eqn{j} is the class, \eqn{y} is the
 #' output (cost, revenue, profit), \eqn{x} is the vector of main explanatory
@@ -129,20 +133,31 @@
 #' \code{S = -1} in the case of cost frontier function.
 #'
 #' The contribution of observation \eqn{i} to the likelihood conditional on
-#' class \eqn{j} is defined as: \deqn{P(i|j) = \frac{2}{\sqrt{\sigma_{u|j}^2 +
-#' \sigma_{v|j}^2}} \phi\left(\frac{S\epsilon_{i|j}}{\sqrt{\sigma_{u|j}^2 +
-#' \sigma_{v|j}^2}}\right) \Phi\left(\frac{\mu_{i*|j}}{\sigma_{*|j}}\right)}
+#' class \eqn{j} is defined as: 
+#' 
+#' \Sexpr[results=rd, stage=build]{
+#' katex::math_to_rd("P(i|j) = \\\frac{2}{\\\sqrt{\\\sigma_{u|j}^2 + \\\sigma_{v|j}^2}}\\\phi\\\\left(\\\frac{S\\\epsilon_{i|j}}{\\\sqrt{\\\sigma_{u|j}^2 +\\\sigma_{v|j}^2}}\\\\right)\\\Phi\\\\left(\\\frac{\\\mu_{i*|j}}{\\\sigma_{*|j}}\\\\right)")
+#' }
 #'
-#' where \deqn{\mu_{i*|j}=\frac{- S\epsilon_{i|j}\sigma_{u|j}^2}{\sigma_{u|j}^2
-#' + \sigma_{v|j}^2}}
+#' where 
+#' 
+#' \Sexpr[results=rd, stage=build]{
+#' katex::math_to_rd("\\\mu_{i*|j}=\\\frac{- S\\\epsilon_{i|j}\\\sigma_{u|j}^2}{\\\sigma_{u|j}^2 + \\\sigma_{v|j}^2}")
+#' }
 #'
-#' and \deqn{\sigma_*^2 = \frac{\sigma_{u|j}^2 \sigma_{v|j}^2}{\sigma_{u|j}^2 +
-#' \sigma_{v|j}^2}}
+#' and 
+#' 
+#' \Sexpr[results=rd, stage=build]{
+#' katex::math_to_rd("\\\sigma_*^2 = \\\frac{\\\sigma_{u|j}^2 \\\sigma_{v|j}^2}{\\\sigma_{u|j}^2 + \\\sigma_{v|j}^2}")
+#' }
 #'
 #' The prior probability of using a particular technology can depend on some
 #' covariates (namely the variables separating the observations into classes)
-#' using a logit specification: \deqn{\pi(i,j) =
-#' \frac{\exp{(\theta_j'Z_h)}}{\sum_{m=1}^{J}\exp{(\theta_m'Z_h)}}}
+#' using a logit specification: 
+#' 
+#' \Sexpr[results=rd, stage=build]{
+#' katex::math_to_rd("\\\pi(i,j) = \\\frac{\\\exp{(\\\theta_j'Z_{hi})}}{\\\sum_{m=1}^{J}\\\exp{(\\\theta_m'Z_{hi})}}")
+#' }
 #'
 #' with \eqn{Z_h} the covariates, \eqn{\theta} the coefficients estimated for
 #' the covariates, and \eqn{\exp(\theta_J'Z_h)=1}.
@@ -157,8 +172,10 @@
 #'
 #' Class assignment is based on the largest posterior probability. This
 #' probability is obtained using Bayes' rule, as follows for class \eqn{j}:
-#' \deqn{w\left(j|i\right)=\frac{P\left(i|j\right)\pi\left(i,
-#' j\right)}{\sum_{m=1}^JP\left(i|m\right)\pi\left(i, m\right)}}
+#' 
+#' \Sexpr[results=rd, stage=build]{
+#' katex::math_to_rd("w\\\\left(j|i\\\\right)=\\\frac{P\\\\left(i|j\\\\right)\\\pi\\\\left(i,j\\\\right)}{\\\sum_{m=1}^JP\\\\left(i|m\\\\right)\\\pi\\\\left(i, m\\\\right)}")
+#' }
 #'
 #' To accommodate heteroscedasticity in the variance parameters of the error
 #' terms, a single part (right) formula can also be specified. To impose the
@@ -170,7 +187,7 @@
 #' heterogeneity in the truncated mean \eqn{\mu}, it is modelled as
 #' \eqn{\mu=\omega'Z_{\mu}}.
 #' 
-#' \code{sfacross} allows for the maximization of weighted log-likelihood.
+#' \code{lcmcross} allows for the maximization of weighted log-likelihood.
 #' When option \code{weights} is specified and \code{wscale = TRUE}, the weights
 #' is scaled as 
 #' 
@@ -280,7 +297,7 @@
 #' cross-section where the probability of belonging to a class a priori is not
 #' permanent (not fixed over time).
 #'
-#' @author K Hervé Dakpo, Yann Desjeux and Laure Latruffe
+#' @author K Hervé Dakpo, Yann Desjeux, Laure Latruffe and Arne Henningsen
 #'
 #' @seealso \code{\link[=print.lcmcross]{print}} for printing \code{lcmcross} object.
 #' 
@@ -309,6 +326,11 @@
 #'
 #' \code{\link[=vcov.lcmcross]{vcov}} for computing the variance-covariance
 #' matrix of the coefficients.
+#' 
+#' \code{\link[=bread.lcmcross]{bread}} for bread for sandwich estimator.
+#' 
+#' \code{\link[=estfun.lcmcross]{estfun}} for gradient extraction for each 
+#' observation.
 #'
 #' @references Aigner, D., Lovell, C. A. K., and P. Schmidt. 1977. Formulation
 #' and estimation of stochastic frontier production function models.
@@ -811,6 +833,7 @@ bread.lcmcross <- function(x, ...) {
   if (x$hessianType == "Analytic Hessian") {
     return(x$invHessian * x$Nobs)
   } else {
+    cat("Computing Analytical Hessian")
     Yvar <- model.response(model.frame(x$formula, data = x$dataTable))
     Xvar <- model.matrix(x$formula, rhs = 1, data = x$dataTable)
     uHvar <- model.matrix(x$formula, rhs = 2, data = x$dataTable)
@@ -847,7 +870,9 @@ bread.lcmcross <- function(x, ...) {
         }
       }
     }
-    return(invHess_fun(hess = -hessAnalytical))
+    invHess <- invHess_fun(hess = hessAnalytical)
+    colnames(invHess) <- rownames(invHess) <- names(x$mlParam)
+    return(invHess * x$Nobs)
   }
 }
 
@@ -856,4 +881,11 @@ bread.lcmcross <- function(x, ...) {
 #' @export
 estfun.lcmcross <- function(x, ...) {
   return(x$gradL_OBS)
+}
+
+# Extract number of observations (use by coeftest) ----------
+#' @rdname lcmcross
+#' @export
+nobs.lcmcross <- function(x, ...) {
+  return(x$Nobs)
 }

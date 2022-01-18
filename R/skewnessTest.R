@@ -12,7 +12,6 @@
 
 #' Skewness test for stochastic frontier models
 #' 
-#'
 #' \code{\link{skewnessTest}} computes skewness test for stochastic frontier
 #' models (i.e. objects of class \code{'sfacross'}).
 #'
@@ -28,6 +27,8 @@
 #'
 #' @note \code{\link{skewnessTest}} is currently only available for object of
 #' class \code{'sfacross'}.
+#' 
+#' @author K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
 #'
 #' @references Coelli, T. 1995. Estimators and hypothesis tests for a
 #' stochastic frontier function - a Monte-Carlo analysis. \emph{Journal of

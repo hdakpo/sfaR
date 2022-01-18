@@ -127,8 +127,15 @@
 #' additional arguments of the print method are currently ignored.
 #'
 #' @details
-#' The stochastic frontier model is defined as: \deqn{y_i = \alpha +
-#' \mathbf{x}'_i\beta + v_i - Su_i} \deqn{\epsilon_i = v_i -Su_i}
+#' The stochastic frontier model is defined as: 
+#' 
+#' \Sexpr[results=rd, stage=build]{
+#' katex::math_to_rd("y_i = \\\alpha + \\\mathbf{x_i^{\\\prime}}\\\bm{\\\beta} + v_i - Su_i")
+#' }
+#' 
+#' \Sexpr[results=rd, stage=build]{
+#' katex::math_to_rd("\\\epsilon_i = v_i -Su_i")
+#' }
 #'
 #' where \eqn{i} is the observation, \eqn{j} is the class, \eqn{y} is the
 #' output (cost, revenue, profit), \eqn{x} is the vector of main explanatory
@@ -162,18 +169,21 @@
 #' In the case of the truncated normal distribution, the convolution of
 #' \eqn{u_i} and \eqn{v_i} is:
 #'
-#' \deqn{f(\epsilon_i)=\frac{1}{\sqrt{\sigma_u^2 + \sigma_v^2}}
-#' \phi\left(\frac{S\epsilon_i + \mu}{\sqrt{\sigma_u^2 + \sigma_v^2}}\right)
-#' \Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)/\Phi\left(\frac{\mu}{\sigma_u}\right)}
+#' \Sexpr[results=rd, stage=build]{
+#' katex::math_to_rd("f(\\\epsilon_i)=\\\frac{1}{\\\sqrt{\\\\sigma_u^2 + \\\sigma_v^2}}\\\phi\\\\left(\\\frac{S\\\epsilon_i + \\\mu}{\\\sqrt{\\\sigma_u^2 + \\\sigma_v^2}}\\\\right)\\\Phi\\\\left(\\\frac{\\\mu_{i*}}{\\\sigma_*}\\\\right)\\\Big/\\\Phi\\\\left(\\\frac{\\\mu}{\\\sigma_u}\\\\right)")
+#' }
 #'
 #' where
 #'
-#' \deqn{\mu_{i*}=\frac{\mu\sigma_v^2 - S\epsilon_i\sigma_u^2}{\sigma_u^2 +
-#' \sigma_v^2}}
+#' \Sexpr[results=rd, stage=build]{
+#' katex::math_to_rd("\\\mu_{i*}=\\\frac{\\\mu\\\sigma_v^2 - S\\\epsilon_i\\\sigma_u^2}{\\\sigma_u^2 + \\\sigma_v^2}")
+#' }
 #'
 #' and
 #'
-#' \deqn{\sigma_*^2 = \frac{\sigma_u^2 \sigma_v^2}{\sigma_u^2 + \sigma_v^2}}
+#' \Sexpr[results=rd, stage=build]{
+#' katex::math_to_rd("\\\sigma_*^2 = \\\frac{\\\sigma_u^2 \\\sigma_v^2}{\\\sigma_u^2 + \\\sigma_v^2}")
+#' }
 #'
 #' In the case of the half normal distribution the convolution is obtained by
 #' setting \eqn{\mu=0}.
@@ -312,7 +322,7 @@
 #' @note For the Halton draws, the code is adapted from the \pkg{mlogit}
 #' package.
 #'
-#' @author K Hervé Dakpo, Yann Desjeux and Laure Latruffe
+#' @author K Hervé Dakpo, Yann Desjeux, Laure Latruffe and Arne Henningsen
 #'
 #' @seealso \code{\link[=print.sfacross]{print}} for printing \code{sfacross} object.
 #' 
@@ -344,6 +354,11 @@
 #'
 #' \code{\link[=vcov.sfacross]{vcov}} for computing the variance-covariance
 #' matrix of the coefficients.
+#' 
+#' \code{\link[=bread.sfacross]{bread}} for bread for sandwich estimator.
+#' 
+#' \code{\link[=estfun.sfacross]{estfun}} for gradient extraction for each 
+#' observation.
 #'
 #' \code{\link{skewnessTest}} for implementing skewness test.
 #'
@@ -1006,6 +1021,7 @@ bread.sfacross <- function(x, ...) {
   if (x$hessianType == "Analytic Hessian") {
     return(x$invHessian * x$Nobs)
   } else {
+    cat("Computing Analytical Hessian")
     Yvar <- model.response(model.frame(x$formula, data = x$dataTable))
     Xvar <- model.matrix(x$formula, rhs = 1, data = x$dataTable)
     if (x$udist %in% c("tnormal", "lognormal")) {
@@ -1107,7 +1123,9 @@ bread.sfacross <- function(x, ...) {
         }
       }
     }
-    return(invHess_fun(hess = -hessAnalytical))
+    invHess <- invHess_fun(hess = hessAnalytical)
+    colnames(invHess) <- rownames(invHess) <- names(x$mlParam)
+    return(invHess * x$Nobs)
   }
 }
 
@@ -1118,3 +1136,9 @@ estfun.sfacross <- function(x, ...) {
   return(x$gradL_OBS)
 }
 
+# Extract number of observations (use by coeftest) ----------
+#' @rdname sfacross
+#' @export
+nobs.sfacross <- function(x, ...) {
+  return(x$Nobs)
+}

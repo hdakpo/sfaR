@@ -5,6 +5,7 @@
 \alias{print.lcmcross}
 \alias{bread.lcmcross}
 \alias{estfun.lcmcross}
+\alias{nobs.lcmcross}
 \title{Latent class stochastic frontier using cross-section data}
 \usage{
 lcmcross(
@@ -41,6 +42,8 @@ lcmcross(
 \method{bread}{lcmcross}(x, ...)
 
 \method{estfun}{lcmcross}(x, ...)
+
+\method{nobs}{lcmcross}(x, ...)
 }
 \arguments{
 \item{formula}{A symbolic description of the model to be estimated based on
@@ -254,9 +257,13 @@ The model can estimate up to five classes.
 \details{
 LCM is an estimation of a finite mixture of production functions:
 
-\deqn{y_i = \alpha_j + x'_i\beta_j + v_{i|j} - Su_{i|j}}
+\Sexpr[results=rd, stage=build]{
+katex::math_to_rd("y_i = \\\alpha_j + \\\mathbf{x_i^{\\\prime}} \\\bm{\\\beta_j} + v_{i|j} - Su_{i|j}")
+}
 
-\deqn{\epsilon_{i|j} = v_{i|j} -Su_{i|j}}
+\Sexpr[results=rd, stage=build]{
+katex::math_to_rd("\\\epsilon_{i|j} = v_{i|j} - Su_{i|j}")
+}
 
 where \eqn{i} is the observation, \eqn{j} is the class, \eqn{y} is the
 output (cost, revenue, profit), \eqn{x} is the vector of main explanatory
@@ -268,20 +275,31 @@ error term with variance \eqn{\sigma_{v}^2}.
 \code{S = -1} in the case of cost frontier function.
 
 The contribution of observation \eqn{i} to the likelihood conditional on
-class \eqn{j} is defined as: \deqn{P(i|j) = \frac{2}{\sqrt{\sigma_{u|j}^2 +
-\sigma_{v|j}^2}} \phi\left(\frac{S\epsilon_{i|j}}{\sqrt{\sigma_{u|j}^2 +
-\sigma_{v|j}^2}}\right) \Phi\left(\frac{\mu_{i*|j}}{\sigma_{*|j}}\right)}
+class \eqn{j} is defined as:
 
-where \deqn{\mu_{i*|j}=\frac{- S\epsilon_{i|j}\sigma_{u|j}^2}{\sigma_{u|j}^2
-+ \sigma_{v|j}^2}}
+\Sexpr[results=rd, stage=build]{
+katex::math_to_rd("P(i|j) = \\\frac{2}{\\\sqrt{\\\sigma_{u|j}^2 + \\\sigma_{v|j}^2}}\\\phi\\\\left(\\\frac{S\\\epsilon_{i|j}}{\\\sqrt{\\\sigma_{u|j}^2 +\\\sigma_{v|j}^2}}\\\\right)\\\Phi\\\\left(\\\frac{\\\mu_{i*|j}}{\\\sigma_{*|j}}\\\\right)")
+}
 
-and \deqn{\sigma_*^2 = \frac{\sigma_{u|j}^2 \sigma_{v|j}^2}{\sigma_{u|j}^2 +
-\sigma_{v|j}^2}}
+where
+
+\Sexpr[results=rd, stage=build]{
+katex::math_to_rd("\\\mu_{i*|j}=\\\frac{- S\\\epsilon_{i|j}\\\sigma_{u|j}^2}{\\\sigma_{u|j}^2 + \\\sigma_{v|j}^2}")
+}
+
+and
+
+\Sexpr[results=rd, stage=build]{
+katex::math_to_rd("\\\sigma_*^2 = \\\frac{\\\sigma_{u|j}^2 \\\sigma_{v|j}^2}{\\\sigma_{u|j}^2 + \\\sigma_{v|j}^2}")
+}
 
 The prior probability of using a particular technology can depend on some
 covariates (namely the variables separating the observations into classes)
-using a logit specification: \deqn{\pi(i,j) =
-\frac{\exp{(\theta_j'Z_h)}}{\sum_{m=1}^{J}\exp{(\theta_m'Z_h)}}}
+using a logit specification:
+
+\Sexpr[results=rd, stage=build]{
+katex::math_to_rd("\\\pi(i,j) = \\\frac{\\\exp{(\\\theta_j'Z_{hi})}}{\\\sum_{m=1}^{J}\\\exp{(\\\theta_m'Z_{hi})}}")
+}
 
 with \eqn{Z_h} the covariates, \eqn{\theta} the coefficients estimated for
 the covariates, and \eqn{\exp(\theta_J'Z_h)=1}.
@@ -296,8 +314,10 @@ for instance \code{\link[=ic.lcmcross]{ic}}).
 
 Class assignment is based on the largest posterior probability. This
 probability is obtained using Bayes' rule, as follows for class \eqn{j}:
-\deqn{w\left(j|i\right)=\frac{P\left(i|j\right)\pi\left(i,
-j\right)}{\sum_{m=1}^JP\left(i|m\right)\pi\left(i, m\right)}}
+
+\Sexpr[results=rd, stage=build]{
+katex::math_to_rd("w\\\\left(j|i\\\\right)=\\\frac{P\\\\left(i|j\\\\right)\\\pi\\\\left(i,j\\\\right)}{\\\sum_{m=1}^JP\\\\left(i|m\\\\right)\\\pi\\\\left(i, m\\\\right)}")
+}
 
 To accommodate heteroscedasticity in the variance parameters of the error
 terms, a single part (right) formula can also be specified. To impose the
@@ -309,7 +329,7 @@ and \eqn{\delta} and \eqn{\phi} the coefficients.  In the case of
 heterogeneity in the truncated mean \eqn{\mu}, it is modelled as
 \eqn{\mu=\omega'Z_{\mu}}.
 
-\code{sfacross} allows for the maximization of weighted log-likelihood.
+\code{lcmcross} allows for the maximization of weighted log-likelihood.
 When option \code{weights} is specified and \code{wscale = TRUE}, the weights
 is scaled as
 
@@ -421,9 +441,14 @@ estimation.
 
 \code{\link[=vcov.lcmcross]{vcov}} for computing the variance-covariance
 matrix of the coefficients.
+
+\code{\link[=bread.lcmcross]{bread}} for bread for sandwich estimator.
+
+\code{\link[=estfun.lcmcross]{estfun}} for gradient extraction for each
+observation.
 }
 \author{
-K Hervé Dakpo, Yann Desjeux and Laure Latruffe
+K Hervé Dakpo, Yann Desjeux, Laure Latruffe and Arne Henningsen
 }
 \keyword{cross-section}
 \keyword{latent-class}
