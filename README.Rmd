@@ -27,9 +27,28 @@ Three categories of models are available in *sfaR*:
 * **Classic Stochastic Frontier Model**: This model allows the estimation of 
 the frontier for a cross-sectional or pooled data. Basically we have
 
-\begin{equation}
-y_i = \mathbf{x_i'}\boldsymbol{\beta} + v_i - Su_i
-\end{equation}
+$$y_i = \mathbf{x_i'}\boldsymbol{\beta} + v_i - Su_i$$
+
+where $S = 1$ for production function and $S = -1$ for cost function. $v$ follows a normal distribution $\mathcal{N}(0, \sigma_v^2)$. For $u$ ten different distributions are available. These distributions include:
+* Half-Normal
+* Truncated Normal
+* Exponential
+* Rayleigh
+* Gamma
+* Generalized Exponential
+* Lognormal, 
+* Truncated Skewed Laplace
+* Uniform
+* Weibull
+
+In the case of the Gamma, lognormal and Weibull distributions, maximum simulated
+likelihood is used with the possibility of four specific distributions to
+construct the draws: Halton, Generalized Halton, Sobol and uniform.
+
+Heteroscedasticity in both error terms can be implemented, in addition to
+heterogeneity in the truncated mean parameter in the case of the truncated
+normal and lognormal distributions. In addition, in the case of the truncated normal
+distribution, the scaling property can be estimated.
 
 * **Latent Class Stochastic Frontier Model** (LCM): This model accounts for 
 technological heterogeneity by splitting the observations into a maximum number of five classes. The
