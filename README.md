@@ -26,15 +26,15 @@ For *u* ten different distributions are available. These distributions
 include:
 
 -   Half-Normal
-    -   Truncated Normal
-    -   Exponential
-    -   Rayleigh
-    -   Gamma
-    -   Generalized Exponential
-    -   Lognormal
-    -   Truncated Skewed Laplace
-    -   Uniform
-    -   Weibull
+-   Truncated Normal
+-   Exponential
+-   Rayleigh
+-   Gamma
+-   Generalized Exponential
+-   Lognormal
+-   Truncated Skewed Laplace
+-   Uniform
+-   Weibull
 
 In the case of the Gamma, lognormal and Weibull distributions, maximum
 simulated likelihood is used with the possibility of four specific
