@@ -47,6 +47,8 @@ truncated normal and lognormal distributions. In addition, in the case
 of the truncated normal distribution, the scaling property can be
 estimated.
 
+The main function for this class of model is `sfacross`.
+
 -   **Latent Class Stochastic Frontier Model** (LCM): This model
     accounts for technological heterogeneity by splitting the
     observations into a maximum number of five classes. The
@@ -62,6 +64,10 @@ estimated.
     model solves the selection bias due to the correlation between the
     two-sided errors terms in both the selection and the frontier
     equations, in the case of cross-sectional or pooled data.
+
+An important features of *sfaR* is to provide eleven different
+optimization algorithms. For complex problem, several algorithms can be
+combined especially non-gradient based in a first step.
 
 ## Installation
 

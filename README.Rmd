@@ -34,16 +34,16 @@ the frontier for a cross-sectional or pooled data. Basically we have
 
 where $S = 1$ for production function and $S = -1$ for cost function. $v$ follows a normal distribution $\mathcal{N}(0, \sigma_v^2)$. For $u$ ten different distributions are available. These distributions include:
 
-   + Half-Normal 
-   + Truncated Normal
-   + Exponential
-   + Rayleigh
-   + Gamma
-   + Generalized Exponential
-   + Lognormal
-   + Truncated Skewed Laplace
-   + Uniform
-   + Weibull
+  + Half-Normal 
+  + Truncated Normal
+  + Exponential
+  + Rayleigh
+  + Gamma
+  + Generalized Exponential
+  + Lognormal
+  + Truncated Skewed Laplace
+  + Uniform
+  + Weibull
 
 In the case of the Gamma, lognormal and Weibull distributions, maximum simulated
 likelihood is used with the possibility of four specific distributions to
@@ -53,6 +53,8 @@ Heteroscedasticity in both error terms can be implemented, in addition to
 heterogeneity in the truncated mean parameter in the case of the truncated
 normal and lognormal distributions. In addition, in the case of the truncated normal
 distribution, the scaling property can be estimated.
+
+The main function for this class of model is `sfacross`.
 
 * **Latent Class Stochastic Frontier Model** (LCM): This model accounts for 
 technological heterogeneity by splitting the observations into a maximum number of five classes. The
@@ -66,6 +68,10 @@ guided by several information criteria (i.e. AIC, BIC or HQIC).
 * **Sample Selection Correction Stochastic Frontier Model**: This model solves the selection bias due to
 the correlation between the two-sided errors terms in both the selection and the 
 frontier equations, in the case of cross-sectional or pooled data.
+
+An important features of *sfaR* is to provide eleven different optimization 
+algorithms. For complex problem, several algorithms can be combined especially
+non-gradient based in a first step.
 
 ## Installation
 
