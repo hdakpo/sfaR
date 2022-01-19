@@ -33,7 +33,6 @@ the frontier for a cross-sectional or pooled data. Basically we have
 <!-- $$y_i = \mathbf{x_i'}\boldsymbol{\beta} + v_i - Su_i$$ -->
 
 where $S = 1$ for production function and $S = -1$ for cost function. $v$ follows a normal distribution $\mathcal{N}(0, \sigma_v^2)$. For $u$ ten different distributions are available. These distributions include:
-
   + Half-Normal 
   + Truncated Normal
   + Exponential
