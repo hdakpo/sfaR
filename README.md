@@ -27,14 +27,14 @@ include:
 
 -   Half-Normal
 -   Truncated Normal
--   Exponential
--   Rayleigh
--   Gamma
--   Generalized Exponential
--   Lognormal
--   Truncated Skewed Laplace
--   Uniform
--   Weibull
+    -   Exponential
+    -   Rayleigh
+    -   Gamma
+    -   Generalized Exponential
+    -   Lognormal
+    -   Truncated Skewed Laplace
+    -   Uniform
+    -   Weibull
 
 In the case of the Gamma, lognormal and Weibull distributions, maximum
 simulated likelihood is used with the possibility of four specific
