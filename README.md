@@ -26,7 +26,7 @@ For *u* ten different distributions are available. These distributions
 include:
 
 -   Half-Normal
--   Truncated Normal
+    -   Truncated Normal
     -   Exponential
     -   Rayleigh
     -   Gamma
