@@ -27,9 +27,7 @@ Three categories of models are available in *sfaR*:
 * **Classic Stochastic Frontier Model**: This model allows the estimation of 
 the frontier for a cross-sectional or pooled data. Basically we have
 
-```{r}
-katex::katex_html(katex::example_math())
-```
+![eq 1](https://latex.codecogs.com/gif.latex?y_i%20%3D%20%5Cmathbf%7Bx_i%27%7D%5Cboldsymbol%7B%5Cbeta%7D%20&plus;%20v_i%20-%20Su_i)
 
 
 <!-- $$y_i = \mathbf{x_i'}\boldsymbol{\beta} + v_i - Su_i$$ -->
