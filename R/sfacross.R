@@ -28,7 +28,7 @@
 #' The truncated normal - normal distribution with scaling property as in Wang
 #' and Schmidt (2002) is also implemented.
 #'
-#' @aliases sfacross print.sfacross
+#' @aliases sfacross print.sfacross nobs.sfacross
 #'
 #' @param formula A symbolic description of the model to be estimated based on
 #' the generic function \code{formula} (see section \sQuote{Details}).
@@ -124,7 +124,7 @@
 #' \code{\link[maxLik:maxNR]{maxNR}}.
 #' @param x an object of class sfacross (returned by the function \code{\link{sfacross}}).
 #' @param ... additional arguments of frontier are passed to sfacross; 
-#' additional arguments of the print method are currently ignored.
+#' additional arguments of the print, bread, estfun, nobs methods are currently ignored.
 #'
 #' @details
 #' The stochastic frontier model is defined as: 
@@ -209,10 +209,10 @@
 #' \code{\link[=fitted.sfacross]{fitted}}, \code{\link[=logLik.sfacross]{logLik}}, 
 #' \code{\link[=residuals.sfacross]{residuals}}, \code{\link[=vcov.sfacross]{vcov}}, 
 #' \code{\link[=efficiencies.sfacross]{efficiencies}}, \code{\link[=ic.sfacross]{ic}}, 
-#' \code{\link[=marginal.sfacross]{marginal}}, \code{\link[=skewnessTest.sfacross]{skewnessTest}}, 
+#' \code{\link[=marginal.sfacross]{marginal}}, \code{\link[=skewnessTest]{skewnessTest}}, 
 #' \code{\link[=estfun.sfacross]{estfun}} and 
 #' \code{\link[=bread.sfacross]{bread}} (from the \pkg{sandwich} package), 
-#' \code{\link[=coeftest.sfacross]{coeftest}} (from the \pkg{lmtest} package).
+#' \code{\link[=coeftest]{coeftest}} (from the \pkg{lmtest} package).
 #'
 #' @return \code{\link{sfacross}} returns a list of class \code{'sfacross'}
 #' containing the following elements:
@@ -322,7 +322,7 @@
 #' @note For the Halton draws, the code is adapted from the \pkg{mlogit}
 #' package.
 #'
-#' @author K Hervé Dakpo, Yann Desjeux, Laure Latruffe and Arne Henningsen
+# @author K Hervé Dakpo, Yann Desjeux, Laure Latruffe and Arne Henningsen
 #'
 #' @seealso \code{\link[=print.sfacross]{print}} for printing \code{sfacross} object.
 #' 
@@ -349,7 +349,7 @@
 #' \code{\link[=residuals.sfacross]{residuals}} for extracting residuals of the
 #' estimation.
 #' 
-#' \code{\link[=skewnessTest.sfacross]{skewnessTest}} for conducting residuals
+#' \code{\link[=skewnessTest]{skewnessTest}} for conducting residuals
 #' skewness test.
 #'
 #' \code{\link[=vcov.sfacross]{vcov}} for computing the variance-covariance

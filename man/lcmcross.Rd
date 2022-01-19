@@ -3,9 +3,9 @@
 \name{lcmcross}
 \alias{lcmcross}
 \alias{print.lcmcross}
+\alias{nobs.lcmcross}
 \alias{bread.lcmcross}
 \alias{estfun.lcmcross}
-\alias{nobs.lcmcross}
 \title{Latent class stochastic frontier using cross-section data}
 \usage{
 lcmcross(
@@ -154,7 +154,7 @@ algorithm. Default = \code{1.5}.}
 \item{x}{an object of class lcmcross (returned by the function \code{\link{lcmcross}}).}
 
 \item{...}{additional arguments of frontier are passed to lcmcross;
-additional arguments of the print method are currently ignored.}
+additional arguments of the print, bread, estfun, nobs methods are currently ignored.}
 }
 \value{
 \code{\link{lcmcross}} returns a list of class \code{'lcmcross'}
@@ -198,7 +198,7 @@ used for optimization along with residuals and fitted values of the OLS and
 ML estimations, and the individual observation log-likelihood. When \code{weights}
 is specified an additional variable is also provided in \code{dataTable}.}
 
-\item{InitHalf}{When \code{start = NULL}. Initial ML estimation with half
+\item{initHalf}{When \code{start = NULL}. Initial ML estimation with half
 normal distribution for the one-sided error term. Model to construct the
 starting values for the latent class estimation. Object of class
 \code{'maxLik'} and \code{'maxim'} returned.}
@@ -352,7 +352,7 @@ A set of extractor functions for fitted model objects is available for objects o
 \code{\link[=efficiencies.lcmcross]{efficiencies}}, \code{\link[=ic.lcmcross]{ic}},
 \code{\link[=marginal.lcmcross]{marginal}}, \code{\link[=estfun.lcmcross]{estfun}} and
 \code{\link[=bread.lcmcross]{bread}} (from the \pkg{sandwich} package),
-\code{\link[=coeftest.lcmcross]{coeftest}} (from the \pkg{lmtest} package).
+\code{\link[=coeftest]{coeftest}} (from the \pkg{lmtest} package).
 }
 \note{
 In the case of panel data, \code{\link{lcmcross}} estimates a pooled
@@ -446,9 +446,6 @@ matrix of the coefficients.
 
 \code{\link[=estfun.lcmcross]{estfun}} for gradient extraction for each
 observation.
-}
-\author{
-K Hervé Dakpo, Yann Desjeux, Laure Latruffe and Arne Henningsen
 }
 \keyword{cross-section}
 \keyword{latent-class}

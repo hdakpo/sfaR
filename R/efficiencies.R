@@ -9,13 +9,14 @@
 # Models: -Standard Stochastic Frontier Analysis                               #
 #         -Latent Class Stochastic Frontier Analysis                           #
 #         -Sample selection correction                                         #
+#         -Zero inefficiency stochastic frontier                               #
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
 
 #' Compute conditional (in-)efficiency estimates of stochastic frontier models
 #'
 #' \code{\link{efficiencies}} returns (in-)efficiency estimates of models estimated with
-#' \code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.
+#' \code{\link{sfacross}}, \code{\link{lcmcross}} \code{\link{selectioncross}}, or \code{\link{zisfcross}}.
 #' 
 #' @name efficiencies
 #'
@@ -28,56 +29,56 @@
 #'
 #' In the case of the half normal distribution for the one-sided error term,
 #' the formulae are as follows (for notations, see the \sQuote{Details} section
-#' of \code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}):
+#' of \code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}):
 #'
 #' \itemize{ \item The conditional inefficiency is }
 #' 
 #' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd("E\\\\left\\\\lbrack u_i|\\\epsilon_i\\\\right\\\\rbrack=\\\mu_{i\\\ast} + \\\sigma_\\\ast\\\frac{\\\phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)}{\\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)}") 
+#' katex::math_to_rd('E\\\\left\\\\lbrack u_i|\\\epsilon_i\\\\right\\\\rbrack=\\\mu_{i\\\ast} + \\\sigma_\\\ast\\\frac{\\\phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)}{\\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)}') 
 #' }
 #'
 #' where
 #' 
 #' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd("\\\mu_{i\\\ast}=\\\frac{-S\\\epsilon_i\\\sigma_u^2}{\\\sigma_u^2 + \\\sigma_v^2}") 
+#' katex::math_to_rd('\\\mu_{i\\\ast}=\\\frac{-S\\\epsilon_i\\\sigma_u^2}{\\\sigma_u^2 + \\\sigma_v^2}') 
 #' }
 #'
 #' and
 #' 
 #' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd("\\\sigma_\\\ast^2 = \\\frac{\\\sigma_u^2 \\\sigma_v^2}{\\\sigma_u^2 + \\\sigma_v^2}") 
+#' katex::math_to_rd('\\\sigma_\\\ast^2 = \\\frac{\\\sigma_u^2 \\\sigma_v^2}{\\\sigma_u^2 + \\\sigma_v^2}') 
 #' }
 #' 
 #' \itemize{ \item The Battese and Coelli (1988) conditional efficiency is
 #' obtained by: } 
 #' 
 #' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd("E\\\\left\\\\lbrack\\\exp{\\\\left(-u_i\\\\right)}|\\\\epsilon_i\\\\right\\\\rbrack = \\\exp{\\\\left(-\\\mu_{i\\\ast}+\\\frac{1}{2}\\\sigma_\\\ast^2\\\\right)}\\\frac{\\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}-\\\sigma_\\\ast\\\\right)}{\\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\right)}") 
+#' katex::math_to_rd('E\\\\left\\\\lbrack\\\exp{\\\\left(-u_i\\\\right)}|\\\\epsilon_i\\\\right\\\\rbrack = \\\exp{\\\\left(-\\\mu_{i\\\ast}+\\\frac{1}{2}\\\sigma_\\\ast^2\\\\right)}\\\frac{\\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}-\\\sigma_\\\ast\\\\right)}{\\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\right)}') 
 #' }
 #' 
 #' \itemize{ \item The reciprocal of the Battese and Coelli (1988) conditional efficiency is
 #' obtained by: } 
 #' 
 #' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd("E\\\\left\\\\lbrack\\\exp{\\\\left(u_i\\\\right)}|\\\epsilon_i\\\\right\\\\rbrack = \\\exp{\\\\left(\\\mu_{i\\\ast}+\\\frac{1}{2}\\\sigma_\\\ast^2\\\\right)} \\\frac{\\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}+\\\sigma_\\\ast\\\\right)}{\\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)}") 
+#' katex::math_to_rd('E\\\\left\\\\lbrack\\\exp{\\\\left(u_i\\\\right)}|\\\epsilon_i\\\\right\\\\rbrack = \\\exp{\\\\left(\\\mu_{i\\\ast}+\\\frac{1}{2}\\\sigma_\\\ast^2\\\\right)} \\\frac{\\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}+\\\sigma_\\\ast\\\\right)}{\\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)}') 
 #' }
 #' 
 #' \itemize{ \item The conditional mode is computed using: }
 #' 
 #' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd("M\\\\left\\\\lbrack u_i|\\\epsilon_i\\\\right\\\\rbrack= \\\mu_{i\\\ast} \\\quad \\\hbox{For} \\\quad \\\mu_{i\\\ast} > 0") 
+#' katex::math_to_rd('M\\\\left\\\\lbrack u_i|\\\epsilon_i\\\\right\\\\rbrack= \\\mu_{i\\\ast} \\\quad \\\hbox{For} \\\quad \\\mu_{i\\\ast} > 0') 
 #' }
 #' 
 #' and
 #' 
 #' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd("M\\\\left\\\\lbrack u_i|\\\epsilon_i\\\\right\\\\rbrack= 0 \\\quad \\\hbox{For} \\\quad \\\mu_{i\\\ast} \\\\leq 0") 
+#' katex::math_to_rd('M\\\\left\\\\lbrack u_i|\\\epsilon_i\\\\right\\\\rbrack= 0 \\\quad \\\hbox{For} \\\quad \\\mu_{i\\\ast} \\\\leq 0') 
 #' } 
 #' 
 #' \itemize{ \item The confidence intervals are obtained with: }
 #' 
 #' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd("\\\mu_{i\\\ast} + I_L\\\sigma_\\\ast \\\\leq E\\\\left\\\\lbrack u_i|\\\epsilon_i\\\\right\\\\rbrack \\\\leq \\\mu_{i\\\ast} + I_U\\\sigma_\\\ast") 
+#' katex::math_to_rd('\\\mu_{i\\\ast} + I_L\\\sigma_\\\ast \\\\leq E\\\\left\\\\lbrack u_i|\\\epsilon_i\\\\right\\\\rbrack \\\\leq \\\mu_{i\\\ast} + I_U\\\sigma_\\\ast') 
 #' }
 #'
 #' with \eqn{LB_i = \mu_{i*} + I_L\sigma_*} and \eqn{UB_i = \mu_{i*} + I_U\sigma_*}
@@ -85,23 +86,23 @@
 #' and
 #' 
 #' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd("I_L = \\\Phi^{-1}\\\\left\\\\lbrace 1 -\\\\left(1-\\\frac{\\\alpha}{2}\\\\right)\\\\left\\\\lbrack 1-\\\Phi\\\\left(-\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)\\\\right\\\\rbrack\\\\right\\\\rbrace") 
+#' katex::math_to_rd('I_L = \\\Phi^{-1}\\\\left\\\\lbrace 1 -\\\\left(1-\\\frac{\\\alpha}{2}\\\\right)\\\\left\\\\lbrack 1-\\\Phi\\\\left(-\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)\\\\right\\\\rbrack\\\\right\\\\rbrace') 
 #' }
 #'
 #' and
 #' 
 #' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd("I_U = \\\Phi^{-1}\\\\left\\\\lbrace 1-\\\frac{\\\alpha}{2}\\\\left\\\\lbrack 1-\\\Phi\\\\left(-\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)\\\\right\\\\rbrack\\\\right\\\\rbrace") 
+#' katex::math_to_rd('I_U = \\\Phi^{-1}\\\\left\\\\lbrace 1-\\\frac{\\\alpha}{2}\\\\left\\\\lbrack 1-\\\Phi\\\\left(-\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)\\\\right\\\\rbrack\\\\right\\\\rbrace') 
 #' }
 #'
 #' Thus
 #' 
 #' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd("\\\exp{\\\\left(-UB_i\\\\right)} \\\\leq E\\\\left\\\\lbrack\\\exp{\\\\left(-u_i\\\\right)}|\\\epsilon_i\\\\right\\\\rbrack \\\\leq\\\exp{\\\\left(-LB_i\\\\right)}") 
+#' katex::math_to_rd('\\\exp{\\\\left(-UB_i\\\\right)} \\\\leq E\\\\left\\\\lbrack\\\exp{\\\\left(-u_i\\\\right)}|\\\epsilon_i\\\\right\\\\rbrack \\\\leq\\\exp{\\\\left(-LB_i\\\\right)}') 
 #' }
 #'
 #' @param object A stochastic frontier model returned
-#' by \code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.
+#' by \code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.
 #' @param level A number between between 0 and 0.9999 used for the computation
 #' of (in-)efficiency confidence intervals (defaut = \code{0.95}). Only used
 #' when \code{udist} = \code{'hnormal'}, \code{'exponential'}, \code{'tnormal'}
@@ -223,8 +224,63 @@
 #' efficiency. Only when \code{logDepVar = TRUE}.}
 #' \item{teBCUB}{Upper bound for Battese and Coelli (1988) conditional
 #' efficiency. Only when \code{logDepVar = TRUE}.}
+#' 
+#' \bold{- For object of class \code{'zisfcross'} the following elements are
+#' returned:}
 #'
-#' @author K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
+#' \item{Group_c}{Most probable class for each observation. In our case \code{class 1} is 
+#' the inefficient class while \code{class 2} is the efficient class.}
+#'
+#' \item{PosteriorProb_c}{Highest posterior probability.}
+#' 
+#' \item{odRatio}{Posterior odds ratio \eqn{R_i = \frac{Post. Prob. Class 2}{Post. Prob. Class 1}}.}
+#' 
+#' \item{u_c}{Conditional inefficiency of the most probable class given the
+#' posterior probability. In the case of the \code{'uniform'} distribution, two conditional inefficiency
+#' estimates are returned: \code{u1_c} and \code{u2_c}.}
+#' 
+#' \item{teJLMS_c}{\eqn{\exp{(-E[u_c|\epsilon_c])}}. Only when, in the function
+#' \link{zisfcross}, \code{logDepVar = TRUE}. In the case of the \code{'uniform'} distribution, two conditional efficiency
+#' estimates are returned: \code{teJLMS1_c} and \code{teJLMS2_c}.}
+#' 
+#' \item{teBC_c}{\eqn{E\left[\exp{(-u_c)}|\epsilon_c\right]}. Only when, in the function
+#' \link{zisfcross}, \code{logDepVar = TRUE}. In the case of the \code{'uniform'} distribution, two conditional efficiency
+#' estimates are returned: \code{teBC1_c} and \code{teBC2_c}.}
+#' 
+#' \item{teBC_reciprocal_c}{\eqn{E\left[\exp{(u_c)}|\epsilon_c\right]}. Only when, in the function
+#' \link{zisfcross}, \code{logDepVar = TRUE}. In the case of the \code{'uniform'} distribution, two conditional reciprocal efficiency
+#' estimates are returned: \code{teBC1_reciprocal_c} and \code{teBC2_reciprocal_c}.}
+#'
+#' \item{PosteriorProb_c#}{Posterior probability of class #.}
+#'
+#' \item{PriorProb_c#}{Prior probability of class #.}
+#'
+#' \item{u_c#}{Conditional inefficiency associated to class #, regardless of
+#' \code{Group_c}. In the case of the \code{'uniform'} distribution, two conditional inefficiency
+#' estimates are returned: \code{u1_c#} and \code{u2_c#}.}
+#' 
+#' \item{teBC_c#}{Conditional efficiency (\eqn{E\left[\exp{(-u_c)}|\epsilon_c\right]}) associated to class #, regardless of
+#' \code{Group_c}. Only when, in the function \link{zisfcross}, \code{logDepVar = TRUE}. In the case of the \code{'uniform'} distribution, two conditional efficiency
+#' estimates are returned: \code{teBC1_c#} and \code{teBC2_c#}.}
+#' 
+#' \item{teBC_reciprocal_c#}{Reciprocal conditional efficiency (\eqn{E\left[\exp{(u_c)}|\epsilon_c\right]}) 
+#' associated to class #, regardless of \code{Group_c}. 
+#' Only when, in the function \link{zisfcross}, \code{logDepVar = TRUE}. In the case of the \code{'uniform'} distribution, two conditional reciprocal efficiency
+#' estimates are returned: \code{teBC1_reciprocal_c#} and \code{teBC2_reciprocal_c#}.}
+#'
+#' \item{ineff_c#}{Conditional inefficiency (\code{u_c}) for observations in
+#' class # only. In the case of the \code{'uniform'} distribution, two conditional inefficiency
+#' estimates are returned: \code{ineff1_c#} and \code{ineff2_c#}.}
+#' 
+#' \item{effBC_c#}{Conditional efficiency (\code{teBC_c}) for observations in
+#' class # only. In the case of the \code{'uniform'} distribution, two conditional efficiency
+#' estimates are returned: \code{effBC1_c#} and \code{effBC2_c#}.}
+#' 
+#' \item{ReffBC_c#}{Reciprocal conditional efficiency (\code{teBC_reciprocal_c}) for observations in
+#' class # only. In the case of the \code{'uniform'} distribution, two conditional reciprocal efficiency
+#' estimates are returned: \code{ReffBC1_c#} and \code{ReffBC2_c#}.}
+#'
+# @author K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
 #'
 #' @seealso \code{\link{sfacross}}, for the stochastic frontier analysis model
 #' fitting function.
@@ -233,6 +289,9 @@
 #' model fitting function.
 #' 
 #' \code{\link{selectioncross}} for sample selection in stochastic frontier model
+#' fitting function.
+#' 
+#' \code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
 #' fitting function.
 #'
 #' @references Battese, G.E., and T.J. Coelli. 1988. Prediction of firm-level
@@ -379,8 +438,8 @@ efficiencies.lcmcross <- function(object, level = 0.95, newData = NULL,
 #' @rdname efficiencies
 #' @aliases efficiencies.selectioncross
 #' @export
-efficiencies.selectioncross <- function(object, level = 0.95, newData = NULL,
-                                        ...) {
+efficiencies.selectioncross <- function(object, level = 0.95,
+  newData = NULL, ...) {
   if (level < 0 || level > 0.9999) {
     stop("'level' must be between 0 and 0.9999", call. = FALSE)
   }
@@ -395,3 +454,68 @@ efficiencies.selectioncross <- function(object, level = 0.95, newData = NULL,
   return(data.frame(EffRes))
 }
 
+# conditional efficiencies zisfcross ----------
+#' @rdname efficiencies
+#' @aliases efficiencies.zisfcross
+#' @export
+efficiencies.zisfcross <- function(object, level = 0.95, newData = NULL,
+  ...) {
+  if (level < 0 || level > 0.9999) {
+    stop("'level' must be between 0 and 0.9999", call. = FALSE)
+  }
+  if (!is.null(newData)) {
+    if (!is.data.frame(newData)) {
+      stop("argument 'newData' must be of class data.frame")
+    }
+    object$dataTable <- newData
+    object$Nobs <- dim(newData)[1]
+  }
+  if (object$udist == "hnormal") {
+    EffRes <- czisfhalfnormeff(object = object, level = level)
+  } else {
+    if (object$udist == "exponential") {
+      EffRes <- czisfexponormeff(object = object, level = level)
+    } else {
+      if (object$udist == "gamma") {
+        EffRes <- czisfgammanormeff(object = object,
+          level = level)
+      } else {
+        if (object$udist == "rayleigh") {
+          EffRes <- czisfraynormeff(object = object,
+          level = level)
+        } else {
+          if (object$udist == "uniform") {
+          EffRes <- czisfuninormeff(object = object,
+            level = level)
+          } else {
+          if (object$udist == "tnormal") {
+            EffRes <- czisftruncnormeff(object = object,
+            level = level)
+          } else {
+            if (object$udist == "lognormal") {
+            EffRes <- czisflognormeff(object = object,
+              level = level)
+            } else {
+            if (object$udist == "genexponential") {
+              EffRes <- czisfgenexponormeff(object = object,
+              level = level)
+            } else {
+              if (object$udist == "tslaplace") {
+              EffRes <- czisftslnormeff(object = object,
+                level = level)
+              } else {
+              if (object$udist == "weibull") {
+                EffRes <- czisfweibullnormeff(object = object,
+                level = level)
+              }
+              }
+            }
+            }
+          }
+          }
+        }
+      }
+    }
+  }
+  return(data.frame(EffRes))
+}

@@ -25,7 +25,7 @@
 #' two-sided error terms, as in Reifschneider and Stevenson (1991), Caudill and
 #' Ford (1993), Caudill \emph{et al.} (1995) and Hadri (1999).
 #'
-#' @aliases selectioncross print.selectioncross
+#' @aliases selectioncross print.selectioncross nobs.selectioncross
 #'
 #' @param selectionF A symbolic (formula) description of the selection equation.
 #' @param frontierF A symbolic (formula) description of the outcome (frontier) equation.
@@ -121,7 +121,7 @@
 #' \code{\link[maxLik:maxNR]{maxNR}}.
 #' @param x an object of class selectioncross (returned by the function \code{\link{selectioncross}}).
 #' @param ... additional arguments of frontier are passed to selectioncross; 
-#' additional arguments of the print method are currently ignored.
+#' additional arguments of the print, bread, estfun, nobs methods are currently ignored.
 #' 
 #' @details 
 #' The current model is an extension of Heckman(1976, 1979) sample selection model to
@@ -252,7 +252,7 @@
 #' \code{\link[=marginal.selectioncross]{marginal}}, 
 #' \code{\link[=estfun.selectioncross]{estfun}} and 
 #' \code{\link[=bread.selectioncross]{bread}} (from the \pkg{sandwich} package), 
-#' \code{\link[=coeftest.selectioncross]{coeftest}} (from the \pkg{lmtest} package).
+#' \code{\link[=coeftest]{coeftest}} (from the \pkg{lmtest} package).
 #' 
 #' @return \code{\link{selectioncross}} returns a list of class \code{'selectioncross'}
 #' containing the following elements:
@@ -377,7 +377,7 @@
 #' @note For the Halton draws, the code is adapted from the \pkg{mlogit}
 #' package.
 #'
-#' @author K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
+# @author K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
 #'
 #' @seealso \code{\link[=print.selectioncross]{print}} for printing \code{selectioncross} object.
 #' 

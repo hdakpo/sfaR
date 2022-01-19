@@ -9,6 +9,7 @@
 # Models: -Standard Stochastic Frontier Analysis                               #
 #         -Latent Class Stochastic Frontier Analysis                           #
 #         -Sample selection correction                                         #
+#         -Zero inefficiency stochastic frontier                               #
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
 
@@ -16,15 +17,16 @@
 #'
 #' \code{\link{fitted}} returns the fitted frontier values from classic or
 #' latent class stochastic frontier models estimated with
-#' \code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.
+#' \code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.
 #'
 #' @param object A stochastic frontier model returned
-#' by \code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.
+#' by \code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.
 #' @param ... Currently ignored.
 #'
 #' @name fitted
 #'
-#' @return In the case of an object of class \code{'sfacross'} or \code{'selectioncross'}, a vector of
+#' @return In the case of an object of class \code{'sfacross'}, \code{'selectioncross'} or 
+#' \code{'selectioncross'}, a vector of
 #' fitted values is returned.
 #'
 #' In the case of an object of class \code{'lcmcross'}, a data frame containing
@@ -34,7 +36,7 @@
 #' @note The fitted values are ordered in the same way as the corresponding
 #' observations in the dataset used for the estimation.
 #' 
-#' @author K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
+# @author K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
 #' 
 #' @seealso \code{\link{sfacross}}, for the stochastic frontier analysis model
 #' fitting function.
@@ -43,6 +45,9 @@
 #' model fitting function.
 #' 
 #' \code{\link{selectioncross}} for sample selection in stochastic frontier model
+#' fitting function.
+#' 
+#' \code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
 #' fitting function.
 #'
 #' @keywords methods fitted
@@ -96,3 +101,9 @@ fitted.selectioncross <- function(object, ...) {
   object$dataTable$mleFitted
 }
 
+#' @aliases fitted.zisfcross
+#' @export
+# fitted values for zisfcross ----------
+fitted.zisfcross <- function(object, ...) {
+  object$dataTable$mleFitted
+}

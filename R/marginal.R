@@ -9,6 +9,7 @@
 # Models: -Standard Stochastic Frontier Analysis                               #
 #         -Latent Class Stochastic Frontier Analysis                           #
 #         -Sample selection correction                                         #
+#         -Zero inefficiency stochastic frontier                               #
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
 
@@ -16,7 +17,7 @@
 #'
 #' This function returns marginal effects of the inefficiency drivers from
 #' classic or latent class stochastic frontier models estimated with
-#' \code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.
+#' \code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.
 #'
 #' @details \code{\link{marginal}} operates in the presence of exogenous variables that
 #' explain inefficiency, namely the inefficiency drivers (\eqn{uhet = ~ Z_u} or
@@ -33,9 +34,9 @@
 #' inefficiency and its drivers.
 #'
 #' @param object A stochastic frontier model returned
-#' by \code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.
-#' @param newData Optional data frame that is used to calculate the efficiency 
-#' estimates. If NULL (the default), the efficiency estimates are calculated 
+#' by \code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.
+#' @param newData Optional data frame that is used to calculate the marginal effect of \eqn{Z} variables on 
+#' inefficiency. If NULL (the default), the marginal estimates are calculated 
 #' for the observations that were used in the estimation.
 #' @param ... Currently ignored.
 #'
@@ -46,10 +47,11 @@
 #' variable has the prefix \code{'Eu_'}) and on the variance of the
 #' inefficiency (each variable has the prefix \code{'Vu_'}) is returned.
 #'
-#' In the case of the latent class model (LCM), each variable terminates with
+#' In the case of the latent class frontier model (LCM) or the zero inefficiency
+#' frontier model, each variable terminates with
 #' \code{'_c#'} where \code{'#'} is the class number
 #' .
-#' @author K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
+# @author K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
 #'
 #' @seealso \code{\link{sfacross}}, for the stochastic frontier analysis model
 #' fitting function.
@@ -58,6 +60,9 @@
 #' model fitting function.
 #' 
 #' \code{\link{selectioncross}} for sample selection in stochastic frontier model
+#' fitting function.
+#' 
+#' \code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
 #' fitting function.
 #'
 #' @references Wang, H.J. 2002. Heteroscedasticity and non-monotonic efficiency
@@ -171,6 +176,26 @@ marginal.sfacross <- function(object, newData = NULL, ...) {
               EffMarg <- bind_cols(as_tibble(cmarglognorm_Eu(object = object)),
               as_tibble(cmarglognorm_Vu(object = object)))
             }
+            } else {
+            if (object$udist == "genexponential") {
+              if (object$nuZUvar == 1) {
+              stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+                call. = FALSE)
+              } else {
+              EffMarg <- bind_cols(as_tibble(cmarggenexponorm_Eu(object = object)),
+                as_tibble(cmarguninorm_Vu(object = object)))
+              }
+            } else {
+              if (object$udist == "tslaplace") {
+              if (object$nuZUvar == 1) {
+                stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+                call. = FALSE)
+              } else {
+                EffMarg <- bind_cols(as_tibble(cmargtslnorm_Eu(object = object)),
+                as_tibble(cmargtslnorm_Vu(object = object)))
+              }
+              }
+            }
             }
           }
           }
@@ -234,10 +259,116 @@ marginal.selectioncross <- function(object, newData = NULL, ...) {
   }
   if (object$nuZUvar == 1) {
     stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
-         call. = FALSE)
+      call. = FALSE)
   } else {
     EffMarg <- bind_cols(as_tibble(cmarghalfnorm_Eu_ss(object = object)),
-                         as_tibble(cmarghalfnorm_Vu_ss(object = object)))
+      as_tibble(cmarghalfnorm_Vu_ss(object = object)))
+  }
+  return(data.frame(EffMarg))
+}
+
+# marginal effects computation zisfcross ----------
+#' @rdname marginal
+#' @aliases marginal.zisfcross
+#' @export
+marginal.zisfcross <- function(object, newData = NULL, ...) {
+  if (!is.null(newData)) {
+    if (!is.data.frame(newData)) {
+      stop("argument 'newData' must be of class data.frame")
+    }
+    object$dataTable <- newData
+    object$Nobs <- dim(newData)[1]
+  }
+  if (object$udist == "hnormal") {
+    if (object$nuZUvar == 1) {
+      stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+        call. = FALSE)
+    } else {
+      EffMarg <- bind_cols(as_tibble(czisfmarghalfnorm_Eu(object = object)),
+        as_tibble(czisfmarghalfnorm_Vu(object = object)))
+    }
+  } else {
+    if (object$udist == "exponential") {
+      if (object$nuZUvar == 1) {
+        stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+          call. = FALSE)
+      } else {
+        EffMarg <- bind_cols(as_tibble(czisfmargexponorm_Eu(object = object)),
+          as_tibble(czisfmargexponorm_Vu(object = object)))
+      }
+    } else {
+      if (object$udist == "gamma") {
+        if (object$nuZUvar == 1) {
+          stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+          call. = FALSE)
+        } else {
+          EffMarg <- bind_cols(as_tibble(czisfmarggammanorm_Eu(object = object)),
+          as_tibble(czisfmarggammanorm_Vu(object = object)))
+        }
+      } else {
+        if (object$udist == "rayleigh") {
+          if (object$nuZUvar == 1) {
+          stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+            call. = FALSE)
+          } else {
+          EffMarg <- bind_cols(as_tibble(czisfmargraynorm_Eu(object = object)),
+            as_tibble(czisfmargraynorm_Vu(object = object)))
+          }
+        } else {
+          if (object$udist == "uniform") {
+          if (object$nuZUvar == 1) {
+            stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+            call. = FALSE)
+          } else {
+            EffMarg <- bind_cols(as_tibble(czisfmarguninorm_Eu(object = object)),
+            as_tibble(czisfmarguninorm_Vu(object = object)))
+          }
+          } else {
+          if (object$udist == "tnormal") {
+            if (object$nmuZUvar == 1 & object$nuZUvar ==
+            1) {
+            stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+              call. = FALSE)
+            } else {
+            EffMarg <- bind_cols(as_tibble(czisfmargtruncnorm_Eu(object = object)),
+              as_tibble(czisfmargtruncnorm_Vu(object = object)))
+            }
+          } else {
+            if (object$udist == "lognormal") {
+            if (object$nmuZUvar == 1 & object$nuZUvar ==
+              1) {
+              stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+              call. = FALSE)
+            } else {
+              EffMarg <- bind_cols(as_tibble(czisfmarglognorm_Eu(object = object)),
+              as_tibble(czisfmarglognorm_Vu(object = object)))
+            }
+            } else {
+            if (object$udist == "genexponential") {
+              if (object$nuZUvar == 1) {
+              stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+                call. = FALSE)
+              } else {
+              EffMarg <- bind_cols(as_tibble(czisfmarggenexponorm_Eu(object = object)),
+                as_tibble(czisfmarggenexponorm_Vu(object = object)))
+              }
+            } else {
+              if (object$udist == "tslaplace") {
+              if (object$nuZUvar == 1) {
+                stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+                call. = FALSE)
+              } else {
+                EffMarg <- bind_cols(as_tibble(czisfmargtslnorm_Eu(object = object)),
+                as_tibble(czisfmargtslnorm_Vu(object = object)))
+              }
+              }
+            }
+            }
+          }
+          }
+        }
+      }
+    }
   }
   return(data.frame(EffMarg))
 }

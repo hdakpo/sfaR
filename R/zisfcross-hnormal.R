@@ -573,7 +573,7 @@ czisfhalfnormeff <- function(object, level) {
       effBC_c2 = effBC_c2, ReffBC_c1 = ReffBC_c1, ReffBC_c2 = ReffBC_c2)
   } else {
     res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
-      u_c = u_c, PosteriorProb_c1 = Pcond_c1, PriorProb_c1 = Probc1,
+                     odRatio = odRatio, u_c = u_c, PosteriorProb_c1 = Pcond_c1, PriorProb_c1 = Probc1,
       u_c1 = u_c1, PosteriorProb_c2 = Pcond_c2, PriorProb_c2 = Probc2,
       u_c2 = u_c2, ineff_c1 = ineff_c1, ineff_c2 = ineff_c2)
   }
@@ -583,20 +583,32 @@ czisfhalfnormeff <- function(object, level) {
 # Marginal effects on inefficiencies ----------
 
 czisfmarghalfnorm_Eu <- function(object) {
-  beta <- parm[1:(nXvar)]
-  delta <- parm[(nXvar + 1):(nXvar + nuZUvar)]
-  phi <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
-  theta <- parm[(nXvar + nuZUvar + nvZVvar + 1):(nXvar + nuZUvar +
-    nvZVvar + nZHvar)]
+  beta <- object$mlParam[1:(object$nXvar)]
+  delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+                                                object$nuZUvar)]
+  phi <- object$mlParam[(object$nXvar + object$nuZUvar + 1):(object$nXvar +
+                                                               object$nuZUvar + object$nvZVvar)]
+  theta <- object$mlParam[(object$nXvar + object$nuZUvar +
+                             object$nvZVvar + 1):(object$nXvar + object$nuZUvar +
+                                                    object$nvZVvar + object$nZHvar)]
+  Xvar <- model.matrix(object$formula, data = object$dataTable,
+                       rhs = 1)
+  uHvar <- model.matrix(object$formula, data = object$dataTable,
+                        rhs = 2)
+  vHvar <- model.matrix(object$formula, data = object$dataTable,
+                        rhs = 3)
+  Zvar <- model.matrix(object$formula, data = object$dataTable,
+                       rhs = 4)
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
   Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
-  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
-  mustar <- -exp(Wu) * S * epsilon/(exp(Wu) + exp(Wv))
+  epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
+    as.numeric(crossprod(matrix(beta), t(Xvar)))
+  mustar <- -exp(Wu) * object$S * epsilon/(exp(Wu) + exp(Wv))
   sigmastar <- sqrt(exp(Wu) * exp(Wv)/(exp(Wu) + exp(Wv)))
-  Pi1 <- 2/sqrt(exp(Wu) + exp(Wv)) * dnorm(S * epsilon/sqrt(exp(Wu) +
-    exp(Wv))) * pnorm(mustar/sigmastar)
-  Pi2 <- 1/exp(Wv/2) * dnorm(S * epsilon/exp(Wv/2))
+  Pi1 <- 2/sqrt(exp(Wu) + exp(Wv)) * dnorm(object$S * epsilon/sqrt(exp(Wu) +
+                                                                     exp(Wv))) * pnorm(mustar/sigmastar)
+  Pi2 <- 1/exp(Wv/2) * dnorm(object$S * epsilon/exp(Wv/2))
   Probc1 <- exp(Wz)/(1 + exp(Wz))
   Probc2 <- 1 - Probc1
   Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
@@ -604,35 +616,41 @@ czisfmarghalfnorm_Eu <- function(object) {
   Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
   margEff1 <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
     matrix(exp(Wu/2) * dnorm(0), ncol = 1))
-  margEff2 <- matrix(0, nrow = N, ncol = object$nuZUvar - 1)
-  margEff_c <- sapply(1:N, FUN = function(x) if (Group_c[x] ==
-    1)
-    margEff1[x] else margEff2[x])
-  margEff_Wc <- sapply(1:N, FUN = function(x) if (Group_c[x] ==
-    1)
-    Pcond_c1[x] * margEff1[x] else Pcond_c2[x] * margEff2[x])
+  margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar - 1)
+  margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
   colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
   colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
   colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff_Wc) <- paste0("Eu_", colnames(uHvar)[-1])
-  return(bind_cols(margEff1, margEff2, margEff_c, margEff_Wc))
+  return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
 czisfmarghalfnorm_Vu <- function(object) {
-  beta <- parm[1:(nXvar)]
-  delta <- parm[(nXvar + 1):(nXvar + nuZUvar)]
-  phi <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
-  theta <- parm[(nXvar + nuZUvar + nvZVvar + 1):(nXvar + nuZUvar +
-    nvZVvar + nZHvar)]
+  beta <- object$mlParam[1:(object$nXvar)]
+  delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+                                                object$nuZUvar)]
+  phi <- object$mlParam[(object$nXvar + object$nuZUvar + 1):(object$nXvar +
+                                                               object$nuZUvar + object$nvZVvar)]
+  theta <- object$mlParam[(object$nXvar + object$nuZUvar +
+                             object$nvZVvar + 1):(object$nXvar + object$nuZUvar +
+                                                    object$nvZVvar + object$nZHvar)]
+  Xvar <- model.matrix(object$formula, data = object$dataTable,
+                       rhs = 1)
+  uHvar <- model.matrix(object$formula, data = object$dataTable,
+                        rhs = 2)
+  vHvar <- model.matrix(object$formula, data = object$dataTable,
+                        rhs = 3)
+  Zvar <- model.matrix(object$formula, data = object$dataTable,
+                       rhs = 4)
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
   Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
-  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
-  mustar <- -exp(Wu) * S * epsilon/(exp(Wu) + exp(Wv))
+  epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
+    as.numeric(crossprod(matrix(beta), t(Xvar)))
+  mustar <- -exp(Wu) * object$S * epsilon/(exp(Wu) + exp(Wv))
   sigmastar <- sqrt(exp(Wu) * exp(Wv)/(exp(Wu) + exp(Wv)))
-  Pi1 <- 2/sqrt(exp(Wu) + exp(Wv)) * dnorm(S * epsilon/sqrt(exp(Wu) +
-    exp(Wv))) * pnorm(mustar/sigmastar)
-  Pi2 <- 1/exp(Wv/2) * dnorm(S * epsilon/exp(Wv/2))
+  Pi1 <- 2/sqrt(exp(Wu) + exp(Wv)) * dnorm(object$S * epsilon/sqrt(exp(Wu) +
+                                                                     exp(Wv))) * pnorm(mustar/sigmastar)
+  Pi2 <- 1/exp(Wv/2) * dnorm(object$S * epsilon/exp(Wv/2))
   Probc1 <- exp(Wz)/(1 + exp(Wz))
   Probc2 <- 1 - Probc1
   Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
@@ -640,17 +658,10 @@ czisfmarghalfnorm_Vu <- function(object) {
   Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
   margEff1 <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
     matrix(exp(Wu) * (1 - (dnorm(0)/pnorm(0))^2), ncol = 1))
-  margEff2 <- matrix(0, nrow = N, ncol = object$nuZUvar - 1)
-  margEff_c <- sapply(1:N, FUN = function(x) if (Group_c[x] ==
-    1)
-    margEff1[x] else margEff2[x])
-  margEff_Wc <- sapply(1:N, FUN = function(x) if (Group_c[x] ==
-    1)
-    Pcond_c1[x] * margEff1[x] else Pcond_c2[x] * margEff2[x])
+  margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar - 1)
+  margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
   colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
   colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
   colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_Wc) <- paste0("Vu_", colnames(uHvar)[-1])
-  return(bind_cols(margEff1, margEff2, margEff_c, margEff_Wc))
+  return(bind_cols(margEff1, margEff2, margEff_c))
 }
-

@@ -15,23 +15,24 @@
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.}
+by \code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.}
 
 \item{...}{Currently ignored.}
 }
 \value{
-When the \code{object} is of class \code{'sfacross'} or \code{'selectioncross'},
+When the \code{object} is of class \code{'sfacross'}, \code{'selectioncross'} or
+\code{'zisfcross'},
 \code{\link{residuals}} returns a vector of residuals values.
 
 When the \code{object} is of class \code{'lcmcross'},
 \code{\link{residuals}} returns a data frame containing the residuals values
-for each latent class, where each variable terminates with \code{"_c#"},
-\code{"#"} being the class number.
+for each latent class, where each variable terminates with \code{'_c#'},
+\code{'#'} being the class number.
 }
 \description{
 This function returns the residuals' values from classic or latent class
 stochastic frontier models estimated with \code{\link{sfacross}},
-\code{\link{lcmcross}} or \code{\link{selectioncross}}.
+\code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.
 }
 \note{
 The residuals values are ordered in the same way as the corresponding
@@ -65,9 +66,9 @@ model fitting function.
 
 \code{\link{selectioncross}} for sample selection in stochastic frontier model
 fitting function.
-}
-\author{
-K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
+
+\code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
+fitting function.
 }
 \keyword{methods}
 \keyword{residuals}

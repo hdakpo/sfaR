@@ -8,6 +8,7 @@
 \alias{coef.summary.lcmcross}
 \alias{coef.selectioncross}
 \alias{coef.summary.selectioncross}
+\alias{coef.summary.zisfcross}
 \title{Extract coefficients of stochastic frontier models}
 \usage{
 \method{coef}{sfacross}(object, extraPar = FALSE, ...)
@@ -21,14 +22,17 @@
 \method{coef}{selectioncross}(object, extraPar = FALSE, ...)
 
 \method{coef}{summary.selectioncross}(object, ...)
+
+\method{coef}{summary.zisfcross}(object, ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}, or an object of class
-\code{'summary.sfacross'}, \code{'summary.lcmcross'} or \code{'summary.selectioncross'} .}
+by \code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or
+\code{\link{zisfcross}}, or an object of class
+\code{'summary.sfacross'}, \code{'summary.lcmcross'}, \code{'summary.selectioncross'} or \code{'summary.zisfcross'} .}
 
 \item{extraPar}{Logical (default = \code{FALSE}). Only applies to objects of
-class \code{'sfacross'}, \code{'lcmcross'} or \code{'selectioncross'}. If \code{TRUE}, additional
+class \code{'sfacross'}, \code{'lcmcross'}, \code{'selectioncross'} or \code{'zisfcross'}. If \code{TRUE}, additional
 parameters are returned:
 
 \code{sigmaSq} = \code{sigmauSq} + \code{sigmavSq}
@@ -53,11 +57,12 @@ parameters are returned:
 }
 \value{
 For objects of class \code{'summary.sfacross'},
-\code{'summary.lcmcross'} or \code{'summary.selectioncross'}, \code{\link{coef}} returns a matrix with four
+\code{'summary.lcmcross'}, \code{'summary.selectioncross'} or
+\code{'summary.zisfcross'}, \code{\link{coef}} returns a matrix with four
 columns. Namely, the estimated coefficients, their standard errors,
 z-values, and (asymptotic) P-values.
 
-For objects of class \code{'sfacross'}, \code{'lcmcross'} or \code{'selectioncross'},
+For objects of class \code{'sfacross'}, \code{'lcmcross'}, \code{'selectioncross'} or \code{'zisfcross'},
 \code{\link{coef}} returns a numeric vector of the estimated coefficients.
 If \code{extraPar = TRUE}, additional parameters, detailed in the section
 \sQuote{Arguments}, are also returned. In the case of object of class
@@ -65,12 +70,12 @@ If \code{extraPar = TRUE}, additional parameters, detailed in the section
 represents the class number.
 }
 \description{
-From an object of class \code{'summary.sfacross'}, \code{'summary.lcmcross'}
-or \code{'summary.selectioncross'}, \code{\link{coef}} extracts the coefficients,
+From an object of class \code{'summary.sfacross'}, \code{'summary.lcmcross'},
+\code{'summary.selectioncross'} or \code{'summary.zisfcross'}, \code{\link{coef}} extracts the coefficients,
 their standard errors, z-values, and (asymptotic) P-values.
 
-From on object of class \code{'sfacross'}, \code{'lcmcross'} or \code{'selectioncross'}, it extracts
-only the estimated coefficients.
+From on object of class \code{'sfacross'}, \code{'lcmcross'}, \code{'selectioncross'} or
+\code{'zisfcross'}, it extracts only the estimated coefficients.
 }
 \examples{
 
@@ -94,9 +99,9 @@ model fitting function.
 
 \code{\link{selectioncross}} for sample selection in stochastic frontier model
 fitting function.
-}
-\author{
-K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
+
+\code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
+fitting function.
 }
 \keyword{coefficients}
 \keyword{methods}

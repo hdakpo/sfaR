@@ -5,6 +5,7 @@
 \alias{logLik.sfacross}
 \alias{logLik.lcmcross}
 \alias{logLik.selectioncross}
+\alias{logLik.zisfcross}
 \title{Extract log-likelihood value of stochastic frontier models}
 \usage{
 \method{logLik}{sfacross}(object, individual = FALSE, ...)
@@ -12,10 +13,12 @@
 \method{logLik}{lcmcross}(object, individual = FALSE, ...)
 
 \method{logLik}{selectioncross}(object, individual = FALSE, ...)
+
+\method{logLik}{zisfcross}(object, individual = FALSE, ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.}
+by \code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.}
 
 \item{individual}{Logical. If \code{FALSE} (default), the sum of all
 observations' log-likelihood values is returned. If \code{TRUE}, a vector of
@@ -35,7 +38,8 @@ number of free parameters (\code{df}), when \code{individual = TRUE}.
 \description{
 \code{\link{logLik}} extracts the log-likelihood value(s) from classic or
 latent class stochastic frontier models estimated with
-\code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.
+\code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or
+\code{\link{zisfcross}}.
 }
 \examples{
 
@@ -63,9 +67,9 @@ model fitting function.
 
 \code{\link{selectioncross}} for sample selection in stochastic frontier model
 fitting function.
-}
-\author{
-K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
+
+\code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
+fitting function.
 }
 \keyword{likelihood}
 \keyword{methods}

@@ -3,9 +3,9 @@
 \name{selectioncross}
 \alias{selectioncross}
 \alias{print.selectioncross}
+\alias{nobs.selectioncross}
 \alias{bread.selectioncross}
 \alias{estfun.selectioncross}
-\alias{nobs.selectioncross}
 \title{Sample Selection in Stochastic frontier estimation using cross-section data}
 \usage{
 selectioncross(
@@ -177,7 +177,7 @@ direction. See \code{\link[maxLik:maxBHHH]{maxBHHH}} and
 \item{x}{an object of class selectioncross (returned by the function \code{\link{selectioncross}}).}
 
 \item{...}{additional arguments of frontier are passed to selectioncross;
-additional arguments of the print method are currently ignored.}
+additional arguments of the print, bread, estfun, nobs methods are currently ignored.}
 }
 \value{
 \code{\link{selectioncross}} returns a list of class \code{'selectioncross'}
@@ -443,7 +443,7 @@ A set of extractor functions for fitted model objects is available for objects o
 \code{\link[=marginal.selectioncross]{marginal}},
 \code{\link[=estfun.selectioncross]{estfun}} and
 \code{\link[=bread.selectioncross]{bread}} (from the \pkg{sandwich} package),
-\code{\link[=coeftest.selectioncross]{coeftest}} (from the \pkg{lmtest} package).
+\code{\link[=coeftest]{coeftest}} (from the \pkg{lmtest} package).
 }
 \note{
 For the Halton draws, the code is adapted from the \pkg{mlogit}
@@ -564,9 +564,6 @@ matrix of the coefficients.
 
 \code{\link[=estfun.selectioncross]{estfun}} for gradient extraction for each
 observation.
-}
-\author{
-K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
 }
 \keyword{cross-section}
 \keyword{likelihood}

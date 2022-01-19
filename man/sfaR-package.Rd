@@ -11,8 +11,9 @@ maximum simulated likelihood - MSL) for various specifications of stochastic
 frontier analysis (SFA).
 }
 \details{
-Three categories of important functions are available: \code{\link{sfacross}},
-\code{\link{lcmcross}}, and \code{\link{selectioncross}}, which estimate different types of frontiers and
+Four categories of important functions are available: \code{\link{sfacross}},
+\code{\link{lcmcross}}, \code{\link{selectioncross}}, and \code{\link{zisfcross}},
+which estimate different types of frontiers and
 offer eleven alternative optimization algorithms (i.e. "bfgs", "bhhh", "nr",
 "nm", "cg", "sann", "ucminf", "mla", "sr1", "sparse", "nlminb").
 }
@@ -29,7 +30,7 @@ guided by several information criteria (i.e. AIC, BIC or HQIC).
 }
 
 \section{sfacross}{
- \code{\link{sfacross}} estimates the frontier for cross-sectional data
+ \code{\link{sfacross}} estimates the basic frontier for cross-sectional data
 and allows for ten different distributions for the one-sided error term.
 These distributions include the exponential, the Gamma, the generalized
 exponential, the half normal, the lognormal, the truncated normal, the
@@ -55,8 +56,26 @@ distribution is available for the one-sided error term. Heteroscedasticity
 in both error terms is possible.
 }
 
+\section{zisfcross}{
+ \code{\link{zisfcross}} relaxes the assumption that all firms
+are inefficient. The model splits the observations into two groups:
+one efficient and the other inefficient. The probability of belonging to one of
+these classes is based on a logit functional form that can be
+specified using some covariates. As in the case of \code{\link{sfacross}}
+ten different distributions for the one-sided error term are implemented.
+These distributions include the exponential, the Gamma, the generalized
+exponential, the half normal, the lognormal, the truncated normal, the
+truncated skewed Laplace, the Rayleigh, the uniform and the Weibull distributions.
+In the case of the Gamma, lognormal and Weibull distributions, maximum simulated
+likelihood (MSL) is used with the possibility of four specific distributions to
+construct the draws: Halton, Generalized Halton, Sobol and uniform.
+Heteroscedasticity in both error terms can be implemented, in addition to
+heterogeneity in the truncated mean parameter in the case of the truncated
+normal and lognormal distributions.
+}
+
 \section{Bugreport}{
- Any bug or suggestion can be reported using the \code{sfaR}'\code{s}
+ Any bug or suggestion can be reported using the \code{sfaR}
 tracker facilities at: \url{https://github.com/hdakpo/sfaR/issues}
 }
 

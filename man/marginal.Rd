@@ -5,6 +5,7 @@
 \alias{marginal.sfacross}
 \alias{marginal.lcmcross}
 \alias{marginal.selectioncross}
+\alias{marginal.zisfcross}
 \title{Marginal effects of the inefficiency drivers in stochastic frontier models}
 \usage{
 \method{marginal}{sfacross}(object, newData = NULL, ...)
@@ -12,13 +13,15 @@
 \method{marginal}{lcmcross}(object, newData = NULL, ...)
 
 \method{marginal}{selectioncross}(object, newData = NULL, ...)
+
+\method{marginal}{zisfcross}(object, newData = NULL, ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.}
+by \code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.}
 
-\item{newData}{Optional data frame that is used to calculate the efficiency
-estimates. If NULL (the default), the efficiency estimates are calculated
+\item{newData}{Optional data frame that is used to calculate the marginal effect of \eqn{Z} variables on
+inefficiency. If NULL (the default), the marginal estimates are calculated
 for the observations that were used in the estimation.}
 
 \item{...}{Currently ignored.}
@@ -29,14 +32,15 @@ effects of the \eqn{Z_u} variables on the expected inefficiency (each
 variable has the prefix \code{'Eu_'}) and on the variance of the
 inefficiency (each variable has the prefix \code{'Vu_'}) is returned.
 
-In the case of the latent class model (LCM), each variable terminates with
+In the case of the latent class frontier model (LCM) or the zero inefficiency
+frontier model, each variable terminates with
 \code{'_c#'} where \code{'#'} is the class number
 .
 }
 \description{
 This function returns marginal effects of the inefficiency drivers from
 classic or latent class stochastic frontier models estimated with
-\code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.
+\code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.
 }
 \details{
 \code{\link{marginal}} operates in the presence of exogenous variables that
@@ -87,9 +91,9 @@ model fitting function.
 
 \code{\link{selectioncross}} for sample selection in stochastic frontier model
 fitting function.
-}
-\author{
-K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
+
+\code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
+fitting function.
 }
 \keyword{marginal}
 \keyword{methods}

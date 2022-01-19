@@ -741,19 +741,19 @@ centerText <- function(x, width) {
 }
 
 # S3methods ----------
-#' @param object sfacross, lcmcross ... objects
+#' @param object sfacross, lcmcross, selectioncross ... objects
 #' @noRd
 efficiencies <- function(object, ...) {
   UseMethod("efficiencies", object)
 }
 
-#' @param object sfacross, lcmcross ... objects
+#' @param object sfacross, lcmcross, selectioncross ... objects
 #' @noRd
 ic <- function(object, ...) {
   UseMethod("ic", object)
 }
 
-#' @param object sfacross, lcmcross ... objects
+#' @param object sfacross, lcmcross, selectioncross ... objects
 #' @noRd
 marginal <- function(object, ...) {
   UseMethod("marginal", object)

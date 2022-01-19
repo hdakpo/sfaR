@@ -9,6 +9,7 @@
 # Models: -Standard Stochastic Frontier Analysis                               #
 #         -Latent Class Stochastic Frontier Analysis                           #
 #         -Sample selection correction                                         #
+#         -Zero inefficiency stochastic frontier                               #
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
 
@@ -16,27 +17,28 @@
 #'
 #' This function returns the residuals' values from classic or latent class
 #' stochastic frontier models estimated with \code{\link{sfacross}},
-#' \code{\link{lcmcross}} or \code{\link{selectioncross}}.
+#' \code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.
 #'
 #'
 #' @param object A stochastic frontier model returned
-#' by \code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.
+#' by \code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.
 #' @param ... Currently ignored.
 #'
 #' @name residuals
 #'
-#' @return When the \code{object} is of class \code{'sfacross'} or \code{'selectioncross'},
+#' @return When the \code{object} is of class \code{'sfacross'}, \code{'selectioncross'} or
+#' \code{'zisfcross'},
 #' \code{\link{residuals}} returns a vector of residuals values.
 #'
 #' When the \code{object} is of class \code{'lcmcross'},
 #' \code{\link{residuals}} returns a data frame containing the residuals values
-#' for each latent class, where each variable terminates with \code{"_c#"},
-#' \code{"#"} being the class number.
+#' for each latent class, where each variable terminates with \code{'_c#'},
+#' \code{'#'} being the class number.
 #'
 #' @note The residuals values are ordered in the same way as the corresponding
 #' observations in the dataset used for the estimation.
 #'
-#' @author K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
+# @author K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
 #'
 #' @seealso \code{\link{sfacross}}, for the stochastic frontier analysis model
 #' fitting function.
@@ -45,6 +47,9 @@
 #' model fitting function.
 #' 
 #' \code{\link{selectioncross}} for sample selection in stochastic frontier model
+#' fitting function.
+#' 
+#' \code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
 #' fitting function.
 #'
 #' @keywords methods residuals
@@ -81,21 +86,20 @@ residuals.sfacross <- function(object, ...) {
 residuals.lcmcross <- function(object, ...) {
   if (object$nClasses == 2) {
     data.frame(select(object$dataTable, "mlResiduals_c1",
-                      "mlResiduals_c2"))
+      "mlResiduals_c2"))
   } else {
     if (object$nClasses == 3) {
       data.frame(select(object$dataTable, "mlResiduals_c1",
-                        "mlResiduals_c2", "mlResiduals_c3"))
+        "mlResiduals_c2", "mlResiduals_c3"))
     } else {
       if (object$nClasses == 4) {
         data.frame(select(object$dataTable, "mlResiduals_c1",
-                          "mlResiduals_c2", "mlResiduals_c3",
-                          "mlResiduals_c4"))
+          "mlResiduals_c2", "mlResiduals_c3", "mlResiduals_c4"))
       } else {
         if (object$nClasses == 5) {
           data.frame(select(object$dataTable, "mlResiduals_c1",
-                            "mlResiduals_c2", "mlResiduals_c3",
-                            "mlResiduals_c4", "mlResiduals_c5"))
+          "mlResiduals_c2", "mlResiduals_c3", "mlResiduals_c4",
+          "mlResiduals_c5"))
         }
       }
     }
@@ -107,5 +111,12 @@ residuals.lcmcross <- function(object, ...) {
 #' @aliases residuals.selectioncross
 #' @export
 residuals.selectioncross <- function(object, ...) {
+  object$dataTable$mlResiduals
+}
+
+#' @aliases residuals.zisfcross
+#' @export
+# residuals from zisfcross ----------
+residuals.zisfcross <- function(object, ...) {
   object$dataTable$mlResiduals
 }

@@ -27,7 +27,7 @@
 #'
 #' The model can estimate up to five classes.
 #'
-#' @aliases lcmcross print.lcmcross
+#' @aliases lcmcross print.lcmcross nobs.lcmcross
 #'
 #' @param formula A symbolic description of the model to be estimated based on
 #' the generic function \code{formula} (see section \sQuote{Details}).
@@ -110,7 +110,7 @@
 #' algorithm. Default = \code{1.5}.
 #' @param x an object of class lcmcross (returned by the function \code{\link{lcmcross}}).
 #' @param ... additional arguments of frontier are passed to lcmcross; 
-#' additional arguments of the print method are currently ignored.
+#' additional arguments of the print, bread, estfun, nobs methods are currently ignored.
 #'
 #' @details
 #' LCM is an estimation of a finite mixture of production functions:
@@ -210,7 +210,7 @@
 #' \code{\link[=efficiencies.lcmcross]{efficiencies}}, \code{\link[=ic.lcmcross]{ic}}, 
 #' \code{\link[=marginal.lcmcross]{marginal}}, \code{\link[=estfun.lcmcross]{estfun}} and 
 #' \code{\link[=bread.lcmcross]{bread}} (from the \pkg{sandwich} package), 
-#' \code{\link[=coeftest.lcmcross]{coeftest}} (from the \pkg{lmtest} package).
+#' \code{\link[=coeftest]{coeftest}} (from the \pkg{lmtest} package).
 #'
 #' @return \code{\link{lcmcross}} returns a list of class \code{'lcmcross'}
 #' containing the following elements:
@@ -253,7 +253,7 @@
 #' ML estimations, and the individual observation log-likelihood. When \code{weights}
 #' is specified an additional variable is also provided in \code{dataTable}.}
 #'
-#' \item{InitHalf}{When \code{start = NULL}. Initial ML estimation with half
+#' \item{initHalf}{When \code{start = NULL}. Initial ML estimation with half
 #' normal distribution for the one-sided error term. Model to construct the
 #' starting values for the latent class estimation. Object of class
 #' \code{'maxLik'} and \code{'maxim'} returned.}
@@ -297,7 +297,7 @@
 #' cross-section where the probability of belonging to a class a priori is not
 #' permanent (not fixed over time).
 #'
-#' @author K Hervé Dakpo, Yann Desjeux, Laure Latruffe and Arne Henningsen
+# @author K Hervé Dakpo, Yann Desjeux, Laure Latruffe and Arne Henningsen
 #'
 #' @seealso \code{\link[=print.lcmcross]{print}} for printing \code{lcmcross} object.
 #' 
@@ -771,7 +771,7 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
   returnObj$startVal <- mleList$startVal
   returnObj$dataTable <- dataTable
   if (is.null(start)) {
-    returnObj$InitHalf <- mleList$InitHalf
+    returnObj$initHalf <- mleList$initHalf
   }
   returnObj$isWeights <- !all.equal(wHvar, rep(1, N))
   returnObj$optType <- mleList$type

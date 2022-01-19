@@ -28,7 +28,7 @@
 #' @note \code{\link{skewnessTest}} is currently only available for object of
 #' class \code{'sfacross'}.
 #' 
-#' @author K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
+# @author K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
 #'
 #' @references Coelli, T. 1995. Estimators and hypothesis tests for a
 #' stochastic frontier function - a Monte-Carlo analysis. \emph{Journal of

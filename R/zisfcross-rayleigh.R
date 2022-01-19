@@ -406,7 +406,7 @@ zisfraynormAlgOpt <- function(start, olsParam, dataTable, S, wHvar,
     vHvar = vHvar, nvZVvar = nvZVvar, nXvar = nXvar, Xvar = Xvar, 
     Yvar = Yvar, itermax = itermax, printInfo = printInfo, 
     tol = tol)
-  InitRay <- start_st$initRay
+  initRay <- start_st$initRay
   startVal <- start_st$StartVal
   startLoglik <- sum(czisfraynormlike(startVal, nXvar = nXvar, 
     nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, 
@@ -527,68 +527,124 @@ zisfraynormAlgOpt <- function(start, olsParam, dataTable, S, wHvar,
     uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, 
     S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
   return(list(startVal = startVal, startLoglik = startLoglik, 
-    mleObj = mleObj, mlParam = mlParam, InitRay = InitRay))
+    mleObj = mleObj, mlParam = mlParam, initRay = initRay))
 }
 
 # Conditional efficiencies estimation ----------
 
-czisfraynormeff <- function(parm) {
-  beta <- parm[1:(nXvar)]
-  delta <- parm[(nXvar + 1):(nXvar + nuZUvar)]
-  phi <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
-  theta <- parm[(nXvar + nuZUvar + nvZVvar + 1):(nXvar + nuZUvar + 
-    nvZVvar + nZHvar)]
+czisfraynormeff <- function(object, level) {
+  beta <- object$mlParam[1:(object$nXvar)]
+  delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+                                                object$nuZUvar)]
+  phi <- object$mlParam[(object$nXvar + object$nuZUvar + 1):(object$nXvar +
+                                                               object$nuZUvar + object$nvZVvar)]
+  theta <- object$mlParam[(object$nXvar + object$nuZUvar +
+                             object$nvZVvar + 1):(object$nXvar + object$nuZUvar +
+                                                    object$nvZVvar + object$nZHvar)]
+  Xvar <- model.matrix(object$formula, data = object$dataTable,
+                       rhs = 1)
+  uHvar <- model.matrix(object$formula, data = object$dataTable,
+                        rhs = 2)
+  vHvar <- model.matrix(object$formula, data = object$dataTable,
+                        rhs = 3)
+  Zvar <- model.matrix(object$formula, data = object$dataTable,
+                       rhs = 4)
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
   Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
-  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
-  mustar <- -exp(Wu) * S * epsilon/(exp(Wu) + exp(Wv))
+  epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
+    as.numeric(crossprod(matrix(beta), t(Xvar)))
+  mustar <- -exp(Wu) * object$S * epsilon/(exp(Wu) + exp(Wv))
   sigmastar <- sqrt(exp(Wu) * exp(Wv)/(exp(Wu) + exp(Wv)))
-  Pi1 <- exp(1/2 * (mustar/sigmastar)^2 - (S * epsilon)^2/(2 * 
+  Pi1 <- exp(1/2 * (mustar/sigmastar)^2 - (object$S * epsilon)^2/(2 * 
     exp(Wv)))/(exp(Wv/2) * exp(Wu)) * sigmastar * (sigmastar * 
     dnorm(mustar/sigmastar) + mustar * pnorm(mustar/sigmastar))
-  Pi2 <- 1/exp(Wv/2) * dnorm(S * epsilon/exp(Wv/2))
+  Pi2 <- 1/exp(Wv/2) * dnorm(object$S * epsilon/exp(Wv/2))
   Probc1 <- exp(Wz)/(1 + exp(Wz))
   Probc2 <- 1 - Probc1
   Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
   Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
   Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
-  # odRatio <- Pcond_c2/(1 - Pcond_c2)
+  P_cond_c <- ifelse(Group_c == 1, Pcond_c1, Pcond_c2)
+  odRatio <- Pcond_c2/(1 - Pcond_c2)
   u_c1 <- (mustar * sigmastar * dnorm(mustar/sigmastar) + (mustar^2 + 
     sigmastar^2) * pnorm(mustar/sigmastar))/(sigmastar * 
     dnorm(mustar/sigmastar) + mustar * pnorm(mustar/sigmastar))
-  u_c2 <- rep(0, N)  ## careful for N object
+  u_c2 <- rep(0, object$Nobs) 
   u_c <- ifelse(Group_c == 1, u_c1, u_c2)
-  u_Wc <- Pcond_c1 * u_c1 + Pcond_c2 * u_c2
+  ineff_c1 <- ifelse(Group_c == 1, u_c1, NA)
+  ineff_c2 <- ifelse(Group_c == 2, u_c2, NA)
+  if (object$logDepVar == TRUE) {
   teJLMS_c1 <- exp(-u_c1)
   teJLMS_c2 <- exp(-u_c2)
   teJLMS_c <- ifelse(Group_c == 1, teJLMS_c1, teJLMS_c2)
-  teJLMS_Wc <- exp(-u_Wc)
-  res <- bind_cols(Group_c = Group_c, u_c1 = u_c1, u_c2 = u_c2, 
-    u_c = u_c, u_Wc = u_Wc, teJLMS_c1 = teJLMS_c1, teJLMS_c2 = teJLMS_c2, 
-    teJLMS_c = teJLMS_c, teJLMS_Wc = teJLMS_Wc, Pcond_c1 = Pcond_c1, 
-    Pcond_c2 = Pcond_c2)
+  teBC_c1 <- exp(-mustar + sigmastar^2/2) * (sigmastar * dnorm(mustar/sigmastar -
+                                                              sigmastar) + (mustar - sigmastar^2) * pnorm(mustar/sigmastar -
+                                                                                                            sigmastar))/(sigmastar * dnorm(mustar/sigmastar) +
+                                                                                                                           mustar * pnorm(mustar/sigmastar))
+  teBC_c2 <- rep(1, object$Nobs)
+  teBC_c <- ifelse(Group_c == 1, teBC_c1, teBC_c2)
+  effBC_c1 <- ifelse(Group_c == 1, teBC_c1, NA)
+  effBC_c2 <- ifelse(Group_c == 2, teBC_c2, NA)
+  teBC_reciprocal_c1 <- exp(mustar + sigmastar^2/2) * (sigmastar *
+                                                      dnorm(mustar/sigmastar + sigmastar) + (mustar + sigmastar^2) *
+                                                      pnorm(mustar/sigmastar + sigmastar))/(sigmastar *
+                                                                                              dnorm(mustar/sigmastar) + mustar * pnorm(mustar/sigmastar))
+  teBC_reciprocal_c2 <- rep(1, object$Nobs)
+  teBC_reciprocal_c <- ifelse(Group_c == 1, teBC_reciprocal_c1,
+                              teBC_reciprocal_c2)
+  ReffBC_c1 <- ifelse(Group_c == 1, teBC_reciprocal_c1,
+                      NA)
+  ReffBC_c2 <- ifelse(Group_c == 2, teBC_reciprocal_c2,
+                      NA)
+  res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+                   odRatio = odRatio, u_c = u_c, teJLMS_c = teJLMS_c,
+                   teBC_c = teBC_c, teBC_reciprocal_c = teBC_reciprocal_c,
+                   PosteriorProb_c1 = Pcond_c1, PriorProb_c1 = Probc1,
+                   u_c1 = u_c1, teBC_c1 = teBC_c1, teBC_reciprocal_c1 = teBC_reciprocal_c1,
+                   PosteriorProb_c2 = Pcond_c2, PriorProb_c2 = Probc2,
+                   u_c2 = u_c2, teBC_c2 = teBC_c2, teBC_reciprocal_c2 = teBC_reciprocal_c2,
+                   ineff_c1 = ineff_c1, ineff_c2 = ineff_c2, effBC_c1 = effBC_c1,
+                   effBC_c2 = effBC_c2, ReffBC_c1 = ReffBC_c1, ReffBC_c2 = ReffBC_c2)
+  } else {
+    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+                     odRatio = odRatio, u_c = u_c, PosteriorProb_c1 = Pcond_c1, PriorProb_c1 = Probc1,
+                     u_c1 = u_c1, PosteriorProb_c2 = Pcond_c2, PriorProb_c2 = Probc2,
+                     u_c2 = u_c2, ineff_c1 = ineff_c1, ineff_c2 = ineff_c2)
+  }
   return(res)
 }
 
 # Marginal effects on inefficiencies ----------
 
 czisfmargraynorm_Eu <- function(object) {
-  beta <- parm[1:(nXvar)]
-  delta <- parm[(nXvar + 1):(nXvar + nuZUvar)]
-  phi <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
-  theta <- parm[(nXvar + nuZUvar + nvZVvar + 1):(nXvar + nuZUvar + 
-    nvZVvar + nZHvar)]
+  beta <- object$mlParam[1:(object$nXvar)]
+  delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+                                                object$nuZUvar)]
+  phi <- object$mlParam[(object$nXvar + object$nuZUvar + 1):(object$nXvar +
+                                                               object$nuZUvar + object$nvZVvar)]
+  theta <- object$mlParam[(object$nXvar + object$nuZUvar +
+                             object$nvZVvar + 1):(object$nXvar + object$nuZUvar +
+                                                    object$nvZVvar + object$nZHvar)]
+  Xvar <- model.matrix(object$formula, data = object$dataTable,
+                       rhs = 1)
+  uHvar <- model.matrix(object$formula, data = object$dataTable,
+                        rhs = 2)
+  vHvar <- model.matrix(object$formula, data = object$dataTable,
+                        rhs = 3)
+  Zvar <- model.matrix(object$formula, data = object$dataTable,
+                       rhs = 4)
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
   Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
-  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
-  mustar <- -exp(Wu) * S * epsilon/(exp(Wu) + exp(Wv))
+  epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
+    as.numeric(crossprod(matrix(beta), t(Xvar)))
+  mustar <- -exp(Wu) * object$S * epsilon/(exp(Wu) + exp(Wv))
   sigmastar <- sqrt(exp(Wu) * exp(Wv)/(exp(Wu) + exp(Wv)))
-  Pi1 <- exp(1/2 * (mustar/sigmastar)^2 - (S * epsilon)^2/(2 * 
-    exp(Wv)))/(exp(Wv/2) * exp(Wu)) * sigmastar * (sigmastar * 
-    dnorm(mustar/sigmastar) + mustar * pnorm(mustar/sigmastar))
-  Pi2 <- 1/exp(Wv/2) * dnorm(S * epsilon/exp(Wv/2))
+  Pi1 <- exp(1/2 * (mustar/sigmastar)^2 - (object$S * epsilon)^2/(2 * 
+                                                                    exp(Wv)))/(exp(Wv/2) * exp(Wu)) * sigmastar * (sigmastar * 
+                                                                                                                     dnorm(mustar/sigmastar) + mustar * pnorm(mustar/sigmastar))
+  Pi2 <- 1/exp(Wv/2) * dnorm(object$S * epsilon/exp(Wv/2))
   Probc1 <- exp(Wz)/(1 + exp(Wz))
   Probc2 <- 1 - Probc1
   Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
@@ -596,36 +652,42 @@ czisfmargraynorm_Eu <- function(object) {
   Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
   margEff1 <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1), 
     matrix(exp(Wu/2) * 1/2 * sqrt(pi/2), ncol = 1))
-  margEff2 <- matrix(0, nrow = N, ncol = object$nuZUvar - 1)
-  margEff_c <- sapply(1:N, FUN = function(x) if (Group_c[x] == 
-    1) 
-    margEff1[x] else margEff2[x])
-  margEff_Wc <- sapply(1:N, FUN = function(x) if (Group_c[x] == 
-    1) 
-    Pcond_c1[x] * margEff1[x] else Pcond_c2[x] * margEff2[x])
+  margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar - 1)
+  margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
   colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
   colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
   colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff_Wc) <- paste0("Eu_", colnames(uHvar)[-1])
-  return(bind_cols(margEff1, margEff2, margEff_c, margEff_Wc))
+  return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
 czisfmargraynorm_Vu <- function(object) {
-  beta <- parm[1:(nXvar)]
-  delta <- parm[(nXvar + 1):(nXvar + nuZUvar)]
-  phi <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
-  theta <- parm[(nXvar + nuZUvar + nvZVvar + 1):(nXvar + nuZUvar + 
-    nvZVvar + nZHvar)]
+  beta <- object$mlParam[1:(object$nXvar)]
+  delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+                                                object$nuZUvar)]
+  phi <- object$mlParam[(object$nXvar + object$nuZUvar + 1):(object$nXvar +
+                                                               object$nuZUvar + object$nvZVvar)]
+  theta <- object$mlParam[(object$nXvar + object$nuZUvar +
+                             object$nvZVvar + 1):(object$nXvar + object$nuZUvar +
+                                                    object$nvZVvar + object$nZHvar)]
+  Xvar <- model.matrix(object$formula, data = object$dataTable,
+                       rhs = 1)
+  uHvar <- model.matrix(object$formula, data = object$dataTable,
+                        rhs = 2)
+  vHvar <- model.matrix(object$formula, data = object$dataTable,
+                        rhs = 3)
+  Zvar <- model.matrix(object$formula, data = object$dataTable,
+                       rhs = 4)
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
   Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
-  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
-  mustar <- -exp(Wu) * S * epsilon/(exp(Wu) + exp(Wv))
+  epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
+    as.numeric(crossprod(matrix(beta), t(Xvar)))
+  mustar <- -exp(Wu) * object$S * epsilon/(exp(Wu) + exp(Wv))
   sigmastar <- sqrt(exp(Wu) * exp(Wv)/(exp(Wu) + exp(Wv)))
-  Pi1 <- exp(1/2 * (mustar/sigmastar)^2 - (S * epsilon)^2/(2 * 
-    exp(Wv)))/(exp(Wv/2) * exp(Wu)) * sigmastar * (sigmastar * 
-    dnorm(mustar/sigmastar) + mustar * pnorm(mustar/sigmastar))
-  Pi2 <- 1/exp(Wv/2) * dnorm(S * epsilon/exp(Wv/2))
+  Pi1 <- exp(1/2 * (mustar/sigmastar)^2 - (object$S * epsilon)^2/(2 * 
+                                                                    exp(Wv)))/(exp(Wv/2) * exp(Wu)) * sigmastar * (sigmastar * 
+                                                                                                                     dnorm(mustar/sigmastar) + mustar * pnorm(mustar/sigmastar))
+  Pi2 <- 1/exp(Wv/2) * dnorm(object$S * epsilon/exp(Wv/2))
   Probc1 <- exp(Wz)/(1 + exp(Wz))
   Probc2 <- 1 - Probc1
   Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
@@ -633,16 +695,10 @@ czisfmargraynorm_Vu <- function(object) {
   Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
   margEff1 <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1), 
     matrix(exp(Wu) * (4 - pi)/2, ncol = 1))
-  margEff2 <- matrix(0, nrow = N, ncol = object$nuZUvar - 1)
-  margEff_c <- sapply(1:N, FUN = function(x) if (Group_c[x] == 
-    1) 
-    margEff1[x] else margEff2[x])
-  margEff_Wc <- sapply(1:N, FUN = function(x) if (Group_c[x] == 
-    1) 
-    Pcond_c1[x] * margEff1[x] else Pcond_c2[x] * margEff2[x])
+  margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar - 1)
+  margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
   colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
   colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
   colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_Wc) <- paste0("Vu_", colnames(uHvar)[-1])
-  return(bind_cols(margEff1, margEff2, margEff_c, margEff_Wc))
+  return(bind_cols(margEff1, margEff2, margEff_c))
 }

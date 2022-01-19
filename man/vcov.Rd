@@ -5,6 +5,7 @@
 \alias{vcov.sfacross}
 \alias{vcov.lcmcross}
 \alias{vcov.selectioncross}
+\alias{vcov.zisfcross}
 \title{Compute variance-covariance matrix of stochastic frontier models}
 \usage{
 \method{vcov}{sfacross}(object, extraPar = FALSE, ...)
@@ -12,13 +13,15 @@
 \method{vcov}{lcmcross}(object, ...)
 
 \method{vcov}{selectioncross}(object, extraPar = FALSE, ...)
+
+\method{vcov}{zisfcross}(object, ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}}
+by \code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.}
 
 \item{extraPar}{Logical. Only available for non heteroscedastic models
-returned by \code{\link{sfacross}}. Default = \code{FALSE}. If \code{TRUE},
+returned by \code{\link{sfacross}} or \code{\link{selectioncross}}. Default = \code{FALSE}. If \code{TRUE},
 variances and covariances of additional parameters are returned:
 
 \code{sigmaSq} = \code{sigmauSq} + \code{sigmavSq}
@@ -48,7 +51,7 @@ coefficients is returned.
 \description{
 \code{\link{vcov}} computes the variance-covariance matrix of the maximum
 likelihood (ML) coefficients of classic or latent class stochastic frontier
-models estimated by \code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.
+models estimated by \code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.
 }
 \details{
 The variance-covariance matrix is obtained by the inversion of the negative
@@ -114,9 +117,9 @@ model fitting function.
 
 \code{\link{selectioncross}} for sample selection in stochastic frontier model
 fitting function.
-}
-\author{
-K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
+
+\code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
+fitting function.
 }
 \keyword{methods}
 \keyword{vcov}

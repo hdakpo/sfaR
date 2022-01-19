@@ -8,6 +8,8 @@
 \alias{print.summary.lcmcross}
 \alias{summary.selectioncross}
 \alias{print.summary.selectioncross}
+\alias{summary.zisfcross}
+\alias{print.summary.zisfcross}
 \title{Summary of results for stochastic frontier models}
 \usage{
 \method{summary}{sfacross}(object, grad = FALSE, ci = FALSE, ...)
@@ -21,12 +23,17 @@
 \method{summary}{selectioncross}(object, grad = FALSE, ci = FALSE, ...)
 
 \method{print}{summary.selectioncross}(x, digits = max(3, getOption("digits") - 2), ...)
+
+\method{summary}{zisfcross}(object, grad = FALSE, ci = FALSE, ...)
+
+\method{print}{summary.zisfcross}(x, digits = max(3, getOption("digits") - 2), ...)
 }
 \arguments{
 \item{object}{An object of either class \code{'sfacross'} returned by the
 function \code{\link{sfacross}}, or class \code{'lcmcross'} returned by the
 function \code{\link{lcmcross}}, or class \code{'selectioncross'} returned by the
-function \code{\link{selectioncross}}.}
+function \code{\link{selectioncross}}, or class \code{'zisfcross'} returned by the
+function \code{\link{zisfcross}}.}
 
 \item{grad}{Logical. Default = \code{FALSE}. If \code{TRUE}, the gradient
 for the maximum likelihood (ML) estimates of the different parameters is
@@ -39,15 +46,15 @@ returned.}
 \item{...}{Currently ignored.}
 
 \item{x}{An object of either class \code{'summary.sfacross'},
-\code{'summary.lcmcross'} or \code{'summary.selectioncross'}.}
+\code{'summary.lcmcross'}, \code{'summary.selectioncross'} or \code{'summary.zisfcross'}.}
 
 \item{digits}{Numeric. Number of digits displayed in values.}
 }
 \value{
 The \code{\link{summary}} method returns a list of class
-\code{'summary.sfacross'}, \code{'summary.lcmcross'} or \code{'summary.selectioncross'}
+\code{'summary.sfacross'}, \code{'summary.lcmcross'}, \code{'summary.selectioncross'} \code{'summary.zisfcross'}
 that contains the same elements as an object returned by \code{\link{sfacross}},
-\code{\link{lcmcross}} or \code{\link{selectioncross}} with the following additional elements:
+\code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}} with the following additional elements:
 
 \item{AIC}{Akaike information criterion.}
 
@@ -94,7 +101,8 @@ statistics of the difference between the stochastic frontier and the OLS.}
 }
 \description{
 Create and print summary results for stochastic frontier models returned by
-\code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.
+\code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or
+\code{\link{zisfcross}}.
 }
 \examples{
 
@@ -116,6 +124,9 @@ fitting function.
 model fitting function.
 
 \code{\link{selectioncross}} for sample selection in stochastic frontier model
+fitting function.
+
+\code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
 fitting function.
 
 \code{\link[=print.sfacross]{print}} for printing \code{sfacross} object.
@@ -149,9 +160,6 @@ matrix of the coefficients.
 observation.
 
 \code{\link{skewnessTest}} for implementing skewness test.
-}
-\author{
-K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
 }
 \keyword{methods}
 \keyword{summary}

@@ -9,6 +9,7 @@
 # Models: -Standard Stochastic Frontier Analysis                               #
 #         -Latent Class Stochastic Frontier Analysis                           #
 #         -Sample selection correction                                         #
+#         -Zero inefficiency stochastic frontier                               #
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
 
@@ -18,8 +19,9 @@
 #' maximum simulated likelihood - MSL) for various specifications of stochastic
 #' frontier analysis (SFA).
 #'
-#' Three categories of important functions are available: \code{\link{sfacross}}, 
-#' \code{\link{lcmcross}}, and \code{\link{selectioncross}}, which estimate different types of frontiers and
+#' Four categories of important functions are available: \code{\link{sfacross}}, 
+#' \code{\link{lcmcross}}, \code{\link{selectioncross}}, and \code{\link{zisfcross}}, 
+#' which estimate different types of frontiers and
 #' offer eleven alternative optimization algorithms (i.e. "bfgs", "bhhh", "nr",
 #' "nm", "cg", "sann", "ucminf", "mla", "sr1", "sparse", "nlminb").
 #'
@@ -39,7 +41,7 @@
 #' in both error terms is possible. The choice of the number of classes can be
 #' guided by several information criteria (i.e. AIC, BIC or HQIC).
 #'
-#' @section sfacross: \code{\link{sfacross}} estimates the frontier for cross-sectional data
+#' @section sfacross: \code{\link{sfacross}} estimates the basic frontier for cross-sectional data
 #'   and allows for ten different distributions for the one-sided error term.
 #'   These distributions include the exponential, the Gamma, the generalized
 #'   exponential, the half normal, the lognormal, the truncated normal, the
@@ -61,8 +63,24 @@
 #'  maximum simulated likelihood. Only the half normal
 #' distribution is available for the one-sided error term. Heteroscedasticity
 #' in both error terms is possible.
+#' 
+#' @section zisfcross: \code{\link{zisfcross}} relaxes the assumption that all firms
+#' are inefficient. The model splits the observations into two groups:
+#' one efficient and the other inefficient. The probability of belonging to one of
+#' these classes is based on a logit functional form that can be
+#' specified using some covariates. As in the case of \code{\link{sfacross}} 
+#' ten different distributions for the one-sided error term are implemented.
+#' These distributions include the exponential, the Gamma, the generalized
+#' exponential, the half normal, the lognormal, the truncated normal, the
+#' truncated skewed Laplace, the Rayleigh, the uniform and the Weibull distributions.
+#' In the case of the Gamma, lognormal and Weibull distributions, maximum simulated
+#' likelihood (MSL) is used with the possibility of four specific distributions to
+#' construct the draws: Halton, Generalized Halton, Sobol and uniform.
+#' Heteroscedasticity in both error terms can be implemented, in addition to
+#' heterogeneity in the truncated mean parameter in the case of the truncated
+#' normal and lognormal distributions.
 #'
-#' @section Bugreport: Any bug or suggestion can be reported using the \code{sfaR}'\code{s}
+#' @section Bugreport: Any bug or suggestion can be reported using the \code{sfaR}
 #' tracker facilities at: \url{https://github.com/hdakpo/sfaR/issues}
 #'
 #' @author K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
@@ -72,7 +90,7 @@
 #' @importFrom stats pnorm qnorm delete.response fitted
 #' @importFrom stats logLik residuals terms vcov formula
 #' @importFrom stats integrate runif model.weights
-#' @importFrom stats na.pass printCoefmat pt qt
+#' @importFrom stats na.pass printCoefmat pt qt na.omit
 #' @importFrom methods as
 #' @importFrom Formula as.Formula Formula
 #' @importFrom primes generate_primes is_prime

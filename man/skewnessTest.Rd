@@ -49,7 +49,4 @@ D'Agostino, R., and E.S. Pearson. 1973. Tests for departure from normality.
 Empirical results for the distributions of \eqn{b_2} and \eqn{\sqrt{b_1}}.
 \emph{Biometrika}, \bold{60}:613--622.
 }
-\author{
-K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
-}
 \keyword{methods}

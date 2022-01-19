@@ -23,9 +23,18 @@ Three categories of models are available in *sfaR*:
 where *S* = 1 for production function and *S* =  − 1 for cost function.
 *v* follows a normal distribution 𝒩(0,*σ*<sub>*v*</sub><sup>2</sup>).
 For *u* ten different distributions are available. These distributions
-include: + Half-Normal + Truncated Normal + Exponential + Rayleigh +
-Gamma + Generalized Exponential + Lognormal + Truncated Skewed Laplace +
-Uniform + Weibull
+include:
+
+-   Half-Normal
+-   Truncated Normal
+-   Exponential
+-   Rayleigh
+-   Gamma
+-   Generalized Exponential
+-   Lognormal
+-   Truncated Skewed Laplace
+-   Uniform
+-   Weibull
 
 In the case of the Gamma, lognormal and Weibull distributions, maximum
 simulated likelihood is used with the possibility of four specific

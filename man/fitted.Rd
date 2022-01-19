@@ -15,12 +15,13 @@
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.}
+by \code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.}
 
 \item{...}{Currently ignored.}
 }
 \value{
-In the case of an object of class \code{'sfacross'} or \code{'selectioncross'}, a vector of
+In the case of an object of class \code{'sfacross'}, \code{'selectioncross'} or
+\code{'selectioncross'}, a vector of
 fitted values is returned.
 
 In the case of an object of class \code{'lcmcross'}, a data frame containing
@@ -30,7 +31,7 @@ with \code{'_c#'}, \code{'#'} being the class number.
 \description{
 \code{\link{fitted}} returns the fitted frontier values from classic or
 latent class stochastic frontier models estimated with
-\code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.
+\code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.
 }
 \note{
 The fitted values are ordered in the same way as the corresponding
@@ -54,9 +55,9 @@ model fitting function.
 
 \code{\link{selectioncross}} for sample selection in stochastic frontier model
 fitting function.
-}
-\author{
-K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
+
+\code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
+fitting function.
 }
 \keyword{fitted}
 \keyword{methods}

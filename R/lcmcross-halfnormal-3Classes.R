@@ -993,7 +993,7 @@ LCM3ChnormAlgOpt <- function(start, olsParam, dataTable, S, wHvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar,
       itermax = itermax, tol = tol, printInfo = printInfo)
-    InitHalf <- start_st$initHalf
+    initHalf <- start_st$initHalf
     startVal <- start_st$StartVal
   }
   if (initStart) {
@@ -1149,7 +1149,7 @@ LCM3ChnormAlgOpt <- function(start, olsParam, dataTable, S, wHvar,
     uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
     S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
   return(list(startVal = startVal, startLoglik = startLoglik,
-    mleObj = mleObj, mlParam = mlParam, if (is.null(start)) InitHalf = InitHalf))
+    mleObj = mleObj, mlParam = mlParam, if (is.null(start)) initHalf = initHalf))
 }
 
 # Posterior probabilities and efficiencies ----------

@@ -9,6 +9,7 @@
 # Models: -Standard Stochastic Frontier Analysis                               #
 #         -Latent Class Stochastic Frontier Analysis                           #
 #         -Sample selection correction                                         #
+#         -Zero inefficiency stochastic frontier                               #
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
 
@@ -16,10 +17,11 @@
 #'
 #' \code{\link{logLik}} extracts the log-likelihood value(s) from classic or
 #' latent class stochastic frontier models estimated with
-#' \code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.
+#' \code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or 
+#' \code{\link{zisfcross}}.
 #'
 #' @param object A stochastic frontier model returned
-#' by \code{\link{sfacross}}, \code{\link{lcmcross}} or \code{\link{selectioncross}}.
+#' by \code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.
 #' @param individual Logical. If \code{FALSE} (default), the sum of all
 #' observations' log-likelihood values is returned. If \code{TRUE}, a vector of
 #' each observation's log-likelihood value is returned.
@@ -35,7 +37,7 @@
 #' (\code{logLik}), the total number of observations (\code{Nobs}) and the
 #' number of free parameters (\code{df}), when \code{individual = TRUE}.
 #'
-#' @author K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
+# @author K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
 #'
 #' @seealso \code{\link{sfacross}}, for the stochastic frontier analysis model
 #' fitting function.
@@ -44,6 +46,9 @@
 #' model fitting function.
 #' 
 #' \code{\link{selectioncross}} for sample selection in stochastic frontier model
+#' fitting function.
+#' 
+#' \code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
 #' fitting function.
 #'
 #' @keywords methods likelihood
@@ -79,9 +84,10 @@ logLik.sfacross <- function(object, individual = FALSE, ...) {
     LL[["df"]] <- object$nParm
     return(LL)
   } else {
-    cat("'log Lik.'", round(object$mlLoglik, 5), paste0("(df=", object$nParm, ")"))
-    # LL <- rbind(`logLik: ` = object$mlLoglik, `Nobs: ` = object$Nobs,
-    #   `df: ` = object$nParm)
+    cat("'log Lik.'", round(object$mlLoglik, 5), paste0("(df=",
+      object$nParm, ")"))
+    # LL <- rbind(`logLik: ` = object$mlLoglik, `Nobs: ` =
+    # object$Nobs, `df: ` = object$nParm)
   }
 }
 
@@ -100,9 +106,10 @@ logLik.lcmcross <- function(object, individual = FALSE, ...) {
     LL[["df"]] <- object$nParm
     return(LL)
   } else {
-    cat("'log Lik.'", round(object$mlLoglik, 5), paste0("(df=", object$nParm, ")"))
-    # LL <- rbind(`logLik: ` = object$mlLoglik, `Nobs: ` = object$Nobs,
-    #   `df: ` = object$nParm)
+    cat("'log Lik.'", round(object$mlLoglik, 5), paste0("(df=",
+      object$nParm, ")"))
+    # LL <- rbind(`logLik: ` = object$mlLoglik, `Nobs: ` =
+    # object$Nobs, `df: ` = object$nParm)
   }
 }
 
@@ -110,10 +117,11 @@ logLik.lcmcross <- function(object, individual = FALSE, ...) {
 #' @rdname logLik
 #' @aliases logLik.selectioncross
 #' @export
-logLik.selectioncross <- function(object, individual = FALSE, ...) {
+logLik.selectioncross <- function(object, individual = FALSE,
+  ...) {
   if (length(individual) != 1 || !is.logical(individual[1]))
     stop("argument 'individual' must be a single logical value",
-         call. = FALSE)
+      call. = FALSE)
   if (individual) {
     LL <- list()
     LL[["logLik"]] <- object$dataTable$logL_OBS
@@ -121,8 +129,31 @@ logLik.selectioncross <- function(object, individual = FALSE, ...) {
     LL[["df"]] <- object$nParm
     return(LL)
   } else {
-    cat("'log Lik.'", round(object$mlLoglik, 5), paste0("(df=", object$nParm, ")"))
-    # LL <- rbind(`logLik: ` = object$mlLoglik, `Nobs: ` = object$Nobs,
-    #   `df: ` = object$nParm)
+    cat("'log Lik.'", round(object$mlLoglik, 5), paste0("(df=",
+      object$nParm, ")"))
+    # LL <- rbind(`logLik: ` = object$mlLoglik, `Nobs: ` =
+    # object$Nobs, `df: ` = object$nParm)
+  }
+}
+
+# log likelihood extraction for zisfcross ----------
+#' @rdname logLik
+#' @aliases logLik.zisfcross
+#' @export
+logLik.zisfcross <- function(object, individual = FALSE, ...) {
+  if (length(individual) != 1 || !is.logical(individual[1]))
+    stop("argument 'individual' must be a single logical value",
+      call. = FALSE)
+  if (individual) {
+    LL <- list()
+    LL[["logLik"]] <- object$dataTable$logL_OBS
+    LL[["Nobs"]] <- object$Nobs
+    LL[["df"]] <- object$nParm
+    return(LL)
+  } else {
+    cat("'log Lik.'", round(object$mlLoglik, 5), paste0("(df=",
+      object$nParm, ")"))
+    # LL <- rbind(`logLik: ` = object$mlLoglik, `Nobs: ` =
+    # object$Nobs, `df: ` = object$nParm)
   }
 }
