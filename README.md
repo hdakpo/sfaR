@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# sfaR
+# sfaR: Stochastic Frontier Analysis Routines
 
 <!-- badges: start -->
 <!-- badges: end -->
@@ -27,14 +27,12 @@ include:
 
 -   Half-Normal
 -   Truncated Normal
--   Exponential
--   Rayleigh
+    -   Exponential
+    -   Rayleigh
 -   Gamma
 -   Generalized Exponential
--   Lognormal,
--   Truncated Skewed Laplace
--   Uniform
--   Weibull
+-   Lognormal
+-   Truncated Skewed Laplace + Uniform + Weibull
 
 In the case of the Gamma, lognormal and Weibull distributions, maximum
 simulated likelihood is used with the possibility of four specific
