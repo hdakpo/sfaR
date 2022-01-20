@@ -27,24 +27,19 @@ RoxygenNote: 7.1.2
 Imports: 
     cubature,
     dplyr,
-    emdbook,
-    fBasics,
     Formula,
     katex,
-    gsl,
     marqLevAlg,
-    MASS,
     maxLik,
     methods,
-    moments,
     nleqslv,
-    numDeriv,
-    primes,
     qrng,
     randtoolbox,
     trustOptim,
     ucminf,
-    sandwich,
-    lmtest,
-    fastGHQuad
+    fastGHQuad,
+    stats,
+    sandwich
 URL: https://github.com/hdakpo/sfaR
+Suggests: 
+    lmtest

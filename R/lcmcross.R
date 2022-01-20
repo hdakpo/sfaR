@@ -27,7 +27,7 @@
 #'
 #' The model can estimate up to five classes.
 #'
-#' @aliases lcmcross print.lcmcross nobs.lcmcross
+#' @aliases lcmcross print.lcmcross
 #'
 #' @param formula A symbolic description of the model to be estimated based on
 #' the generic function \code{formula} (see section \sQuote{Details}).
@@ -209,8 +209,8 @@
 #' \code{\link[=residuals.lcmcross]{residuals}}, \code{\link[=vcov.lcmcross]{vcov}}, 
 #' \code{\link[=efficiencies.lcmcross]{efficiencies}}, \code{\link[=ic.lcmcross]{ic}}, 
 #' \code{\link[=marginal.lcmcross]{marginal}}, \code{\link[=estfun.lcmcross]{estfun}} and 
-#' \code{\link[=bread.lcmcross]{bread}} (from the \pkg{sandwich} package), 
-#' \code{\link[=coeftest]{coeftest}} (from the \pkg{lmtest} package).
+#' \code{\link[=bread.lcmcross]{bread}} (from the \CRANpkg{sandwich} package), 
+#' [lmtest::coeftest()] (from the \CRANpkg{lmtest} package).
 #'
 #' @return \code{\link{lcmcross}} returns a list of class \code{'lcmcross'}
 #' containing the following elements:
@@ -881,11 +881,4 @@ bread.lcmcross <- function(x, ...) {
 #' @export
 estfun.lcmcross <- function(x, ...) {
   return(x$gradL_OBS)
-}
-
-# Extract number of observations (use by coeftest) ----------
-#' @rdname lcmcross
-#' @export
-nobs.lcmcross <- function(x, ...) {
-  return(x$Nobs)
 }

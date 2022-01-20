@@ -72,7 +72,7 @@ cstzisfuninorm <- function(olsObj, epsiRes, nXvar, nuZUvar, nvZVvar,
     epsiRes = epsiRes, S = S, nuZUvar = 1, uHvar = uHvar[,
       1, drop = FALSE], nvZVvar = 1, vHvar = vHvar[, 1,
       drop = FALSE]), grad = cgraduninormlike, method = "BFGS",
-    control = list(iterlim = itermax, printLevel = printInfo,
+    control = list(iterlim = itermax, printLevel = if (printInfo) 2 else 0,
       reltol = tol), nXvar = nXvar, nuZUvar = 1, uHvar = as.matrix(uHvar[,
       1]), nvZVvar = 1, vHvar = as.matrix(vHvar[, 1]),
     Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar)

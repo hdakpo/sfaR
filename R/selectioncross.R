@@ -25,7 +25,7 @@
 #' two-sided error terms, as in Reifschneider and Stevenson (1991), Caudill and
 #' Ford (1993), Caudill \emph{et al.} (1995) and Hadri (1999).
 #'
-#' @aliases selectioncross print.selectioncross nobs.selectioncross
+#' @aliases selectioncross print.selectioncross
 #'
 #' @param selectionF A symbolic (formula) description of the selection equation.
 #' @param frontierF A symbolic (formula) description of the outcome (frontier) equation.
@@ -251,8 +251,8 @@
 #' \code{\link[=efficiencies.selectioncross]{efficiencies}}, \code{\link[=ic.selectioncross]{ic}}, 
 #' \code{\link[=marginal.selectioncross]{marginal}}, 
 #' \code{\link[=estfun.selectioncross]{estfun}} and 
-#' \code{\link[=bread.selectioncross]{bread}} (from the \pkg{sandwich} package), 
-#' \code{\link[=coeftest]{coeftest}} (from the \pkg{lmtest} package).
+#' \code{\link[=bread.selectioncross]{bread}} (from the \CRANpkg{sandwich} package), 
+#' [lmtest::coeftest()] (from the \CRANpkg{lmtest} package).
 #' 
 #' @return \code{\link{selectioncross}} returns a list of class \code{'selectioncross'}
 #' containing the following elements:
@@ -1093,11 +1093,4 @@ bread.selectioncross <- function(x, ...) {
 #' @export
 estfun.selectioncross <- function(x, ...) {
   return(x$gradL_OBS)
-}
-
-# Extract number of observations (use by coeftest) ----------
-#' @rdname selectioncross
-#' @export
-nobs.selectioncross <- function(x, ...) {
-  return(x$Nobs)
 }

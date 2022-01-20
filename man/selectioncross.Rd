@@ -3,7 +3,6 @@
 \name{selectioncross}
 \alias{selectioncross}
 \alias{print.selectioncross}
-\alias{nobs.selectioncross}
 \alias{bread.selectioncross}
 \alias{estfun.selectioncross}
 \title{Sample Selection in Stochastic frontier estimation using cross-section data}
@@ -47,8 +46,6 @@ selectioncross(
 \method{bread}{selectioncross}(x, ...)
 
 \method{estfun}{selectioncross}(x, ...)
-
-\method{nobs}{selectioncross}(x, ...)
 }
 \arguments{
 \item{selectionF}{A symbolic (formula) description of the selection equation.}
@@ -442,8 +439,8 @@ A set of extractor functions for fitted model objects is available for objects o
 \code{\link[=efficiencies.selectioncross]{efficiencies}}, \code{\link[=ic.selectioncross]{ic}},
 \code{\link[=marginal.selectioncross]{marginal}},
 \code{\link[=estfun.selectioncross]{estfun}} and
-\code{\link[=bread.selectioncross]{bread}} (from the \pkg{sandwich} package),
-\code{\link[=coeftest]{coeftest}} (from the \pkg{lmtest} package).
+\code{\link[=bread.selectioncross]{bread}} (from the \CRANpkg{sandwich} package),
+\code{\link[lmtest:coeftest]{lmtest::coeftest()}} (from the \CRANpkg{lmtest} package).
 }
 \note{
 For the Halton draws, the code is adapted from the \pkg{mlogit}

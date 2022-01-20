@@ -3,7 +3,6 @@
 \name{lcmcross}
 \alias{lcmcross}
 \alias{print.lcmcross}
-\alias{nobs.lcmcross}
 \alias{bread.lcmcross}
 \alias{estfun.lcmcross}
 \title{Latent class stochastic frontier using cross-section data}
@@ -42,8 +41,6 @@ lcmcross(
 \method{bread}{lcmcross}(x, ...)
 
 \method{estfun}{lcmcross}(x, ...)
-
-\method{nobs}{lcmcross}(x, ...)
 }
 \arguments{
 \item{formula}{A symbolic description of the model to be estimated based on
@@ -351,8 +348,8 @@ A set of extractor functions for fitted model objects is available for objects o
 \code{\link[=residuals.lcmcross]{residuals}}, \code{\link[=vcov.lcmcross]{vcov}},
 \code{\link[=efficiencies.lcmcross]{efficiencies}}, \code{\link[=ic.lcmcross]{ic}},
 \code{\link[=marginal.lcmcross]{marginal}}, \code{\link[=estfun.lcmcross]{estfun}} and
-\code{\link[=bread.lcmcross]{bread}} (from the \pkg{sandwich} package),
-\code{\link[=coeftest]{coeftest}} (from the \pkg{lmtest} package).
+\code{\link[=bread.lcmcross]{bread}} (from the \CRANpkg{sandwich} package),
+\code{\link[lmtest:coeftest]{lmtest::coeftest()}} (from the \CRANpkg{lmtest} package).
 }
 \note{
 In the case of panel data, \code{\link{lcmcross}} estimates a pooled

@@ -114,9 +114,10 @@ residuals.selectioncross <- function(object, ...) {
   object$dataTable$mlResiduals
 }
 
+# residuals from zisfcross ----------
+#' @rdname residuals
 #' @aliases residuals.zisfcross
 #' @export
-# residuals from zisfcross ----------
 residuals.zisfcross <- function(object, ...) {
   object$dataTable$mlResiduals
 }

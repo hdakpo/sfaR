@@ -89,28 +89,21 @@
 #' @importFrom stats model.matrix model.response nlminb
 #' @importFrom stats pnorm qnorm delete.response fitted
 #' @importFrom stats logLik residuals terms vcov formula
-#' @importFrom stats integrate runif model.weights
+#' @importFrom stats integrate runif model.weights nobs
 #' @importFrom stats na.pass printCoefmat pt qt na.omit
-#' @importFrom methods as
+#' @importFrom stats pchisq qchisq uniroot
+#' @importFrom methods as new
 #' @importFrom Formula as.Formula Formula
-#' @importFrom primes generate_primes is_prime
-#' @importFrom randtoolbox sobol
+#' @importFrom randtoolbox get.primes sobol
 #' @importFrom qrng ghalton
-#' @importFrom MASS ginv
-#' @importFrom gsl erf erfc
 #' @import maxLik
 #' @importFrom ucminf ucminf
 #' @importFrom trustOptim trust.optim
 #' @importFrom marqLevAlg mla
 #' @importFrom dplyr bind_cols as_tibble mutate select
-#' @importFrom numDeriv jacobian
 #' @importFrom nleqslv nleqslv
-#' @importFrom emdbook qchibarsq
-#' @importFrom fBasics dagoTest
-#' @importFrom cubature hcubature
 #' @importFrom katex math_to_rd
-#' @importFrom lmtest coeftest coeftest.default
-#' @importFrom sandwich bread estfun
 #' @importFrom fastGHQuad gaussHermiteData
 #' @importFrom cubature hcubature pcubature
+#' @importFrom sandwich bread estfun
 NULL

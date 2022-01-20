@@ -26,7 +26,7 @@
 #' Ten distributions are possible for the one-sided error term and nine
 #' optimization algorithms are available.
 #'
-#' @aliases zisfcross print.zisfcross nobs.zisfcross
+#' @aliases zisfcross print.zisfcross
 #'
 #' @param formula A symbolic description of the model to be estimated based on
 #' the generic function \code{formula} (see section \sQuote{Details}).
@@ -217,8 +217,8 @@
 #' \code{\link[=efficiencies.zisfcross]{efficiencies}}, \code{\link[=ic.zisfcross]{ic}}, 
 #' \code{\link[=marginal.zisfcross]{marginal}}, \code{\link[=skewnessTest]{skewnessTest}}, 
 #' \code{\link[=estfun.zisfcross]{estfun}} and 
-#' \code{\link[=bread.zisfcross]{bread}} (from the \pkg{sandwich} package), 
-#' \code{\link[=coeftest]{coeftest}} (from the \pkg{lmtest} package).
+#' \code{\link[=bread.zisfcross]{bread}} (from the \CRANpkg{sandwich} package), 
+#' [lmtest::coeftest()] (from the \CRANpkg{lmtest} package).
 #' 
 #' @return \code{\link{zisfcross}} returns a list of class \code{'zisfcross'}
 #' containing the following elements:
@@ -439,11 +439,12 @@
 #' ## Using data on Spanish dairy farms
 #' # Cobb Douglas (production function) half normal distribution
 #' 
-#' cb_zisf_h <- zisfcross(formula = YIT ~ X1 + X2 + X3 + X4, udist = "hnormal", 
-#' data = dairyspain, S = 1, method = "bfgs")
+#' cb_zisf_h <- zisfcross(formula = YIT ~ X1 + X2 + X3 + X4, udist = 'hnormal', 
+#' data = dairyspain, S = 1, method = 'bfgs')
 #' 
 #' summary(cb_zisf_h)
 #' 
+#' @export 
 zisfcross <- function(formula, muhet, uhet, vhet, thet, logDepVar = TRUE,
   data, subset, weights, wscale = TRUE, S = 1L, udist = "hnormal",
   start = NULL, method = "bfgs", hessianType = 1, simType = "halton",
@@ -1075,12 +1076,3 @@ bread.zisfcross <- function(x, ...) {
 estfun.zisfcross <- function(x, ...) {
   return(x$gradL_OBS)
 }
-
-# Extract number of observations (use by coeftest)
-# ----------
-#' @rdname zisfcross
-#' @export
-nobs.zisfcross <- function(x, ...) {
-  return(x$Nobs)
-}
-

@@ -40,8 +40,7 @@ interCheckSelection <- function(formula) {
   return(formula)
 }
 
-# intercept check for heteroscedasticity in u
-# (cross-section) ----------
+# Intercept hetero. in u (cross-section) ----------
 #' @param formula formula for heteroscedasticity in inefficiency term
 #' @param scaling logical for scaling property
 #' @noRd
@@ -61,8 +60,7 @@ clhsCheck_u <- function(formula, scaling) {
   return(formula)
 }
 
-# intercept check for heteroscedasticity in u (panel data)
-# ----------
+# Intercept hetero. in u (panel data) ----------
 #' @param formula main formula of model
 #' @noRd
 plhsCheck_u <- function(formula) {
@@ -81,8 +79,7 @@ plhsCheck_u <- function(formula) {
   return(formula)
 }
 
-# intercept check for heterogeneity in mu (cross section)
-# ----------
+# Intercept hetero. in mu (cross section) ----------
 #' @param formula formula for heterogeneity in inefficiency term
 #' @param scaling logical for scaling property
 #' @noRd
@@ -102,8 +99,7 @@ clhsCheck_mu <- function(formula, scaling) {
   return(formula)
 }
 
-# intercept check for heterogeneity in mu (panel data)
-# ----------
+# Intercept hetero. in mu (panel data) ----------
 #' @param formula formula for heterogeneity in inefficiency term
 #' @noRd
 plhsCheck_mu <- function(formula) {
@@ -122,7 +118,7 @@ plhsCheck_mu <- function(formula) {
   return(formula)
 }
 
-# intercept check for heteroscedasticity in v ----------
+# Intercept hetero. in v (cross section) ----------
 #' @param formula formula for heteroscedasticity in noise component
 #' @noRd
 clhsCheck_v <- function(formula) {
@@ -141,8 +137,7 @@ clhsCheck_v <- function(formula) {
   return(formula)
 }
 
-# intercept check for separating variables in LCM
-# ----------
+# Intercept separating variables in LCM ----------
 #' @param formula formula for logit form in LCM
 #' @noRd
 clhsCheck_t <- function(formula) {
@@ -161,8 +156,7 @@ clhsCheck_t <- function(formula) {
   return(formula)
 }
 
-# intercept check for separating variables in ZISF
-# ----------
+# Intercept separating variables in ZISF ----------
 #' @param formula formula for logit form in ZISF
 #' @noRd
 clhsCheck_q <- function(formula) {
@@ -398,6 +392,15 @@ halton <- function(prime, length, drop) {
 }
 
 # matrix of draws ----------
+
+list_primes <- randtoolbox::get.primes(1e+05)
+
+#' @param prime prime number
+#' @noRd
+is_prime <- function(prime) {
+  prime %in% list_primes
+}
+
 #' @param N number of observations
 #' @param Nsim number of draw per observation
 #' @param prime prime number
@@ -411,8 +414,7 @@ drawMat <- function(N, Nsim, simType, prime, burn, seed, antithetics) {
       N), drop = burn), nrow = N, ncol = Nsim, byrow = TRUE)
   } else {
     if (simType == "ghalton") {
-      nthPrime <- generate_primes(min = 0, max = prime)
-      idPrime <- which(prime == nthPrime)
+      idPrime <- which(list_primes == prime)
       set.seed(seed)
       matDraw <- matrix(ghalton(n = Nsim * N, d = idPrime,
         method = "generalized"), nrow = N, ncol = Nsim,
@@ -442,6 +444,21 @@ drawMat <- function(N, Nsim, simType, prime, burn, seed, antithetics) {
 }
 
 # Inverse hessian ----------
+#' @param X matrix X
+#' @noRd
+ginvsfaR <- function(X, tol = sqrt(.Machine$double.eps)) {
+  if (!is.numeric(X))
+    stop("'hessian' must be a numeric matrix")
+  if (!is.matrix(X))
+    X <- as.matrix(X)
+  Xsvd <- svd(X)
+  Positive <- Xsvd$d > max(tol * Xsvd$d[1L], 0)
+  if (all(Positive))
+    Xsvd$v %*% (1/Xsvd$d * t(Xsvd$u)) else if (!any(Positive))
+    array(0, dim(X)[2L:1L]) else Xsvd$v[, Positive, drop = FALSE] %*% ((1/Xsvd$d[Positive]) *
+    t(Xsvd$u[, Positive, drop = FALSE]))
+}
+
 #' @param hess hessian matrix
 #' @noRd
 invHess_fun <- function(hess) {
@@ -462,7 +479,7 @@ invHess_fun <- function(hess) {
       } else {
         warning("hessian is singular for 'qr.solve' switching to 'ginv'",
           call. = FALSE, immediate. = TRUE)
-        invhess <- ginv(-as.matrix(hess))
+        invhess <- ginvsfaR(-as.matrix(hess))
         invhess <- (invhess + t(invhess))/2
       }
     }
@@ -583,12 +600,23 @@ varuFun <- function(object, mu, P, lambda, k) {
 }
 
 # expected value of u ----------
+#' @param x vector for error function
 #' @param object object from sfacross/lcmcross ...
 #' @param mu mu in truncated normal and log-normal distribution
 #' @param P Shape parameter in gamma distribution
 #' @param lambda parameter in truncated skewed laplace distribution
 #' @param k parameter in weibull distribution
 #' @noRd
+erf <- function(x) {
+  # 2*pnorm(sqrt(2)*x)-1 # or
+  pchisq(2 * x^2, 1) * sign(x)
+}
+
+erfc <- function(x) {
+  # 1 - erf(x)
+  2 * pnorm(-sqrt(2) * x)
+}
+
 euFun <- function(object, mu, P, lambda, k) {
   if (object$udist == "hnormal") {
     sqrt(object$sigmauSq) * sqrt(2/pi)
@@ -715,8 +743,7 @@ probit_gradient <- function(beta, Xvar, Yvar, wHvar) {
   sweep(Xvar, MARGIN = 1, STATS = gx, FUN = "*")
 }
 
-# Center text strings (adapted from gdata package)
-# ----------
+# Center text strings (gdata package) ----------
 #' @param s string
 #' @noRd
 trimChar <- function(s, recode.factor = TRUE, ...) {
@@ -740,6 +767,152 @@ centerText <- function(x, width) {
   retval
 }
 
+# mix-chisquare distribution (emdbook) ----------
+#' @param p numeric vector of positive values
+#' @param q numeric vector of quantiles (0-1)
+#' @param df degrees of freedom (positive integer)
+#' @param mix mixture parameter: fraction of distribution that is chi-square(n-1) distributed
+#' @param lower.tail return lower tail values?
+#' @param log.p return log probabilities?
+#' @noRd
+pchibarsq <- function(p, df = 1, mix = 0.5, lower.tail = TRUE,
+  log.p = FALSE) {
+  df <- rep(df, length.out = length(p))
+  mix <- rep(mix, length.out = length(p))
+  c1 <- ifelse(df == 1, if (lower.tail)
+    1 else 0, pchisq(p, df - 1, lower.tail = lower.tail))
+  c2 <- pchisq(p, df, lower.tail = lower.tail)
+  r <- mix * c1 + (1 - mix) * c2
+  if (log.p)
+    log(r) else r
+}
+
+qchibarsq <- function(q, df = 1, mix = 0.5) {
+  n <- max(length(q), length(df), length(mix))
+  df <- rep(df, length.out = n)
+  mix <- rep(mix, length.out = n)
+  q <- rep(q, length.out = n)
+  tmpf2 <- function(q, df, mix) {
+    if (df > 1) {
+      tmpf <- function(x) {
+        pchibarsq(x, df, mix) - q
+      }
+      uniroot(tmpf, lower = qchisq(q, df - 1), upper = qchisq(q,
+        df))$root
+    } else {
+      newq <- (q - mix)/(1 - mix)
+      ifelse(newq < 0, 0, qchisq(newq, df = 1))
+    }
+  }
+  mapply(tmpf2, q, df, mix)
+}
+
+# D'Agostino normality test (fBasics) ----------
+#' @param x numeric vector of data values
+#' @noRd
+.skewness.test <- function(x) {
+  n <- length(x)
+  if (n < 8)
+    stop("Sample size must be at least 8 for skewness test")
+  meanX <- mean(x)
+  s <- sqrt(mean((x - meanX)^2))
+  a3 <- mean((x - meanX)^3)/s^3
+  SD3 <- sqrt(6 * (n - 2)/((n + 1) * (n + 3)))
+  U3 <- a3/SD3
+  b <- (3 * (n^2 + 27 * n - 70) * (n + 1) * (n + 3))/((n -
+    2) * (n + 5) * (n + 7) * (n + 9))
+  W2 <- sqrt(2 * (b - 1)) - 1
+  delta <- 1/sqrt(log(sqrt(W2)))
+  a <- sqrt(2/(W2 - 1))
+  Z3 <- delta * log((U3/a) + sqrt((U3/a)^2 + 1))
+  pZ3 <- 2 * (1 - pnorm(abs(Z3), 0, 1))
+  names(Z3) <- "Z3"
+  RVAL <- list(statistic = Z3, p.value = pZ3)
+  return(RVAL)
+}
+
+.kurtosis.test <- function(x) {
+  n <- length(x)
+  if (n < 20)
+    stop("Sample size must be at least 20 for kurtosis test")
+  meanX <- mean(x)
+  s <- sqrt(mean((x - meanX)^2))
+  a4 <- mean((x - meanX)^4)/s^4
+  SD4 <- sqrt(24 * (n - 2) * (n - 3) * n/((n + 1)^2 * (n +
+    3) * (n + 5)))
+  U4 <- (a4 - 3 + 6/(n + 1))/SD4
+  B <- (6 * (n * n - 5 * n + 2)/((n + 7) * (n + 9))) * sqrt((6 *
+    (n + 3) * (n + 5))/(n * (n - 2) * (n - 3)))
+  A <- 6 + (8/B) * ((2/B) + sqrt(1 + 4/(B^2)))
+  jm <- sqrt(2/(9 * A))
+  pos <- ((1 - 2/A)/(1 + U4 * sqrt(2/(A - 4))))^(1/3)
+  Z4 <- (1 - 2/(9 * A) - pos)/jm
+  pZ4 <- 2 * (1 - pnorm(abs(Z4), 0, 1))
+  names(Z4) <- "Z4"
+  RVAL <- list(statistic = Z4, p.value = pZ4)
+  return(RVAL)
+}
+
+.omnibus.test <- function(x) {
+  n <- length(x)
+  if (n < 20)
+    stop("sample size must be at least 20 for omnibus test")
+  meanX <- mean(x)
+  s <- sqrt(mean((x - meanX)^2))
+  a3 <- mean((x - meanX)^3)/s^3
+  a4 <- mean((x - meanX)^4)/s^4
+  SD3 <- sqrt(6 * (n - 2)/((n + 1) * (n + 3)))
+  SD4 <- sqrt(24 * (n - 2) * (n - 3) * n/((n + 1)^2 * (n +
+    3) * (n + 5)))
+  U3 <- a3/SD3
+  U4 <- (a4 - 3 + 6/(n + 1))/SD4
+  b <- (3 * (n^2 + 27 * n - 70) * (n + 1) * (n + 3))/((n -
+    2) * (n + 5) * (n + 7) * (n + 9))
+  W2 <- sqrt(2 * (b - 1)) - 1
+  delta <- 1/sqrt(log(sqrt(W2)))
+  a <- sqrt(2/(W2 - 1))
+  Z3 <- delta * log((U3/a) + sqrt((U3/a)^2 + 1))
+  B <- (6 * (n * n - 5 * n + 2)/((n + 7) * (n + 9))) * sqrt((6 *
+    (n + 3) * (n + 5))/(n * (n - 2) * (n - 3)))
+  A <- 6 + (8/B) * ((2/B) + sqrt(1 + 4/(B^2)))
+  jm <- sqrt(2/(9 * A))
+  pos <- ((1 - 2/A)/(1 + U4 * sqrt(2/(A - 4))))^(1/3)
+  Z4 <- (1 - 2/(9 * A) - pos)/jm
+  omni <- Z3^2 + Z4^2
+  pomni <- 1 - pchisq(omni, 2)
+  RVAL <- list(statistic = omni, p.value = pomni)
+  return(RVAL)
+}
+
+setClass("fHTEST",
+         representation(
+           call = "call",
+           data = "list",
+           test = "list",
+           title = "character",
+           description = "character")
+)
+
+dagoTest <- function(x) {
+  x <- as.vector(x)
+  call <- match.call()
+  test <- .omnibus.test(x)
+  skew <- .skewness.test(x)
+  kurt <- .kurtosis.test(x)
+  test$data.name <- "ols residuals"
+  PVAL <- c(test$p.value, skew$p.value, kurt$p.value)
+  names(PVAL) <- c("Omnibus  Test", "Skewness Test", "Kurtosis Test")
+  test$p.value <- PVAL
+  STATISTIC <- c(test$statistic, skew$statistic, kurt$statistic)
+  names(STATISTIC) <- c("Chi2 | Omnibus", "Z3  | Skewness",
+    "Z4  | Kurtosis")
+  test$statistic <- STATISTIC
+  class(test) <- "list"
+  title <- "D'Agostino Normality Test"
+  new("fHTEST", call = call, data = list(x = x), test = test,
+    title = as.character(title))
+}
+
 # S3methods ----------
 #' @param object sfacross, lcmcross, selectioncross ... objects
 #' @noRd
@@ -758,6 +931,12 @@ ic <- function(object, ...) {
 marginal <- function(object, ...) {
   UseMethod("marginal", object)
 }
+
+# #' @param object sfacross, lcmcross, selectioncross ... objects
+# #' @noRd
+# nobs <- function(x, ...) {
+#   UseMethod("nobs", x)
+# }
 
 setClass("dagoTest", representation(call = "call", data = "list",
   test = "list", title = "character"))

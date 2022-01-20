@@ -5,6 +5,7 @@
 \alias{fitted.sfacross}
 \alias{fitted.lcmcross}
 \alias{fitted.selectioncross}
+\alias{fitted.zisfcross}
 \title{Extract fitted values of stochastic frontier models}
 \usage{
 \method{fitted}{sfacross}(object, ...)
@@ -12,6 +13,8 @@
 \method{fitted}{lcmcross}(object, ...)
 
 \method{fitted}{selectioncross}(object, ...)
+
+\method{fitted}{zisfcross}(object, ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned

@@ -28,7 +28,7 @@
 #' The truncated normal - normal distribution with scaling property as in Wang
 #' and Schmidt (2002) is also implemented.
 #'
-#' @aliases sfacross print.sfacross nobs.sfacross
+#' @aliases sfacross print.sfacross
 #'
 #' @param formula A symbolic description of the model to be estimated based on
 #' the generic function \code{formula} (see section \sQuote{Details}).
@@ -211,8 +211,8 @@
 #' \code{\link[=efficiencies.sfacross]{efficiencies}}, \code{\link[=ic.sfacross]{ic}}, 
 #' \code{\link[=marginal.sfacross]{marginal}}, \code{\link[=skewnessTest]{skewnessTest}}, 
 #' \code{\link[=estfun.sfacross]{estfun}} and 
-#' \code{\link[=bread.sfacross]{bread}} (from the \pkg{sandwich} package), 
-#' \code{\link[=coeftest]{coeftest}} (from the \pkg{lmtest} package).
+#' \code{\link[=bread.sfacross]{bread}} (from the \CRANpkg{sandwich} package), 
+#' [lmtest::coeftest()] (from the \CRANpkg{lmtest} package).
 #'
 #' @return \code{\link{sfacross}} returns a list of class \code{'sfacross'}
 #' containing the following elements:
@@ -1134,11 +1134,4 @@ bread.sfacross <- function(x, ...) {
 #' @export
 estfun.sfacross <- function(x, ...) {
   return(x$gradL_OBS)
-}
-
-# Extract number of observations (use by coeftest) ----------
-#' @rdname sfacross
-#' @export
-nobs.sfacross <- function(x, ...) {
-  return(x$Nobs)
 }

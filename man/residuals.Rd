@@ -5,6 +5,7 @@
 \alias{residuals.sfacross}
 \alias{residuals.lcmcross}
 \alias{residuals.selectioncross}
+\alias{residuals.zisfcross}
 \title{Extract residuals of stochastic frontier models}
 \usage{
 \method{residuals}{sfacross}(object, ...)
@@ -12,6 +13,8 @@
 \method{residuals}{lcmcross}(object, ...)
 
 \method{residuals}{selectioncross}(object, ...)
+
+\method{residuals}{zisfcross}(object, ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned

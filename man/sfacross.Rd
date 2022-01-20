@@ -3,7 +3,6 @@
 \name{sfacross}
 \alias{sfacross}
 \alias{print.sfacross}
-\alias{nobs.sfacross}
 \alias{bread.sfacross}
 \alias{estfun.sfacross}
 \title{Stochastic frontier estimation using cross-section data}
@@ -43,8 +42,6 @@ sfacross(
 \method{bread}{sfacross}(x, ...)
 
 \method{estfun}{sfacross}(x, ...)
-
-\method{nobs}{sfacross}(x, ...)
 }
 \arguments{
 \item{formula}{A symbolic description of the model to be estimated based on
@@ -379,8 +376,8 @@ A set of extractor functions for fitted model objects is available for objects o
 \code{\link[=efficiencies.sfacross]{efficiencies}}, \code{\link[=ic.sfacross]{ic}},
 \code{\link[=marginal.sfacross]{marginal}}, \code{\link[=skewnessTest]{skewnessTest}},
 \code{\link[=estfun.sfacross]{estfun}} and
-\code{\link[=bread.sfacross]{bread}} (from the \pkg{sandwich} package),
-\code{\link[=coeftest]{coeftest}} (from the \pkg{lmtest} package).
+\code{\link[=bread.sfacross]{bread}} (from the \CRANpkg{sandwich} package),
+\code{\link[lmtest:coeftest]{lmtest::coeftest()}} (from the \CRANpkg{lmtest} package).
 }
 \note{
 For the Halton draws, the code is adapted from the \pkg{mlogit}

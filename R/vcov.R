@@ -86,31 +86,31 @@
 #'  
 #'  # Robust variance-covariance matrix
 #'  
-#'  library(sandwich)
+#'  requireNamespace("sandwich", quietly = TRUE)
 #'  
-#'  vcovCL(cb_s_h)
+#'  sandwich::vcovCL(cb_s_h)
 #'  
 #'  # Coefficients and standard error can be obtained using lmtest package
 #'  
-#'  library(lmtest)
+#'  requireNamespace("lmtest", quietly = TRUE)
 #'  
-#'  coeftest(cb_s_h, vcov. = vcovCL)
+#'  lmtest::coeftest(cb_s_h, vcov. = sandwich::vcovCL)
 #'  
 #'  # Clustered Standard errors
 #'  
-#'  coeftest(cb_s_h, vcov. = vcovCL, cluster = ~ FARM)
+#'  lmtest::coeftest(cb_s_h, vcov. = sandwich::vcovCL, cluster = ~ FARM)
 #'  
 #'  # Doubly clustered standard errors
 #'  
-#'  coeftest(cb_s_h, vcov. = vcovCL, cluster = ~ FARM + YEAR)
+#'  lmtest::coeftest(cb_s_h, vcov. = sandwich::vcovCL, cluster = ~ FARM + YEAR)
 #'  
 #'  # BHHH standard errors can also be obtained using
 #'  
-#'  coeftest(cb_s_h, vcov. = vcovOPG)
+#'  lmtest::coeftest(cb_s_h, vcov. = sandwich::vcovOPG)
 #'  
 #'  # Adjusted BHHH standard errors is obtained by
 #'  
-#'  coeftest(cb_s_h, vcov. = vcovOPG, adjust = TRUE)
+#'  lmtest::coeftest(cb_s_h, vcov. = sandwich::vcovOPG, adjust = TRUE)
 #'
 #' ## Using data on eighty-two countries production (DGP)
 #' # LCM Cobb Douglas (production function) half normal distribution

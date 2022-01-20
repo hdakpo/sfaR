@@ -3,7 +3,6 @@
 \name{zisfcross}
 \alias{zisfcross}
 \alias{print.zisfcross}
-\alias{nobs.zisfcross}
 \alias{bread.zisfcross}
 \alias{estfun.zisfcross}
 \title{Zero inefficiency stochastic frontier estimation using cross-section data}
@@ -43,8 +42,6 @@ zisfcross(
 \method{bread}{zisfcross}(x, ...)
 
 \method{estfun}{zisfcross}(x, ...)
-
-\method{nobs}{zisfcross}(x, ...)
 }
 \arguments{
 \item{formula}{A symbolic description of the model to be estimated based on
@@ -375,8 +372,8 @@ A set of extractor functions for fitted model objects is available for objects o
 \code{\link[=efficiencies.zisfcross]{efficiencies}}, \code{\link[=ic.zisfcross]{ic}},
 \code{\link[=marginal.zisfcross]{marginal}}, \code{\link[=skewnessTest]{skewnessTest}},
 \code{\link[=estfun.zisfcross]{estfun}} and
-\code{\link[=bread.zisfcross]{bread}} (from the \pkg{sandwich} package),
-\code{\link[=coeftest]{coeftest}} (from the \pkg{lmtest} package).
+\code{\link[=bread.zisfcross]{bread}} (from the \CRANpkg{sandwich} package),
+\code{\link[lmtest:coeftest]{lmtest::coeftest()}} (from the \CRANpkg{lmtest} package).
 }
 \note{
 For the Halton draws, the code is adapted from the \pkg{mlogit}
@@ -387,8 +384,8 @@ package.
 ## Using data on Spanish dairy farms
 # Cobb Douglas (production function) half normal distribution
 
-cb_zisf_h <- zisfcross(formula = YIT ~ X1 + X2 + X3 + X4, udist = "hnormal", 
-data = dairyspain, S = 1, method = "bfgs")
+cb_zisf_h <- zisfcross(formula = YIT ~ X1 + X2 + X3 + X4, udist = 'hnormal', 
+data = dairyspain, S = 1, method = 'bfgs')
 
 summary(cb_zisf_h)
 

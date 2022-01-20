@@ -101,9 +101,10 @@ fitted.selectioncross <- function(object, ...) {
   object$dataTable$mleFitted
 }
 
+# fitted values for zisfcross ----------
+#' @rdname fitted
 #' @aliases fitted.zisfcross
 #' @export
-# fitted values for zisfcross ----------
 fitted.zisfcross <- function(object, ...) {
   object$dataTable$mleFitted
 }

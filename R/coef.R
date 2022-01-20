@@ -366,6 +366,9 @@ coef.summary.selectioncross <- function(object, ...) {
 }
 
 # coefficients from zisfcross ----------
+#' @rdname coef
+#' @aliases coef.zisfcross
+#' @export
 coef.zisfcross <- function(object, extraPar = FALSE, ...) {
   if (length(extraPar) != 1 || !is.logical(extraPar[1]))
     stop("argument 'extraPar' must be a single logical value",

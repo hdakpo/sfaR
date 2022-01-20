@@ -8,6 +8,7 @@
 \alias{coef.summary.lcmcross}
 \alias{coef.selectioncross}
 \alias{coef.summary.selectioncross}
+\alias{coef.zisfcross}
 \alias{coef.summary.zisfcross}
 \title{Extract coefficients of stochastic frontier models}
 \usage{
@@ -22,6 +23,8 @@
 \method{coef}{selectioncross}(object, extraPar = FALSE, ...)
 
 \method{coef}{summary.selectioncross}(object, ...)
+
+\method{coef}{zisfcross}(object, extraPar = FALSE, ...)
 
 \method{coef}{summary.zisfcross}(object, ...)
 }

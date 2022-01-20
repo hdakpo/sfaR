@@ -7,7 +7,7 @@
 #------------------------------------------------------------------------------#
 # Data: Cross sectional data & Pooled data                                     #
 # Model: Zero Inefficiency Stochastic Frontier Model                           #
-# Convolution: lognormal - normal                                              #
+# Convolution: weibull - normal                                                #
 #------------------------------------------------------------------------------#
 
 # Log-likelihood ----------
@@ -84,7 +84,7 @@ cstzisfweibullnorm <- function(olsObj, epsiRes, nXvar, nuZUvar,
     epsiRes = epsiRes, S = S, nuZUvar = 1, uHvar = uHvar[, 
       1, drop = FALSE], nvZVvar = 1, vHvar = vHvar[, 1, 
       drop = FALSE]), grad = cgradweibullnormlike, method = "BFGS", 
-    control = list(iterlim = itermax, printLevel = printInfo, 
+    control = list(iterlim = itermax, printLevel = if (printInfo) 2 else 0, 
       reltol = tol), nXvar = nXvar, nuZUvar = 1, nvZVvar = 1, 
     uHvar = as.matrix(uHvar[, 1]), vHvar = as.matrix(vHvar[, 
       1]), Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar, N = N, FiMat = FiMat)
@@ -375,7 +375,7 @@ zisfweibullnormAlgOpt <- function(start, olsParam, dataTable,
       grtol = gradtol)), maxLikAlgo = maxRoutine(fn = czisfweibullnormlike, 
     grad = cgradzisfweibullnormlike, hess = chesszisfweibullnormlike, 
     start = startVal, finalHessian = if (hessianType == 
-      2) "bhhh" else TRUE, control = list(printLevel = if (printInfo) 2, 
+      2) "bhhh" else TRUE, control = list(printLevel = if (printInfo) 2 else 0, 
       iterlim = itermax, reltol = tol, tol = tol, qac = qac), 
     nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, 
     uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, 
@@ -628,7 +628,7 @@ czisfmargweibullnorm_Eu <- function(object) {
   Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
   margEff1 <- kronecker(matrix(delta[2:object$nuZUvar] * 1/2,
                                nrow = 1), matrix(exp(Wu/2) * gamma(1 + 1/k), ncol = 1))
-  margEff2 <- matrix(0, nrow = N, ncol = object$nuZUvar - 1)
+  margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar - 1)
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
   colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
   colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
