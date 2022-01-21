@@ -336,7 +336,7 @@ zisfuninormAlgOpt <- function(start, olsParam, dataTable, S,
       stepmax = stepmax, xtol = tol, grtol = gradtol)),
     maxLikAlgo = maxRoutine(fn = czisfuninormlike, grad = cgradzisfuninormlike,
       hess = chesszisfuninormlike, start = startVal, finalHessian = if (hessianType ==
-        2) "bhhh" else TRUE, control = list(printLevel = if (printInfo) 2,
+        2) "bhhh" else TRUE, control = list(printLevel = if (printInfo) 2 else 0,
         iterlim = itermax, reltol = tol, tol = tol, qac = qac),
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -443,7 +443,10 @@ zisfuninormAlgOpt <- function(start, olsParam, dataTable, S,
 }
 
 # Conditional efficiencies estimation ----------
-
+#' efficiencies for zisf uniform-normal distribution
+#' @param object object of class sfacross
+#' @param level level for confidence interval
+#' @noRd
 czisfuninormeff <- function(object, level) {
   beta <- object$mlParam[1:(object$nXvar)]
   delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
@@ -561,7 +564,9 @@ czisfuninormeff <- function(object, level) {
 }
 
 # Marginal effects on inefficiencies ----------
-
+#' marginal impact on efficiencies for zisf uniform-normal distribution
+#' @param object object of class sfacross
+#' @noRd
 czisfmarguninorm_Eu <- function(object) {
   beta <- object$mlParam[1:(object$nXvar)]
   delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +

@@ -511,73 +511,79 @@ zisflognormAlgOpt <- function(start, olsParam, dataTable, S,
       grtol = gradtol)), maxLikAlgo = maxRoutine(fn = czisflognormlike,
     grad = cgradzisflognormlike, hess = chesszisflognormlike,
     start = startVal, finalHessian = if (hessianType == 2) "bhhh" else TRUE,
-    control = list(printLevel = if (printInfo) 2 else 0, iterlim = itermax,
-      reltol = tol, tol = tol, qac = qac), nXvar = nXvar,
-    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
-    nmuZUvar = nmuZUvar, muHvar = muHvar, vHvar = vHvar,
-    Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar, N = N,
-    FiMat = FiMat, Zvar = Zvar, nZHvar = nZHvar), sr1 = trust.optim(x = startVal,
-    fn = function(parm) -sum(czisflognormlike(parm, nXvar = nXvar,
-      nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
-      nmuZUvar = nmuZUvar, muHvar = muHvar, vHvar = vHvar,
-      Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar, N = N,
-      FiMat = FiMat, Zvar = Zvar, nZHvar = nZHvar)), gr = function(parm) -colSums(cgradzisflognormlike(parm,
+    control = list(printLevel = if (printInfo) 2 else 0,
+      iterlim = itermax, reltol = tol, tol = tol, qac = qac),
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, nmuZUvar = nmuZUvar, muHvar = muHvar,
+    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar,
+    N = N, FiMat = FiMat, Zvar = Zvar, nZHvar = nZHvar),
+    sr1 = trust.optim(x = startVal, fn = function(parm) -sum(czisflognormlike(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, nmuZUvar = nmuZUvar, muHvar = muHvar,
       vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar,
       N = N, FiMat = FiMat, Zvar = Zvar, nZHvar = nZHvar)),
-    method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
-      stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 4L else 0,
-      report.precision = 1L)), sparse = trust.optim(x = startVal,
-    fn = function(parm) -sum(czisflognormlike(parm, nXvar = nXvar,
-      nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
-      nmuZUvar = nmuZUvar, muHvar = muHvar, vHvar = vHvar,
-      Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar, N = N,
-      FiMat = FiMat, Zvar = Zvar, nZHvar = nZHvar)), gr = function(parm) -colSums(cgradzisflognormlike(parm,
+      gr = function(parm) -colSums(cgradzisflognormlike(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, nmuZUvar = nmuZUvar, muHvar = muHvar,
+        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
+        wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
+        nZHvar = nZHvar)), method = "SR1", control = list(maxit = itermax,
+        cgtol = gradtol, stop.trust.radius = tol, prec = tol,
+        report.level = if (printInfo) 4L else 0, report.precision = 1L)),
+    sparse = trust.optim(x = startVal, fn = function(parm) -sum(czisflognormlike(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, nmuZUvar = nmuZUvar, muHvar = muHvar,
       vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar,
       N = N, FiMat = FiMat, Zvar = Zvar, nZHvar = nZHvar)),
-    hs = function(parm) as(-chesszisflognormlike(parm, nXvar = nXvar,
-      nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
-      nmuZUvar = nmuZUvar, muHvar = muHvar, vHvar = vHvar,
-      Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar, N = N,
-      FiMat = FiMat, Zvar = Zvar, nZHvar = nZHvar), "dgCMatrix"),
-    method = "Sparse", control = list(maxit = itermax, cgtol = gradtol,
-      stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 4L else 0,
-      report.precision = 1L, preconditioner = 1L)), mla = mla(b = startVal,
-    fn = function(parm) -sum(czisflognormlike(parm, nXvar = nXvar,
-      nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
-      nmuZUvar = nmuZUvar, muHvar = muHvar, vHvar = vHvar,
-      Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar, N = N,
-      FiMat = FiMat, Zvar = Zvar, nZHvar = nZHvar)), gr = function(parm) -colSums(cgradzisflognormlike(parm,
+      gr = function(parm) -colSums(cgradzisflognormlike(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, nmuZUvar = nmuZUvar, muHvar = muHvar,
+        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
+        wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
+        nZHvar = nZHvar)), hs = function(parm) as(-chesszisflognormlike(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, nmuZUvar = nmuZUvar, muHvar = muHvar,
+        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
+        wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
+        nZHvar = nZHvar), "dgCMatrix"), method = "Sparse",
+      control = list(maxit = itermax, cgtol = gradtol,
+        stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 4L else 0,
+        report.precision = 1L, preconditioner = 1L)),
+    mla = mla(b = startVal, fn = function(parm) -sum(czisflognormlike(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, nmuZUvar = nmuZUvar, muHvar = muHvar,
       vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar,
       N = N, FiMat = FiMat, Zvar = Zvar, nZHvar = nZHvar)),
-    hess = function(parm) -chesszisflognormlike(parm, nXvar = nXvar,
-      nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
-      nmuZUvar = nmuZUvar, muHvar = muHvar, vHvar = vHvar,
-      Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar, N = N,
-      FiMat = FiMat, Zvar = Zvar, nZHvar = nZHvar), print.info = printInfo,
-    maxiter = itermax, epsa = gradtol, epsb = gradtol), nlminb = nlminb(start = startVal,
-    objective = function(parm) -sum(czisflognormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, nmuZUvar = nmuZUvar, muHvar = muHvar,
-      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar,
-      N = N, FiMat = FiMat, Zvar = Zvar, nZHvar = nZHvar)),
-    gradient = function(parm) -colSums(cgradzisflognormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, nmuZUvar = nmuZUvar, muHvar = muHvar,
-      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar,
-      N = N, FiMat = FiMat, Zvar = Zvar, nZHvar = nZHvar)),
-    hessian = function(parm) -chesszisflognormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, nmuZUvar = nmuZUvar, muHvar = muHvar,
-      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar,
-      N = N, FiMat = FiMat, Zvar = Zvar, nZHvar = nZHvar),
-    control = list(iter.max = itermax, trace = printInfo,
-      eval.max = itermax, rel.tol = tol, x.tol = tol)))
+      gr = function(parm) -colSums(cgradzisflognormlike(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, nmuZUvar = nmuZUvar, muHvar = muHvar,
+        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
+        wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
+        nZHvar = nZHvar)), hess = function(parm) -chesszisflognormlike(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, nmuZUvar = nmuZUvar, muHvar = muHvar,
+        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
+        wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
+        nZHvar = nZHvar), print.info = printInfo, maxiter = itermax,
+      epsa = gradtol, epsb = gradtol), nlminb = nlminb(start = startVal,
+      objective = function(parm) -sum(czisflognormlike(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, nmuZUvar = nmuZUvar, muHvar = muHvar,
+        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
+        wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
+        nZHvar = nZHvar)), gradient = function(parm) -colSums(cgradzisflognormlike(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, nmuZUvar = nmuZUvar, muHvar = muHvar,
+        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
+        wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
+        nZHvar = nZHvar)), hessian = function(parm) -chesszisflognormlike(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, nmuZUvar = nmuZUvar, muHvar = muHvar,
+        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
+        wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
+        nZHvar = nZHvar), control = list(iter.max = itermax,
+        trace = printInfo, eval.max = itermax, rel.tol = tol,
+        x.tol = tol)))
   if (method %in% c("ucminf", "nlminb")) {
     mleObj$gradient <- colSums(cgradzisflognormlike(mleObj$par,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
@@ -634,28 +640,32 @@ zisflognormAlgOpt <- function(start, olsParam, dataTable, S,
 }
 
 # Conditional efficiencies estimation ----------
-
+#' efficiencies for cnsf lognormal-normal distribution
+#' @param object object of class sfacross
+#' @param level level for confidence interval
+#' @noRd
 czisflognormeff <- function(object, level) {
   beta <- object$mlParam[1:(object$nXvar)]
   omega <- object$mlParam[(object$nXvar + 1):(object$nXvar +
-                                                object$nmuZUvar)]
-  delta <- object$mlParam[(object$nXvar + object$nmuZUvar + 1):(object$nXvar +
-                                                                  object$nmuZUvar + object$nuZUvar)]
-  phi <- object$mlParam[(object$nXvar +  object$nmuZUvar+object$nuZUvar + 1):(object$nXvar +
-                                                                                object$nmuZUvar+object$nuZUvar + object$nvZVvar)]
-  theta <- object$mlParam[(object$nXvar +  object$nmuZUvar+object$nuZUvar +
-                             object$nvZVvar + 1):(object$nXvar +  object$nmuZUvar+object$nuZUvar +
-                                                    object$nvZVvar + object$nZHvar)]
+    object$nmuZUvar)]
+  delta <- object$mlParam[(object$nXvar + object$nmuZUvar +
+    1):(object$nXvar + object$nmuZUvar + object$nuZUvar)]
+  phi <- object$mlParam[(object$nXvar + object$nmuZUvar + object$nuZUvar +
+    1):(object$nXvar + object$nmuZUvar + object$nuZUvar +
+    object$nvZVvar)]
+  theta <- object$mlParam[(object$nXvar + object$nmuZUvar +
+    object$nuZUvar + object$nvZVvar + 1):(object$nXvar +
+    object$nmuZUvar + object$nuZUvar + object$nvZVvar + object$nZHvar)]
   Xvar <- model.matrix(object$formula, data = object$dataTable,
-                       rhs = 1)
+    rhs = 1)
   muHvar <- model.matrix(object$formula, data = object$dataTable,
-                         rhs = 2)
+    rhs = 2)
   uHvar <- model.matrix(object$formula, data = object$dataTable,
-                        rhs = 3)
+    rhs = 3)
   vHvar <- model.matrix(object$formula, data = object$dataTable,
-                        rhs = 4)
+    rhs = 4)
   Zvar <- model.matrix(object$formula, data = object$dataTable,
-                       rhs = 5)
+    rhs = 5)
   mu <- as.numeric(crossprod(matrix(omega), t(muHvar)))
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
@@ -664,9 +674,10 @@ czisflognormeff <- function(object, level) {
     as.numeric(crossprod(matrix(beta), t(Xvar)))
   Pi1 <- numeric(object$Nobs)
   for (i in 1:object$Nobs) {
-    ur <- exp(mu[i] + exp(Wu[i]/2) * qnorm(object$FiMat[i, ]))
+    ur <- exp(mu[i] + exp(Wu[i]/2) * qnorm(object$FiMat[i,
+      ]))
     Pi1[i] <- mean(1/exp(Wv[i]/2) * dnorm((epsilon[i] + object$S *
-                                             ur)/exp(Wv[i]/2)))
+      ur)/exp(Wv[i]/2)))
   }
   Pi2 <- 1/exp(Wv/2) * dnorm(object$S * epsilon/exp(Wv/2))
   Probc1 <- exp(Wz)/(1 + exp(Wz))
@@ -679,15 +690,15 @@ czisflognormeff <- function(object, level) {
   u_c1 <- numeric(object$Nobs)
   for (i in 1:object$Nobs) {
     ur <- exp(mu[i] + exp(Wu[i]/2) * qnorm(object$FiMat[i,
-    ]))
+      ]))
     density_epsilon <- (mean(1/exp(Wv[i]/2) * dnorm((epsilon[i] +
-                                                       object$S * ur)/exp(Wv[i]/2))))
+      object$S * ur)/exp(Wv[i]/2))))
     u_c1[i] <- hcubature(f = fnCondEffLogNorm, lowerLimit = 0,
-                      upperLimit = Inf, maxEval = 100, fDim = 1, sigmaU = exp(Wu[i]/2),
-                      sigmaV = exp(Wv[i]/2), mu = mu[i], epsilon = epsilon[i],
-                      S = object$S, vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon
+      upperLimit = Inf, maxEval = 100, fDim = 1, sigmaU = exp(Wu[i]/2),
+      sigmaV = exp(Wv[i]/2), mu = mu[i], epsilon = epsilon[i],
+      S = object$S, vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon
   }
-  u_c2 <- rep(0, object$Nobs) 
+  u_c2 <- rep(0, object$Nobs)
   u_c <- ifelse(Group_c == 1, u_c1, u_c2)
   ineff_c1 <- ifelse(Group_c == 1, u_c1, NA)
   ineff_c2 <- ifelse(Group_c == 2, u_c2, NA)
@@ -699,18 +710,18 @@ czisflognormeff <- function(object, level) {
     teBC_reciprocal_c1 <- numeric(object$Nobs)
     for (i in 1:object$Nobs) {
       ur <- exp(mu[i] + exp(Wu[i]/2) * qnorm(object$FiMat[i,
-      ]))
+        ]))
       density_epsilon <- (mean(1/exp(Wv[i]/2) * dnorm((epsilon[i] +
-                                                         object$S * ur)/exp(Wv[i]/2))))
+        object$S * ur)/exp(Wv[i]/2))))
       teBC_c1[i] <- hcubature(f = fnCondBCEffLogNorm, lowerLimit = 0,
-                           upperLimit = Inf, maxEval = 100, fDim = 1, sigmaU = exp(Wu[i]/2),
-                           sigmaV = exp(Wv[i]/2), mu = mu[i], epsilon = epsilon[i],
-                           S = object$S, vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon
+        upperLimit = Inf, maxEval = 100, fDim = 1, sigmaU = exp(Wu[i]/2),
+        sigmaV = exp(Wv[i]/2), mu = mu[i], epsilon = epsilon[i],
+        S = object$S, vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon
       teBC_reciprocal_c1[i] <- hcubature(f = fnCondBCreciprocalEffLogNorm,
-                                      lowerLimit = 0, upperLimit = Inf, maxEval = 100,
-                                      fDim = 1, sigmaU = exp(Wu[i]/2), sigmaV = exp(Wv[i]/2),
-                                      mu = mu[i], epsilon = epsilon[i], S = object$S,
-                                      vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon
+        lowerLimit = 0, upperLimit = Inf, maxEval = 100,
+        fDim = 1, sigmaU = exp(Wu[i]/2), sigmaV = exp(Wv[i]/2),
+        mu = mu[i], epsilon = epsilon[i], S = object$S,
+        vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon
     }
     teBC_c2 <- rep(1, object$Nobs)
     teBC_c <- ifelse(Group_c == 1, teBC_c1, teBC_c2)
@@ -718,52 +729,56 @@ czisflognormeff <- function(object, level) {
     effBC_c2 <- ifelse(Group_c == 2, teBC_c2, NA)
     teBC_reciprocal_c2 <- rep(1, object$Nobs)
     teBC_reciprocal_c <- ifelse(Group_c == 1, teBC_reciprocal_c1,
-                                teBC_reciprocal_c2)
+      teBC_reciprocal_c2)
     ReffBC_c1 <- ifelse(Group_c == 1, teBC_reciprocal_c1,
-                        NA)
+      NA)
     ReffBC_c2 <- ifelse(Group_c == 2, teBC_reciprocal_c2,
-                        NA)
+      NA)
     res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
-                     odRatio = odRatio, u_c = u_c, teJLMS_c = teJLMS_c,
-                     teBC_c = teBC_c, teBC_reciprocal_c = teBC_reciprocal_c,
-                     PosteriorProb_c1 = Pcond_c1, PriorProb_c1 = Probc1,
-                     u_c1 = u_c1, teBC_c1 = teBC_c1, teBC_reciprocal_c1 = teBC_reciprocal_c1,
-                     PosteriorProb_c2 = Pcond_c2, PriorProb_c2 = Probc2,
-                     u_c2 = u_c2, teBC_c2 = teBC_c2, teBC_reciprocal_c2 = teBC_reciprocal_c2,
-                     ineff_c1 = ineff_c1, ineff_c2 = ineff_c2, effBC_c1 = effBC_c1,
-                     effBC_c2 = effBC_c2, ReffBC_c1 = ReffBC_c1, ReffBC_c2 = ReffBC_c2)
+      odRatio = odRatio, u_c = u_c, teJLMS_c = teJLMS_c,
+      teBC_c = teBC_c, teBC_reciprocal_c = teBC_reciprocal_c,
+      PosteriorProb_c1 = Pcond_c1, PriorProb_c1 = Probc1,
+      u_c1 = u_c1, teBC_c1 = teBC_c1, teBC_reciprocal_c1 = teBC_reciprocal_c1,
+      PosteriorProb_c2 = Pcond_c2, PriorProb_c2 = Probc2,
+      u_c2 = u_c2, teBC_c2 = teBC_c2, teBC_reciprocal_c2 = teBC_reciprocal_c2,
+      ineff_c1 = ineff_c1, ineff_c2 = ineff_c2, effBC_c1 = effBC_c1,
+      effBC_c2 = effBC_c2, ReffBC_c1 = ReffBC_c1, ReffBC_c2 = ReffBC_c2)
   } else {
     res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
-                     odRatio = odRatio, u_c = u_c, PosteriorProb_c1 = Pcond_c1, PriorProb_c1 = Probc1,
-                     u_c1 = u_c1, PosteriorProb_c2 = Pcond_c2, PriorProb_c2 = Probc2,
-                     u_c2 = u_c2, ineff_c1 = ineff_c1, ineff_c2 = ineff_c2)
+      odRatio = odRatio, u_c = u_c, PosteriorProb_c1 = Pcond_c1,
+      PriorProb_c1 = Probc1, u_c1 = u_c1, PosteriorProb_c2 = Pcond_c2,
+      PriorProb_c2 = Probc2, u_c2 = u_c2, ineff_c1 = ineff_c1,
+      ineff_c2 = ineff_c2)
   }
   return(res)
 }
 
 # Marginal effects on inefficiencies ----------
-
+#' marginal impact on efficiencies for zisf lognormal-normal distribution
+#' @param object object of class sfacross
+#' @noRd
 czisfmarglognorm_Eu <- function(object) {
   beta <- object$mlParam[1:(object$nXvar)]
   omega <- object$mlParam[(object$nXvar + 1):(object$nXvar +
-                                                object$nmuZUvar)]
-  delta <- object$mlParam[(object$nXvar + object$nmuZUvar + 1):(object$nXvar +
-                                                                  object$nmuZUvar + object$nuZUvar)]
-  phi <- object$mlParam[(object$nXvar +  object$nmuZUvar+object$nuZUvar + 1):(object$nXvar +
-                                                                                object$nmuZUvar+object$nuZUvar + object$nvZVvar)]
-  theta <- object$mlParam[(object$nXvar +  object$nmuZUvar+object$nuZUvar +
-                             object$nvZVvar + 1):(object$nXvar +  object$nmuZUvar+object$nuZUvar +
-                                                    object$nvZVvar + object$nZHvar)]
+    object$nmuZUvar)]
+  delta <- object$mlParam[(object$nXvar + object$nmuZUvar +
+    1):(object$nXvar + object$nmuZUvar + object$nuZUvar)]
+  phi <- object$mlParam[(object$nXvar + object$nmuZUvar + object$nuZUvar +
+    1):(object$nXvar + object$nmuZUvar + object$nuZUvar +
+    object$nvZVvar)]
+  theta <- object$mlParam[(object$nXvar + object$nmuZUvar +
+    object$nuZUvar + object$nvZVvar + 1):(object$nXvar +
+    object$nmuZUvar + object$nuZUvar + object$nvZVvar + object$nZHvar)]
   Xvar <- model.matrix(object$formula, data = object$dataTable,
-                       rhs = 1)
+    rhs = 1)
   muHvar <- model.matrix(object$formula, data = object$dataTable,
-                         rhs = 2)
+    rhs = 2)
   uHvar <- model.matrix(object$formula, data = object$dataTable,
-                        rhs = 3)
+    rhs = 3)
   vHvar <- model.matrix(object$formula, data = object$dataTable,
-                        rhs = 4)
+    rhs = 4)
   Zvar <- model.matrix(object$formula, data = object$dataTable,
-                       rhs = 5)
+    rhs = 5)
   mu <- as.numeric(crossprod(matrix(omega), t(muHvar)))
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
@@ -772,9 +787,10 @@ czisfmarglognorm_Eu <- function(object) {
     as.numeric(crossprod(matrix(beta), t(Xvar)))
   Pi1 <- numeric(object$Nobs)
   for (i in 1:object$Nobs) {
-    ur <- exp(mu[i] + exp(Wu[i]/2) * qnorm(object$FiMat[i, ]))
+    ur <- exp(mu[i] + exp(Wu[i]/2) * qnorm(object$FiMat[i,
+      ]))
     Pi1[i] <- mean(1/exp(Wv[i]/2) * dnorm((epsilon[i] + object$S *
-                                             ur)/exp(Wv[i]/2)))
+      ur)/exp(Wv[i]/2)))
   }
   Pi2 <- 1/exp(Wv/2) * dnorm(object$S * epsilon/exp(Wv/2))
   Probc1 <- exp(Wz)/(1 + exp(Wz))
@@ -784,47 +800,49 @@ czisfmarglognorm_Eu <- function(object) {
   Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
   P_cond_c <- ifelse(Group_c == 1, Pcond_c1, Pcond_c2)
   mu_mat <- kronecker(matrix(omega[2:object$nmuZUvar], nrow = 1),
-                      matrix(exp(mu + exp(Wu)/2), ncol = 1))
+    matrix(exp(mu + exp(Wu)/2), ncol = 1))
   Wu_mat <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
-                      matrix(exp(mu + exp(Wu)/2 + Wu)/2, ncol = 1))
+    matrix(exp(mu + exp(Wu)/2 + Wu)/2, ncol = 1))
   idTRUE_mu <- substring(names(omega)[-1], 5) %in% substring(names(delta)[-1],
-                                                             4)
+    4)
   idTRUE_Wu <- substring(names(delta)[-1], 4) %in% substring(names(omega)[-1],
-                                                             5)
+    5)
   margEff1 <- cbind(mu_mat[, idTRUE_mu] + Wu_mat[, idTRUE_Wu],
-                   mu_mat[, !idTRUE_mu], Wu_mat[, !idTRUE_Wu])
-  margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar - 1)
+    mu_mat[, !idTRUE_mu], Wu_mat[, !idTRUE_Wu])
+  margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar -
+    1)
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
   colnames(margEff1) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
-                                        colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
   colnames(margEff2) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
-                                        colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
   colnames(margEff_c) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
-                                         colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
 czisfmarglognorm_Vu <- function(object) {
   beta <- object$mlParam[1:(object$nXvar)]
   omega <- object$mlParam[(object$nXvar + 1):(object$nXvar +
-                                                object$nmuZUvar)]
-  delta <- object$mlParam[(object$nXvar + object$nmuZUvar + 1):(object$nXvar +
-                                                                  object$nmuZUvar + object$nuZUvar)]
-  phi <- object$mlParam[(object$nXvar +  object$nmuZUvar+object$nuZUvar + 1):(object$nXvar +
-                                                                                object$nmuZUvar+object$nuZUvar + object$nvZVvar)]
-  theta <- object$mlParam[(object$nXvar +  object$nmuZUvar+object$nuZUvar +
-                             object$nvZVvar + 1):(object$nXvar +  object$nmuZUvar+object$nuZUvar +
-                                                    object$nvZVvar + object$nZHvar)]
+    object$nmuZUvar)]
+  delta <- object$mlParam[(object$nXvar + object$nmuZUvar +
+    1):(object$nXvar + object$nmuZUvar + object$nuZUvar)]
+  phi <- object$mlParam[(object$nXvar + object$nmuZUvar + object$nuZUvar +
+    1):(object$nXvar + object$nmuZUvar + object$nuZUvar +
+    object$nvZVvar)]
+  theta <- object$mlParam[(object$nXvar + object$nmuZUvar +
+    object$nuZUvar + object$nvZVvar + 1):(object$nXvar +
+    object$nmuZUvar + object$nuZUvar + object$nvZVvar + object$nZHvar)]
   Xvar <- model.matrix(object$formula, data = object$dataTable,
-                       rhs = 1)
+    rhs = 1)
   muHvar <- model.matrix(object$formula, data = object$dataTable,
-                         rhs = 2)
+    rhs = 2)
   uHvar <- model.matrix(object$formula, data = object$dataTable,
-                        rhs = 3)
+    rhs = 3)
   vHvar <- model.matrix(object$formula, data = object$dataTable,
-                        rhs = 4)
+    rhs = 4)
   Zvar <- model.matrix(object$formula, data = object$dataTable,
-                       rhs = 5)
+    rhs = 5)
   mu <- as.numeric(crossprod(matrix(omega), t(muHvar)))
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
@@ -833,9 +851,10 @@ czisfmarglognorm_Vu <- function(object) {
     as.numeric(crossprod(matrix(beta), t(Xvar)))
   Pi1 <- numeric(object$Nobs)
   for (i in 1:object$Nobs) {
-    ur <- exp(mu[i] + exp(Wu[i]/2) * qnorm(object$FiMat[i, ]))
+    ur <- exp(mu[i] + exp(Wu[i]/2) * qnorm(object$FiMat[i,
+      ]))
     Pi1[i] <- mean(1/exp(Wv[i]/2) * dnorm((epsilon[i] + object$S *
-                                             ur)/exp(Wv[i]/2)))
+      ur)/exp(Wv[i]/2)))
   }
   Pi2 <- 1/exp(Wv/2) * dnorm(object$S * epsilon/exp(Wv/2))
   Probc1 <- exp(Wz)/(1 + exp(Wz))
@@ -845,23 +864,24 @@ czisfmarglognorm_Vu <- function(object) {
   Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
   P_cond_c <- ifelse(Group_c == 1, Pcond_c1, Pcond_c2)
   mu_mat <- kronecker(matrix(omega[2:object$nmuZUvar], nrow = 1),
-                      matrix(2 * (exp(Wu) - 1) * exp(2 * mu + exp(Wu)), ncol = 1))
+    matrix(2 * (exp(Wu) - 1) * exp(2 * mu + exp(Wu)), ncol = 1))
   Wu_mat <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
-                      matrix(exp(Wu) * exp(2 * mu + exp(Wu) + Wu), ncol = 1))
+    matrix(exp(Wu) * exp(2 * mu + exp(Wu) + Wu), ncol = 1))
   idTRUE_mu <- substring(names(omega)[-1], 5) %in% substring(names(delta)[-1],
-                                                             4)
+    4)
   idTRUE_Wu <- substring(names(delta)[-1], 4) %in% substring(names(omega)[-1],
-                                                             5)
+    5)
   margEff1 <- cbind(mu_mat[, idTRUE_mu] + Wu_mat[, idTRUE_Wu],
-                   mu_mat[, !idTRUE_mu], Wu_mat[, !idTRUE_Wu])
-  margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar - 1)
+    mu_mat[, !idTRUE_mu], Wu_mat[, !idTRUE_Wu])
+  margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar -
+    1)
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
   colnames(margEff1) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
-                                        colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
   colnames(margEff2) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
-                                        colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
   colnames(margEff_c) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
-                                         colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
