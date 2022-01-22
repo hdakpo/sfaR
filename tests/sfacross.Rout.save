@@ -1,0 +1,158 @@
+
+R version 4.1.2 (2021-11-01) -- "Bird Hippie"
+Copyright (C) 2021 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> library( "sfaR" )
+* Please cite the 'sfaR' package as:
+  Dakpo KH., Desjeux Y., and Latruffe L. (2022). sfaR: Stochastic Frontier Analysis Routines. R package version 1.0.0.
+See also: citation("sfaR")
+
+* For any questions, suggestions, or comments on the 'sfaR' package, please make use of Tracker facilities at:
+  https://github.com/hdakpo/sfaR/issues
+> data( "utility" )
+> data( "ricephil" )
+> data( "electricity" )
+> 
+> ## Using data on fossil fuel fired steam electric power generation plants in U.S.
+> # Cobb-Douglas (cost function) half normal with heteroscedasticity
+> cd_u_h <- sfacross( formula = log(tc/wf) ~ log(y) + log(wl/wf) + log(wk/wf),
++   udist = 'hnormal', uhet = ~ regu, data = utility, S = -1, method = 'bfgs' )
+> logLik( cd_u_h )
+'log Lik.' 56.41206 (df=7)> round( coef( summary( cd_u_h ) ), 3 )
+               Coefficient Std. Error z value Pr(>|z|)
+(Intercept)         -2.388      0.194 -12.286    0.000
+log(y)               0.993      0.008 118.006    0.000
+log(wl/wf)           0.016      0.028   0.578    0.563
+log(wk/wf)           0.718      0.042  17.055    0.000
+Zu_(Intercept)      -2.572      0.112 -22.934    0.000
+Zu_regu              1.023      0.117   8.735    0.000
+Zv_(Intercept)      -5.083      0.218 -23.330    0.000
+> t( sapply( efficiencies( cd_u_h ), function(x) round( summary( x ), 3 ) ) )
+                 Min. 1st Qu. Median  Mean 3rd Qu.  Max.
+u               0.027   0.124  0.238 0.310   0.411 1.340
+uLB             0.001   0.012  0.089 0.181   0.260 1.188
+uUB             0.091   0.266  0.389 0.452   0.563 1.492
+teJLMS          0.262   0.663  0.789 0.754   0.883 0.973
+m               0.000   0.113  0.237 0.300   0.411 1.340
+teMO            0.262   0.663  0.789 0.762   0.893 1.000
+teBC            0.263   0.665  0.791 0.756   0.885 0.974
+teBCLB          0.225   0.569  0.678 0.655   0.766 0.913
+teBCUB          0.305   0.771  0.914 0.854   0.988 0.999
+teBC_reciprocal 1.028   1.135  1.272 1.414   1.513 3.830
+> 
+> # Cobb-Douglas (cost function) truncated normal with heteroscedasticity
+> cd_u_t <- sfacross( formula = log(tc/wf) ~ log(y) + log(wl/wf) + log(wk/wf),
++   udist = 'tnormal', muhet = ~ regu, data = utility, S = -1, method = 'bhhh' )
+> logLik( cd_u_t )
+'log Lik.' 67.90694 (df=8)> round( coef( summary( cd_u_t ) ), 3 )
+                Coefficient Std. Error z value Pr(>|z|)
+(Intercept)          -2.266      0.187 -12.146    0.000
+log(y)                0.991      0.008 123.381    0.000
+log(wl/wf)            0.009      0.028   0.307    0.759
+log(wk/wf)            0.732      0.041  17.700    0.000
+Zmu_(Intercept)      -1.272      0.578  -2.200    0.028
+Zmu_regu              1.008      0.321   3.144    0.002
+Zu_(Intercept)       -1.265      0.309  -4.093    0.000
+Zv_(Intercept)       -4.836      0.202 -23.972    0.000
+> t( sapply( efficiencies( cd_u_t ), function(x) round( summary( x ), 3 ) ) )
+                 Min. 1st Qu. Median  Mean 3rd Qu.  Max.
+u               0.027   0.103  0.199 0.279   0.377 1.299
+uLB             0.001   0.006  0.040 0.145   0.204 1.126
+uUB             0.093   0.253  0.369 0.436   0.549 1.471
+teJLMS          0.273   0.686  0.819 0.776   0.902 0.973
+m               0.000   0.072  0.196 0.263   0.377 1.299
+teMO            0.273   0.686  0.822 0.792   0.931 1.000
+teBC            0.274   0.689  0.822 0.778   0.904 0.974
+teBCLB          0.230   0.578  0.691 0.666   0.777 0.911
+teBCUB          0.324   0.815  0.961 0.882   0.994 0.999
+teBC_reciprocal 1.028   1.111  1.225 1.370   1.463 3.679
+> 
+> # Cobb-Douglas (cost function) truncated normal with scaling property
+> cd_u_ts <- sfacross( formula = log(tc/wf) ~ log(y) + log(wl/wf) + log(wk/wf),
++   udist = 'tnormal', muhet = ~ regu, uhet = ~ regu, data = utility, S = -1,
++   scaling = TRUE, method = 'mla' )
+> logLik( cd_u_ts )
+'log Lik.' 62.39656 (df=8)> round( coef( summary( cd_u_ts ) ), 3 )
+               Coefficient Std. Error z value Pr(>|z|)
+(Intercept)         -2.265      0.187 -12.082    0.000
+log(y)               0.992      0.008 123.203    0.000
+log(wl/wf)           0.017      0.029   0.590    0.555
+log(wk/wf)           0.740      0.042  17.729    0.000
+Zscale_regu          0.620      0.087   7.136    0.000
+tau                 -0.970      0.896  -1.083    0.279
+cu                  -1.512      0.626  -2.414    0.016
+Zv_(Intercept)      -4.694      0.202 -23.205    0.000
+> t( sapply( efficiencies( cd_u_ts ), function(x) round( summary( x ), 3 ) ) )
+                 Min. 1st Qu. Median  Mean 3rd Qu.  Max.
+u               0.029   0.095  0.182 0.265   0.351 1.296
+uLB             0.001   0.005  0.025 0.128   0.166 1.110
+uUB             0.100   0.247  0.362 0.431   0.537 1.483
+teJLMS          0.274   0.704  0.834 0.786   0.909 0.971
+m               0.000   0.046  0.174 0.244   0.351 1.296
+teMO            0.274   0.704  0.840 0.806   0.955 1.000
+teBC            0.275   0.707  0.837 0.789   0.911 0.972
+teBCLB          0.227   0.585  0.696 0.669   0.781 0.905
+teBCUB          0.330   0.847  0.976 0.896   0.995 0.999
+teBC_reciprocal 1.030   1.102  1.204 1.351   1.427 3.672
+> 
+> ## Using data on Philippine rice producers
+> # Cobb Douglas (production function) generalized exponential, and Weibull distributions
+> cd_p_ge <- sfacross( formula = log(PROD) ~ log(AREA) + log(LABOR) + log(NPK) +
++     log(OTHER), udist = 'genexponential', data = ricephil, S = 1, method = 'bfgs')
+> logLik( cd_p_ge )
+'log Lik.' -80.07733 (df=7)> round( coef( summary( cd_p_ge ) ), 3 )
+               Coefficient Std. Error z value Pr(>|z|)
+(Intercept)         -1.069      0.250  -4.272    0.000
+log(AREA)            0.328      0.060   5.444    0.000
+log(LABOR)           0.328      0.061   5.405    0.000
+log(NPK)             0.258      0.034   7.489    0.000
+log(OTHER)           0.035      0.017   2.022    0.043
+Zu_(Intercept)      -2.770      0.177 -15.685    0.000
+Zv_(Intercept)      -3.577      0.236 -15.170    0.000
+> t( sapply( efficiencies( cd_p_ge ), function(x) round( summary( x ), 3 ) ) )
+                 Min. 1st Qu. Median  Mean 3rd Qu.  Max.
+u               0.076   0.207  0.295 0.376   0.456 2.234
+teJLMS          0.107   0.634  0.744 0.705   0.813 0.927
+teBC            0.109   0.642  0.751 0.711   0.818 0.928
+teBC_reciprocal 1.080   1.237  1.356 1.530   1.596 9.466
+> 
+> ## Using data on U.S. electric utility industry
+> # Cost frontier Gamma distribution
+> cd_u_g <- sfacross( formula = log(cost/fprice) ~ log(output) +
++     log(lprice/fprice) + log(cprice/fprice), udist = 'gamma', uhet = ~ 1,
++   data = electricity, S = -1, method = 'bfgs', simType = 'halton', Nsim = 200,
++   hessianType = 2 )
+Initialization of 200 Halton draws per observation ...
+> logLik( cd_u_g )
+'log Lik.' 37.99963 (df=7)> round( coef( summary( cd_u_g ) ), 3 )
+                   Coefficient Std. Error z value Pr(>|z|)
+(Intercept)             -9.397      0.413 -22.739    0.000
+log(output)              0.913      0.011  84.313    0.000
+log(lprice/fprice)       0.255      0.077   3.304    0.001
+log(cprice/fprice)      -0.015      0.072  -0.203    0.839
+Zu_(Intercept)          -2.407      0.406  -5.933    0.000
+Zv_(Intercept)          -4.643      0.276 -16.838    0.000
+P                        0.451      0.154   2.936    0.003
+> t( sapply( efficiencies( cd_u_g ), function(x) round( summary( x ), 3 ) ) )
+                 Min. 1st Qu. Median  Mean 3rd Qu.  Max.
+u               0.014   0.036  0.060 0.135   0.111 1.529
+teJLMS          0.217   0.895  0.942 0.891   0.964 0.986
+teBC            0.218   0.899  0.944 0.893   0.965 0.987
+teBC_reciprocal 1.014   1.038  1.063 1.194   1.121 4.638
+> 
+> proc.time()
+   user  system elapsed 
+  2.891   0.083   2.954 
