@@ -31,7 +31,8 @@ See also: citation("sfaR")
 > cd_u_h <- sfacross( formula = log(tc/wf) ~ log(y) + log(wl/wf) + log(wk/wf),
 +   udist = 'hnormal', uhet = ~ regu, data = utility, S = -1, method = 'bfgs' )
 > logLik( cd_u_h )
-'log Lik.' 56.41206 (df=7)> round( coef( summary( cd_u_h ) ), 3 )
+'log Lik.' 56.41206 (df=7)
+> round( coef( summary( cd_u_h ) ), 3 )
                Coefficient Std. Error z value Pr(>|z|)
 (Intercept)         -2.388      0.194 -12.286    0.000
 log(y)               0.993      0.008 118.006    0.000
@@ -57,7 +58,8 @@ teBC_reciprocal 1.028   1.135  1.272 1.414   1.513 3.830
 > cd_u_t <- sfacross( formula = log(tc/wf) ~ log(y) + log(wl/wf) + log(wk/wf),
 +   udist = 'tnormal', muhet = ~ regu, data = utility, S = -1, method = 'bhhh' )
 > logLik( cd_u_t )
-'log Lik.' 67.90694 (df=8)> round( coef( summary( cd_u_t ) ), 3 )
+'log Lik.' 67.90694 (df=8)
+> round( coef( summary( cd_u_t ) ), 3 )
                 Coefficient Std. Error z value Pr(>|z|)
 (Intercept)          -2.266      0.187 -12.146    0.000
 log(y)                0.991      0.008 123.381    0.000
@@ -85,7 +87,8 @@ teBC_reciprocal 1.028   1.111  1.225 1.370   1.463 3.679
 +   udist = 'tnormal', muhet = ~ regu, uhet = ~ regu, data = utility, S = -1,
 +   scaling = TRUE, method = 'mla' )
 > logLik( cd_u_ts )
-'log Lik.' 62.39656 (df=8)> round( coef( summary( cd_u_ts ) ), 3 )
+'log Lik.' 62.39656 (df=8)
+> round( coef( summary( cd_u_ts ) ), 3 )
                Coefficient Std. Error z value Pr(>|z|)
 (Intercept)         -2.265      0.187 -12.082    0.000
 log(y)               0.992      0.008 123.203    0.000
@@ -113,7 +116,8 @@ teBC_reciprocal 1.030   1.102  1.204 1.351   1.427 3.672
 > cd_p_ge <- sfacross( formula = log(PROD) ~ log(AREA) + log(LABOR) + log(NPK) +
 +     log(OTHER), udist = 'genexponential', data = ricephil, S = 1, method = 'bfgs')
 > logLik( cd_p_ge )
-'log Lik.' -80.07733 (df=7)> round( coef( summary( cd_p_ge ) ), 3 )
+'log Lik.' -80.07733 (df=7)
+> round( coef( summary( cd_p_ge ) ), 3 )
                Coefficient Std. Error z value Pr(>|z|)
 (Intercept)         -1.069      0.250  -4.272    0.000
 log(AREA)            0.328      0.060   5.444    0.000
@@ -137,7 +141,8 @@ teBC_reciprocal 1.080   1.237  1.356 1.530   1.596 9.466
 +   hessianType = 2 )
 Initialization of 200 Halton draws per observation ...
 > logLik( cd_u_g )
-'log Lik.' 37.99963 (df=7)> round( coef( summary( cd_u_g ) ), 3 )
+'log Lik.' 37.99963 (df=7)
+> round( coef( summary( cd_u_g ) ), 3 )
                    Coefficient Std. Error z value Pr(>|z|)
 (Intercept)             -9.397      0.413 -22.739    0.000
 log(output)              0.913      0.011  84.313    0.000
@@ -155,4 +160,4 @@ teBC_reciprocal 1.014   1.038  1.063 1.194   1.121 4.638
 > 
 > proc.time()
    user  system elapsed 
-  2.891   0.083   2.954 
+  2.890   0.133   3.009 

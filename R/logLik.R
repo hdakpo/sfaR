@@ -85,7 +85,7 @@ logLik.sfacross <- function(object, individual = FALSE, ...) {
     return(LL)
   } else {
     cat("'log Lik.'", round(object$mlLoglik, 5), paste0("(df=",
-      object$nParm, ")"))
+      object$nParm, ")\n"))
     # LL <- rbind(`logLik: ` = object$mlLoglik, `Nobs: ` =
     # object$Nobs, `df: ` = object$nParm)
   }
@@ -107,7 +107,7 @@ logLik.lcmcross <- function(object, individual = FALSE, ...) {
     return(LL)
   } else {
     cat("'log Lik.'", round(object$mlLoglik, 5), paste0("(df=",
-      object$nParm, ")"))
+      object$nParm, ")\n"))
     # LL <- rbind(`logLik: ` = object$mlLoglik, `Nobs: ` =
     # object$Nobs, `df: ` = object$nParm)
   }
@@ -130,7 +130,7 @@ logLik.selectioncross <- function(object, individual = FALSE,
     return(LL)
   } else {
     cat("'log Lik.'", round(object$mlLoglik, 5), paste0("(df=",
-      object$nParm, ")"))
+      object$nParm, ")\n"))
     # LL <- rbind(`logLik: ` = object$mlLoglik, `Nobs: ` =
     # object$Nobs, `df: ` = object$nParm)
   }
@@ -152,7 +152,7 @@ logLik.zisfcross <- function(object, individual = FALSE, ...) {
     return(LL)
   } else {
     cat("'log Lik.'", round(object$mlLoglik, 5), paste0("(df=",
-      object$nParm, ")"))
+      object$nParm, ")\n"))
     # LL <- rbind(`logLik: ` = object$mlLoglik, `Nobs: ` =
     # object$Nobs, `df: ` = object$nParm)
   }
