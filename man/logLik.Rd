@@ -27,10 +27,10 @@ each observation's log-likelihood value is returned.}
 \item{...}{Currently ignored.}
 }
 \value{
-\code{\link{logLik}} returns an object of class \code{'logLik'},
-which is either a numeric matrix with the log-likelihood value
-(\code{logLik}), the total number of observations (\code{Nobs}) and the
-number of free parameters (\code{df}), when \code{individual = FALSE},
+\code{\link{logLik}} returns either an object of class \code{'logLik'},
+which is the log-likelihood value
+with the total number of observations (\code{nobs}) and the
+number of free parameters (\code{df}) as attributes, when \code{individual = FALSE},
 or a list of elements, containing the log-likelihood of each observation
 (\code{logLik}), the total number of observations (\code{Nobs}) and the
 number of free parameters (\code{df}), when \code{individual = TRUE}.
