@@ -32,6 +32,9 @@ See also: citation("sfaR")
 +   udist = 'hnormal', uhet = ~ regu, data = utility, S = -1, method = 'bfgs' )
 > logLik( cd_u_h )
 'log Lik.' 56.41206 (df=7)
+> all.equal( c( logLik( cd_u_h ) ), 
++   sum( logLik( cd_u_h, individual = TRUE )[[ "logLik" ]] ) )
+[1] TRUE
 > round( coef( summary( cd_u_h ) ), 3 )
                Coefficient Std. Error z value Pr(>|z|)
 (Intercept)         -2.388      0.194 -12.286    0.000
@@ -59,6 +62,9 @@ teBC_reciprocal 1.028   1.135  1.272 1.414   1.513 3.830
 +   udist = 'tnormal', muhet = ~ regu, data = utility, S = -1, method = 'bhhh' )
 > logLik( cd_u_t )
 'log Lik.' 67.90694 (df=8)
+> all.equal( c( logLik( cd_u_t ) ), 
++   sum( logLik( cd_u_t, individual = TRUE )[[ "logLik" ]] ) )
+[1] TRUE
 > round( coef( summary( cd_u_t ) ), 3 )
                 Coefficient Std. Error z value Pr(>|z|)
 (Intercept)          -2.266      0.187 -12.146    0.000
@@ -88,6 +94,9 @@ teBC_reciprocal 1.028   1.111  1.225 1.370   1.463 3.679
 +   scaling = TRUE, method = 'mla' )
 > logLik( cd_u_ts )
 'log Lik.' 62.39656 (df=8)
+> all.equal( c( logLik( cd_u_ts ) ), 
++   sum( logLik( cd_u_ts, individual = TRUE )[[ "logLik" ]] ) )
+[1] TRUE
 > round( coef( summary( cd_u_ts ) ), 3 )
                Coefficient Std. Error z value Pr(>|z|)
 (Intercept)         -2.265      0.187 -12.082    0.000
@@ -117,6 +126,9 @@ teBC_reciprocal 1.030   1.102  1.204 1.351   1.427 3.672
 +     log(OTHER), udist = 'genexponential', data = ricephil, S = 1, method = 'bfgs')
 > logLik( cd_p_ge )
 'log Lik.' -80.07733 (df=7)
+> all.equal( c( logLik( cd_p_ge ) ), 
++   sum( logLik( cd_p_ge, individual = TRUE )[[ "logLik" ]] ) )
+[1] TRUE
 > round( coef( summary( cd_p_ge ) ), 3 )
                Coefficient Std. Error z value Pr(>|z|)
 (Intercept)         -1.069      0.250  -4.272    0.000
@@ -142,6 +154,9 @@ teBC_reciprocal 1.080   1.237  1.356 1.530   1.596 9.466
 Initialization of 200 Halton draws per observation ...
 > logLik( cd_u_g )
 'log Lik.' 37.99963 (df=7)
+> all.equal( c( logLik( cd_u_g ) ), 
++   sum( logLik( cd_u_g, individual = TRUE )[[ "logLik" ]] ) )
+[1] TRUE
 > round( coef( summary( cd_u_g ) ), 3 )
                    Coefficient Std. Error z value Pr(>|z|)
 (Intercept)             -9.397      0.413 -22.739    0.000
@@ -160,4 +175,4 @@ teBC_reciprocal 1.014   1.038  1.063 1.194   1.121 4.638
 > 
 > proc.time()
    user  system elapsed 
-  2.890   0.133   3.009 
+  2.825   0.095   2.905 
