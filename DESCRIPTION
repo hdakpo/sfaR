@@ -43,3 +43,8 @@ Imports:
 URL: https://github.com/hdakpo/sfaR
 Suggests: 
     lmtest
+Maintainer: K Hervé Dakpo <herve.dakpo@inrae.fr>
+Author: K Hervé Dakpo [aut, cre],
+  Yann Desjeux [aut],
+  Laure Latruffe [aut], 
+  Arne Henningsen [ctb]
