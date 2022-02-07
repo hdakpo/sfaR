@@ -465,7 +465,7 @@ zisfcross <- function(formula, muhet, uhet, vhet, thet, logDepVar = TRUE,
   }
   cl <- match.call()
   mc <- match.call(expand.dots = FALSE)
-  m <- match(c("formula", "data", "subset"), names(mc), nomatch = 0L)
+  m <- match(c("formula", "data", "subset", "weights"), names(mc), nomatch = 0L)
   mc <- mc[c(1L, m)]
   mc$drop.unused.levels <- TRUE
   formula <- interCheckMain(formula = formula)
