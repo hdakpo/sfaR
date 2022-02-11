@@ -830,10 +830,10 @@ selectioncross <- function(selectionF, frontierF, uhet, vhet,
     "Residuals do not have the expected skeweness"
   }
   if (S * ols2stepSkew > 0) {
-    warning("The residuals of the OLS are ", if (S == 1) {
+    warning("The residuals of the OLS are", if (S == 1) {
       " right"
     } else {
-      "left"
+      " left"
     }, "-skewed. This may indicate the absence of inefficiency or
   model misspecification or sample 'bad luck'",
       call. = FALSE)

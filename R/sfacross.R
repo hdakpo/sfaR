@@ -803,10 +803,10 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
     "Residuals do not have the expected skeweness"
   }
   if (S * olsSkew > 0) {
-    warning("The residuals of the OLS are ", if (S == 1) {
+    warning("The residuals of the OLS are", if (S == 1) {
       " right"
     } else {
-      "left"
+      " left"
     }, "-skewed. This may indicate the absence of inefficiency or
   model misspecification or sample 'bad luck'",
       call. = FALSE)

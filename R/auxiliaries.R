@@ -175,6 +175,27 @@ clhsCheck_q <- function(formula) {
   return(formula)
 }
 
+# Remove intercept in ghet (metacross) ----------
+#' @param formula formula for group variable
+#' @noRd
+clhsCheck_meta <- function(formula) {
+  terM <- terms(formula(formula))
+  if (attr(terM, "response") == 1)
+    formula[[2]] <- NULL
+  if (length(attr(terM, "term.labels")) == 0) {
+    stop("a group variable must be specified for metafrontier estimation",
+      call. = FALSE)
+  }
+  if (length(attr(terM, "term.labels")) > 1) {
+    stop("only one group variable must be provided for metafrontier estimation",
+      call. = FALSE)
+  }
+  if (attr(terM, "intercept") == 1) {
+    formula <- formula(paste0(" ~ 0 + ", attr(terM, "term.labels")))
+  }
+  return(formula)
+}
+
 # Formulas depending on the distribution ----------
 #' @param udist inefficiency term distribution
 #' @param formula formula for model
@@ -223,6 +244,22 @@ formDist_zisfcross <- function(udist, formula, muhet, uhet, vhet,
     formula <- as.Formula(formula, muhet, uhet, vhet, qhet)
   } else {
     formula <- as.Formula(formula, uhet, vhet, qhet)
+  }
+  return(formula)
+}
+
+#' @param udist inefficiency term distribution
+#' @param formula formula for model
+#' @param uhet heteroscedasticity in u
+#' @param vhet heteroscedasticity in v
+#' @param ghet group variable for metafrontier
+#' @noRd
+formDist_metacross <- function(udist, formula, muhet, uhet, vhet,
+  ghet) {
+  if (udist %in% c("tnormal", "lognormal")) {
+    formula <- as.Formula(formula, muhet, uhet, vhet, ghet)
+  } else {
+    formula <- as.Formula(formula, uhet, vhet, ghet)
   }
   return(formula)
 }
@@ -884,14 +921,8 @@ qchibarsq <- function(q, df = 1, mix = 0.5) {
   return(RVAL)
 }
 
-setClass("fHTEST",
-         representation(
-           call = "call",
-           data = "list",
-           test = "list",
-           title = "character",
-           description = "character")
-)
+setClass("fHTEST", representation(call = "call", data = "list",
+  test = "list", title = "character", description = "character"))
 
 dagoTest <- function(x) {
   x <- as.vector(x)
@@ -932,11 +963,9 @@ marginal <- function(object, ...) {
   UseMethod("marginal", object)
 }
 
-# #' @param object sfacross, lcmcross, selectioncross ... objects
-# #' @noRd
-# nobs <- function(x, ...) {
-#   UseMethod("nobs", x)
-# }
+# #' @param object sfacross, lcmcross, selectioncross ...
+# objects #' @noRd nobs <- function(x, ...) {
+# UseMethod('nobs', x) }
 
 setClass("dagoTest", representation(call = "call", data = "list",
   test = "list", title = "character"))
