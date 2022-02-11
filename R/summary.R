@@ -2114,7 +2114,7 @@ print.summary.zisfcross <- function(x, digits = max(3, getOption("digits") -
       cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
         `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
         "\n")
-      cat(centerText("Estimated prior probabilities for class membership",
+      cat(centerText("Estimated prior probabilities for inefficient class",
         width = lengthSum + 2 + switch(dimCoefTable,
           `4` = 18, `5` = 31, `6` = 43, `7` = 57)), "\n")
       cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
@@ -2163,7 +2163,7 @@ print.summary.zisfcross <- function(x, digits = max(3, getOption("digits") -
         cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
           `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
           "\n")
-        cat(centerText("Estimated prior probabilities for class membership",
+        cat(centerText("Estimated prior probabilities for inefficient class",
           width = lengthSum + 2 + switch(dimCoefTable,
           `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
           "\n")
@@ -2213,7 +2213,7 @@ print.summary.zisfcross <- function(x, digits = max(3, getOption("digits") -
           cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
           `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
           collapse = ""), "\n")
-          cat(centerText("Estimated prior probabilities for class membership",
+          cat(centerText("Estimated prior probabilities for inefficient class",
           width = lengthSum + 2 + switch(dimCoefTable,
             `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
           "\n")
@@ -2260,7 +2260,7 @@ print.summary.zisfcross <- function(x, digits = max(3, getOption("digits") -
           cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
             `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
             collapse = ""), "\n")
-          cat(centerText("Estimated prior probabilities for class membership",
+          cat(centerText("Estimated prior probabilities for inefficient class",
             width = lengthSum + 2 + switch(dimCoefTable,
             `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
             "\n")
@@ -2297,7 +2297,7 @@ print.summary.zisfcross <- function(x, digits = max(3, getOption("digits") -
           cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
             `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
             collapse = ""), "\n")
-          cat(centerText("Estimated prior probabilities for class membership",
+          cat(centerText("Estimated prior probabilities for inefficient class",
             width = lengthSum + 2 + switch(dimCoefTable,
             `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
             "\n")
