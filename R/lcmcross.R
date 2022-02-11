@@ -624,10 +624,10 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
     olsFitted = fitted(olsRes))
   olsSkew <- skewness(dataTable[["olsResiduals"]])
   if (S * olsSkew > 0) {
-    warning("The residuals of the OLS are ", if (S == 1) {
+    warning("The residuals of the OLS are", if (S == 1) {
       " right"
     } else {
-      "left"
+      " left"
     }, "-skewed. This may indicate the absence of inefficiency or
   model misspecification or sample 'bad luck'",
       call. = FALSE)
