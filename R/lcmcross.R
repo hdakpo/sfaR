@@ -532,7 +532,7 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
   }
   # Check hessian type -------
   if (length(hessianType) != 1 || !(hessianType %in% c(1L,
-    2L, 3L))) {
+    2L))) {
     stop("argument 'hessianType' must equal either 1 or 2",
       call. = FALSE)
   }
@@ -798,11 +798,7 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
   } else {
     if (hessianType == 2) {
       "BHHH Hessian"
-    } else {
-      if (hessianType == 3) {
-        "Robust Hessian"
-      }
-    }
+    } 
   }
   returnObj$mlDate <- mleDate
   rm(mleList)
