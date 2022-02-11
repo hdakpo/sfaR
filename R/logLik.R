@@ -29,10 +29,10 @@
 #'
 #' @name logLik
 #'
-#' @return \code{\link{logLik}} returns an object of class \code{'logLik'},
-#' which is either a numeric matrix with the log-likelihood value
-#' (\code{logLik}), the total number of observations (\code{Nobs}) and the
-#' number of free parameters (\code{df}), when \code{individual = FALSE},
+#' @return \code{\link{logLik}} returns either an object of class \code{'logLik'},
+#' which is the log-likelihood value
+#' with the total number of observations (\code{nobs}) and the
+#' number of free parameters (\code{df}) as attributes, when \code{individual = FALSE},
 #' or a list of elements, containing the log-likelihood of each observation
 #' (\code{logLik}), the total number of observations (\code{Nobs}) and the
 #' number of free parameters (\code{df}), when \code{individual = TRUE}.
@@ -84,10 +84,11 @@ logLik.sfacross <- function(object, individual = FALSE, ...) {
     LL[["df"]] <- object$nParm
     return(LL)
   } else {
-    cat("'log Lik.'", round(object$mlLoglik, 5), paste0("(df=",
-      object$nParm, ")"))
-    # LL <- rbind(`logLik: ` = object$mlLoglik, `Nobs: ` =
-    # object$Nobs, `df: ` = object$nParm)
+    LL <- object$mlLoglik
+    attributes( LL )$nobs <- object$Nobs
+    attributes( LL )$df <- object$nParm
+    class( LL ) <- "logLik"
+    return( LL )
   }
 }
 
@@ -106,10 +107,11 @@ logLik.lcmcross <- function(object, individual = FALSE, ...) {
     LL[["df"]] <- object$nParm
     return(LL)
   } else {
-    cat("'log Lik.'", round(object$mlLoglik, 5), paste0("(df=",
-      object$nParm, ")"))
-    # LL <- rbind(`logLik: ` = object$mlLoglik, `Nobs: ` =
-    # object$Nobs, `df: ` = object$nParm)
+    LL <- object$mlLoglik
+    attributes( LL )$nobs <- object$Nobs
+    attributes( LL )$df <- object$nParm
+    class( LL ) <- "logLik"
+    return( LL )
   }
 }
 
@@ -129,10 +131,11 @@ logLik.selectioncross <- function(object, individual = FALSE,
     LL[["df"]] <- object$nParm
     return(LL)
   } else {
-    cat("'log Lik.'", round(object$mlLoglik, 5), paste0("(df=",
-      object$nParm, ")"))
-    # LL <- rbind(`logLik: ` = object$mlLoglik, `Nobs: ` =
-    # object$Nobs, `df: ` = object$nParm)
+    LL <- object$mlLoglik
+    attributes( LL )$nobs <- object$Nobs
+    attributes( LL )$df <- object$nParm
+    class( LL ) <- "logLik"
+    return( LL )
   }
 }
 
@@ -151,9 +154,10 @@ logLik.zisfcross <- function(object, individual = FALSE, ...) {
     LL[["df"]] <- object$nParm
     return(LL)
   } else {
-    cat("'log Lik.'", round(object$mlLoglik, 5), paste0("(df=",
-      object$nParm, ")"))
-    # LL <- rbind(`logLik: ` = object$mlLoglik, `Nobs: ` =
-    # object$Nobs, `df: ` = object$nParm)
+    LL <- object$mlLoglik
+    attributes( LL )$nobs <- object$Nobs
+    attributes( LL )$df <- object$nParm
+    class( LL ) <- "logLik"
+    return( LL )
   }
 }
