@@ -39,7 +39,8 @@ Imports:
     ucminf,
     fastGHQuad,
     stats,
-    sandwich
+    sandwich,
+    magrittr
 URL: https://github.com/hdakpo/sfaR
 Suggests: 
     lmtest

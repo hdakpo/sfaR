@@ -136,7 +136,7 @@ cstzisfgammanorm <- function(olsObj, epsiRes, nXvar, nuZUvar,
     1) rep(0, nvZVvar - 1), Esti[nXvar + 3], rep(0, nZHvar))
   names(StartVal) <- c(names(Esti)[1:nXvar], paste0("Zu_",
     colnames(uHvar)), paste0("Zv_", colnames(vHvar)), "P",
-    paste0("SF_", colnames(Zvar)))
+    paste0("ZI_", colnames(Zvar)))
   names(initGamma$estimate) <- c(names(Esti)[1:nXvar], paste0("Zu_",
     colnames(uHvar)[1]), paste0("Zv_", colnames(vHvar)[1]),
     "P")
@@ -164,7 +164,7 @@ cstmnsfgammanorm <- function(olsObj, epsiRes, nXvar, nuZUvar,
     1) rep(0, nvZVvar - 1), Esti[nXvar + 3], rep(0, nZHvar))
   names(StartVal) <- c(names(Esti)[1:nXvar], paste0("Zu_",
     colnames(uHvar)), paste0("Zv_", colnames(vHvar)), paste0("Zv_",
-    colnames(vHvar)), "P", paste0("SF_", colnames(Zvar)))
+    colnames(vHvar)), "P", paste0("ZI_", colnames(Zvar)))
   names(initGamma$estimate) <- c(names(Esti)[1:nXvar], paste0("Zu_",
     colnames(uHvar)[1]), paste0("Zv_", colnames(vHvar)[1]),
     "P")

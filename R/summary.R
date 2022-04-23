@@ -1933,18 +1933,8 @@ print.summary.zisfcross <- function(x, digits = max(3, getOption("digits") -
   row.names(mlRes) <- formatC(row.names(mlRes), width = max(nchar(row.names(mlRes))),
     flag = "-")
   mlRes1 <- mlRes[1:x$nXvar, , drop = FALSE]
-  if (x$udist == "tnormal") {
-    mlRes2 <- mlRes[(x$nXvar + 1):(x$nXvar + x$nmuZUvar),
-      , drop = FALSE]
-    mlRes3 <- mlRes[(x$nXvar + x$nmuZUvar + 1):(x$nXvar +
-      x$nmuZUvar + x$nuZUvar), , drop = FALSE]
-    mlRes4 <- mlRes[(x$nXvar + x$nmuZUvar + x$nuZUvar + 1):(x$nXvar +
-      x$nmuZUvar + x$nuZUvar + x$nvZVvar), , drop = FALSE]
-    mlRes5 <- mlRes[(x$nXvar + x$nmuZUvar + x$nuZUvar + x$nvZVvar +
-      1):(x$nXvar + x$nmuZUvar + x$nuZUvar + x$nvZVvar +
-      x$nZHvar), , drop = FALSE]
-  } else {
-    if (x$udist == "lognormal") {
+  if (x$sigmavType == "common") {
+    if (x$udist == "tnormal") {
       mlRes2 <- mlRes[(x$nXvar + 1):(x$nXvar + x$nmuZUvar),
         , drop = FALSE]
       mlRes3 <- mlRes[(x$nXvar + x$nmuZUvar + 1):(x$nXvar +
@@ -1956,20 +1946,87 @@ print.summary.zisfcross <- function(x, digits = max(3, getOption("digits") -
         x$nvZVvar + 1):(x$nXvar + x$nmuZUvar + x$nuZUvar +
         x$nvZVvar + x$nZHvar), , drop = FALSE]
     } else {
-      mlRes2 <- mlRes[(x$nXvar + 1):(x$nXvar + x$nuZUvar),
-        , drop = FALSE]
-      mlRes3 <- mlRes[(x$nXvar + x$nuZUvar + 1):(x$nXvar +
-        x$nuZUvar + x$nvZVvar), , drop = FALSE]
-      if (x$udist %in% c("gamma", "weibull", "tslaplace")) {
-        mlRes4 <- mlRes[x$nXvar + x$nuZUvar + x$nvZVvar +
+      if (x$udist == "lognormal") {
+        mlRes2 <- mlRes[(x$nXvar + 1):(x$nXvar + x$nmuZUvar),
+          , drop = FALSE]
+        mlRes3 <- mlRes[(x$nXvar + x$nmuZUvar + 1):(x$nXvar +
+          x$nmuZUvar + x$nuZUvar), , drop = FALSE]
+        mlRes4 <- mlRes[(x$nXvar + x$nmuZUvar + x$nuZUvar +
+          1):(x$nXvar + x$nmuZUvar + x$nuZUvar + x$nvZVvar),
+          , drop = FALSE]
+        mlRes5 <- mlRes[(x$nXvar + x$nmuZUvar + x$nuZUvar +
+          x$nvZVvar + 1):(x$nXvar + x$nmuZUvar + x$nuZUvar +
+          x$nvZVvar + x$nZHvar), , drop = FALSE]
+      } else {
+        mlRes2 <- mlRes[(x$nXvar + 1):(x$nXvar + x$nuZUvar),
+          , drop = FALSE]
+        mlRes3 <- mlRes[(x$nXvar + x$nuZUvar + 1):(x$nXvar +
+          x$nuZUvar + x$nvZVvar), , drop = FALSE]
+        if (x$udist %in% c("gamma", "weibull", "tslaplace")) {
+          mlRes4 <- mlRes[x$nXvar + x$nuZUvar + x$nvZVvar +
           1, , drop = FALSE]
-        mlRes5 <- mlRes[(x$nXvar + x$nuZUvar + x$nvZVvar +
+          mlRes5 <- mlRes[(x$nXvar + x$nuZUvar + x$nvZVvar +
           2):(x$nXvar + x$nuZUvar + x$nvZVvar + x$nZHvar +
           1), , drop = FALSE]
-      } else {
-        mlRes4 <- mlRes[(x$nXvar + x$nuZUvar + x$nvZVvar +
+        } else {
+          mlRes4 <- mlRes[(x$nXvar + x$nuZUvar + x$nvZVvar +
           1):(x$nXvar + x$nuZUvar + x$nvZVvar + x$nZHvar),
           , drop = FALSE]
+        }
+      }
+    }
+  } else {
+    if (x$sigmavType == "different") {
+      if (x$udist == "tnormal") {
+        mlRes2 <- mlRes[(x$nXvar + 1):(x$nXvar + x$nmuZUvar),
+          , drop = FALSE]
+        mlRes3 <- mlRes[(x$nXvar + x$nmuZUvar + 1):(x$nXvar +
+          x$nmuZUvar + x$nuZUvar), , drop = FALSE]
+        mlRes4 <- mlRes[(x$nXvar + x$nmuZUvar + x$nuZUvar +
+          1):(x$nXvar + x$nmuZUvar + x$nuZUvar + x$nvZVvar),
+          , drop = FALSE]
+        mlRes5 <- mlRes[(x$nXvar + x$nmuZUvar + x$nuZUvar +
+          x$nvZVvar + 1):(x$nXvar + x$nmuZUvar + x$nuZUvar +
+          2 * x$nvZVvar), , drop = FALSE]
+        mlRes6 <- mlRes[(x$nXvar + x$nmuZUvar + x$nuZUvar +
+          2 * x$nvZVvar + 1):(x$nXvar + x$nmuZUvar +
+          x$nuZUvar + 2 * x$nvZVvar + x$nZHvar), , drop = FALSE]
+      } else {
+        if (x$udist == "lognormal") {
+          mlRes2 <- mlRes[(x$nXvar + 1):(x$nXvar + x$nmuZUvar),
+          , drop = FALSE]
+          mlRes3 <- mlRes[(x$nXvar + x$nmuZUvar + 1):(x$nXvar +
+          x$nmuZUvar + x$nuZUvar), , drop = FALSE]
+          mlRes4 <- mlRes[(x$nXvar + x$nmuZUvar + x$nuZUvar +
+          1):(x$nXvar + x$nmuZUvar + x$nuZUvar + x$nvZVvar),
+          , drop = FALSE]
+          mlRes5 <- mlRes[(x$nXvar + x$nmuZUvar + x$nuZUvar +
+          x$nvZVvar + 1):(x$nXvar + x$nmuZUvar + x$nuZUvar +
+          2 * x$nvZVvar), , drop = FALSE]
+          mlRes6 <- mlRes[(x$nXvar + x$nmuZUvar + x$nuZUvar +
+          2 * x$nvZVvar + 1):(x$nXvar + x$nmuZUvar +
+          x$nuZUvar + 2 * x$nvZVvar + x$nZHvar), ,
+          drop = FALSE]
+        } else {
+          mlRes2 <- mlRes[(x$nXvar + 1):(x$nXvar + x$nuZUvar),
+          , drop = FALSE]
+          mlRes3 <- mlRes[(x$nXvar + x$nuZUvar + 1):(x$nXvar +
+          x$nuZUvar + x$nvZVvar), , drop = FALSE]
+          mlRes4 <- mlRes[(x$nXvar + x$nuZUvar + x$nvZVvar +
+          1):(x$nXvar + x$nuZUvar + 2 * x$nvZVvar),
+          , drop = FALSE]
+          if (x$udist %in% c("gamma", "weibull", "tslaplace")) {
+          mlRes5 <- mlRes[x$nXvar + x$nuZUvar + 2 *
+            x$nvZVvar + 1, , drop = FALSE]
+          mlRes6 <- mlRes[(x$nXvar + x$nuZUvar + 2 *
+            x$nvZVvar + 2):(x$nXvar + x$nuZUvar + 2 *
+            x$nvZVvar + x$nZHvar + 1), , drop = FALSE]
+          } else {
+          mlRes5 <- mlRes[(x$nXvar + x$nuZUvar + 2 *
+            x$nvZVvar + 1):(x$nXvar + x$nuZUvar + 2 *
+            x$nvZVvar + x$nZHvar), , drop = FALSE]
+          }
+        }
       }
     }
   }
@@ -2057,25 +2114,63 @@ print.summary.zisfcross <- function(x, digits = max(3, getOption("digits") -
     cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
       `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
       "\n")
-    cat(centerText("Parameters in variance of v (two-sided error)",
-      width = lengthSum + 2 + switch(dimCoefTable, `4` = 18,
-        `5` = 31, `6` = 43, `7` = 57)), "\n")
-    cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
-      `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
-      "\n")
-    printCoefmat(mlRes4, P.values = TRUE, digits = digits,
-      signif.legend = FALSE)
-    cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
-      `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
-      "\n")
-    cat(centerText("Estimated prior probabilities for class membership",
-      width = lengthSum + 2 + switch(dimCoefTable, `4` = 18,
-        `5` = 31, `6` = 43, `7` = 57)), "\n")
-    cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
-      `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
-      "\n")
-    printCoefmat(mlRes5, P.values = TRUE, digits = digits,
-      signif.legend = TRUE)
+    if (x$sigmavType == "common") {
+      cat(centerText("Parameters in variance of v (two-sided error)",
+        width = lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), "\n")
+      cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+        `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+        "\n")
+      printCoefmat(mlRes4, P.values = TRUE, digits = digits,
+        signif.legend = FALSE)
+      cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+        `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+        "\n")
+      cat(centerText("Estimated prior probabilities for class membership",
+        width = lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), "\n")
+      cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+        `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+        "\n")
+      printCoefmat(mlRes5, P.values = TRUE, digits = digits,
+        signif.legend = TRUE)
+    } else {
+      if (x$sigmavType == "different") {
+        cat(centerText("Parameters in variance of v (two-sided error) for inefficient class",
+          width = lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          "\n")
+        cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+          "\n")
+        printCoefmat(mlRes4, P.values = TRUE, digits = digits,
+          signif.legend = FALSE)
+        cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+          "\n")
+        cat(centerText("Parameters in variance of v (two-sided error) for efficient class",
+          width = lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          "\n")
+        cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+          "\n")
+        printCoefmat(mlRes5, P.values = TRUE, digits = digits,
+          signif.legend = FALSE)
+        cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+          "\n")
+        cat(centerText("Estimated prior probabilities for class membership",
+          width = lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          "\n")
+        cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+          "\n")
+        printCoefmat(mlRes6, P.values = TRUE, digits = digits,
+          signif.legend = TRUE)
+      }
+    }
     cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
       `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
       "\n")
@@ -2103,25 +2198,65 @@ print.summary.zisfcross <- function(x, digits = max(3, getOption("digits") -
       cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
         `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
         "\n")
-      cat(centerText("Parameters in variance of v (two-sided error)",
-        width = lengthSum + 2 + switch(dimCoefTable,
-          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), "\n")
-      cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
-        `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
-        "\n")
-      printCoefmat(mlRes4, P.values = TRUE, digits = digits,
-        signif.legend = FALSE)
-      cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
-        `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
-        "\n")
-      cat(centerText("Estimated prior probabilities for inefficient class",
-        width = lengthSum + 2 + switch(dimCoefTable,
-          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), "\n")
-      cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
-        `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
-        "\n")
-      printCoefmat(mlRes5, P.values = TRUE, digits = digits,
-        signif.legend = TRUE)
+      if (x$sigmavType == "common") {
+        cat(centerText("Parameters in variance of v (two-sided error)",
+          width = lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          "\n")
+        cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+          "\n")
+        printCoefmat(mlRes4, P.values = TRUE, digits = digits,
+          signif.legend = FALSE)
+        cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+          "\n")
+        cat(centerText("Estimated prior probabilities for class membership",
+          width = lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          "\n")
+        cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+          "\n")
+        printCoefmat(mlRes5, P.values = TRUE, digits = digits,
+          signif.legend = TRUE)
+      } else {
+        if (x$sigmavType == "different") {
+          cat(centerText("Parameters in variance of v (two-sided error) for inefficient class",
+          width = lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          "\n")
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          collapse = ""), "\n")
+          printCoefmat(mlRes4, P.values = TRUE, digits = digits,
+          signif.legend = FALSE)
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          collapse = ""), "\n")
+          cat(centerText("Parameters in variance of v (two-sided error) for efficient class",
+          width = lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          "\n")
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          collapse = ""), "\n")
+          printCoefmat(mlRes5, P.values = TRUE, digits = digits,
+          signif.legend = FALSE)
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          collapse = ""), "\n")
+          cat(centerText("Estimated prior probabilities for class membership",
+          width = lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          "\n")
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          collapse = ""), "\n")
+          printCoefmat(mlRes6, P.values = TRUE, digits = digits,
+          signif.legend = TRUE)
+        }
+      }
       cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
         `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
         "\n")
@@ -2139,39 +2274,89 @@ print.summary.zisfcross <- function(x, digits = max(3, getOption("digits") -
         cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
           `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
           "\n")
-        cat(centerText("Parameters in variance of v (two-sided error)",
+        if (x$sigmavType == "common") {
+          cat(centerText("Parameters in variance of v (two-sided error)",
           width = lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          "\n")
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
           `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
-          "\n")
-        cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
-          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
-          "\n")
-        printCoefmat(mlRes3, P.values = TRUE, digits = digits,
+          collapse = ""), "\n")
+          printCoefmat(mlRes3, P.values = TRUE, digits = digits,
           signif.legend = TRUE)
-        cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
-          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
-          "\n")
-        cat(centerText("Location parameter P in u (one-sided error)",
-          width = lengthSum + 2 + switch(dimCoefTable,
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
           `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          collapse = ""), "\n")
+          cat(centerText("Location parameter P in u (one-sided error)",
+          width = lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
           "\n")
-        cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
-          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
-          "\n")
-        printCoefmat(mlRes4, P.values = TRUE, digits = digits,
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          collapse = ""), "\n")
+          printCoefmat(mlRes4, P.values = TRUE, digits = digits,
           signif.legend = FALSE)
-        cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
-          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
-          "\n")
-        cat(centerText("Estimated prior probabilities for inefficient class",
-          width = lengthSum + 2 + switch(dimCoefTable,
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
           `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          collapse = ""), "\n")
+          cat(centerText("Estimated prior probabilities for inefficient class",
+          width = lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
           "\n")
-        cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
-          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
-          "\n")
-        printCoefmat(mlRes5, P.values = TRUE, digits = digits,
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          collapse = ""), "\n")
+          printCoefmat(mlRes5, P.values = TRUE, digits = digits,
           signif.legend = TRUE)
+        } else {
+          if (x$sigmavType == "different") {
+          cat(centerText("Parameters in variance of v (two-sided error) for inefficient class",
+            width = lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+            "\n")
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+            collapse = ""), "\n")
+          printCoefmat(mlRes3, P.values = TRUE, digits = digits,
+            signif.legend = TRUE)
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+            collapse = ""), "\n")
+          cat(centerText("Parameters in variance of v (two-sided error) for efficient class",
+            width = lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+            "\n")
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+            collapse = ""), "\n")
+          printCoefmat(mlRes4, P.values = TRUE, digits = digits,
+            signif.legend = TRUE)
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+            collapse = ""), "\n")
+          cat(centerText("Location parameter P in u (one-sided error)",
+            width = lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+            "\n")
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+            collapse = ""), "\n")
+          printCoefmat(mlRes5, P.values = TRUE, digits = digits,
+            signif.legend = FALSE)
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+            collapse = ""), "\n")
+          cat(centerText("Estimated prior probabilities for inefficient class",
+            width = lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+            "\n")
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+            collapse = ""), "\n")
+          printCoefmat(mlRes6, P.values = TRUE, digits = digits,
+            signif.legend = TRUE)
+          }
+        }
         cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
           `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
           "\n")
@@ -2189,39 +2374,89 @@ print.summary.zisfcross <- function(x, digits = max(3, getOption("digits") -
           cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
           `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
           collapse = ""), "\n")
+          if (x$sigmavType == "common") {
           cat(centerText("Parameters in variance of v (two-sided error)",
-          width = lengthSum + 2 + switch(dimCoefTable,
+            width = lengthSum + 2 + switch(dimCoefTable,
             `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
-          "\n")
+            "\n")
           cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
-          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
-          collapse = ""), "\n")
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+            collapse = ""), "\n")
           printCoefmat(mlRes3, P.values = TRUE, digits = digits,
-          signif.legend = TRUE)
+            signif.legend = TRUE)
           cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
-          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
-          collapse = ""), "\n")
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+            collapse = ""), "\n")
           cat(centerText("Shape parameter k in u (one-sided error)",
-          width = lengthSum + 2 + switch(dimCoefTable,
+            width = lengthSum + 2 + switch(dimCoefTable,
             `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
-          "\n")
+            "\n")
           cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
-          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
-          collapse = ""), "\n")
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+            collapse = ""), "\n")
           printCoefmat(mlRes4, P.values = TRUE, digits = digits,
-          signif.legend = FALSE)
+            signif.legend = FALSE)
           cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
-          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
-          collapse = ""), "\n")
-          cat(centerText("Estimated prior probabilities for inefficient class",
-          width = lengthSum + 2 + switch(dimCoefTable,
             `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
-          "\n")
+            collapse = ""), "\n")
+          cat(centerText("Estimated prior probabilities for inefficient class",
+            width = lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+            "\n")
           cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
-          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
-          collapse = ""), "\n")
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+            collapse = ""), "\n")
           printCoefmat(mlRes5, P.values = TRUE, digits = digits,
-          signif.legend = TRUE)
+            signif.legend = TRUE)
+          } else {
+          if (x$sigmavType == "different") {
+            cat(centerText("Parameters in variance of v (two-sided error) for inefficient class",
+            width = lengthSum + 2 + switch(dimCoefTable,
+              `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+            "\n")
+            cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+            collapse = ""), "\n")
+            printCoefmat(mlRes3, P.values = TRUE, digits = digits,
+            signif.legend = TRUE)
+            cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+            collapse = ""), "\n")
+            cat(centerText("Parameters in variance of v (two-sided error) for efficient class",
+            width = lengthSum + 2 + switch(dimCoefTable,
+              `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+            "\n")
+            cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+            collapse = ""), "\n")
+            printCoefmat(mlRes4, P.values = TRUE, digits = digits,
+            signif.legend = TRUE)
+            cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+            collapse = ""), "\n")
+            cat(centerText("Shape parameter k in u (one-sided error)",
+            width = lengthSum + 2 + switch(dimCoefTable,
+              `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+            "\n")
+            cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+            collapse = ""), "\n")
+            printCoefmat(mlRes5, P.values = TRUE, digits = digits,
+            signif.legend = FALSE)
+            cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+            collapse = ""), "\n")
+            cat(centerText("Estimated prior probabilities for inefficient class",
+            width = lengthSum + 2 + switch(dimCoefTable,
+              `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+            "\n")
+            cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+            collapse = ""), "\n")
+            printCoefmat(mlRes6, P.values = TRUE, digits = digits,
+            signif.legend = TRUE)
+          }
+          }
           cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
           `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
           collapse = ""), "\n")
@@ -2239,36 +2474,83 @@ print.summary.zisfcross <- function(x, digits = max(3, getOption("digits") -
           cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
             `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
             collapse = ""), "\n")
-          cat(centerText("Parameters in variance of v (two-sided error)",
+          if (x$sigmavType == "common") {
+            cat(centerText("Parameters in variance of v (two-sided error)",
             width = lengthSum + 2 + switch(dimCoefTable,
-            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+              `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
             "\n")
-          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+            cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
             `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
             collapse = ""), "\n")
-          printCoefmat(mlRes3, P.values = TRUE, digits = digits,
+            printCoefmat(mlRes3, P.values = TRUE, digits = digits,
             signif.legend = TRUE)
-          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+            cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
             `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
             collapse = ""), "\n")
-          cat(centerText("Skewness parameter 'lambda' in u (one-sided error)",
+            cat(centerText("Skewness parameter 'lambda' in u (one-sided error)",
             width = lengthSum + 2 + switch(dimCoefTable,
-            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+              `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
             "\n")
-          printCoefmat(mlRes4, P.values = TRUE, digits = digits,
+            printCoefmat(mlRes4, P.values = TRUE, digits = digits,
             signif.legend = FALSE)
-          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+            cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
             `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
             collapse = ""), "\n")
-          cat(centerText("Estimated prior probabilities for inefficient class",
+            cat(centerText("Estimated prior probabilities for inefficient class",
             width = lengthSum + 2 + switch(dimCoefTable,
-            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+              `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
             "\n")
-          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+            cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
             `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
             collapse = ""), "\n")
-          printCoefmat(mlRes5, P.values = TRUE, digits = digits,
+            printCoefmat(mlRes5, P.values = TRUE, digits = digits,
             signif.legend = TRUE)
+          } else {
+            if (x$sigmavType == "different") {
+            cat(centerText("Parameters in variance of v (two-sided error) for inefficient class",
+              width = lengthSum + 2 + switch(dimCoefTable,
+              `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+              "\n")
+            cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+              `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+              collapse = ""), "\n")
+            printCoefmat(mlRes3, P.values = TRUE,
+              digits = digits, signif.legend = TRUE)
+            cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+              `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+              collapse = ""), "\n")
+            cat(centerText("Parameters in variance of v (two-sided error) for efficient class",
+              width = lengthSum + 2 + switch(dimCoefTable,
+              `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+              "\n")
+            cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+              `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+              collapse = ""), "\n")
+            printCoefmat(mlRes4, P.values = TRUE,
+              digits = digits, signif.legend = TRUE)
+            cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+              `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+              collapse = ""), "\n")
+            cat(centerText("Skewness parameter 'lambda' in u (one-sided error)",
+              width = lengthSum + 2 + switch(dimCoefTable,
+              `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+              "\n")
+            printCoefmat(mlRes5, P.values = TRUE,
+              digits = digits, signif.legend = FALSE)
+            cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+              `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+              collapse = ""), "\n")
+            cat(centerText("Estimated prior probabilities for inefficient class",
+              width = lengthSum + 2 + switch(dimCoefTable,
+              `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+              "\n")
+            cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+              `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+              collapse = ""), "\n")
+            printCoefmat(mlRes6, P.values = TRUE,
+              digits = digits, signif.legend = TRUE)
+            }
+          }
           cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
             `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
             collapse = ""), "\n")
@@ -2285,27 +2567,65 @@ print.summary.zisfcross <- function(x, digits = max(3, getOption("digits") -
           cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
             `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
             collapse = ""), "\n")
-          cat(centerText("Parameters in variance of v (two-sided error)",
+          if (x$sigmavType == "common") {
+            cat(centerText("Parameters in variance of v (two-sided error)",
             width = lengthSum + 2 + switch(dimCoefTable,
-            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+              `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
             "\n")
-          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+            cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
             `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
             collapse = ""), "\n")
-          printCoefmat(mlRes3, P.values = TRUE, digits = digits,
+            printCoefmat(mlRes3, P.values = TRUE, digits = digits,
             signif.legend = FALSE)
-          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+            cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
             `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
             collapse = ""), "\n")
-          cat(centerText("Estimated prior probabilities for inefficient class",
+            cat(centerText("Estimated prior probabilities for inefficient class",
             width = lengthSum + 2 + switch(dimCoefTable,
-            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+              `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
             "\n")
-          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+            cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
             `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
             collapse = ""), "\n")
-          printCoefmat(mlRes4, P.values = TRUE, digits = digits,
+            printCoefmat(mlRes4, P.values = TRUE, digits = digits,
             signif.legend = TRUE)
+          } else {
+            if (x$sigmavType == "different") {
+            cat(centerText("Parameters in variance of v (two-sided error) for inefficient class",
+              width = lengthSum + 2 + switch(dimCoefTable,
+              `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+              "\n")
+            cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+              `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+              collapse = ""), "\n")
+            printCoefmat(mlRes3, P.values = TRUE,
+              digits = digits, signif.legend = FALSE)
+            cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+              `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+              collapse = ""), "\n")
+            cat(centerText("Parameters in variance of v (two-sided error) for efficient class",
+              width = lengthSum + 2 + switch(dimCoefTable,
+              `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+              "\n")
+            cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+              `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+              collapse = ""), "\n")
+            printCoefmat(mlRes4, P.values = TRUE,
+              digits = digits, signif.legend = FALSE)
+            cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+              `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+              collapse = ""), "\n")
+            cat(centerText("Estimated prior probabilities for inefficient class",
+              width = lengthSum + 2 + switch(dimCoefTable,
+              `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+              "\n")
+            cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+              `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+              collapse = ""), "\n")
+            printCoefmat(mlRes5, P.values = TRUE,
+              digits = digits, signif.legend = TRUE)
+            }
+          }
           cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
             `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
             collapse = ""), "\n")

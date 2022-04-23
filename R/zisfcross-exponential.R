@@ -109,7 +109,7 @@ cstzisfexponorm <- function(olsObj, epsiRes, nXvar, nuZUvar,
     1) rep(0, nuZUvar - 1), Esti[nXvar + 2], if (nvZVvar >
     1) rep(0, nvZVvar - 1), rep(0, nZHvar))
   names(StartVal) <- c(names(Esti)[1:nXvar], paste0("Zu_",
-    colnames(uHvar)), paste0("Zv_", colnames(vHvar)), paste0("SF_",
+    colnames(uHvar)), paste0("Zv_", colnames(vHvar)), paste0("ZI_",
     colnames(Zvar)))
   names(initExpo$estimate) <- c(names(Esti)[1:nXvar], paste0("Zu_",
     colnames(uHvar)[1]), paste0("Zv_", colnames(vHvar)[1]))
@@ -136,7 +136,7 @@ cstmnsfexponorm <- function(olsObj, epsiRes, nXvar, nuZUvar,
     1) rep(0, nvZVvar - 1), rep(0, nZHvar))
   names(StartVal) <- c(names(Esti)[1:nXvar], paste0("Zu_",
     colnames(uHvar)), paste0("Zv_", colnames(vHvar)), paste0("Zv_",
-    colnames(vHvar)), paste0("SF_", colnames(Zvar)))
+    colnames(vHvar)), paste0("ZI_", colnames(Zvar)))
   names(initExpo$estimate) <- c(names(Esti)[1:nXvar], paste0("Zu_",
     colnames(uHvar)[1]), paste0("Zv_", colnames(vHvar)[1]))
   return(list(StartVal = StartVal, initExpo = initExpo))

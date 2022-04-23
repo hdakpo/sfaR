@@ -126,7 +126,7 @@ cstzisftslnorm <- function(olsObj, epsiRes, nXvar, nuZUvar, nvZVvar,
     1) rep(0, nvZVvar - 1), Esti[nXvar + 3], rep(0, nZHvar))
   names(StartVal) <- c(names(Esti)[1:nXvar], paste0("Zu_",
     colnames(uHvar)), paste0("Zv_", colnames(vHvar)), "lambda",
-    paste0("SF_", colnames(Zvar)))
+    paste0("ZI_", colnames(Zvar)))
   names(initTSL$estimate) <- c(names(Esti)[1:nXvar], paste0("Zu_",
     colnames(uHvar)[1]), paste0("Zv_", colnames(vHvar)[1]),
     "lambda")
@@ -153,7 +153,7 @@ cstmnsftslnorm <- function(olsObj, epsiRes, nXvar, nuZUvar, nvZVvar,
     1) rep(0, nvZVvar - 1), Esti[nXvar + 3], rep(0, nZHvar))
   names(StartVal) <- c(names(Esti)[1:nXvar], paste0("Zu_",
     colnames(uHvar)), paste0("Zv_", colnames(vHvar)), paste0("Zv_",
-    colnames(vHvar)), "lambda", paste0("SF_", colnames(Zvar)))
+    colnames(vHvar)), "lambda", paste0("ZI_", colnames(Zvar)))
   names(initTSL$estimate) <- c(names(Esti)[1:nXvar], paste0("Zu_",
     colnames(uHvar)[1]), paste0("Zv_", colnames(vHvar)[1]),
     "lambda")

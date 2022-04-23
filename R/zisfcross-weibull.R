@@ -129,7 +129,7 @@ cstzisfweibullnorm <- function(olsObj, epsiRes, nXvar, nuZUvar,
     1) rep(0, nvZVvar - 1), 1, rep(0, nZHvar))
   names(StartVal) <- c(names(Esti)[1:nXvar], paste0("Zu_",
     colnames(uHvar)), paste0("Zv_", colnames(vHvar)), "k",
-    paste0("SF_", colnames(Zvar)))
+    paste0("ZI_", colnames(Zvar)))
   names(initWeibull$estimate) <- c(names(Esti)[1:nXvar], paste0("Zu_",
     colnames(uHvar)[1]), paste0("Zv_", colnames(vHvar)[1]),
     "k")
@@ -157,7 +157,7 @@ cstmnsfweibullnorm <- function(olsObj, epsiRes, nXvar, nuZUvar,
     1) rep(0, nvZVvar - 1), 1, rep(0, nZHvar))
   names(StartVal) <- c(names(Esti)[1:nXvar], paste0("Zu_",
     colnames(uHvar)), paste0("Zv_", colnames(vHvar)), paste0("Zv_",
-    colnames(vHvar)), "k", paste0("SF_", colnames(Zvar)))
+    colnames(vHvar)), "k", paste0("ZI_", colnames(Zvar)))
   names(initWeibull$estimate) <- c(names(Esti)[1:nXvar], paste0("Zu_",
     colnames(uHvar)[1]), paste0("Zv_", colnames(vHvar)[1]),
     "k")

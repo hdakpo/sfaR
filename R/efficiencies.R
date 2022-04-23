@@ -470,43 +470,96 @@ efficiencies.zisfcross <- function(object, level = 0.95, newData = NULL,
     object$dataTable <- newData
     object$Nobs <- dim(newData)[1]
   }
-  if (object$udist == "hnormal") {
-    EffRes <- czisfhalfnormeff(object = object, level = level)
-  } else {
-    if (object$udist == "exponential") {
-      EffRes <- czisfexponormeff(object = object, level = level)
+  if (object$sigmavType == "common") {
+    if (object$udist == "hnormal") {
+      EffRes <- czisfhalfnormeff(object = object, level = level)
     } else {
-      if (object$udist == "gamma") {
-        EffRes <- czisfgammanormeff(object = object,
-          level = level)
+      if (object$udist == "exponential") {
+        EffRes <- czisfexponormeff(object = object, level = level)
       } else {
-        if (object$udist == "rayleigh") {
-          EffRes <- czisfraynormeff(object = object,
+        if (object$udist == "gamma") {
+          EffRes <- czisfgammanormeff(object = object,
           level = level)
         } else {
+          if (object$udist == "rayleigh") {
+          EffRes <- czisfraynormeff(object = object,
+            level = level)
+          } else {
           if (object$udist == "uniform") {
-          EffRes <- czisfuninormeff(object = object,
+            EffRes <- czisfuninormeff(object = object,
             level = level)
           } else {
-          if (object$udist == "tnormal") {
+            if (object$udist == "tnormal") {
             EffRes <- czisftruncnormeff(object = object,
-            level = level)
-          } else {
+              level = level)
+            } else {
             if (object$udist == "lognormal") {
-            EffRes <- czisflognormeff(object = object,
+              EffRes <- czisflognormeff(object = object,
               level = level)
             } else {
-            if (object$udist == "genexponential") {
+              if (object$udist == "genexponential") {
               EffRes <- czisfgenexponormeff(object = object,
-              level = level)
-            } else {
-              if (object$udist == "tslaplace") {
-              EffRes <- czisftslnormeff(object = object,
                 level = level)
               } else {
-              if (object$udist == "weibull") {
-                EffRes <- czisfweibullnormeff(object = object,
+              if (object$udist == "tslaplace") {
+                EffRes <- czisftslnormeff(object = object,
                 level = level)
+              } else {
+                if (object$udist == "weibull") {
+                EffRes <- czisfweibullnormeff(object = object,
+                  level = level)
+                }
+              }
+              }
+            }
+            }
+          }
+          }
+        }
+      }
+    }
+  } else {
+    if (object$sigmavType == "different") {
+      if (object$udist == "hnormal") {
+        EffRes <- cmnsfhalfnormeff(object = object, level = level)
+      } else {
+        if (object$udist == "exponential") {
+          EffRes <- cmnsfexponormeff(object = object,
+          level = level)
+        } else {
+          if (object$udist == "gamma") {
+          EffRes <- cmnsfgammanormeff(object = object,
+            level = level)
+          } else {
+          if (object$udist == "rayleigh") {
+            EffRes <- cmnsfraynormeff(object = object,
+            level = level)
+          } else {
+            if (object$udist == "uniform") {
+            EffRes <- cmnsfuninormeff(object = object,
+              level = level)
+            } else {
+            if (object$udist == "tnormal") {
+              EffRes <- cmnsftruncnormeff(object = object,
+              level = level)
+            } else {
+              if (object$udist == "lognormal") {
+              EffRes <- cmnsflognormeff(object = object,
+                level = level)
+              } else {
+              if (object$udist == "genexponential") {
+                EffRes <- cmnsfgenexponormeff(object = object,
+                level = level)
+              } else {
+                if (object$udist == "tslaplace") {
+                EffRes <- cmnsftslnormeff(object = object,
+                  level = level)
+                } else {
+                if (object$udist == "weibull") {
+                  EffRes <- cmnsfweibullnormeff(object = object,
+                  level = level)
+                }
+                }
               }
               }
             }

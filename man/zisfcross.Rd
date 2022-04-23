@@ -20,6 +20,7 @@ zisfcross(
   wscale = TRUE,
   S = 1L,
   udist = "hnormal",
+  sigmavType = "common",
   start = NULL,
   method = "bfgs",
   hessianType = 1,
@@ -93,6 +94,11 @@ Wang and Ye 2020) \item \code{'weibull'}, for the Weibull distribution
 (Tsionas 2007) \item \code{'genexponential'}, for the generalized
 exponential distribution (Papadopoulos 2020) \item \code{'tslaplace'}, for
 the truncated skewed Laplace distribution (Wang 2012). }}
+
+\item{sigmavType}{Character string. Default = \code{'common'}. Nature of the
+two-sided error term between classes. Two possibilities: \code{'common'} for
+common error term \eqn{v} and \code{'different'} for different error term
+\eqn{v}.}
 
 \item{start}{Numeric vector. Optional starting values for the maximum
 likelihood (ML) estimation.}
@@ -210,6 +216,9 @@ used for optimization along with residuals and fitted values of the OLS and
 M(S)L estimations, and the individual observation log-likelihood. When \code{weights}
 is specified an additional variable is also provided in \code{dataTable}.}
 
+\item{sigmavType}{Character string. Nature of the
+two-sided error term between classes. See \strong{Arguments} section.}
+
 \item{initHalf}{When \code{start = NULL} and \code{udist = 'hnormal'}. Initial ML estimation with half
 normal distribution for the one-sided error term. Model to construct the
 starting values for the ZISF estimation. Object of class
@@ -282,11 +291,11 @@ optimization algorithms are available.
 Following Kumbhakar \emph{et al.} (2013) the model can be defined as:
 
 \Sexpr[results=rd, stage=build]{
-katex::math_to_rd("y_i = \\\alpha + \\\mathbf{x_i^{\\\prime}}\\\bm{\\\beta} + v_i - Su_i \\\quad \\\hbox{with probability} \\\quad p,")
+katex::math_to_rd('y_i = \\\alpha + \\\mathbf{x_i^{\\\prime}}\\\bm{\\\beta} + v_i - Su_i \\\quad \\\hbox{with probability} \\\quad p,')
 }
 
 \Sexpr[results=rd, stage=build]{
-katex::math_to_rd("y_i = \\\alpha + \\\mathbf{x_i^{\\\prime}}\\\bm{\\\beta} + v_i \\\quad \\\hbox{with probability} \\\quad 1-p")
+katex::math_to_rd('y_i = \\\alpha + \\\mathbf{x_i^{\\\prime}}\\\bm{\\\beta} + v_i \\\quad \\\hbox{with probability} \\\quad 1-p')
 }
 
 where \eqn{i} is the observation, \eqn{y} is the
@@ -302,35 +311,35 @@ The prior probability of belonging to the inefficient class can depend on some
 covariates using a logit specification:
 
 \Sexpr[results=rd, stage=build]{
-katex::math_to_rd("p_i = \\\frac{\\\exp{(\\\theta'Z_{hi})}}{1-\\\exp{(\\\theta'Z_{hi})}}")
+katex::math_to_rd('p_i = \\\frac{\\\exp{(Z_{hi}^{\\\prime}\\\theta)}}{1-\\\exp{(Z_{hi}^{\\\prime}\\\theta)}}')
 }
 
-with \eqn{Z_h} the covariates, \eqn{\theta} the coefficients estimated for
+with \eqn{Z_h} the covariates, \eqn{\bm{\theta}} the vector of coefficients estimated for
 the covariates.
 
 Let
 
 \Sexpr[results=rd, stage=build]{
-katex::math_to_rd("\\\epsilon_i = v_i -Su_i")
+katex::math_to_rd('\\\epsilon_i = v_i -Su_i')
 }
 
 In the case of the truncated normal distribution, the convolution of
 \eqn{u_i} and \eqn{v_i} is:
 
 \Sexpr[results=rd, stage=build]{
-katex::math_to_rd("f(\\\epsilon_i)=\\\frac{p_i}{\\\sqrt{\\\\sigma_u^2 + \\\sigma_v^2}}\\\phi\\\\left(\\\frac{S\\\epsilon_i + \\\mu}{\\\sqrt{\\\sigma_u^2 + \\\sigma_v^2}}\\\\right)\\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)\\\Big/\\\Phi\\\\left(\\\frac{\\\mu}{\\\sigma_u}\\\\right) + \\\frac{1-p_i}{\\\sigma_v}\\\Phi\\\\left(\\\frac{S\\\epsilon}{\\\sigma_v}\\\\right)")
+katex::math_to_rd('f(\\\epsilon_i)=\\\frac{p_i}{\\\sqrt{\\\\sigma_u^2 + \\\sigma_v^2}}\\\phi\\\\left(\\\frac{S\\\epsilon_i + \\\mu}{\\\sqrt{\\\sigma_u^2 + \\\sigma_v^2}}\\\\right)\\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)\\\Big/\\\Phi\\\\left(\\\frac{\\\mu}{\\\sigma_u}\\\\right) + \\\frac{1-p_i}{\\\sigma_v}\\\Phi\\\\left(\\\frac{S\\\epsilon}{\\\sigma_v}\\\\right)')
 }
 
 where
 
 \Sexpr[results=rd, stage=build]{
-katex::math_to_rd("\\\mu_{i*}=\\\frac{\\\mu\\\sigma_v^2 - S\\\epsilon_i\\\sigma_u^2}{\\\sigma_u^2 + \\\sigma_v^2}")
+katex::math_to_rd('\\\mu_{i*}=\\\frac{\\\mu\\\sigma_v^2 - S\\\epsilon_i\\\sigma_u^2}{\\\sigma_u^2 + \\\sigma_v^2}')
 }
 
 and
 
 \Sexpr[results=rd, stage=build]{
-katex::math_to_rd("\\\sigma_*^2 = \\\frac{\\\sigma_u^2 \\\sigma_v^2}{\\\sigma_u^2 + \\\sigma_v^2}")
+katex::math_to_rd('\\\sigma_*^2 = \\\frac{\\\sigma_u^2 \\\sigma_v^2}{\\\sigma_u^2 + \\\sigma_v^2}')
 }
 
 In the case of the half normal distribution the convolution is obtained by
@@ -340,13 +349,25 @@ Class assignment is based on the largest posterior probability. This
 probability is obtained using Bayes' rule, as follows for the inefficient class
 
 \Sexpr[results=rd, stage=build]{
-katex::math_to_rd("p_i^\\\ast = \\\frac{p_i \\\times \\\pi(i, 1) }{f(\\\epsilon_i)}")
+katex::math_to_rd('p_i^\\\ast = \\\frac{p_i \\\times \\\pi(i, 1) }{f(\\\epsilon_i)}')
 }
 
 where
 
 \Sexpr[results=rd, stage=build]{
-katex::math_to_rd("\\\pi(i, 1)=\\\frac{1}{\\\sqrt{\\\\sigma_u^2 + \\\sigma_v^2}}\\\phi\\\\left(\\\frac{S\\\epsilon_i + \\\mu}{\\\sqrt{\\\sigma_u^2 + \\\sigma_v^2}}\\\\right)\\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)\\\Big/\\\Phi\\\\left(\\\frac{\\\mu}{\\\sigma_u}\\\\right)")
+katex::math_to_rd('\\\pi(i, 1)=\\\frac{1}{\\\sqrt{\\\\sigma_u^2 + \\\sigma_v^2}}\\\phi\\\\left(\\\frac{S\\\epsilon_i + \\\mu}{\\\sqrt{\\\sigma_u^2 + \\\sigma_v^2}}\\\\right)\\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)\\\Big/\\\Phi\\\\left(\\\frac{\\\mu}{\\\sigma_u}\\\\right)')
+}
+
+The model presented so far assumed common noise variable \eqn{v} for the two classes of
+observations. By setting argument \code{sigmavType = 'different'}, different noise variables
+are imposed for the two groups. The new estimated model is presented as follows:
+
+\Sexpr[results=rd, stage=build]{
+katex::math_to_rd('y_i = \\\alpha + \\\mathbf{x_i^{\\\prime}}\\\bm{\\\beta} + v_i^{ZI} - Su_i \\\quad \\\hbox{with probability} \\\quad p,')
+}
+
+\Sexpr[results=rd, stage=build]{
+katex::math_to_rd('y_i = \\\alpha + \\\mathbf{x_i^{\\\prime}}\\\bm{\\\beta} + v_i^{SF} \\\quad \\\hbox{with probability} \\\quad 1-p')
 }
 
 \code{zisfcross} allows for the maximization of weighted log-likelihood.
@@ -370,7 +391,7 @@ A set of extractor functions for fitted model objects is available for objects o
 \code{\link[=fitted.zisfcross]{fitted}}, \code{\link[=logLik.zisfcross]{logLik}},
 \code{\link[=residuals.zisfcross]{residuals}}, \code{\link[=vcov.zisfcross]{vcov}},
 \code{\link[=efficiencies.zisfcross]{efficiencies}}, \code{\link[=ic.zisfcross]{ic}},
-\code{\link[=marginal.zisfcross]{marginal}}, \code{\link[=skewnessTest]{skewnessTest}},
+\code{\link[=marginal.zisfcross]{marginal}},
 \code{\link[=estfun.zisfcross]{estfun}} and
 \code{\link[=bread.zisfcross]{bread}} (from the \CRANpkg{sandwich} package),
 \code{\link[lmtest:coeftest]{lmtest::coeftest()}} (from the \CRANpkg{lmtest} package).
@@ -491,9 +512,6 @@ inefficiency drivers.
 \code{\link[=residuals.zisfcross]{residuals}} for extracting residuals of the
 estimation.
 
-\code{\link[=skewnessTest]{skewnessTest}} for conducting residuals
-skewness test.
-
 \code{\link[=vcov.zisfcross]{vcov}} for computing the variance-covariance
 matrix of the coefficients.
 
@@ -501,8 +519,6 @@ matrix of the coefficients.
 
 \code{\link[=estfun.zisfcross]{estfun}} for gradient extraction for each
 observation.
-
-\code{\link{skewnessTest}} for implementing skewness test.
 }
 \keyword{cross-section}
 \keyword{likelihood}

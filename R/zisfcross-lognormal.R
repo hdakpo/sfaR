@@ -140,7 +140,7 @@ cstzisflognorm <- function(olsObj, epsiRes, nXvar, nmuZUvar,
     1), rep(0, nZHvar))
   names(StartVal) <- c(names(Esti)[1:nXvar], paste0("Zmu_",
     colnames(muHvar)), paste0("Zu_", colnames(uHvar)), paste0("Zv_",
-    colnames(vHvar)), paste0("SF_", colnames(Zvar)))
+    colnames(vHvar)), paste0("ZI_", colnames(Zvar)))
   names(initLog$estimate) <- c(names(Esti)[1:nXvar], paste0("Zmu_",
     colnames(muHvar)[1]), paste0("Zu_", colnames(uHvar)[1]),
     paste0("Zv_", colnames(vHvar)[1]))
@@ -171,7 +171,7 @@ cstmnsflognorm <- function(olsObj, epsiRes, nXvar, nmuZUvar,
     1), rep(0, nZHvar))
   names(StartVal) <- c(names(Esti)[1:nXvar], paste0("Zmu_",
     colnames(muHvar)), paste0("Zu_", colnames(uHvar)), paste0("Zv_",
-    colnames(vHvar)), paste0("Zv_", colnames(vHvar)), paste0("SF_",
+    colnames(vHvar)), paste0("Zv_", colnames(vHvar)), paste0("ZI_",
     colnames(Zvar)))
   names(initLog$estimate) <- c(names(Esti)[1:nXvar], paste0("Zmu_",
     colnames(muHvar)[1]), paste0("Zu_", colnames(uHvar)[1]),
@@ -1055,7 +1055,7 @@ zisflognormAlgOpt <- function(start, olsParam, dataTable, S,
 }
 
 # Different sigma_v
-cmnsflognormAlgOpt <- function(start, olsParam, dataTable, S,
+mnsflognormAlgOpt <- function(start, olsParam, dataTable, S,
   wHvar, nXvar, N, FiMat, uHvar, nuZUvar, vHvar, nvZVvar, muHvar,
   nmuZUvar, Zvar, nZHvar, Yvar, Xvar, method, printInfo, itermax,
   stepmax, tol, gradtol, hessianType, qac) {
