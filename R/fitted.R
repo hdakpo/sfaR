@@ -64,7 +64,7 @@
 #' @export
 # fitted values for sfacross ----------
 fitted.sfacross <- function(object, ...) {
-  object$dataTable$mleFitted
+  object$dataTable$mlFitted
 }
 
 # fitted values for lcmcross ----------
@@ -73,20 +73,21 @@ fitted.sfacross <- function(object, ...) {
 #' @export
 fitted.lcmcross <- function(object, ...) {
   if (object$nClasses == 2) {
-    data.frame(select(object$dataTable, "mlFitted_c1", "mlFitted_c2"))
+    data.frame(dplyr::select(object$dataTable, "mlFitted_c1",
+      "mlFitted_c2"))
   } else {
     if (object$nClasses == 3) {
-      data.frame(select(object$dataTable, "mlFitted_c1",
+      data.frame(dplyr::select(object$dataTable, "mlFitted_c1",
         "mlFitted_c2", "mlFitted_c3"))
     } else {
       if (object$nClasses == 4) {
-        data.frame(select(object$dataTable, "mlFitted_c1",
+        data.frame(dplyr::select(object$dataTable, "mlFitted_c1",
           "mlFitted_c2", "mlFitted_c3", "mlFitted_c4"))
       } else {
         if (object$nClasses == 5) {
-          data.frame(select(object$dataTable, "mlFitted_c1",
-          "mlFitted_c2", "mlFitted_c3", "mlFitted_c4",
-          "mlFitted_c5"))
+          data.frame(dplyr::select(object$dataTable,
+          "mlFitted_c1", "mlFitted_c2", "mlFitted_c3",
+          "mlFitted_c4", "mlFitted_c5"))
         }
       }
     }
@@ -98,7 +99,7 @@ fitted.lcmcross <- function(object, ...) {
 #' @aliases fitted.selectioncross
 #' @export
 fitted.selectioncross <- function(object, ...) {
-  object$dataTable$mleFitted
+  object$dataTable$mlFitted
 }
 
 # fitted values for zisfcross ----------
@@ -106,5 +107,5 @@ fitted.selectioncross <- function(object, ...) {
 #' @aliases fitted.zisfcross
 #' @export
 fitted.zisfcross <- function(object, ...) {
-  object$dataTable$mleFitted
+  object$dataTable$mlFitted
 }
