@@ -75,14 +75,25 @@ pstexponorm_k90 <- function(olsObj, epsiRes, nXvar, nuZUvar,
   tol) {
   cat("Initialization: SFA + exponential-normal distribution...\n")
   initExpo <- maxLik(logLik = cexponormlike, start = cstexponorm(olsObj = olsObj,
-    epsiRes = epsiRes, S = S, nuZUvar = 1, uHvar = uHvar,
-    nvZVvar = 1, vHvar = vHvar), grad = cgradexponormlike,
-    method = "BFGS", control = list(iterlim = itermax, printLevel = if (printInfo) 2 else 0,
-      reltol = tol), nXvar = nXvar, nuZUvar = 1, nvZVvar = 1,
-    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-    S = S, wHvar = wHvar)
+    epsiRes = epsiRes, S = S, nuZUvar = 1, uHvar = as.matrix(uHvar[,
+      1]), nvZVvar = 1, vHvar = as.matrix(vHvar[, 1])),
+    grad = cgradexponormlike, method = "BFGS", control = list(iterlim = itermax,
+      printLevel = if (printInfo) 2 else 0, reltol = tol),
+    nXvar = nXvar, nuZUvar = 1, nvZVvar = 1, uHvar = as.matrix(uHvar[,
+      1]), vHvar = as.matrix(vHvar[, 1]), Yvar = Yvar,
+    Xvar = Xvar, S = S, wHvar = wHvar)
   Esti <- initExpo$estimate
-  StartVal <- c(Esti, eta1 = 0.001, eta2 = 0.001)
+  StartVal <- c(Esti[1:(nXvar)], Esti[nXvar + 1], if (nuZUvar >
+    1) {
+    rep(0, nuZUvar - 1)
+  }, Esti[nXvar + 2], if (nvZVvar > 1) {
+    rep(0, nvZVvar - 1)
+  }, 0.001, 0.001)
+  names(StartVal) <- c(names(Esti)[1:nXvar], paste0("Zu_",
+    colnames(uHvar)), paste0("Zv_", colnames(vHvar)), "eta1",
+    "eta2")
+  names(initExpo$estimate) <- c(names(Esti)[1:nXvar], paste0("Zu_",
+    colnames(uHvar)[1]), paste0("Zv_", colnames(vHvar)[1]))
   return(list(StartVal = StartVal, initExpo = initExpo))
 }
 

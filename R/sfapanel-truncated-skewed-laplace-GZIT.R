@@ -7,9 +7,17 @@
 #------------------------------------------------------------------------------#
 # Data: Panel data                                                             #
 # Model: Panel Stochastic Frontier Model                                       #
-# Two types: - Battese and Coelli 1992 specification  BC92III                  #
-#            - u_it = g(zit)u_i                                                #
-#            - g(zit) = exp(eta * gHvar)                                       #
+# Inefficiency structure: u_it = g(zit)u_i                                     #
+#                         Battese and Coelli 1992 specifications:              #
+#                          - g(zit) = exp(-eta * (t - T))                      #
+#                          - g(zit) = exp(-eta1 * (t - T) - eta2 * (t - T)^2)  #
+#                          - g(zit) = exp(eta * gHvar)                         #
+#                         Kumbhakar and Wang 2005 specification:               #
+#                          - g(zit) = exp(eta * (t - t1))                      #
+#                         Cuesta 2000 specification:                           #
+#                          - g(zit) = exp(-eta_i * (t - T))                    #
+#                         Modified Lee and Schmidt 1993                        #
+#                          - g(zit) = exp(-eta_t * (t - T)): g(zit) = 1 for T  #
 # Convolution: truncated skewed laplace - normal                               #
 #------------------------------------------------------------------------------#
 
@@ -28,7 +36,7 @@
 #' @param pindex panel indices (ID, TIME)
 #' @param TT vector of time of presence
 #' @noRd
-ptslnormlike_bc92III <- function(parm, nXvar, nuZUvar, nvZVvar,
+ptslnormlike_gzit <- function(parm, nXvar, nuZUvar, nvZVvar,
   uHvar, vHvar, Yvar, Xvar, pindex, TT, S, wHvar, ngZGvar,
   gHvar) {
   beta <- parm[1:(nXvar)]
@@ -75,8 +83,8 @@ ptslnormlike_bc92III <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param itermax maximum iteration
 #' @param tol parameter tolerance
 #' @noRd
-psttslnorm_bc92III <- function(olsObj, epsiRes, nXvar, nuZUvar,
-  nvZVvar, uHvar, vHvar, Yvar, Xvar, ngZGvar, gHvar, S, wHvar,
+psttslnorm_gzit <- function(olsObj, epsiRes, nXvar, nuZUvar,
+  nvZVvar, uHvar, vHvar, Yvar, Xvar, ngZGvar, gHvar, S, wHvar, modelType,
   itermax, printInfo, tol) {
   cat("Initialization: SFA + truncated-skewed-laplace-normal distribution...\n")
   initTsl <- maxLik(logLik = ctslnormlike, start = csttslnorm(olsObj = olsObj,
@@ -89,14 +97,42 @@ psttslnorm_bc92III <- function(olsObj, epsiRes, nXvar, nuZUvar,
     Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar)
   Esti <- initTsl$estimate
   StartVal <- c(Esti[1:(nXvar)], Esti[nXvar + 1], if (nuZUvar >
-    1) {
+                                                      1) {
     rep(0, nuZUvar - 1)
   }, Esti[nXvar + 2], if (nvZVvar > 1) {
     rep(0, nvZVvar - 1)
-  }, Esti[nXvar + 3], rep(0, ngZGvar))
+  }, Esti[nXvar + 3], if (modelType %in% c("bc92a", "kw05")) {
+    0.001} else {
+      if (modelType == "bc92b") {
+        c(0.001, 0.001)
+      } else {
+        if (modelType == "bc92c") {
+          rep(0, ngZGvar)
+        } else {
+          if (modelType %in% c("c00", "mols93")) {
+            rep(0.001, ngZGvar)
+          }
+        }
+      }
+    } 
+  )
   names(StartVal) <- c(names(Esti)[1:nXvar], paste0("Zu_",
-    colnames(uHvar)), paste0("Zv_", colnames(vHvar)), "lambda",
-    paste("Zg_", colnames(gHvar)))
+                                                    colnames(uHvar)), paste0("Zv_", colnames(vHvar)), "lambda", if (modelType %in% c("bc92a", "kw05")) {
+                                                      "eta"
+                                                    } else {
+                                                      if (modelType == "bc92b") {
+                                                        c("eta1", "eta2")
+                                                      } else {
+                                                        if (modelType == "bc92c") {
+                                                          paste0("Zg_",colnames(gHvar))
+                                                        } else {
+                                                          if (modelType %in% c("c00", "mols93")) {
+                                                            paste0("eta_", colnames(gHvar))
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+  )
   names(initTsl$estimate) <- c(names(Esti)[1:nXvar], paste0("Zu_",
     colnames(uHvar)[1]), paste0("Zv_", colnames(vHvar)[1]),
     "lambda")
@@ -118,7 +154,7 @@ psttslnorm_bc92III <- function(olsObj, epsiRes, nXvar, nuZUvar,
 #' @param pindex panel indices (ID, TIME)
 #' @param TT vector of time of presence
 #' @noRd
-pgradtslnormlike_bc92III <- function(parm, nXvar, nuZUvar, nvZVvar,
+pgradtslnormlike_gzit <- function(parm, nXvar, nuZUvar, nvZVvar,
   uHvar, vHvar, Yvar, Xvar, pindex, TT, S, wHvar, ngZGvar,
   gHvar) {
   beta <- parm[1:(nXvar)]
@@ -233,7 +269,7 @@ pgradtslnormlike_bc92III <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param pindex panel indices (ID, TIME)
 #' @param TT vector of time of presence
 #' @noRd
-phesstslnormlike_bc92III <- function(parm, nXvar, nuZUvar, nvZVvar,
+phesstslnormlike_gzit <- function(parm, nXvar, nuZUvar, nvZVvar,
   uHvar, vHvar, Yvar, Xvar, pindex, TT, S, wHvar, ngZGvar,
   gHvar) {
   beta <- parm[1:(nXvar)]
@@ -698,7 +734,7 @@ phesstslnormlike_bc92III <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param hessianType how hessian is computed
 #' @param qac qac option for maxLik
 #' @noRd
-tslnormAlgOpt_bc92III <- function(start, olsParam, dataTable,
+tslnormAlgOpt_gzit <- function(start, olsParam, dataTable,
   S, nXvar, uHvar_c, uHvar_p, nuZUvar, vHvar_c, vHvar_p, nvZVvar,
   gHvar, ngZGvar, Yvar, Xvar, pindex, TT, wHvar_c, wHvar_p,
   method, printInfo, itermax, stepmax, tol, gradtol, hessianType,
@@ -706,7 +742,7 @@ tslnormAlgOpt_bc92III <- function(start, olsParam, dataTable,
   if (!is.null(start)) {
     startVal <- start
   } else {
-    start_st <- psttslnorm_bc92III(olsObj = olsParam, epsiRes = dataTable[["olsResiduals"]],
+    start_st <- psttslnorm_gzit(olsObj = olsParam, epsiRes = dataTable[["olsResiduals"]],
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       gHvar = gHvar, ngZGvar = ngZGvar, uHvar = uHvar_c,
       vHvar = vHvar_c, Yvar = Yvar, Xvar = Xvar, S = S,
@@ -715,7 +751,7 @@ tslnormAlgOpt_bc92III <- function(start, olsParam, dataTable,
     InitTsl <- start_st$initTsl
     startVal <- start_st$StartVal
   }
-  startLoglik <- sum(ptslnormlike_bc92III(startVal, nXvar = nXvar,
+  startLoglik <- sum(ptslnormlike_gzit(startVal, nXvar = nXvar,
     nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
     gHvar = gHvar, ngZGvar = ngZGvar, vHvar = vHvar_p, Yvar = Yvar,
     Xvar = Xvar, pindex = pindex, TT = TT, S = S, wHvar = wHvar_p,
@@ -729,21 +765,21 @@ tslnormAlgOpt_bc92III <- function(start, olsParam, dataTable,
   }
   mleObj <- switch(method, ucminf = ucminf(par = startVal,
     fn = function(parm) {
-      -sum(ptslnormlike_bc92III(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+      -sum(ptslnormlike_gzit(parm, nXvar = nXvar, nuZUvar = nuZUvar,
         nvZVvar = nvZVvar, uHvar = uHvar_p, gHvar = gHvar,
         ngZGvar = ngZGvar, vHvar = vHvar_p, Yvar = Yvar,
         Xvar = Xvar, pindex = pindex, TT = TT, S = S,
         wHvar = wHvar_p))
     }, gr = function(parm) {
-      -colSums(pgradtslnormlike_bc92III(parm, nXvar = nXvar,
+      -colSums(pgradtslnormlike_gzit(parm, nXvar = nXvar,
         nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
         gHvar = gHvar, ngZGvar = ngZGvar, vHvar = vHvar_p,
         Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT,
         S = S, wHvar = wHvar_p))
     }, hessian = 0, control = list(trace = if (printInfo) 1 else 0,
       maxeval = itermax, stepmax = stepmax, xtol = tol,
-      grtol = gradtol)), maxLikAlgo = maxRoutine(fn = ptslnormlike_bc92III,
-    grad = pgradtslnormlike_bc92III, hess = phesstslnormlike_bc92III,
+      grtol = gradtol)), maxLikAlgo = maxRoutine(fn = ptslnormlike_gzit,
+    grad = pgradtslnormlike_gzit, hess = phesstslnormlike_gzit,
     start = startVal, finalHessian = if (hessianType == 2) "bhhh" else TRUE,
     control = list(printLevel = if (printInfo) 2 else 0,
       iterlim = itermax, reltol = tol, tol = tol, qac = qac),
@@ -751,12 +787,12 @@ tslnormAlgOpt_bc92III <- function(start, olsParam, dataTable,
     uHvar = uHvar_p, gHvar = gHvar, ngZGvar = ngZGvar, vHvar = vHvar_p,
     Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT, S = S,
     wHvar = wHvar_p), sr1 = trust.optim(x = startVal, fn = function(parm) {
-    -sum(ptslnormlike_bc92III(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+    -sum(ptslnormlike_gzit(parm, nXvar = nXvar, nuZUvar = nuZUvar,
       nvZVvar = nvZVvar, uHvar = uHvar_p, gHvar = gHvar,
       ngZGvar = ngZGvar, vHvar = vHvar_p, Yvar = Yvar,
       Xvar = Xvar, pindex = pindex, TT = TT, S = S, wHvar = wHvar_p))
   }, gr = function(parm) {
-    -colSums(pgradtslnormlike_bc92III(parm, nXvar = nXvar,
+    -colSums(pgradtslnormlike_gzit(parm, nXvar = nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
       gHvar = gHvar, ngZGvar = ngZGvar, vHvar = vHvar_p,
       Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT,
@@ -765,19 +801,19 @@ tslnormAlgOpt_bc92III <- function(start, olsParam, dataTable,
     stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
     report.precision = 1L)), sparse = trust.optim(x = startVal,
     fn = function(parm) {
-      -sum(ptslnormlike_bc92III(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+      -sum(ptslnormlike_gzit(parm, nXvar = nXvar, nuZUvar = nuZUvar,
         nvZVvar = nvZVvar, uHvar = uHvar_p, gHvar = gHvar,
         ngZGvar = ngZGvar, vHvar = vHvar_p, Yvar = Yvar,
         Xvar = Xvar, pindex = pindex, TT = TT, S = S,
         wHvar = wHvar_p))
     }, gr = function(parm) {
-      -colSums(pgradtslnormlike_bc92III(parm, nXvar = nXvar,
+      -colSums(pgradtslnormlike_gzit(parm, nXvar = nXvar,
         nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
         gHvar = gHvar, ngZGvar = ngZGvar, vHvar = vHvar_p,
         Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT,
         S = S, wHvar = wHvar_p))
     }, hs = function(parm) {
-      as(-phesstslnormlike_bc92III(parm, nXvar = nXvar,
+      as(-phesstslnormlike_gzit(parm, nXvar = nXvar,
         nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
         gHvar = gHvar, ngZGvar = ngZGvar, vHvar = vHvar_p,
         Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT,
@@ -786,42 +822,42 @@ tslnormAlgOpt_bc92III <- function(start, olsParam, dataTable,
       cgtol = gradtol, stop.trust.radius = tol, prec = tol,
       report.level = if (printInfo) 2 else 0, report.precision = 1L,
       preconditioner = 1L)), mla = mla(b = startVal, fn = function(parm) {
-    -sum(ptslnormlike_bc92III(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+    -sum(ptslnormlike_gzit(parm, nXvar = nXvar, nuZUvar = nuZUvar,
       nvZVvar = nvZVvar, uHvar = uHvar_p, gHvar = gHvar,
       ngZGvar = ngZGvar, vHvar = vHvar_p, Yvar = Yvar,
       Xvar = Xvar, pindex = pindex, TT = TT, S = S, wHvar = wHvar_p))
   }, gr = function(parm) {
-    -colSums(pgradtslnormlike_bc92III(parm, nXvar = nXvar,
+    -colSums(pgradtslnormlike_gzit(parm, nXvar = nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
       gHvar = gHvar, ngZGvar = ngZGvar, vHvar = vHvar_p,
       Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT,
       S = S, wHvar = wHvar_p))
   }, hess = function(parm) {
-    -phesstslnormlike_bc92III(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+    -phesstslnormlike_gzit(parm, nXvar = nXvar, nuZUvar = nuZUvar,
       nvZVvar = nvZVvar, uHvar = uHvar_p, gHvar = gHvar,
       ngZGvar = ngZGvar, vHvar = vHvar_p, Yvar = Yvar,
       Xvar = Xvar, pindex = pindex, TT = TT, S = S, wHvar = wHvar_p)
   }, print.info = printInfo, maxiter = itermax, epsa = gradtol,
     epsb = gradtol), nlminb = nlminb(start = startVal, objective = function(parm) {
-    -sum(ptslnormlike_bc92III(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+    -sum(ptslnormlike_gzit(parm, nXvar = nXvar, nuZUvar = nuZUvar,
       nvZVvar = nvZVvar, uHvar = uHvar_p, gHvar = gHvar,
       ngZGvar = ngZGvar, vHvar = vHvar_p, Yvar = Yvar,
       Xvar = Xvar, pindex = pindex, TT = TT, S = S, wHvar = wHvar_p))
   }, gradient = function(parm) {
-    -colSums(pgradtslnormlike_bc92III(parm, nXvar = nXvar,
+    -colSums(pgradtslnormlike_gzit(parm, nXvar = nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
       gHvar = gHvar, ngZGvar = ngZGvar, vHvar = vHvar_p,
       Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT,
       S = S, wHvar = wHvar_p))
   }, hessian = function(parm) {
-    -phesstslnormlike_bc92III(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+    -phesstslnormlike_gzit(parm, nXvar = nXvar, nuZUvar = nuZUvar,
       nvZVvar = nvZVvar, uHvar = uHvar_p, gHvar = gHvar,
       ngZGvar = ngZGvar, vHvar = vHvar_p, Yvar = Yvar,
       Xvar = Xvar, pindex = pindex, TT = TT, S = S, wHvar = wHvar_p)
   }, control = list(iter.max = itermax, trace = if (printInfo) 1 else 0,
     eval.max = itermax, rel.tol = tol, x.tol = tol)))
   if (method %in% c("ucminf", "nlminb")) {
-    mleObj$gradient <- colSums(pgradtslnormlike_bc92III(mleObj$par,
+    mleObj$gradient <- colSums(pgradtslnormlike_gzit(mleObj$par,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar_p, gHvar = gHvar, ngZGvar = ngZGvar,
       vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar, pindex = pindex,
@@ -845,25 +881,25 @@ tslnormAlgOpt_bc92III <- function(start, olsParam, dataTable,
   }
   if (hessianType != 2) {
     if (method %in% c("ucminf", "nlminb")) {
-      mleObj$hessian <- phesstslnormlike_bc92III(parm = mleObj$par,
+      mleObj$hessian <- phesstslnormlike_gzit(parm = mleObj$par,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar_p, gHvar = gHvar, ngZGvar = ngZGvar,
         vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar, pindex = pindex,
         TT = TT, S = S, wHvar = wHvar_p)
     }
     if (method == "sr1") {
-      mleObj$hessian <- phesstslnormlike_bc92III(parm = mleObj$solution,
+      mleObj$hessian <- phesstslnormlike_gzit(parm = mleObj$solution,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar_p, gHvar = gHvar, ngZGvar = ngZGvar,
         vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar, pindex = pindex,
         TT = TT, S = S, wHvar = wHvar_p)
     }
   }
-  mleObj$logL_OBS <- ptslnormlike_bc92III(parm = mlParam, nXvar = nXvar,
+  mleObj$logL_OBS <- ptslnormlike_gzit(parm = mlParam, nXvar = nXvar,
     nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
     gHvar = gHvar, ngZGvar = ngZGvar, vHvar = vHvar_p, Yvar = Yvar,
     Xvar = Xvar, pindex = pindex, TT = TT, S = S, wHvar = wHvar_p)
-  mleObj$gradL_OBS <- pgradtslnormlike_bc92III(parm = mlParam,
+  mleObj$gradL_OBS <- pgradtslnormlike_gzit(parm = mlParam,
     nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
     uHvar = uHvar_p, gHvar = gHvar, ngZGvar = ngZGvar, vHvar = vHvar_p,
     Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT, S = S,
@@ -882,7 +918,7 @@ tslnormAlgOpt_bc92III <- function(start, olsParam, dataTable,
 #' @param object object of class sfacross
 #' @param level level for confidence interval
 #' @noRd
-ptslnormeff_bc92III <- function(object, level) {
+ptslnormeff_gzit <- function(object, level) {
   beta <- object$mlParam[1:(object$nXvar)]
   delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
