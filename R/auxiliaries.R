@@ -1017,6 +1017,56 @@ probit_gradient <- function(beta, Xvar, Yvar, wHvar) {
   sweep(Xvar, MARGIN = 1, STATS = gx, FUN = "*")
 }
 
+# Likelihood for logit model ----------
+
+## Likelihood ----------
+logit_likelihood <- function(beta, Xvar, Yvar, wHvar) {
+  Z <- as.numeric(crossprod(matrix(beta), t(Xvar)))
+  wHvar * (Yvar * log(exp(Z)/(1 + exp(Z))) + (1 - Yvar) * log(1/(1 +
+    exp(Z))))
+}
+
+## Gradient ----------
+logit_gradient <- function(beta, Xvar, Yvar, wHvar) {
+  Z <- as.numeric(crossprod(matrix(beta), t(Xvar)))
+  gx <- wHvar * (Yvar * (1 - exp(Z)/(1 + exp(Z))) - (1 - Yvar) *
+    exp(Z)/(1 + exp(Z)))
+  sweep(Xvar, MARGIN = 1, STATS = gx, FUN = "*")
+}
+
+# Likelihood for cauchit model ----------
+
+## Likelihood ----------
+cauchit_likelihood <- function(beta, Xvar, Yvar, wHvar) {
+  Z <- as.numeric(crossprod(matrix(beta), t(Xvar)))
+  wHvar * (Yvar * log(1/pi * atan(Z) + 1/2) + (1 - Yvar) *
+    log(1/2 - 1/pi * atan(Z)))
+}
+
+## Gradient ----------
+cauchit_gradient <- function(beta, Xvar, Yvar, wHvar) {
+  Z <- as.numeric(crossprod(matrix(beta), t(Xvar)))
+  gx <- wHvar * (Yvar/(0.5 + atan(Z)/pi) - (1 - Yvar)/(0.5 -
+    atan(Z)/pi))/(pi * ((Z)^2 + 1))
+  sweep(Xvar, MARGIN = 1, STATS = gx, FUN = "*")
+}
+
+# Likelihood for cloglog model ----------
+
+## Likelihood ----------
+cloglog_likelihood <- function(beta, Xvar, Yvar, wHvar) {
+  Z <- as.numeric(crossprod(matrix(beta), t(Xvar)))
+  wHvar * (Yvar * log(1 - exp(-exp(Z))) + (1 - Yvar) * log(exp(-exp(Z))))
+}
+
+## Gradient ----------
+cloglog_gradient <- function(beta, Xvar, Yvar, wHvar) {
+  Z <- as.numeric(crossprod(matrix(beta), t(Xvar)))
+  gx <- wHvar * exp(Z) * (Yvar * (1 + exp(-exp(Z))/(1 - exp(-exp(Z)))) -
+    1)
+  sweep(Xvar, MARGIN = 1, STATS = gx, FUN = "*")
+}
+
 # Center text strings (gdata package) ----------
 #' @param s string
 #' @noRd

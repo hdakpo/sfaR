@@ -100,10 +100,13 @@
 #' @importFrom ucminf ucminf
 #' @importFrom trustOptim trust.optim
 #' @importFrom marqLevAlg mla
-#' @importFrom dplyr bind_cols as_tibble mutate select
+#' @importFrom dplyr bind_cols as_tibble mutate select pull
+#' @importFrom magrittr %>%
 #' @importFrom nleqslv nleqslv
 #' @importFrom katex math_to_rd
 #' @importFrom fastGHQuad gaussHermiteData
 #' @importFrom cubature hcubature pcubature
 #' @importFrom sandwich bread estfun
+#' @importFrom calculus jacobian
+#' @importFrom plm pdata.frame index
 NULL

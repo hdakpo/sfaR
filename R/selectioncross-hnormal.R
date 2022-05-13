@@ -11,8 +11,6 @@
 #------------------------------------------------------------------------------#
 
 # Log-likelihood ----------
-
-## Gauss-Kronrod quadrature ----------
 #' log-likelihood for halfnormal-normal distribution + selection bias
 #' @param parm all parameters to be estimated
 #' @param nXvar number of main variables (inputs + env. var)
@@ -28,7 +26,11 @@
 #' @param uBound upper bound for inefficiency (default \code{Inf})
 #' @param subdivisions number of divisions for GK quadrature
 #' @param intol integration tolerance
+#' @param gH Gauss-Hermite quadrature rule (list from fastGHQuad)
+#' @param N number of observations
+#' @param FiMat matrix of Halton draws
 #' @noRd
+## Gauss-Kronrod quadrature ----------
 chalfnormlike_ss_GK <- function(parm, nXvar, nuZUvar, nvZVvar,
   uHvar, vHvar, Yvar, Xvar, wHvar, S, PREDICTIONS, uBound,
   subdivisions, intol) {
@@ -56,22 +58,6 @@ chalfnormlike_ss_GK <- function(parm, nXvar, nuZUvar, nvZVvar,
 }
 
 ## Hcubature ----------
-#' log-likelihood for halfnormal-normal distribution + selection bias
-#' @param parm all parameters to be estimated
-#' @param nXvar number of main variables (inputs + env. var)
-#' @param nuZUvar number of Zu variables
-#' @param nvZVvar number of Zv variables
-#' @param uHvar matrix of Zu variables
-#' @param vHvar matrix of Zv variables
-#' @param Yvar vector of dependent variable
-#' @param Xvar matrix of main variables
-#' @param wHvar vector of weights (weighted likelihood)
-#' @param S integer for cost/prod estimation
-#' @param PREDICTIONS predictions from the first step probit model
-#' @param uBound upper bound for inefficiency (default \code{Inf})
-#' @param subdivisions number of divisions for hcubature
-#' @param intol integration tolerance
-#' @noRd
 chalfnormlike_ss_HCUB <- function(parm, nXvar, nuZUvar, nvZVvar,
   uHvar, vHvar, Yvar, Xvar, wHvar, S, PREDICTIONS, uBound,
   subdivisions, intol) {
@@ -100,22 +86,6 @@ chalfnormlike_ss_HCUB <- function(parm, nXvar, nuZUvar, nvZVvar,
 }
 
 ## Pcubature ----------
-#' log-likelihood for halfnormal-normal distribution + selection bias
-#' @param parm all parameters to be estimated
-#' @param nXvar number of main variables (inputs + env. var)
-#' @param nuZUvar number of Zu variables
-#' @param nvZVvar number of Zv variables
-#' @param uHvar matrix of Zu variables
-#' @param vHvar matrix of Zv variables
-#' @param Yvar vector of dependent variable
-#' @param Xvar matrix of main variables
-#' @param wHvar vector of weights (weighted likelihood)
-#' @param S integer for cost/prod estimation
-#' @param PREDICTIONS predictions from the first step probit model
-#' @param uBound upper bound for inefficiency (default \code{Inf})
-#' @param subdivisions number of divisions for pcubature
-#' @param intol integration tolerance
-#' @noRd
 chalfnormlike_ss_PCUB <- function(parm, nXvar, nuZUvar, nvZVvar,
   uHvar, vHvar, Yvar, Xvar, wHvar, S, PREDICTIONS, uBound,
   subdivisions, intol) {
@@ -144,21 +114,6 @@ chalfnormlike_ss_PCUB <- function(parm, nXvar, nuZUvar, nvZVvar,
 }
 
 ## Gauss-Hermite quadrature ----------
-#' log-likelihood for halfnormal-normal distribution + selection bias
-#' @param parm all parameters to be estimated
-#' @param nXvar number of main variables (inputs + env. var)
-#' @param nuZUvar number of Zu variables
-#' @param nvZVvar number of Zv variables
-#' @param uHvar matrix of Zu variables
-#' @param vHvar matrix of Zv variables
-#' @param Yvar vector of dependent variable
-#' @param Xvar matrix of main variables
-#' @param wHvar vector of weights (weighted likelihood)
-#' @param S integer for cost/prod estimation
-#' @param PREDICTIONS predictions from the first step probit model
-#' @param gH Gauss-Hermite quadrature rule (list from fastGHQuad)
-#' @param N number of observations
-#' @noRd
 chalfnormlike_ss_GH <- function(parm, nXvar, nuZUvar, nvZVvar,
   uHvar, vHvar, Yvar, Xvar, wHvar, S, PREDICTIONS, gH, N) {
   beta <- parm[1:(nXvar)]
@@ -185,21 +140,6 @@ chalfnormlike_ss_GH <- function(parm, nXvar, nuZUvar, nvZVvar,
 }
 
 ## Maximum Simulated Likelihood ----------
-#' log-likelihood for halfnormal-normal distribution + selection bias
-#' @param parm all parameters to be estimated
-#' @param nXvar number of main variables (inputs + env. var)
-#' @param nuZUvar number of Zu variables
-#' @param nvZVvar number of Zv variables
-#' @param uHvar matrix of Zu variables
-#' @param vHvar matrix of Zv variables
-#' @param Yvar vector of dependent variable
-#' @param Xvar matrix of main variables
-#' @param wHvar vector of weights (weighted likelihood)
-#' @param S integer for cost/prod estimation
-#' @param PREDICTIONS predictions from the first step probit model
-#' @param N number of observations
-#' @param FiMat matrix of Halton draws
-#' @noRd
 chalfnormlike_ss_MSL <- function(parm, nXvar, nuZUvar, nvZVvar,
   uHvar, vHvar, Yvar, Xvar, wHvar, S, PREDICTIONS, N, FiMat) {
   beta <- parm[1:(nXvar)]
@@ -288,8 +228,6 @@ csthalfnorm_ss <- function(olsObj, epsiRes, S, nuZUvar, uHvar,
 }
 
 # Gradient of the likelihood function ----------
-
-## Gauss-Kronrod quadrature ----------
 #' log-likelihood for halfnormal-normal distribution + selection bias
 #' @param parm all parameters to be estimated
 #' @param nXvar number of main variables (inputs + env. var)
@@ -305,7 +243,11 @@ csthalfnorm_ss <- function(olsObj, epsiRes, S, nuZUvar, uHvar,
 #' @param uBound upper bound for inefficiency (default \code{Inf})
 #' @param subdivisions number of divisions for GK quadrature
 #' @param intol integration tolerance
+#' @param gH Gauss-Hermite quadrature rule (list from fastGHQuad)
+#' @param N number of observations
+#' @param FiMat matrix of Halton draws
 #' @noRd
+## Gauss-Kronrod quadrature ----------
 cgradhalfnormlike_ss_GK <- function(parm, nXvar, nuZUvar, nvZVvar,
   uHvar, vHvar, Yvar, Xvar, wHvar, S, PREDICTIONS, uBound,
   subdivisions, intol) {
@@ -419,22 +361,6 @@ cgradhalfnormlike_ss_GK <- function(parm, nXvar, nuZUvar, nvZVvar,
 }
 
 ## Hcubature ----------
-#' log-likelihood for halfnormal-normal distribution + selection bias
-#' @param parm all parameters to be estimated
-#' @param nXvar number of main variables (inputs + env. var)
-#' @param nuZUvar number of Zu variables
-#' @param nvZVvar number of Zv variables
-#' @param uHvar matrix of Zu variables
-#' @param vHvar matrix of Zv variables
-#' @param Yvar vector of dependent variable
-#' @param Xvar matrix of main variables
-#' @param wHvar vector of weights (weighted likelihood)
-#' @param S integer for cost/prod estimation
-#' @param PREDICTIONS predictions from the first step probit model
-#' @param uBound upper bound for inefficiency (default \code{Inf})
-#' @param subdivisions number of divisions for hcubature
-#' @param intol integration tolerance
-#' @noRd
 cgradhalfnormlike_ss_HCUB <- function(parm, nXvar, nuZUvar, nvZVvar,
   uHvar, vHvar, Yvar, Xvar, wHvar, S, PREDICTIONS, uBound,
   subdivisions, intol) {
@@ -553,22 +479,6 @@ cgradhalfnormlike_ss_HCUB <- function(parm, nXvar, nuZUvar, nvZVvar,
 }
 
 ## Pcubature ----------
-#' log-likelihood for halfnormal-normal distribution + selection bias
-#' @param parm all parameters to be estimated
-#' @param nXvar number of main variables (inputs + env. var)
-#' @param nuZUvar number of Zu variables
-#' @param nvZVvar number of Zv variables
-#' @param uHvar matrix of Zu variables
-#' @param vHvar matrix of Zv variables
-#' @param Yvar vector of dependent variable
-#' @param Xvar matrix of main variables
-#' @param wHvar vector of weights (weighted likelihood)
-#' @param S integer for cost/prod estimation
-#' @param PREDICTIONS predictions from the first step probit model
-#' @param uBound upper bound for inefficiency (default \code{Inf})
-#' @param subdivisions number of divisions for pcubature
-#' @param intol integration tolerance
-#' @noRd
 cgradhalfnormlike_ss_PCUB <- function(parm, nXvar, nuZUvar, nvZVvar,
   uHvar, vHvar, Yvar, Xvar, wHvar, S, PREDICTIONS, uBound,
   subdivisions, intol) {
@@ -687,21 +597,6 @@ cgradhalfnormlike_ss_PCUB <- function(parm, nXvar, nuZUvar, nvZVvar,
 }
 
 ## Gauss-Hermite quadrature ----------
-#' log-likelihood for halfnormal-normal distribution + selection bias
-#' @param parm all parameters to be estimated
-#' @param nXvar number of main variables (inputs + env. var)
-#' @param nuZUvar number of Zu variables
-#' @param nvZVvar number of Zv variables
-#' @param uHvar matrix of Zu variables
-#' @param vHvar matrix of Zv variables
-#' @param Yvar vector of dependent variable
-#' @param Xvar matrix of main variables
-#' @param wHvar vector of weights (weighted likelihood)
-#' @param S integer for cost/prod estimation
-#' @param PREDICTIONS predictions from the first step probit model
-#' @param gH Gauss-Hermite quadrature rule (list from fastGHQuad)
-#' @param N number of observations
-#' @noRd
 cgradhalfnormlike_ss_GH <- function(parm, nXvar, nuZUvar, nvZVvar,
   uHvar, vHvar, Yvar, Xvar, wHvar, S, PREDICTIONS, gH, N) {
   beta <- parm[1:(nXvar)]
@@ -767,21 +662,6 @@ cgradhalfnormlike_ss_GH <- function(parm, nXvar, nuZUvar, nvZVvar,
 }
 
 ## Maximum Simulated Likelihood ----------
-#' log-likelihood for halfnormal-normal distribution + selection bias
-#' @param parm all parameters to be estimated
-#' @param nXvar number of main variables (inputs + env. var)
-#' @param nuZUvar number of Zu variables
-#' @param nvZVvar number of Zv variables
-#' @param uHvar matrix of Zu variables
-#' @param vHvar matrix of Zv variables
-#' @param Yvar vector of dependent variable
-#' @param Xvar matrix of main variables
-#' @param wHvar vector of weights (weighted likelihood)
-#' @param S integer for cost/prod estimation
-#' @param PREDICTIONS predictions from the first step probit model
-#' @param N number of observations
-#' @param FiMat matrix of Halton draws
-#' @noRd
 cgradhalfnormlike_ss_MSL <- function(parm, nXvar, nuZUvar, nvZVvar,
   uHvar, vHvar, Yvar, Xvar, wHvar, S, PREDICTIONS, FiMat, N) {
   beta <- parm[1:(nXvar)]
@@ -841,8 +721,6 @@ cgradhalfnormlike_ss_MSL <- function(parm, nXvar, nuZUvar, nvZVvar,
 }
 
 # Hessian of the likelihood function ----------
-
-## Gauss-Kronrod quadrature ----------
 #' log-likelihood for halfnormal-normal distribution + selection bias
 #' @param parm all parameters to be estimated
 #' @param nXvar number of main variables (inputs + env. var)
@@ -858,7 +736,11 @@ cgradhalfnormlike_ss_MSL <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param uBound upper bound for inefficiency (default \code{Inf})
 #' @param subdivisions number of divisions for GK quadrature
 #' @param intol integration tolerance
+#' @param gH Gauss-Hermite quadrature rule (list from fastGHQuad)
+#' @param N number of observations
+#' @param FiMat matrix of Halton draws
 #' @noRd
+## Gauss-Kronrod quadrature ----------
 chesshalfnormlike_ss_GK <- function(parm, nXvar, nuZUvar, nvZVvar,
   uHvar, vHvar, Yvar, Xvar, wHvar, S, PREDICTIONS, uBound,
   subdivisions, intol) {
@@ -1259,22 +1141,6 @@ chesshalfnormlike_ss_GK <- function(parm, nXvar, nuZUvar, nvZVvar,
 }
 
 ## Hcubature ----------
-#' log-likelihood for halfnormal-normal distribution + selection bias
-#' @param parm all parameters to be estimated
-#' @param nXvar number of main variables (inputs + env. var)
-#' @param nuZUvar number of Zu variables
-#' @param nvZVvar number of Zv variables
-#' @param uHvar matrix of Zu variables
-#' @param vHvar matrix of Zv variables
-#' @param Yvar vector of dependent variable
-#' @param Xvar matrix of main variables
-#' @param wHvar vector of weights (weighted likelihood)
-#' @param S integer for cost/prod estimation
-#' @param PREDICTIONS predictions from the first step probit model
-#' @param uBound upper bound for inefficiency (default \code{Inf})
-#' @param subdivisions number of divisions for hcubature
-#' @param intol integration tolerance
-#' @noRd
 chesshalfnormlike_ss_HCUB <- function(parm, nXvar, nuZUvar, nvZVvar,
   uHvar, vHvar, Yvar, Xvar, wHvar, S, PREDICTIONS, uBound,
   subdivisions, intol) {
@@ -1690,22 +1556,6 @@ chesshalfnormlike_ss_HCUB <- function(parm, nXvar, nuZUvar, nvZVvar,
 }
 
 ## Pcubature ----------
-#' log-likelihood for halfnormal-normal distribution + selection bias
-#' @param parm all parameters to be estimated
-#' @param nXvar number of main variables (inputs + env. var)
-#' @param nuZUvar number of Zu variables
-#' @param nvZVvar number of Zv variables
-#' @param uHvar matrix of Zu variables
-#' @param vHvar matrix of Zv variables
-#' @param Yvar vector of dependent variable
-#' @param Xvar matrix of main variables
-#' @param wHvar vector of weights (weighted likelihood)
-#' @param S integer for cost/prod estimation
-#' @param PREDICTIONS predictions from the first step probit model
-#' @param uBound upper bound for inefficiency (default \code{Inf})
-#' @param subdivisions number of divisions for pcubature
-#' @param intol integration tolerance
-#' @noRd
 chesshalfnormlike_ss_PCUB <- function(parm, nXvar, nuZUvar, nvZVvar,
   uHvar, vHvar, Yvar, Xvar, wHvar, S, PREDICTIONS, uBound,
   subdivisions, intol) {
@@ -2121,21 +1971,6 @@ chesshalfnormlike_ss_PCUB <- function(parm, nXvar, nuZUvar, nvZVvar,
 }
 
 ## Gauss-Hermite quadrature ----------
-#' log-likelihood for halfnormal-normal distribution + selection bias
-#' @param parm all parameters to be estimated
-#' @param nXvar number of main variables (inputs + env. var)
-#' @param nuZUvar number of Zu variables
-#' @param nvZVvar number of Zv variables
-#' @param uHvar matrix of Zu variables
-#' @param vHvar matrix of Zv variables
-#' @param Yvar vector of dependent variable
-#' @param Xvar matrix of main variables
-#' @param wHvar vector of weights (weighted likelihood)
-#' @param S integer for cost/prod estimation
-#' @param PREDICTIONS predictions from the first step probit model
-#' @param gH Gauss-Hermite quadrature rule (list from fastGHQuad)
-#' @param N number of observations
-#' @noRd
 chesshalfnormlike_ss_GH <- function(parm, nXvar, nuZUvar, nvZVvar,
   uHvar, vHvar, Yvar, Xvar, wHvar, S, PREDICTIONS, gH, N) {
   beta <- parm[1:(nXvar)]
@@ -2359,21 +2194,6 @@ chesshalfnormlike_ss_GH <- function(parm, nXvar, nuZUvar, nvZVvar,
 }
 
 ## Maximum Simulated Likelihood ----------
-#' log-likelihood for halfnormal-normal distribution + selection bias
-#' @param parm all parameters to be estimated
-#' @param nXvar number of main variables (inputs + env. var)
-#' @param nuZUvar number of Zu variables
-#' @param nvZVvar number of Zv variables
-#' @param uHvar matrix of Zu variables
-#' @param vHvar matrix of Zv variables
-#' @param Yvar vector of dependent variable
-#' @param Xvar matrix of main variables
-#' @param wHvar vector of weights (weighted likelihood)
-#' @param S integer for cost/prod estimation
-#' @param PREDICTIONS predictions from the first step probit model
-#' @param N number of observations
-#' @param FiMat matrix of Halton draws
-#' @noRd
 chesshalfnormlike_ss_MSL <- function(parm, nXvar, nuZUvar, nvZVvar,
   uHvar, vHvar, Yvar, Xvar, wHvar, S, PREDICTIONS, FiMat, N) {
   beta <- parm[1:(nXvar)]
@@ -2557,8 +2377,6 @@ chesshalfnormlike_ss_MSL <- function(parm, nXvar, nuZUvar, nvZVvar,
 }
 
 # Optimization using different algorithms ----------
-
-## Gauss-Kronrod quadrature ----------
 #' optimizations solve for halfnormal-normal distribution + selection bias
 #' @param start starting value for optimization
 #' @param olsParam OLS coefficients
@@ -2584,7 +2402,11 @@ chesshalfnormlike_ss_MSL <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param uBound upper bound for inefficiency (default \code{Inf})
 #' @param subdivisions number of divisions for GK quadrature
 #' @param intol integration tolerance
+#' @param gH Gauss-Hermite quadrature rule (list from fastGHQuad)
+#' @param N number of observations
+#' @param FiMat matrix of Halton draws
 #' @noRd
+## Gauss-Kronrod quadrature ----------
 halfnormAlgOpt_ss_GK <- function(start, olsParam, dataTable,
   S, nXvar, uHvar, nuZUvar, vHvar, nvZVvar, Yvar, Xvar, wHvar,
   PREDICTIONS, uBound, subdivisions, intol, method, printInfo,
@@ -2740,32 +2562,6 @@ halfnormAlgOpt_ss_GK <- function(start, olsParam, dataTable,
 }
 
 ## Hcubature ----------
-#' optimizations solve for halfnormal-normal distribution + selection bias
-#' @param start starting value for optimization
-#' @param olsParam OLS coefficients
-#' @param dataTable dataframe contains id of observations
-#' @param nXvar number of main variables (inputs + env. var)
-#' @param nuZUvar number of Zu variables
-#' @param nvZVvar number of Zv variables
-#' @param uHvar matrix of Zu variables
-#' @param vHvar matrix of Zv variables
-#' @param Yvar vector of dependent variable
-#' @param Xvar matrix of main variables
-#' @param wHvar vector of weights (weighted likelihood)
-#' @param S integer for cost/prod estimation
-#' @param method algorithm for solver
-#' @param printInfo logical print info during optimization
-#' @param itermax maximum iteration
-#' @param stepmax stepmax for ucminf
-#' @param tol parameter tolerance
-#' @param gradtol gradient tolerance
-#' @param hessianType how hessian is computed
-#' @param qac qac option for maxLik
-#' @param PREDICTIONS predictions from the first step probit model
-#' @param uBound upper bound for inefficiency (default \code{Inf})
-#' @param subdivisions number of divisions for hcubature
-#' @param intol integration tolerance
-#' @noRd
 halfnormAlgOpt_ss_HCUB <- function(start, olsParam, dataTable,
   S, nXvar, uHvar, nuZUvar, vHvar, nvZVvar, Yvar, Xvar, wHvar,
   PREDICTIONS, uBound, subdivisions, intol, method, printInfo,
@@ -2924,32 +2720,6 @@ halfnormAlgOpt_ss_HCUB <- function(start, olsParam, dataTable,
 }
 
 ## Pcubature ----------
-#' optimizations solve for halfnormal-normal distribution + selection bias
-#' @param start starting value for optimization
-#' @param olsParam OLS coefficients
-#' @param dataTable dataframe contains id of observations
-#' @param nXvar number of main variables (inputs + env. var)
-#' @param nuZUvar number of Zu variables
-#' @param nvZVvar number of Zv variables
-#' @param uHvar matrix of Zu variables
-#' @param vHvar matrix of Zv variables
-#' @param Yvar vector of dependent variable
-#' @param Xvar matrix of main variables
-#' @param wHvar vector of weights (weighted likelihood)
-#' @param S integer for cost/prod estimation
-#' @param method algorithm for solver
-#' @param printInfo logical print info during optimization
-#' @param itermax maximum iteration
-#' @param stepmax stepmax for ucminf
-#' @param tol parameter tolerance
-#' @param gradtol gradient tolerance
-#' @param hessianType how hessian is computed
-#' @param qac qac option for maxLik
-#' @param PREDICTIONS predictions from the first step probit model
-#' @param uBound upper bound for inefficiency (default \code{Inf})
-#' @param subdivisions number of divisions for pcubature
-#' @param intol integration tolerance
-#' @noRd
 halfnormAlgOpt_ss_PCUB <- function(start, olsParam, dataTable,
   S, nXvar, uHvar, nuZUvar, vHvar, nvZVvar, Yvar, Xvar, wHvar,
   PREDICTIONS, uBound, subdivisions, intol, method, printInfo,
@@ -3108,31 +2878,6 @@ halfnormAlgOpt_ss_PCUB <- function(start, olsParam, dataTable,
 }
 
 ## Gauss-Hermite quadrature ----------
-#' optimizations solve for halfnormal-normal distribution + selection bias
-#' @param start starting value for optimization
-#' @param olsParam OLS coefficients
-#' @param dataTable dataframe contains id of observations
-#' @param nXvar number of main variables (inputs + env. var)
-#' @param nuZUvar number of Zu variables
-#' @param nvZVvar number of Zv variables
-#' @param uHvar matrix of Zu variables
-#' @param vHvar matrix of Zv variables
-#' @param Yvar vector of dependent variable
-#' @param Xvar matrix of main variables
-#' @param wHvar vector of weights (weighted likelihood)
-#' @param S integer for cost/prod estimation
-#' @param method algorithm for solver
-#' @param printInfo logical print info during optimization
-#' @param itermax maximum iteration
-#' @param stepmax stepmax for ucminf
-#' @param tol parameter tolerance
-#' @param gradtol gradient tolerance
-#' @param hessianType how hessian is computed
-#' @param qac qac option for maxLik
-#' @param PREDICTIONS predictions from the first step probit model
-#' @param gH Gauss-Hermite quadrature rule (list from fastGHQuad)
-#' @param N number of observations
-#' @noRd
 halfnormAlgOpt_ss_GH <- function(start, olsParam, dataTable,
   S, nXvar, uHvar, nuZUvar, vHvar, nvZVvar, Yvar, Xvar, wHvar,
   PREDICTIONS, gH, N, method, printInfo, itermax, stepmax,
@@ -3278,31 +3023,6 @@ halfnormAlgOpt_ss_GH <- function(start, olsParam, dataTable,
 }
 
 ## Maximum Simulated Likelihood ----------
-#' optimizations solve for halfnormal-normal distribution + selection bias
-#' @param start starting value for optimization
-#' @param olsParam OLS coefficients
-#' @param dataTable dataframe contains id of observations
-#' @param nXvar number of main variables (inputs + env. var)
-#' @param nuZUvar number of Zu variables
-#' @param nvZVvar number of Zv variables
-#' @param uHvar matrix of Zu variables
-#' @param vHvar matrix of Zv variables
-#' @param Yvar vector of dependent variable
-#' @param Xvar matrix of main variables
-#' @param wHvar vector of weights (weighted likelihood)
-#' @param S integer for cost/prod estimation
-#' @param method algorithm for solver
-#' @param printInfo logical print info during optimization
-#' @param itermax maximum iteration
-#' @param stepmax stepmax for ucminf
-#' @param tol parameter tolerance
-#' @param gradtol gradient tolerance
-#' @param hessianType how hessian is computed
-#' @param qac qac option for maxLik
-#' @param PREDICTIONS predictions from the first step probit model
-#' @param N number of observations
-#' @param FiMat matrix of Halton draws
-#' @noRd
 halfnormAlgOpt_ss_MSL <- function(start, olsParam, dataTable,
   S, nXvar, uHvar, nuZUvar, vHvar, nvZVvar, Yvar, Xvar, wHvar,
   PREDICTIONS, FiMat, N, method, printInfo, itermax, stepmax,

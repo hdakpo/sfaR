@@ -40,7 +40,8 @@ Imports:
     fastGHQuad,
     stats,
     sandwich,
-    magrittr
+    magrittr,
+    calculus
 URL: https://github.com/hdakpo/sfaR
 Suggests: 
     lmtest
