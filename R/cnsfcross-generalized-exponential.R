@@ -9,7 +9,11 @@
 # Model: Contaminated Noise Stochastic Frontier Model                          #
 # Two types: - Common inefficiency component (sigma_u)                         #
 #            - Mixture composed error (mcesf)                                  # 
-# Convolution: generalized exponential - normal                                #
+# Link functions: - logit exp(theta * Z)/(1 + exp(theta * Z))                  #
+#                 - cauchit 1/pi * atan(theta * Z) + 1/2                       #
+#                 - probit pnorm(theta * Z)                                    #
+#                 - cloglog 1 - exp(-exp(theta * Z))                           #
+# Convolution: generalized genexponential - normal                             #
 #------------------------------------------------------------------------------#
 
 # Log-likelihood ----------
@@ -28,8 +32,10 @@
 #' @param nZHvar number of separating variables
 #' @noRd
 # same sigma_u
-ccnsfgenexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
-  uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
+
+## logit specification class membership
+ccnsfgenexponormlike_logit <- function(parm, nXvar, nuZUvar,
+  nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
   beta <- parm[1:(nXvar)]
   delta <- parm[(nXvar + 1):(nXvar + nuZUvar)]
   phi1 <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
@@ -58,9 +64,104 @@ ccnsfgenexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
     log(Probc1 * Pi1 + Probc2 * Pi2)))
 }
 
+## cauchit specification class membership
+ccnsfgenexponormlike_cauchit <- function(parm, nXvar, nuZUvar,
+  nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
+  beta <- parm[1:(nXvar)]
+  delta <- parm[(nXvar + 1):(nXvar + nuZUvar)]
+  phi1 <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
+  phi2 <- parm[(nXvar + nuZUvar + nvZVvar + 1):(nXvar + nuZUvar +
+    2 * nvZVvar)]
+  theta <- parm[(nXvar + nuZUvar + 2 * nvZVvar + 1):(nXvar +
+    nuZUvar + 2 * nvZVvar + nZHvar)]
+  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
+  A1 <- S * epsilon/exp(Wu/2) + exp(Wv1)/(2 * exp(Wu))
+  B1 <- 2 * S * epsilon/exp(Wu/2) + 2 * exp(Wv1)/exp(Wu)
+  a1 <- -S * epsilon/exp(Wv1/2) - exp(Wv1/2)/exp(Wu/2)
+  b1 <- -S * epsilon/exp(Wv1/2) - 2 * exp(Wv1/2)/exp(Wu/2)
+  A2 <- S * epsilon/exp(Wu/2) + exp(Wv2)/(2 * exp(Wu))
+  B2 <- 2 * S * epsilon/exp(Wu/2) + 2 * exp(Wv2)/exp(Wu)
+  a2 <- -S * epsilon/exp(Wv2/2) - exp(Wv2/2)/exp(Wu/2)
+  b2 <- -S * epsilon/exp(Wv2/2) - 2 * exp(Wv2/2)/exp(Wu/2)
+  Pi1 <- 2/exp(Wu/2) * (exp(A1) * pnorm(a1) - exp(B1) * pnorm(b1))
+  Pi2 <- 2/exp(Wu/2) * (exp(A2) * pnorm(a2) - exp(B2) * pnorm(b2))
+  Probc1 <- 1/pi * atan(Wz) + 1/2
+  Probc2 <- 1 - Probc1
+  ifelse(Probc1 * Pi1 + Probc2 * Pi2 <= 0, return(NA), return(wHvar *
+    log(Probc1 * Pi1 + Probc2 * Pi2)))
+}
+
+## probit specification class membership
+ccnsfgenexponormlike_probit <- function(parm, nXvar, nuZUvar,
+  nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
+  beta <- parm[1:(nXvar)]
+  delta <- parm[(nXvar + 1):(nXvar + nuZUvar)]
+  phi1 <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
+  phi2 <- parm[(nXvar + nuZUvar + nvZVvar + 1):(nXvar + nuZUvar +
+    2 * nvZVvar)]
+  theta <- parm[(nXvar + nuZUvar + 2 * nvZVvar + 1):(nXvar +
+    nuZUvar + 2 * nvZVvar + nZHvar)]
+  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
+  A1 <- S * epsilon/exp(Wu/2) + exp(Wv1)/(2 * exp(Wu))
+  B1 <- 2 * S * epsilon/exp(Wu/2) + 2 * exp(Wv1)/exp(Wu)
+  a1 <- -S * epsilon/exp(Wv1/2) - exp(Wv1/2)/exp(Wu/2)
+  b1 <- -S * epsilon/exp(Wv1/2) - 2 * exp(Wv1/2)/exp(Wu/2)
+  A2 <- S * epsilon/exp(Wu/2) + exp(Wv2)/(2 * exp(Wu))
+  B2 <- 2 * S * epsilon/exp(Wu/2) + 2 * exp(Wv2)/exp(Wu)
+  a2 <- -S * epsilon/exp(Wv2/2) - exp(Wv2/2)/exp(Wu/2)
+  b2 <- -S * epsilon/exp(Wv2/2) - 2 * exp(Wv2/2)/exp(Wu/2)
+  Pi1 <- 2/exp(Wu/2) * (exp(A1) * pnorm(a1) - exp(B1) * pnorm(b1))
+  Pi2 <- 2/exp(Wu/2) * (exp(A2) * pnorm(a2) - exp(B2) * pnorm(b2))
+  Probc1 <- pnorm(Wz)
+  Probc2 <- 1 - Probc1
+  ifelse(Probc1 * Pi1 + Probc2 * Pi2 <= 0, return(NA), return(wHvar *
+    log(Probc1 * Pi1 + Probc2 * Pi2)))
+}
+
+## cloglog specification class membership
+ccnsfgenexponormlike_cloglog <- function(parm, nXvar, nuZUvar,
+  nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
+  beta <- parm[1:(nXvar)]
+  delta <- parm[(nXvar + 1):(nXvar + nuZUvar)]
+  phi1 <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
+  phi2 <- parm[(nXvar + nuZUvar + nvZVvar + 1):(nXvar + nuZUvar +
+    2 * nvZVvar)]
+  theta <- parm[(nXvar + nuZUvar + 2 * nvZVvar + 1):(nXvar +
+    nuZUvar + 2 * nvZVvar + nZHvar)]
+  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
+  A1 <- S * epsilon/exp(Wu/2) + exp(Wv1)/(2 * exp(Wu))
+  B1 <- 2 * S * epsilon/exp(Wu/2) + 2 * exp(Wv1)/exp(Wu)
+  a1 <- -S * epsilon/exp(Wv1/2) - exp(Wv1/2)/exp(Wu/2)
+  b1 <- -S * epsilon/exp(Wv1/2) - 2 * exp(Wv1/2)/exp(Wu/2)
+  A2 <- S * epsilon/exp(Wu/2) + exp(Wv2)/(2 * exp(Wu))
+  B2 <- 2 * S * epsilon/exp(Wu/2) + 2 * exp(Wv2)/exp(Wu)
+  a2 <- -S * epsilon/exp(Wv2/2) - exp(Wv2/2)/exp(Wu/2)
+  b2 <- -S * epsilon/exp(Wv2/2) - 2 * exp(Wv2/2)/exp(Wu/2)
+  Pi1 <- 2/exp(Wu/2) * (exp(A1) * pnorm(a1) - exp(B1) * pnorm(b1))
+  Pi2 <- 2/exp(Wu/2) * (exp(A2) * pnorm(a2) - exp(B2) * pnorm(b2))
+  Probc1 <- 1 - exp(-exp(Wz))
+  Probc2 <- 1 - Probc1
+  ifelse(Probc1 * Pi1 + Probc2 * Pi2 <= 0, return(NA), return(wHvar *
+    log(Probc1 * Pi1 + Probc2 * Pi2)))
+}
+
 # different sigma_u
-cmcesfgenexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
-  uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
+
+## logit specification class membership
+cmcesfgenexponormlike_logit <- function(parm, nXvar, nuZUvar,
+  nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
   beta <- parm[1:(nXvar)]
   delta1 <- parm[(nXvar + 1):(nXvar + nuZUvar)]
   delta2 <- parm[(nXvar + nuZUvar + 1):(nXvar + 2 * nuZUvar)]
@@ -92,6 +193,108 @@ cmcesfgenexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
     log(Probc1 * Pi1 + Probc2 * Pi2)))
 }
 
+## cauchit specification class membership
+cmcesfgenexponormlike_cauchit <- function(parm, nXvar, nuZUvar,
+  nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
+  beta <- parm[1:(nXvar)]
+  delta1 <- parm[(nXvar + 1):(nXvar + nuZUvar)]
+  delta2 <- parm[(nXvar + nuZUvar + 1):(nXvar + 2 * nuZUvar)]
+  phi1 <- parm[(nXvar + 2 * nuZUvar + 1):(nXvar + 2 * nuZUvar +
+    nvZVvar)]
+  phi2 <- parm[(nXvar + 2 * nuZUvar + nvZVvar + 1):(nXvar +
+    2 * nuZUvar + 2 * nvZVvar)]
+  theta <- parm[(nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(nXvar +
+    2 * nuZUvar + 2 * nvZVvar + nZHvar)]
+  Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
+  Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
+  A1 <- S * epsilon/exp(Wu1/2) + exp(Wv1)/(2 * exp(Wu1))
+  B1 <- 2 * S * epsilon/exp(Wu1/2) + 2 * exp(Wv1)/exp(Wu1)
+  a1 <- -S * epsilon/exp(Wv1/2) - exp(Wv1/2)/exp(Wu1/2)
+  b1 <- -S * epsilon/exp(Wv1/2) - 2 * exp(Wv1/2)/exp(Wu1/2)
+  A2 <- S * epsilon/exp(Wu2/2) + exp(Wv2)/(2 * exp(Wu2))
+  B2 <- 2 * S * epsilon/exp(Wu2/2) + 2 * exp(Wv2)/exp(Wu2)
+  a2 <- -S * epsilon/exp(Wv2/2) - exp(Wv2/2)/exp(Wu2/2)
+  b2 <- -S * epsilon/exp(Wv2/2) - 2 * exp(Wv2/2)/exp(Wu2/2)
+  Pi1 <- 2/exp(Wu1/2) * (exp(A1) * pnorm(a1) - exp(B1) * pnorm(b1))
+  Pi2 <- 2/exp(Wu2/2) * (exp(A2) * pnorm(a2) - exp(B2) * pnorm(b2))
+  Probc1 <- 1/pi * atan(Wz) + 1/2
+  Probc2 <- 1 - Probc1
+  ifelse(Probc1 * Pi1 + Probc2 * Pi2 <= 0, return(NA), return(wHvar *
+    log(Probc1 * Pi1 + Probc2 * Pi2)))
+}
+
+## probit specification class membership
+cmcesfgenexponormlike_probit <- function(parm, nXvar, nuZUvar,
+  nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
+  beta <- parm[1:(nXvar)]
+  delta1 <- parm[(nXvar + 1):(nXvar + nuZUvar)]
+  delta2 <- parm[(nXvar + nuZUvar + 1):(nXvar + 2 * nuZUvar)]
+  phi1 <- parm[(nXvar + 2 * nuZUvar + 1):(nXvar + 2 * nuZUvar +
+    nvZVvar)]
+  phi2 <- parm[(nXvar + 2 * nuZUvar + nvZVvar + 1):(nXvar +
+    2 * nuZUvar + 2 * nvZVvar)]
+  theta <- parm[(nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(nXvar +
+    2 * nuZUvar + 2 * nvZVvar + nZHvar)]
+  Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
+  Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
+  A1 <- S * epsilon/exp(Wu1/2) + exp(Wv1)/(2 * exp(Wu1))
+  B1 <- 2 * S * epsilon/exp(Wu1/2) + 2 * exp(Wv1)/exp(Wu1)
+  a1 <- -S * epsilon/exp(Wv1/2) - exp(Wv1/2)/exp(Wu1/2)
+  b1 <- -S * epsilon/exp(Wv1/2) - 2 * exp(Wv1/2)/exp(Wu1/2)
+  A2 <- S * epsilon/exp(Wu2/2) + exp(Wv2)/(2 * exp(Wu2))
+  B2 <- 2 * S * epsilon/exp(Wu2/2) + 2 * exp(Wv2)/exp(Wu2)
+  a2 <- -S * epsilon/exp(Wv2/2) - exp(Wv2/2)/exp(Wu2/2)
+  b2 <- -S * epsilon/exp(Wv2/2) - 2 * exp(Wv2/2)/exp(Wu2/2)
+  Pi1 <- 2/exp(Wu1/2) * (exp(A1) * pnorm(a1) - exp(B1) * pnorm(b1))
+  Pi2 <- 2/exp(Wu2/2) * (exp(A2) * pnorm(a2) - exp(B2) * pnorm(b2))
+  Probc1 <- pnorm(Wz)
+  Probc2 <- 1 - Probc1
+  ifelse(Probc1 * Pi1 + Probc2 * Pi2 <= 0, return(NA), return(wHvar *
+    log(Probc1 * Pi1 + Probc2 * Pi2)))
+}
+
+## cloglog specification class membership
+cmcesfgenexponormlike_cloglog <- function(parm, nXvar, nuZUvar,
+  nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
+  beta <- parm[1:(nXvar)]
+  delta1 <- parm[(nXvar + 1):(nXvar + nuZUvar)]
+  delta2 <- parm[(nXvar + nuZUvar + 1):(nXvar + 2 * nuZUvar)]
+  phi1 <- parm[(nXvar + 2 * nuZUvar + 1):(nXvar + 2 * nuZUvar +
+    nvZVvar)]
+  phi2 <- parm[(nXvar + 2 * nuZUvar + nvZVvar + 1):(nXvar +
+    2 * nuZUvar + 2 * nvZVvar)]
+  theta <- parm[(nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(nXvar +
+    2 * nuZUvar + 2 * nvZVvar + nZHvar)]
+  Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
+  Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
+  A1 <- S * epsilon/exp(Wu1/2) + exp(Wv1)/(2 * exp(Wu1))
+  B1 <- 2 * S * epsilon/exp(Wu1/2) + 2 * exp(Wv1)/exp(Wu1)
+  a1 <- -S * epsilon/exp(Wv1/2) - exp(Wv1/2)/exp(Wu1/2)
+  b1 <- -S * epsilon/exp(Wv1/2) - 2 * exp(Wv1/2)/exp(Wu1/2)
+  A2 <- S * epsilon/exp(Wu2/2) + exp(Wv2)/(2 * exp(Wu2))
+  B2 <- 2 * S * epsilon/exp(Wu2/2) + 2 * exp(Wv2)/exp(Wu2)
+  a2 <- -S * epsilon/exp(Wv2/2) - exp(Wv2/2)/exp(Wu2/2)
+  b2 <- -S * epsilon/exp(Wv2/2) - 2 * exp(Wv2/2)/exp(Wu2/2)
+  Pi1 <- 2/exp(Wu1/2) * (exp(A1) * pnorm(a1) - exp(B1) * pnorm(b1))
+  Pi2 <- 2/exp(Wu2/2) * (exp(A2) * pnorm(a2) - exp(B2) * pnorm(b2))
+  Probc1 <- 1 - exp(-exp(Wz))
+  Probc2 <- 1 - Probc1
+  ifelse(Probc1 * Pi1 + Probc2 * Pi2 <= 0, return(NA), return(wHvar *
+    log(Probc1 * Pi1 + Probc2 * Pi2)))
+}
+
 # starting value for the log-likelihood ----------
 #' starting values for cnsf generalized exponential-normal distribution
 #' @param olsObj OLS object
@@ -115,7 +318,7 @@ cmcesfgenexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
 cstcnsfgenexponorm <- function(olsObj, epsiRes, nXvar, nuZUvar,
   nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar,
   itermax, printInfo, tol) {
-  cat("Initialization: SFA + generalized exponential - normal distributions...\n")
+  cat("Initialization: SFA + generalized genexponential - normal distributions...\n")
   initGenExpo <- maxLik(logLik = cgenexponormlike, start = cstgenexponorm(olsObj = olsObj,
     epsiRes = epsiRes, S = S, nuZUvar = 1, uHvar = uHvar[,
       1, drop = FALSE], nvZVvar = 1, vHvar = vHvar[, 1,
@@ -141,7 +344,7 @@ cstcnsfgenexponorm <- function(olsObj, epsiRes, nXvar, nuZUvar,
 cstmcesfgenexponorm <- function(olsObj, epsiRes, nXvar, nuZUvar,
   nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar,
   itermax, printInfo, tol) {
-  cat("Initialization: SFA + generalized exponential - normal distributions...\n")
+  cat("Initialization: SFA + generalized genexponential - normal distributions...\n")
   initGenExpo <- maxLik(logLik = cgenexponormlike, start = cstgenexponorm(olsObj = olsObj,
     epsiRes = epsiRes, S = S, nuZUvar = 1, uHvar = uHvar[,
       1, drop = FALSE], nvZVvar = 1, vHvar = vHvar[, 1,
@@ -181,8 +384,10 @@ cstmcesfgenexponorm <- function(olsObj, epsiRes, nXvar, nuZUvar,
 #' @param nZHvar number of separating variables
 #' @noRd
 # same sigma_u
-cgradcnsfgenexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
-  uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
+
+## logit specification class membership
+cgradcnsfgenexponormlike_logit <- function(parm, nXvar, nuZUvar,
+  nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
   beta <- parm[1:(nXvar)]
   delta <- parm[(nXvar + 1):(nXvar + nuZUvar)]
   phi1 <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
@@ -268,9 +473,276 @@ cgradcnsfgenexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
   return(sweep(gradll, MARGIN = 1, STATS = wHvar, FUN = "*"))
 }
 
+## cauchit specification class membership
+cgradcnsfgenexponormlike_cauchit <- function(parm, nXvar, nuZUvar,
+  nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
+  beta <- parm[1:(nXvar)]
+  delta <- parm[(nXvar + 1):(nXvar + nuZUvar)]
+  phi1 <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
+  phi2 <- parm[(nXvar + nuZUvar + nvZVvar + 1):(nXvar + nuZUvar +
+    2 * nvZVvar)]
+  theta <- parm[(nXvar + nuZUvar + 2 * nvZVvar + 1):(nXvar +
+    nuZUvar + 2 * nvZVvar + nZHvar)]
+  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
+  ewusr <- exp(Wu/2)
+  ewu <- exp(Wu)
+  ewvsr1 <- exp(Wv1/2)
+  ewvsr2 <- exp(Wv2/2)
+  ewv1 <- exp(Wv1)
+  ewv2 <- exp(Wv2)
+  ewz1 <- (0.5 + atan(Wz)/pi)
+  ewz2 <- (0.5 - atan(Wz)/pi)
+  musig1 <- (ewvsr1/ewusr + S * (epsilon)/ewvsr1)
+  musig2 <- (ewvsr2/ewusr + S * (epsilon)/ewvsr2)
+  dmusig1 <- dnorm(-musig1, 0, 1)
+  dmusig2 <- dnorm(-musig2, 0, 1)
+  pmusig1 <- pnorm(-musig1)
+  pmusig2 <- pnorm(-musig2)
+  epsivu1 <- (2 * (ewvsr1/ewusr) + S * (epsilon)/ewvsr1)
+  epsivu2 <- (2 * (ewvsr2/ewusr) + S * (epsilon)/ewvsr2)
+  depsi1 <- dnorm(-epsivu1, 0, 1)
+  depsi2 <- dnorm(-epsivu2, 0, 1)
+  pepsi1 <- pnorm(-epsivu1)
+  pepsi2 <- pnorm(-epsivu2)
+  dpuv1 <- (depsi1/ewvsr1 - 2 * (pepsi1/ewusr))
+  dpuv2 <- (depsi2/ewvsr2 - 2 * (pepsi2/ewusr))
+  euv1 <- (2 * (ewv1/ewu) + S * (epsilon)/ewusr)
+  euv2 <- (2 * (ewv2/ewu) + S * (epsilon)/ewusr)
+  epsiu <- (S * (epsilon)/ewusr)
+  sigx0_1 <- exp(2 * (ewv1/ewu) + 2 * epsiu)
+  sigx0_2 <- exp(2 * (ewv2/ewu) + 2 * epsiu)
+  sigx1_1 <- (dmusig1/ewvsr1 - pmusig1/ewusr)
+  sigx1_2 <- (dmusig2/ewvsr2 - pmusig2/ewusr)
+  sigx2_1 <- exp(ewv1/(2 * ewu) + S * (epsilon)/ewusr)
+  sigx2_2 <- exp(ewv2/(2 * ewu) + S * (epsilon)/ewusr)
+  sigx3_1 <- ((sigx1_1 * sigx2_1 - dpuv1 * sigx0_1) * ewz1)
+  sigx3_2 <- ((sigx1_2 * sigx2_2 - dpuv2 * sigx0_2) * ewz2)
+  sigx14_1 <- (sigx2_1 * pmusig1 - sigx0_1 * pepsi1)
+  sigx14_2 <- (sigx2_2 * pmusig2 - sigx0_2 * pepsi2)
+  sigx4_1 <- (ewz1 * sigx14_1)
+  sigx4_2 <- (ewz2 * sigx14_2)
+  sigx5_1 <- (dmusig1 * ewvsr1/ewusr)
+  sigx5_2 <- (dmusig2 * ewvsr2/ewusr)
+  sigx6_1 <- (ewu * ewv1/(2 * ewu)^2)
+  sigx6_2 <- (ewu * ewv2/(2 * ewu)^2)
+  sigx7_1 <- (0.5 * sigx5_1 - (0.5 * epsiu + 2 * sigx6_1) *
+    pmusig1)
+  sigx7_2 <- (0.5 * sigx5_2 - (0.5 * epsiu + 2 * sigx6_2) *
+    pmusig2)
+  sigx8_1 <- (depsi1 * ewvsr1/ewusr - euv1 * pepsi1)
+  sigx8_2 <- (depsi2 * ewvsr2/ewusr - euv2 * pepsi2)
+  epsiv1 <- (0.5 * (ewvsr1/ewusr) - 0.5 * (S * (epsilon)/ewvsr1))
+  epsiv2 <- (0.5 * (ewvsr2/ewusr) - 0.5 * (S * (epsilon)/ewvsr2))
+  sigx9_1 <- (ewv1 * pmusig1/(2 * ewu) - epsiv1 * dmusig1)
+  sigx9_2 <- (ewv2 * pmusig2/(2 * ewu) - epsiv2 * dmusig2)
+  sigx10_1 <- ((sigx7_1 * sigx2_1 - sigx8_1 * sigx0_1) * ewz1)
+  sigx10_2 <- ((sigx7_2 * sigx2_2 - sigx8_2 * sigx0_2) * ewz2)
+  sigx11_1 <- (ewvsr1/ewusr - 0.5 * (S * (epsilon)/ewvsr1))
+  sigx11_2 <- (ewvsr2/ewusr - 0.5 * (S * (epsilon)/ewvsr2))
+  sigx12_1 <- (2 * (ewv1 * pepsi1/ewu) - depsi1 * sigx11_1)
+  sigx12_2 <- (2 * (ewv2 * pepsi2/ewu) - depsi2 * sigx11_2)
+  sigx13_1 <- (sigx2_1 * sigx9_1 - sigx12_1 * sigx0_1)
+  sigx13_2 <- (sigx2_2 * sigx9_2 - sigx12_2 * sigx0_2)
+  sigx15 <- (pi * ((Wz)^2 + 1) * (2 * sigx4_2 + 2 * sigx4_1))
+  gradll <- cbind(sweep(Xvar, MARGIN = 1, STATS = S * (2 *
+    sigx3_1 + 2 * sigx3_2)/(2 * sigx4_2 + 2 * sigx4_1), FUN = "*"),
+    sweep(uHvar, MARGIN = 1, STATS = ((2 * sigx10_1 + 2 *
+      sigx10_2)/(2 * sigx4_2 + 2 * sigx4_1) - 0.5), FUN = "*"),
+    sweep(vHvar, MARGIN = 1, STATS = 2 * (ewz1 * sigx13_1/(2 *
+      sigx4_2 + 2 * sigx4_1)), FUN = "*"), sweep(vHvar,
+      MARGIN = 1, STATS = 2 * (ewz2 * sigx13_2/(2 * sigx4_2 +
+        2 * sigx4_1)), FUN = "*"), sweep(Zvar, MARGIN = 1,
+      STATS = (2 * sigx14_1 - 2 * sigx14_2)/sigx15, FUN = "*"))
+  return(sweep(gradll, MARGIN = 1, STATS = wHvar, FUN = "*"))
+}
+
+## probit specification class membership
+cgradcnsfgenexponormlike_probit <- function(parm, nXvar, nuZUvar,
+  nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
+  beta <- parm[1:(nXvar)]
+  delta <- parm[(nXvar + 1):(nXvar + nuZUvar)]
+  phi1 <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
+  phi2 <- parm[(nXvar + nuZUvar + nvZVvar + 1):(nXvar + nuZUvar +
+    2 * nvZVvar)]
+  theta <- parm[(nXvar + nuZUvar + 2 * nvZVvar + 1):(nXvar +
+    nuZUvar + 2 * nvZVvar + nZHvar)]
+  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
+  ewusr <- exp(Wu/2)
+  ewu <- exp(Wu)
+  ewvsr1 <- exp(Wv1/2)
+  ewvsr2 <- exp(Wv2/2)
+  ewv1 <- exp(Wv1)
+  ewv2 <- exp(Wv2)
+  pwZ <- pnorm(Wz)
+  dwZ <- dnorm(Wz, 0, 1)
+  musig1 <- (ewvsr1/ewusr + S * (epsilon)/ewvsr1)
+  musig2 <- (ewvsr2/ewusr + S * (epsilon)/ewvsr2)
+  dmusig1 <- dnorm(-musig1, 0, 1)
+  dmusig2 <- dnorm(-musig2, 0, 1)
+  pmusig1 <- pnorm(-musig1)
+  pmusig2 <- pnorm(-musig2)
+  epsivu1 <- (2 * (ewvsr1/ewusr) + S * (epsilon)/ewvsr1)
+  epsivu2 <- (2 * (ewvsr2/ewusr) + S * (epsilon)/ewvsr2)
+  depsi1 <- dnorm(-epsivu1, 0, 1)
+  depsi2 <- dnorm(-epsivu2, 0, 1)
+  pepsi1 <- pnorm(-epsivu1)
+  pepsi2 <- pnorm(-epsivu2)
+  dpuv1 <- (depsi1/ewvsr1 - 2 * (pepsi1/ewusr))
+  dpuv2 <- (depsi2/ewvsr2 - 2 * (pepsi2/ewusr))
+  euv1 <- (2 * (ewv1/ewu) + S * (epsilon)/ewusr)
+  euv2 <- (2 * (ewv2/ewu) + S * (epsilon)/ewusr)
+  epsiu <- (S * (epsilon)/ewusr)
+  sigx0_1 <- exp(2 * (ewv1/ewu) + 2 * epsiu)
+  sigx0_2 <- exp(2 * (ewv2/ewu) + 2 * epsiu)
+  sigx1_1 <- (dmusig1/ewvsr1 - pmusig1/ewusr)
+  sigx1_2 <- (dmusig2/ewvsr2 - pmusig2/ewusr)
+  sigx2_1 <- exp(ewv1/(2 * ewu) + S * (epsilon)/ewusr)
+  sigx2_2 <- exp(ewv2/(2 * ewu) + S * (epsilon)/ewusr)
+  sigx3_1 <- ((sigx1_1 * sigx2_1 - dpuv1 * sigx0_1) * pwZ)
+  sigx3_2 <- ((sigx1_2 * sigx2_2 - dpuv2 * sigx0_2) * (1 -
+    pwZ))
+  sigx14_1 <- (sigx2_1 * pmusig1 - sigx0_1 * pepsi1)
+  sigx14_2 <- (sigx2_2 * pmusig2 - sigx0_2 * pepsi2)
+  sigx4_1 <- (sigx14_1 * pwZ)
+  sigx4_2 <- ((1 - pwZ) * sigx14_2)
+  sigx5_1 <- (dmusig1 * ewvsr1/ewusr)
+  sigx5_2 <- (dmusig2 * ewvsr2/ewusr)
+  sigx6_1 <- (ewu * ewv1/(2 * ewu)^2)
+  sigx6_2 <- (ewu * ewv2/(2 * ewu)^2)
+  sigx7_1 <- (0.5 * sigx5_1 - (0.5 * epsiu + 2 * sigx6_1) *
+    pmusig1)
+  sigx7_2 <- (0.5 * sigx5_2 - (0.5 * epsiu + 2 * sigx6_2) *
+    pmusig2)
+  sigx8_1 <- (depsi1 * ewvsr1/ewusr - euv1 * pepsi1)
+  sigx8_2 <- (depsi2 * ewvsr2/ewusr - euv2 * pepsi2)
+  epsiv1 <- (0.5 * (ewvsr1/ewusr) - 0.5 * (S * (epsilon)/ewvsr1))
+  epsiv2 <- (0.5 * (ewvsr2/ewusr) - 0.5 * (S * (epsilon)/ewvsr2))
+  sigx9_1 <- (ewv1 * pmusig1/(2 * ewu) - epsiv1 * dmusig1)
+  sigx9_2 <- (ewv2 * pmusig2/(2 * ewu) - epsiv2 * dmusig2)
+  sigx10_1 <- ((sigx7_1 * sigx2_1 - sigx8_1 * sigx0_1) * pwZ)
+  sigx10_2 <- ((sigx7_2 * sigx2_2 - sigx8_2 * sigx0_2) * (1 -
+    pwZ))
+  sigx11_1 <- (ewvsr1/ewusr - 0.5 * (S * (epsilon)/ewvsr1))
+  sigx11_2 <- (ewvsr2/ewusr - 0.5 * (S * (epsilon)/ewvsr2))
+  sigx12_1 <- (2 * (ewv1 * pepsi1/ewu) - depsi1 * sigx11_1)
+  sigx12_2 <- (2 * (ewv2 * pepsi2/ewu) - depsi2 * sigx11_2)
+  sigx13_1 <- (sigx2_1 * sigx9_1 - sigx12_1 * sigx0_1)
+  sigx13_2 <- (sigx2_2 * sigx9_2 - sigx12_2 * sigx0_2)
+  gradll <- cbind(sweep(Xvar, MARGIN = 1, STATS = S * (2 *
+    sigx3_1 + 2 * sigx3_2)/(2 * sigx4_2 + 2 * sigx4_1), FUN = "*"),
+    sweep(uHvar, MARGIN = 1, STATS = ((2 * sigx10_1 + 2 *
+      sigx10_2)/(2 * sigx4_2 + 2 * sigx4_1) - 0.5), FUN = "*"),
+    sweep(vHvar, MARGIN = 1, STATS = 2 * (pwZ * sigx13_1/(2 *
+      sigx4_2 + 2 * sigx4_1)), FUN = "*"), sweep(vHvar,
+      MARGIN = 1, STATS = 2 * ((1 - pwZ) * sigx13_2/(2 *
+        sigx4_2 + 2 * sigx4_1)), FUN = "*"), sweep(Zvar,
+      MARGIN = 1, STATS = (2 * sigx14_1 - 2 * sigx14_2) *
+        dwZ/(2 * sigx4_2 + 2 * sigx4_1), FUN = "*"))
+  return(sweep(gradll, MARGIN = 1, STATS = wHvar, FUN = "*"))
+}
+
+## cloglog specification class membership
+cgradcnsfgenexponormlike_cloglog <- function(parm, nXvar, nuZUvar,
+  nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
+  beta <- parm[1:(nXvar)]
+  delta <- parm[(nXvar + 1):(nXvar + nuZUvar)]
+  phi1 <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
+  phi2 <- parm[(nXvar + nuZUvar + nvZVvar + 1):(nXvar + nuZUvar +
+    2 * nvZVvar)]
+  theta <- parm[(nXvar + nuZUvar + 2 * nvZVvar + 1):(nXvar +
+    nuZUvar + 2 * nvZVvar + nZHvar)]
+  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
+  ewusr <- exp(Wu/2)
+  ewu <- exp(Wu)
+  ewvsr1 <- exp(Wv1/2)
+  ewvsr2 <- exp(Wv2/2)
+  ewv1 <- exp(Wv1)
+  ewv2 <- exp(Wv2)
+  ewz <- exp(Wz)
+  prZ <- exp(-ewz)
+  musig1 <- (ewvsr1/ewusr + S * (epsilon)/ewvsr1)
+  musig2 <- (ewvsr2/ewusr + S * (epsilon)/ewvsr2)
+  dmusig1 <- dnorm(-musig1, 0, 1)
+  dmusig2 <- dnorm(-musig2, 0, 1)
+  pmusig1 <- pnorm(-musig1)
+  pmusig2 <- pnorm(-musig2)
+  epsivu1 <- (2 * (ewvsr1/ewusr) + S * (epsilon)/ewvsr1)
+  epsivu2 <- (2 * (ewvsr2/ewusr) + S * (epsilon)/ewvsr2)
+  depsi1 <- dnorm(-epsivu1, 0, 1)
+  depsi2 <- dnorm(-epsivu2, 0, 1)
+  pepsi1 <- pnorm(-epsivu1)
+  pepsi2 <- pnorm(-epsivu2)
+  dpuv1 <- (depsi1/ewvsr1 - 2 * (pepsi1/ewusr))
+  dpuv2 <- (depsi2/ewvsr2 - 2 * (pepsi2/ewusr))
+  euv1 <- (2 * (ewv1/ewu) + S * (epsilon)/ewusr)
+  euv2 <- (2 * (ewv2/ewu) + S * (epsilon)/ewusr)
+  epsiu <- (S * (epsilon)/ewusr)
+  sigx0_1 <- exp(2 * (ewv1/ewu) + 2 * epsiu)
+  sigx0_2 <- exp(2 * (ewv2/ewu) + 2 * epsiu)
+  sigx1_1 <- (dmusig1/ewvsr1 - pmusig1/ewusr)
+  sigx1_2 <- (dmusig2/ewvsr2 - pmusig2/ewusr)
+  sigx2_1 <- exp(ewv1/(2 * ewu) + S * (epsilon)/ewusr)
+  sigx2_2 <- exp(ewv2/(2 * ewu) + S * (epsilon)/ewusr)
+  sigx3_1 <- ((sigx1_1 * sigx2_1 - dpuv1 * sigx0_1) * (1 -
+    prZ))
+  sigx3_2 <- ((sigx1_2 * sigx2_2 - dpuv2 * sigx0_2) * prZ)
+  sigx14_1 <- (sigx2_1 * pmusig1 - sigx0_1 * pepsi1)
+  sigx14_2 <- (sigx2_2 * pmusig2 - sigx0_2 * pepsi2)
+  sigx4_1 <- ((1 - prZ) * sigx14_1)
+  sigx4_2 <- (prZ * sigx14_2)
+  sigx5_1 <- (dmusig1 * ewvsr1/ewusr)
+  sigx5_2 <- (dmusig2 * ewvsr2/ewusr)
+  sigx6_1 <- (ewu * ewv1/(2 * ewu)^2)
+  sigx6_2 <- (ewu * ewv2/(2 * ewu)^2)
+  sigx7_1 <- (0.5 * sigx5_1 - (0.5 * epsiu + 2 * sigx6_1) *
+    pmusig1)
+  sigx7_2 <- (0.5 * sigx5_2 - (0.5 * epsiu + 2 * sigx6_2) *
+    pmusig2)
+  sigx8_1 <- (depsi1 * ewvsr1/ewusr - euv1 * pepsi1)
+  sigx8_2 <- (depsi2 * ewvsr2/ewusr - euv2 * pepsi2)
+  epsiv1 <- (0.5 * (ewvsr1/ewusr) - 0.5 * (S * (epsilon)/ewvsr1))
+  epsiv2 <- (0.5 * (ewvsr2/ewusr) - 0.5 * (S * (epsilon)/ewvsr2))
+  sigx9_1 <- (ewv1 * pmusig1/(2 * ewu) - epsiv1 * dmusig1)
+  sigx9_2 <- (ewv2 * pmusig2/(2 * ewu) - epsiv2 * dmusig2)
+  sigx10_1 <- ((sigx7_1 * sigx2_1 - sigx8_1 * sigx0_1) * (1 -
+    prZ))
+  sigx10_2 <- ((sigx7_2 * sigx2_2 - sigx8_2 * sigx0_2) * prZ)
+  sigx11_1 <- (ewvsr1/ewusr - 0.5 * (S * (epsilon)/ewvsr1))
+  sigx11_2 <- (ewvsr2/ewusr - 0.5 * (S * (epsilon)/ewvsr2))
+  sigx12_1 <- (2 * (ewv1 * pepsi1/ewu) - depsi1 * sigx11_1)
+  sigx12_2 <- (2 * (ewv2 * pepsi2/ewu) - depsi2 * sigx11_2)
+  sigx13_1 <- (sigx2_1 * sigx9_1 - sigx12_1 * sigx0_1)
+  sigx13_2 <- (sigx2_2 * sigx9_2 - sigx12_2 * sigx0_2)
+  gradll <- cbind(sweep(Xvar, MARGIN = 1, STATS = S * (2 *
+    sigx3_1 + 2 * sigx3_2)/(2 * sigx4_2 + 2 * sigx4_1), FUN = "*"),
+    sweep(uHvar, MARGIN = 1, STATS = ((2 * sigx10_1 + 2 *
+      sigx10_2)/(2 * sigx4_2 + 2 * sigx4_1) - 0.5), FUN = "*"),
+    sweep(vHvar, MARGIN = 1, STATS = 2 * ((1 - prZ) * sigx13_1/(2 *
+      sigx4_2 + 2 * sigx4_1)), FUN = "*"), sweep(vHvar,
+      MARGIN = 1, STATS = 2 * (prZ * sigx13_2/(2 * sigx4_2 +
+        2 * sigx4_1)), FUN = "*"), sweep(Zvar, MARGIN = 1,
+      STATS = (2 * sigx14_1 - 2 * sigx14_2) * prZ * ewz/(2 *
+        sigx4_1 + 2 * sigx4_2), FUN = "*"))
+  return(sweep(gradll, MARGIN = 1, STATS = wHvar, FUN = "*"))
+}
+
 # different sigma_u
-cgradmcesfgenexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
-  uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
+
+## logit specification class membership
+cgradmcesfgenexponormlike_logit <- function(parm, nXvar, nuZUvar,
+  nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
   beta <- parm[1:(nXvar)]
   delta1 <- parm[(nXvar + 1):(nXvar + nuZUvar)]
   delta2 <- parm[(nXvar + nuZUvar + 1):(nXvar + 2 * nuZUvar)]
@@ -370,6 +842,302 @@ cgradmcesfgenexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
   return(sweep(gradll, MARGIN = 1, STATS = wHvar, FUN = "*"))
 }
 
+## cauchit specification class membership
+cgradmcesfgenexponormlike_cauchit <- function(parm, nXvar, nuZUvar,
+  nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
+  beta <- parm[1:(nXvar)]
+  delta1 <- parm[(nXvar + 1):(nXvar + nuZUvar)]
+  delta2 <- parm[(nXvar + nuZUvar + 1):(nXvar + 2 * nuZUvar)]
+  phi1 <- parm[(nXvar + 2 * nuZUvar + 1):(nXvar + 2 * nuZUvar +
+    nvZVvar)]
+  phi2 <- parm[(nXvar + 2 * nuZUvar + nvZVvar + 1):(nXvar +
+    2 * nuZUvar + 2 * nvZVvar)]
+  theta <- parm[(nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(nXvar +
+    2 * nuZUvar + 2 * nvZVvar + nZHvar)]
+  Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
+  Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
+  ewusr1 <- exp(Wu1/2)
+  ewusr2 <- exp(Wu2/2)
+  ewu1 <- exp(Wu1)
+  ewu2 <- exp(Wu2)
+  ewvsr1 <- exp(Wv1/2)
+  ewvsr2 <- exp(Wv2/2)
+  ewv1 <- exp(Wv1)
+  ewv2 <- exp(Wv2)
+  ewz1 <- (0.5 + atan(Wz)/pi)
+  ewz2 <- (0.5 - atan(Wz)/pi)
+  musig1 <- (ewvsr1/ewusr1 + S * (epsilon)/ewvsr1)
+  musig2 <- (ewvsr2/ewusr2 + S * (epsilon)/ewvsr2)
+  dmusig1 <- dnorm(-musig1, 0, 1)
+  dmusig2 <- dnorm(-musig2, 0, 1)
+  pmusig1 <- pnorm(-musig1)
+  pmusig2 <- pnorm(-musig2)
+  epsivu1 <- (2 * (ewvsr1/ewusr1) + S * (epsilon)/ewvsr1)
+  epsivu2 <- (2 * (ewvsr2/ewusr2) + S * (epsilon)/ewvsr2)
+  depsi1 <- dnorm(-epsivu1, 0, 1)
+  depsi2 <- dnorm(-epsivu2, 0, 1)
+  pepsi1 <- pnorm(-epsivu1)
+  pepsi2 <- pnorm(-epsivu2)
+  dpuv1 <- (depsi1/ewvsr1 - 2 * (pepsi1/ewusr1))
+  dpuv2 <- (depsi2/ewvsr2 - 2 * (pepsi2/ewusr2))
+  euv1 <- (2 * (ewv1/ewu1) + S * (epsilon)/ewusr1)
+  euv2 <- (2 * (ewv2/ewu2) + S * (epsilon)/ewusr2)
+  epsiu1 <- (S * (epsilon)/ewusr1)
+  epsiu2 <- (S * (epsilon)/ewusr2)
+  sigx0_1 <- exp(2 * (ewv1/ewu1) + 2 * epsiu1)
+  sigx0_2 <- exp(2 * (ewv2/ewu2) + 2 * epsiu2)
+  sigx1_1 <- (dmusig1/ewvsr1 - pmusig1/ewusr1)
+  sigx1_2 <- (dmusig2/ewvsr2 - pmusig2/ewusr2)
+  sigx2_1 <- exp(ewv1/(2 * ewu1) + S * (epsilon)/ewusr1)
+  sigx2_2 <- exp(ewv2/(2 * ewu2) + S * (epsilon)/ewusr2)
+  sigx3_1 <- ((sigx1_1 * sigx2_1 - dpuv1 * sigx0_1) * ewz1/ewusr1)
+  sigx3_2 <- ((sigx1_2 * sigx2_2 - dpuv2 * sigx0_2) * ewz2/ewusr2)
+  sigx14_1 <- (sigx2_1 * pmusig1 - sigx0_1 * pepsi1)
+  sigx14_2 <- (sigx2_2 * pmusig2 - sigx0_2 * pepsi2)
+  sigx4_1 <- (ewz1 * sigx14_1/ewusr1)
+  sigx4_2 <- (ewz2 * sigx14_2/ewusr2)
+  sigx5_1 <- (dmusig1 * ewvsr1/ewusr1)
+  sigx5_2 <- (dmusig2 * ewvsr2/ewusr2)
+  sigx6_1 <- (ewu1 * ewv1/(2 * ewu1)^2)
+  sigx6_2 <- (ewu2 * ewv2/(2 * ewu2)^2)
+  sigx7_1 <- (0.5 * sigx5_1 - (0.5 * epsiu1 + 2 * sigx6_1) *
+    pmusig1)
+  sigx7_2 <- (0.5 * sigx5_2 - (0.5 * epsiu2 + 2 * sigx6_2) *
+    pmusig2)
+  sigx8_1 <- (depsi1 * ewvsr1/ewusr1 - euv1 * pepsi1)
+  sigx8_2 <- (depsi2 * ewvsr2/ewusr2 - euv2 * pepsi2)
+  epsiv1 <- (0.5 * (ewvsr1/ewusr1) - 0.5 * (S * (epsilon)/ewvsr1))
+  epsiv2 <- (0.5 * (ewvsr2/ewusr2) - 0.5 * (S * (epsilon)/ewvsr2))
+  sigx9_1 <- (ewv1 * pmusig1/(2 * ewu1) - epsiv1 * dmusig1)
+  sigx9_2 <- (ewv2 * pmusig2/(2 * ewu2) - epsiv2 * dmusig2)
+  sigx10_1 <- (sigx7_1 * sigx2_1 - (sigx8_1 * sigx0_1 + 0.5 *
+    sigx14_1))
+  sigx10_2 <- (sigx7_2 * sigx2_2 - (sigx8_2 * sigx0_2 + 0.5 *
+    sigx14_2))
+  sigx11_1 <- (ewvsr1/ewusr1 - 0.5 * (S * (epsilon)/ewvsr1))
+  sigx11_2 <- (ewvsr2/ewusr2 - 0.5 * (S * (epsilon)/ewvsr2))
+  sigx12_1 <- (2 * (ewv1 * pepsi1/ewu1) - depsi1 * sigx11_1)
+  sigx12_2 <- (2 * (ewv2 * pepsi2/ewu2) - depsi2 * sigx11_2)
+  sigx13_1 <- (sigx2_1 * sigx9_1 - sigx12_1 * sigx0_1)
+  sigx13_2 <- (sigx2_2 * sigx9_2 - sigx12_2 * sigx0_2)
+  sigx15 <- (pi * ((Wz)^2 + 1) * (2 * sigx4_2 + 2 * sigx4_1))
+  gradll <- cbind(sweep(Xvar, MARGIN = 1, STATS = S * (2 *
+    sigx3_1 + 2 * sigx3_2)/(2 * sigx4_2 + 2 * sigx4_1), FUN = "*"),
+    sweep(uHvar, MARGIN = 1, STATS = 2 * (sigx10_1 * ewz1/((2 *
+      sigx4_2 + 2 * sigx4_1) * ewusr1)), FUN = "*"), sweep(uHvar,
+      MARGIN = 1, STATS = 2 * (sigx10_2 * ewz2/((2 * sigx4_2 +
+        2 * sigx4_1) * ewusr2)), FUN = "*"), sweep(vHvar,
+      MARGIN = 1, STATS = 2 * (ewz1 * sigx13_1/((2 * sigx4_2 +
+        2 * sigx4_1) * ewusr1)), FUN = "*"), sweep(vHvar,
+      MARGIN = 1, STATS = 2 * (ewz2 * sigx13_2/((2 * sigx4_2 +
+        2 * sigx4_1) * ewusr2)), FUN = "*"), sweep(Zvar,
+      MARGIN = 1, STATS = (2 * (sigx14_1/ewusr1) - 2 *
+        (sigx14_2/ewusr2))/sigx15, FUN = "*"))
+  return(sweep(gradll, MARGIN = 1, STATS = wHvar, FUN = "*"))
+}
+
+## probit specification class membership
+cgradmcesfgenexponormlike_probit <- function(parm, nXvar, nuZUvar,
+  nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
+  beta <- parm[1:(nXvar)]
+  delta1 <- parm[(nXvar + 1):(nXvar + nuZUvar)]
+  delta2 <- parm[(nXvar + nuZUvar + 1):(nXvar + 2 * nuZUvar)]
+  phi1 <- parm[(nXvar + 2 * nuZUvar + 1):(nXvar + 2 * nuZUvar +
+    nvZVvar)]
+  phi2 <- parm[(nXvar + 2 * nuZUvar + nvZVvar + 1):(nXvar +
+    2 * nuZUvar + 2 * nvZVvar)]
+  theta <- parm[(nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(nXvar +
+    2 * nuZUvar + 2 * nvZVvar + nZHvar)]
+  Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
+  Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
+  ewusr1 <- exp(Wu1/2)
+  ewusr2 <- exp(Wu2/2)
+  ewu1 <- exp(Wu1)
+  ewu2 <- exp(Wu2)
+  ewvsr1 <- exp(Wv1/2)
+  ewvsr2 <- exp(Wv2/2)
+  ewv1 <- exp(Wv1)
+  ewv2 <- exp(Wv2)
+  pwZ <- pnorm(Wz)
+  dwZ <- dnorm(Wz, 0, 1)
+  musig1 <- (ewvsr1/ewusr1 + S * (epsilon)/ewvsr1)
+  musig2 <- (ewvsr2/ewusr2 + S * (epsilon)/ewvsr2)
+  dmusig1 <- dnorm(-musig1, 0, 1)
+  dmusig2 <- dnorm(-musig2, 0, 1)
+  pmusig1 <- pnorm(-musig1)
+  pmusig2 <- pnorm(-musig2)
+  epsivu1 <- (2 * (ewvsr1/ewusr1) + S * (epsilon)/ewvsr1)
+  epsivu2 <- (2 * (ewvsr2/ewusr2) + S * (epsilon)/ewvsr2)
+  depsi1 <- dnorm(-epsivu1, 0, 1)
+  depsi2 <- dnorm(-epsivu2, 0, 1)
+  pepsi1 <- pnorm(-epsivu1)
+  pepsi2 <- pnorm(-epsivu2)
+  dpuv1 <- (depsi1/ewvsr1 - 2 * (pepsi1/ewusr1))
+  dpuv2 <- (depsi2/ewvsr2 - 2 * (pepsi2/ewusr2))
+  euv1 <- (2 * (ewv1/ewu1) + S * (epsilon)/ewusr1)
+  euv2 <- (2 * (ewv2/ewu2) + S * (epsilon)/ewusr2)
+  epsiu1 <- (S * (epsilon)/ewusr1)
+  epsiu2 <- (S * (epsilon)/ewusr2)
+  sigx0_1 <- exp(2 * (ewv1/ewu1) + 2 * epsiu1)
+  sigx0_2 <- exp(2 * (ewv2/ewu2) + 2 * epsiu2)
+  sigx1_1 <- (dmusig1/ewvsr1 - pmusig1/ewusr1)
+  sigx1_2 <- (dmusig2/ewvsr2 - pmusig2/ewusr2)
+  sigx2_1 <- exp(ewv1/(2 * ewu1) + S * (epsilon)/ewusr1)
+  sigx2_2 <- exp(ewv2/(2 * ewu2) + S * (epsilon)/ewusr2)
+  sigx3_1 <- ((sigx1_1 * sigx2_1 - dpuv1 * sigx0_1) * pwZ/ewusr1)
+  sigx3_2 <- ((sigx1_2 * sigx2_2 - dpuv2 * sigx0_2) * (1 -
+    pwZ)/ewusr2)
+  sigx14_1 <- (sigx2_1 * pmusig1 - sigx0_1 * pepsi1)
+  sigx14_2 <- (sigx2_2 * pmusig2 - sigx0_2 * pepsi2)
+  sigx4_1 <- (sigx14_1 * pwZ/ewusr1)
+  sigx4_2 <- ((1 - pwZ) * sigx14_2/ewusr2)
+  sigx5_1 <- (dmusig1 * ewvsr1/ewusr1)
+  sigx5_2 <- (dmusig2 * ewvsr2/ewusr2)
+  sigx6_1 <- (ewu1 * ewv1/(2 * ewu1)^2)
+  sigx6_2 <- (ewu2 * ewv2/(2 * ewu2)^2)
+  sigx7_1 <- (0.5 * sigx5_1 - (0.5 * epsiu1 + 2 * sigx6_1) *
+    pmusig1)
+  sigx7_2 <- (0.5 * sigx5_2 - (0.5 * epsiu2 + 2 * sigx6_2) *
+    pmusig2)
+  sigx8_1 <- (depsi1 * ewvsr1/ewusr1 - euv1 * pepsi1)
+  sigx8_2 <- (depsi2 * ewvsr2/ewusr2 - euv2 * pepsi2)
+  epsiv1 <- (0.5 * (ewvsr1/ewusr1) - 0.5 * (S * (epsilon)/ewvsr1))
+  epsiv2 <- (0.5 * (ewvsr2/ewusr2) - 0.5 * (S * (epsilon)/ewvsr2))
+  sigx9_1 <- (ewv1 * pmusig1/(2 * ewu1) - epsiv1 * dmusig1)
+  sigx9_2 <- (ewv2 * pmusig2/(2 * ewu2) - epsiv2 * dmusig2)
+  sigx10_1 <- (sigx7_1 * sigx2_1 - (sigx8_1 * sigx0_1 + 0.5 *
+    sigx14_1))
+  sigx10_2 <- (sigx7_2 * sigx2_2 - (sigx8_2 * sigx0_2 + 0.5 *
+    sigx14_2))
+  sigx11_1 <- (ewvsr1/ewusr1 - 0.5 * (S * (epsilon)/ewvsr1))
+  sigx11_2 <- (ewvsr2/ewusr2 - 0.5 * (S * (epsilon)/ewvsr2))
+  sigx12_1 <- (2 * (ewv1 * pepsi1/ewu1) - depsi1 * sigx11_1)
+  sigx12_2 <- (2 * (ewv2 * pepsi2/ewu2) - depsi2 * sigx11_2)
+  sigx13_1 <- (sigx2_1 * sigx9_1 - sigx12_1 * sigx0_1)
+  sigx13_2 <- (sigx2_2 * sigx9_2 - sigx12_2 * sigx0_2)
+  gradll <- cbind(sweep(Xvar, MARGIN = 1, STATS = S * (2 *
+    sigx3_1 + 2 * sigx3_2)/(2 * sigx4_2 + 2 * sigx4_1), FUN = "*"),
+    sweep(uHvar, MARGIN = 1, STATS = 2 * (sigx10_1 * pwZ/((2 *
+      sigx4_2 + 2 * sigx4_1) * ewusr1)), FUN = "*"), sweep(uHvar,
+      MARGIN = 1, STATS = 2 * (sigx10_2 * (1 - pwZ)/((2 *
+        sigx4_2 + 2 * sigx4_1) * ewusr2)), FUN = "*"),
+    sweep(vHvar, MARGIN = 1, STATS = 2 * (pwZ * sigx13_1/((2 *
+      sigx4_2 + 2 * sigx4_1) * ewusr1)), FUN = "*"), sweep(vHvar,
+      MARGIN = 1, STATS = 2 * ((1 - pwZ) * sigx13_2/((2 *
+        sigx4_2 + 2 * sigx4_1) * ewusr2)), FUN = "*"),
+    sweep(Zvar, MARGIN = 1, STATS = (2 * (sigx14_1/ewusr1) -
+      2 * (sigx14_2/ewusr2)) * dwZ/(2 * sigx4_2 + 2 * sigx4_1),
+      FUN = "*"))
+  return(sweep(gradll, MARGIN = 1, STATS = wHvar, FUN = "*"))
+}
+
+## cloglog specification class membership
+cgradmcesfgenexponormlike_cloglog <- function(parm, nXvar, nuZUvar,
+  nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
+  beta <- parm[1:(nXvar)]
+  delta1 <- parm[(nXvar + 1):(nXvar + nuZUvar)]
+  delta2 <- parm[(nXvar + nuZUvar + 1):(nXvar + 2 * nuZUvar)]
+  phi1 <- parm[(nXvar + 2 * nuZUvar + 1):(nXvar + 2 * nuZUvar +
+    nvZVvar)]
+  phi2 <- parm[(nXvar + 2 * nuZUvar + nvZVvar + 1):(nXvar +
+    2 * nuZUvar + 2 * nvZVvar)]
+  theta <- parm[(nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(nXvar +
+    2 * nuZUvar + 2 * nvZVvar + nZHvar)]
+  Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
+  Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
+  ewusr1 <- exp(Wu1/2)
+  ewusr2 <- exp(Wu2/2)
+  ewu1 <- exp(Wu1)
+  ewu2 <- exp(Wu2)
+  ewvsr1 <- exp(Wv1/2)
+  ewvsr2 <- exp(Wv2/2)
+  ewv1 <- exp(Wv1)
+  ewv2 <- exp(Wv2)
+  ewz <- exp(Wz)
+  prZ <- exp(-ewz)
+  musig1 <- (ewvsr1/ewusr1 + S * (epsilon)/ewvsr1)
+  musig2 <- (ewvsr2/ewusr2 + S * (epsilon)/ewvsr2)
+  dmusig1 <- dnorm(-musig1, 0, 1)
+  dmusig2 <- dnorm(-musig2, 0, 1)
+  pmusig1 <- pnorm(-musig1)
+  pmusig2 <- pnorm(-musig2)
+  epsivu1 <- (2 * (ewvsr1/ewusr1) + S * (epsilon)/ewvsr1)
+  epsivu2 <- (2 * (ewvsr2/ewusr2) + S * (epsilon)/ewvsr2)
+  depsi1 <- dnorm(-epsivu1, 0, 1)
+  depsi2 <- dnorm(-epsivu2, 0, 1)
+  pepsi1 <- pnorm(-epsivu1)
+  pepsi2 <- pnorm(-epsivu2)
+  dpuv1 <- (depsi1/ewvsr1 - 2 * (pepsi1/ewusr1))
+  dpuv2 <- (depsi2/ewvsr2 - 2 * (pepsi2/ewusr2))
+  euv1 <- (2 * (ewv1/ewu1) + S * (epsilon)/ewusr1)
+  euv2 <- (2 * (ewv2/ewu2) + S * (epsilon)/ewusr2)
+  epsiu1 <- (S * (epsilon)/ewusr1)
+  epsiu2 <- (S * (epsilon)/ewusr2)
+  sigx0_1 <- exp(2 * (ewv1/ewu1) + 2 * epsiu1)
+  sigx0_2 <- exp(2 * (ewv2/ewu2) + 2 * epsiu2)
+  sigx1_1 <- (dmusig1/ewvsr1 - pmusig1/ewusr1)
+  sigx1_2 <- (dmusig2/ewvsr2 - pmusig2/ewusr2)
+  sigx2_1 <- exp(ewv1/(2 * ewu1) + S * (epsilon)/ewusr1)
+  sigx2_2 <- exp(ewv2/(2 * ewu2) + S * (epsilon)/ewusr2)
+  sigx3_1 <- ((sigx1_1 * sigx2_1 - dpuv1 * sigx0_1) * (1 -
+    prZ)/ewusr1)
+  sigx3_2 <- ((sigx1_2 * sigx2_2 - dpuv2 * sigx0_2) * prZ/ewusr2)
+  sigx14_1 <- (sigx2_1 * pmusig1 - sigx0_1 * pepsi1)
+  sigx14_2 <- (sigx2_2 * pmusig2 - sigx0_2 * pepsi2)
+  sigx4_1 <- ((1 - prZ) * sigx14_1/ewusr1)
+  sigx4_2 <- (prZ * sigx14_2/ewusr2)
+  sigx5_1 <- (dmusig1 * ewvsr1/ewusr1)
+  sigx5_2 <- (dmusig2 * ewvsr2/ewusr2)
+  sigx6_1 <- (ewu1 * ewv1/(2 * ewu1)^2)
+  sigx6_2 <- (ewu2 * ewv2/(2 * ewu2)^2)
+  sigx7_1 <- (0.5 * sigx5_1 - (0.5 * epsiu1 + 2 * sigx6_1) *
+    pmusig1)
+  sigx7_2 <- (0.5 * sigx5_2 - (0.5 * epsiu2 + 2 * sigx6_2) *
+    pmusig2)
+  sigx8_1 <- (depsi1 * ewvsr1/ewusr1 - euv1 * pepsi1)
+  sigx8_2 <- (depsi2 * ewvsr2/ewusr2 - euv2 * pepsi2)
+  epsiv1 <- (0.5 * (ewvsr1/ewusr1) - 0.5 * (S * (epsilon)/ewvsr1))
+  epsiv2 <- (0.5 * (ewvsr2/ewusr2) - 0.5 * (S * (epsilon)/ewvsr2))
+  sigx9_1 <- (ewv1 * pmusig1/(2 * ewu1) - epsiv1 * dmusig1)
+  sigx9_2 <- (ewv2 * pmusig2/(2 * ewu2) - epsiv2 * dmusig2)
+  sigx10_1 <- (sigx7_1 * sigx2_1 - (sigx8_1 * sigx0_1 + 0.5 *
+    sigx14_1))
+  sigx10_2 <- (sigx7_2 * sigx2_2 - (sigx8_2 * sigx0_2 + 0.5 *
+    sigx14_2))
+  sigx11_1 <- (ewvsr1/ewusr1 - 0.5 * (S * (epsilon)/ewvsr1))
+  sigx11_2 <- (ewvsr2/ewusr2 - 0.5 * (S * (epsilon)/ewvsr2))
+  sigx12_1 <- (2 * (ewv1 * pepsi1/ewu1) - depsi1 * sigx11_1)
+  sigx12_2 <- (2 * (ewv2 * pepsi2/ewu2) - depsi2 * sigx11_2)
+  sigx13_1 <- (sigx2_1 * sigx9_1 - sigx12_1 * sigx0_1)
+  sigx13_2 <- (sigx2_2 * sigx9_2 - sigx12_2 * sigx0_2)
+  gradll <- cbind(sweep(Xvar, MARGIN = 1, STATS = S * (2 *
+    sigx3_1 + 2 * sigx3_2)/(2 * sigx4_2 + 2 * sigx4_1), FUN = "*"),
+    sweep(uHvar, MARGIN = 1, STATS = 2 * (sigx10_1 * (1 -
+      prZ)/((2 * sigx4_2 + 2 * sigx4_1) * ewusr1)), FUN = "*"),
+    sweep(uHvar, MARGIN = 1, STATS = 2 * (sigx10_2 * prZ/((2 *
+      sigx4_2 + 2 * sigx4_1) * ewusr2)), FUN = "*"), sweep(vHvar,
+      MARGIN = 1, STATS = 2 * ((1 - prZ) * sigx13_1/((2 *
+        sigx4_2 + 2 * sigx4_1) * ewusr1)), FUN = "*"),
+    sweep(vHvar, MARGIN = 1, STATS = 2 * (prZ * sigx13_2/((2 *
+      sigx4_2 + 2 * sigx4_1) * ewusr2)), FUN = "*"), sweep(Zvar,
+      MARGIN = 1, STATS = (2 * (sigx14_1/ewusr1) - 2 *
+        (sigx14_2/ewusr2)) * prZ * ewz/(2 * sigx4_1 +
+        2 * sigx4_2), FUN = "*"))
+  return(sweep(gradll, MARGIN = 1, STATS = wHvar, FUN = "*"))
+}
+
 # Hessian of the likelihood function ----------
 #' hessian for cnsf generalized exponential-normal distribution
 #' @param parm all parameters to be estimated
@@ -386,8 +1154,10 @@ cgradmcesfgenexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param nZHvar number of separating variables
 #' @noRd
 # same sigma_u
-chesscnsfgenexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
-  uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
+
+## logit specification class membership
+chesscnsfgenexponormlike_logit <- function(parm, nXvar, nuZUvar,
+  nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
   beta <- parm[1:(nXvar)]
   delta <- parm[(nXvar + 1):(nXvar + nuZUvar)]
   phi1 <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
@@ -612,9 +1382,707 @@ chesscnsfgenexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
   return(hessll)
 }
 
+## cauchit specification class membership
+chesscnsfgenexponormlike_cauchit <- function(parm, nXvar, nuZUvar,
+  nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
+  beta <- parm[1:(nXvar)]
+  delta <- parm[(nXvar + 1):(nXvar + nuZUvar)]
+  phi1 <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
+  phi2 <- parm[(nXvar + nuZUvar + nvZVvar + 1):(nXvar + nuZUvar +
+    2 * nvZVvar)]
+  theta <- parm[(nXvar + nuZUvar + 2 * nvZVvar + 1):(nXvar +
+    nuZUvar + 2 * nvZVvar + nZHvar)]
+  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
+  ewusr <- exp(Wu/2)
+  ewu <- exp(Wu)
+  ewvsr1 <- exp(Wv1/2)
+  ewvsr2 <- exp(Wv2/2)
+  ewv1 <- exp(Wv1)
+  ewv2 <- exp(Wv2)
+  ewz1 <- (0.5 + atan(Wz)/pi)
+  ewz2 <- (0.5 - atan(Wz)/pi)
+  musig1 <- (ewvsr1/ewusr + S * (epsilon)/ewvsr1)
+  musig2 <- (ewvsr2/ewusr + S * (epsilon)/ewvsr2)
+  dmusig1 <- dnorm(-musig1, 0, 1)
+  dmusig2 <- dnorm(-musig2, 0, 1)
+  pmusig1 <- pnorm(-musig1)
+  pmusig2 <- pnorm(-musig2)
+  epsivu1 <- (2 * (ewvsr1/ewusr) + S * (epsilon)/ewvsr1)
+  epsivu2 <- (2 * (ewvsr2/ewusr) + S * (epsilon)/ewvsr2)
+  depsi1 <- dnorm(-epsivu1, 0, 1)
+  depsi2 <- dnorm(-epsivu2, 0, 1)
+  pepsi1 <- pnorm(-epsivu1)
+  pepsi2 <- pnorm(-epsivu2)
+  dpuv1 <- (depsi1/ewvsr1 - 2 * (pepsi1/ewusr))
+  dpuv2 <- (depsi2/ewvsr2 - 2 * (pepsi2/ewusr))
+  euv1 <- (2 * (ewv1/ewu) + S * (epsilon)/ewusr)
+  euv2 <- (2 * (ewv2/ewu) + S * (epsilon)/ewusr)
+  epsiu <- (S * (epsilon)/ewusr)
+  sigx0_1 <- exp(2 * (ewv1/ewu) + 2 * epsiu)
+  sigx0_2 <- exp(2 * (ewv2/ewu) + 2 * epsiu)
+  sigx1_1 <- (dmusig1/ewvsr1 - pmusig1/ewusr)
+  sigx1_2 <- (dmusig2/ewvsr2 - pmusig2/ewusr)
+  sigx2_1 <- exp(ewv1/(2 * ewu) + S * (epsilon)/ewusr)
+  sigx2_2 <- exp(ewv2/(2 * ewu) + S * (epsilon)/ewusr)
+  sigx3_1 <- ((sigx1_1 * sigx2_1 - dpuv1 * sigx0_1) * ewz1)
+  sigx3_2 <- ((sigx1_2 * sigx2_2 - dpuv2 * sigx0_2) * ewz2)
+  sigx14_1 <- (sigx2_1 * pmusig1 - sigx0_1 * pepsi1)
+  sigx14_2 <- (sigx2_2 * pmusig2 - sigx0_2 * pepsi2)
+  sigx4_1 <- (ewz1 * sigx14_1)
+  sigx4_2 <- (ewz2 * sigx14_2)
+  sigx5_1 <- (dmusig1 * ewvsr1/ewusr)
+  sigx5_2 <- (dmusig2 * ewvsr2/ewusr)
+  sigx6_1 <- (ewu * ewv1/(2 * ewu)^2)
+  sigx6_2 <- (ewu * ewv2/(2 * ewu)^2)
+  sigx7_1 <- (0.5 * sigx5_1 - (0.5 * epsiu + 2 * sigx6_1) *
+    pmusig1)
+  sigx7_2 <- (0.5 * sigx5_2 - (0.5 * epsiu + 2 * sigx6_2) *
+    pmusig2)
+  sigx8_1 <- (depsi1 * ewvsr1/ewusr - euv1 * pepsi1)
+  sigx8_2 <- (depsi2 * ewvsr2/ewusr - euv2 * pepsi2)
+  epsiv1 <- (0.5 * (ewvsr1/ewusr) - 0.5 * (S * (epsilon)/ewvsr1))
+  epsiv2 <- (0.5 * (ewvsr2/ewusr) - 0.5 * (S * (epsilon)/ewvsr2))
+  sigx9_1 <- (ewv1 * pmusig1/(2 * ewu) - epsiv1 * dmusig1)
+  sigx9_2 <- (ewv2 * pmusig2/(2 * ewu) - epsiv2 * dmusig2)
+  sigx10_1 <- ((sigx7_1 * sigx2_1 - sigx8_1 * sigx0_1) * ewz1)
+  sigx10_2 <- ((sigx7_2 * sigx2_2 - sigx8_2 * sigx0_2) * ewz2)
+  sigx11_1 <- (ewvsr1/ewusr - 0.5 * (S * (epsilon)/ewvsr1))
+  sigx11_2 <- (ewvsr2/ewusr - 0.5 * (S * (epsilon)/ewvsr2))
+  sigx12_1 <- (2 * (ewv1 * pepsi1/ewu) - depsi1 * sigx11_1)
+  sigx12_2 <- (2 * (ewv2 * pepsi2/ewu) - depsi2 * sigx11_2)
+  sigx13_1 <- (sigx2_1 * sigx9_1 - sigx12_1 * sigx0_1)
+  sigx13_2 <- (sigx2_2 * sigx9_2 - sigx12_2 * sigx0_2)
+  sigx15 <- (pi * ((Wz)^2 + 1) * (2 * sigx4_2 + 2 * sigx4_1))
+  hessll <- matrix(nrow = nXvar + nuZUvar + 2 * nvZVvar + nZHvar,
+    ncol = nXvar + nuZUvar + 2 * nvZVvar + nZHvar)
+  hessll[1:nXvar, 1:nXvar] <- crossprod(sweep(Xvar, MARGIN = 1,
+    STATS = wHvar * (2 * ((((musig1/ewvsr1 - 1/ewusr) * dmusig1/ewvsr1 -
+      sigx1_1/ewusr) * sigx2_1 - ((epsivu1/ewvsr1 - 2/ewusr) *
+      depsi1/ewvsr1 - 2 * (dpuv1/ewusr)) * sigx0_1) * ewz1) +
+      2 * ((((musig2/ewvsr2 - 1/ewusr) * dmusig2/ewvsr2 -
+        sigx1_2/ewusr) * sigx2_2 - ((epsivu2/ewvsr2 -
+        2/ewusr) * depsi2/ewvsr2 - 2 * (dpuv2/ewusr)) *
+        sigx0_2) * ewz2) - (2 * sigx3_1 + 2 * sigx3_2)^2/(2 *
+      sigx4_2 + 2 * sigx4_1))/(2 * sigx4_2 + 2 * sigx4_1),
+    FUN = "*"), Xvar)
+  hessll[1:nXvar, (nXvar + 1):(nXvar + nuZUvar)] <- crossprod(sweep(Xvar,
+    MARGIN = 1, STATS = wHvar * S * (2 * (((((0.5 + 0.5 *
+      epsiu + 2 * sigx6_1) * pmusig1 - 0.5 * sigx5_1)/ewusr +
+      (0.5 * (musig1/ewusr) - (0.5 * epsiu + 2 * sigx6_1)/ewvsr1) *
+        dmusig1) * sigx2_1 - ((epsivu1/ewusr - euv1/ewvsr1) *
+      depsi1 + (pepsi1 - 2 * sigx8_1)/ewusr) * sigx0_1) *
+      ewz1) + 2 * (((((0.5 + 0.5 * epsiu + 2 * sigx6_2) *
+      pmusig2 - 0.5 * sigx5_2)/ewusr + (0.5 * (musig2/ewusr) -
+      (0.5 * epsiu + 2 * sigx6_2)/ewvsr2) * dmusig2) *
+      sigx2_2 - ((epsivu2/ewusr - (2 * (ewv2/ewu) + S *
+      (epsilon)/ewusr)/ewvsr2) * depsi2 + (pepsi2 - 2 *
+      sigx8_2)/ewusr) * sigx0_2) * ewz2) - (2 * sigx10_1 +
+      2 * sigx10_2) * (2 * sigx3_1 + 2 * sigx3_2)/(2 *
+      sigx4_2 + 2 * sigx4_1))/(2 * sigx4_2 + 2 * sigx4_1),
+    FUN = "*"), uHvar)
+  hessll[1:nXvar, (nXvar + nuZUvar + 1):(nXvar + nuZUvar +
+    nvZVvar)] <- crossprod(sweep(Xvar, MARGIN = 1, STATS = wHvar *
+    2 * (S * ((dmusig1 * (ewv1/(2 * ewu) - (epsiv1 * musig1 +
+    0.5))/ewvsr1 - sigx9_1/ewusr) * sigx2_1 - (((2 * (ewv1/ewu) -
+    (epsivu1 * sigx11_1 + 0.5)) * depsi1/ewvsr1 - 2 * (sigx12_1/ewusr)) *
+    sigx0_1 + (2 * sigx3_1 + 2 * sigx3_2) * sigx13_1/(2 *
+    sigx4_2 + 2 * sigx4_1))) * ewz1/(2 * sigx4_2 + 2 * sigx4_1)),
+    FUN = "*"), vHvar)
+  hessll[1:nXvar, (nXvar + nuZUvar + nvZVvar + 1):(nXvar +
+    nuZUvar + 2 * nvZVvar)] <- crossprod(sweep(Xvar, MARGIN = 1,
+    STATS = wHvar * 2 * (S * ((dmusig2 * (ewv2/(2 * ewu) -
+      (epsiv2 * musig2 + 0.5))/ewvsr2 - sigx9_2/ewusr) *
+      sigx2_2 - (((2 * (ewv2/ewu) - (epsivu2 * sigx11_2 +
+      0.5)) * depsi2/ewvsr2 - 2 * (sigx12_2/ewusr)) * sigx0_2 +
+      (2 * sigx3_1 + 2 * sigx3_2) * sigx13_2/(2 * sigx4_2 +
+        2 * sigx4_1))) * ewz2/(2 * sigx4_2 + 2 * sigx4_1)),
+    FUN = "*"), vHvar)
+  hessll[1:nXvar, (nXvar + nuZUvar + 2 * nvZVvar + 1):(nXvar +
+    nuZUvar + 2 * nvZVvar + nZHvar)] <- crossprod(sweep(Xvar,
+    MARGIN = 1, STATS = wHvar * S * ((2 * (sigx1_1 * sigx2_1 -
+      dpuv1 * sigx0_1) - 2 * (sigx1_2 * sigx2_2 - dpuv2 *
+      sigx0_2))/sigx15 - pi * ((Wz)^2 + 1) * (2 * sigx3_1 +
+      2 * sigx3_2) * (2 * sigx14_1 - 2 * sigx14_2)/sigx15^2),
+    FUN = "*"), Zvar)
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + 1):(nXvar +
+    nuZUvar)] <- crossprod(sweep(uHvar, MARGIN = 1, STATS = wHvar *
+    (2 * ((((0.5 * (0.5 * (ewvsr1 * musig1/ewusr) - 0.5) -
+      0.5 * (0.5 * epsiu + 2 * sigx6_1)) * dmusig1 * ewvsr1/ewusr -
+      (sigx7_1 * (0.5 * epsiu + 2 * sigx6_1) + (2 * ((1 -
+        8 * (ewu^2/(2 * ewu)^2)) * ewu * ewv1/(2 * ewu)^2) -
+        0.25 * epsiu) * pmusig1)) * sigx2_1 - (((epsivu1 *
+      ewvsr1 - S * (epsilon))/ewusr - (0.5 + 2 * (ewv1/ewu))) *
+      depsi1 * ewvsr1/ewusr + (0.5 * epsiu + 2 * (ewv1/ewu)) *
+      pepsi1 - euv1 * sigx8_1) * sigx0_1) * ewz1) + 2 *
+      ((((0.5 * (0.5 * (ewvsr2 * musig2/ewusr) - 0.5) -
+        0.5 * (0.5 * epsiu + 2 * sigx6_2)) * dmusig2 *
+        ewvsr2/ewusr - (sigx7_2 * (0.5 * epsiu + 2 *
+        sigx6_2) + (2 * ((1 - 8 * (ewu^2/(2 * ewu)^2)) *
+        ewu * ewv2/(2 * ewu)^2) - 0.25 * epsiu) * pmusig2)) *
+        sigx2_2 - (((epsivu2 * ewvsr2 - S * (epsilon))/ewusr -
+        (0.5 + 2 * (ewv2/ewu))) * depsi2 * ewvsr2/ewusr +
+        (0.5 * epsiu + 2 * (ewv2/ewu)) * pepsi2 - euv2 *
+        sigx8_2) * sigx0_2) * ewz2) - (2 * sigx10_1 +
+      2 * sigx10_2)^2/(2 * sigx4_2 + 2 * sigx4_1))/(2 *
+    sigx4_2 + 2 * sigx4_1), FUN = "*"), uHvar)
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + nuZUvar +
+    1):(nXvar + nuZUvar + nvZVvar)] <- crossprod(sweep(uHvar,
+    MARGIN = 1, STATS = wHvar * 2 * ((((dmusig1 * ewvsr1/(4 *
+      (ewu * ewusr)) - 2 * (ewu * pmusig1/(2 * ewu)^2)) *
+      ewv1 - ((0.5 * (epsiv1 * musig1) - 0.25) * dmusig1 *
+      ewvsr1/ewusr + (0.5 * epsiu + 2 * sigx6_1) * sigx9_1)) *
+      sigx2_1 - ((2 * sigx10_1 + 2 * sigx10_2) * sigx13_1/(2 *
+      sigx4_2 + 2 * sigx4_1) + (2 * ((depsi1 * ewvsr1/ewusr -
+      pepsi1) * ewv1/ewu) - ((epsivu1 * sigx11_1 - 0.5) *
+      depsi1 * ewvsr1/ewusr + sigx12_1 * euv1)) * sigx0_1)) *
+      ewz1/(2 * sigx4_2 + 2 * sigx4_1)), FUN = "*"), vHvar)
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + nuZUvar +
+    nvZVvar + 1):(nXvar + nuZUvar + 2 * nvZVvar)] <- crossprod(sweep(uHvar,
+    MARGIN = 1, STATS = wHvar * 2 * ((((dmusig2 * ewvsr2/(4 *
+      (ewu * ewusr)) - 2 * (ewu * pmusig2/(2 * ewu)^2)) *
+      ewv2 - ((0.5 * (epsiv2 * musig2) - 0.25) * dmusig2 *
+      ewvsr2/ewusr + (0.5 * epsiu + 2 * sigx6_2) * sigx9_2)) *
+      sigx2_2 - ((2 * sigx10_1 + 2 * sigx10_2) * sigx13_2/(2 *
+      sigx4_2 + 2 * sigx4_1) + (2 * ((depsi2 * ewvsr2/ewusr -
+      pepsi2) * ewv2/ewu) - ((epsivu2 * sigx11_2 - 0.5) *
+      depsi2 * ewvsr2/ewusr + sigx12_2 * (2 * (ewv2/ewu) +
+      S * (epsilon)/ewusr))) * sigx0_2)) * ewz2/(2 * sigx4_2 +
+      2 * sigx4_1)), FUN = "*"), vHvar)
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + nuZUvar +
+    2 * nvZVvar + 1):(nXvar + nuZUvar + 2 * nvZVvar + nZHvar)] <- crossprod(sweep(uHvar,
+    MARGIN = 1, STATS = wHvar * ((2 * (sigx7_1 * sigx2_1 -
+      sigx8_1 * sigx0_1) - 2 * (sigx7_2 * sigx2_2 - sigx8_2 *
+      sigx0_2))/sigx15 - pi * ((Wz)^2 + 1) * (2 * sigx10_1 +
+      2 * sigx10_2) * (2 * sigx14_1 - 2 * sigx14_2)/sigx15^2),
+    FUN = "*"), Zvar)
+  hessll[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar),
+    (nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)] <- crossprod(sweep(vHvar,
+    MARGIN = 1, STATS = wHvar * 2 * ((((sigx9_1/2 + (pmusig1 -
+      epsiv1 * dmusig1)/2) * ewv1/ewu - (0.25 * (ewvsr1/ewusr) +
+      0.25 * (S * (epsilon)/ewvsr1) - epsiv1^2 * musig1) *
+      dmusig1) * sigx2_1 - (((2 * sigx12_1 + 2 * (pepsi1 -
+      depsi1 * sigx11_1)) * ewv1/ewu - (0.25 * (S * (epsilon)/ewvsr1) +
+      0.5 * (ewvsr1/ewusr) - epsivu1 * sigx11_1^2) * depsi1) *
+      sigx0_1 + 2 * (ewz1 * sigx13_1^2/(2 * sigx4_2 + 2 *
+      sigx4_1)))) * ewz1/(2 * sigx4_2 + 2 * sigx4_1)),
+    FUN = "*"), vHvar)
+  hessll[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar),
+    (nXvar + nuZUvar + nvZVvar + 1):(nXvar + nuZUvar + 2 *
+      nvZVvar)] <- crossprod(sweep(vHvar, MARGIN = 1, STATS = -wHvar *
+    (4 * (ewz2 * ewz1 * sigx13_1 * sigx13_2/(2 * sigx4_2 +
+      2 * sigx4_1)^2)), FUN = "*"), vHvar)
+  hessll[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar),
+    (nXvar + nuZUvar + 2 * nvZVvar + 1):(nXvar + nuZUvar +
+      2 * nvZVvar + nZHvar)] <- crossprod(sweep(vHvar,
+    MARGIN = 1, STATS = wHvar * (2/sigx15 - 2 * (pi * ((Wz)^2 +
+      1) * ewz1 * (2 * sigx14_1 - 2 * sigx14_2)/sigx15^2)) *
+      sigx13_1, FUN = "*"), Zvar)
+  hessll[(nXvar + nuZUvar + nvZVvar + 1):(nXvar + nuZUvar +
+    2 * nvZVvar), (nXvar + nuZUvar + nvZVvar + 1):(nXvar +
+    nuZUvar + 2 * nvZVvar)] <- crossprod(sweep(vHvar, MARGIN = 1,
+    STATS = wHvar * 2 * ((((sigx9_2/2 + (pmusig2 - epsiv2 *
+      dmusig2)/2) * ewv2/ewu - (0.25 * (ewvsr2/ewusr) +
+      0.25 * (S * (epsilon)/ewvsr2) - epsiv2^2 * musig2) *
+      dmusig2) * sigx2_2 - (((2 * sigx12_2 + 2 * (pepsi2 -
+      depsi2 * sigx11_2)) * ewv2/ewu - (0.25 * (S * (epsilon)/ewvsr2) +
+      0.5 * (ewvsr2/ewusr) - epsivu2 * sigx11_2^2) * depsi2) *
+      sigx0_2 + 2 * (ewz2 * sigx13_2^2/(2 * sigx4_2 + 2 *
+      sigx4_1)))) * ewz2/(2 * sigx4_2 + 2 * sigx4_1)),
+    FUN = "*"), vHvar)
+  hessll[(nXvar + nuZUvar + nvZVvar + 1):(nXvar + nuZUvar +
+    2 * nvZVvar), (nXvar + nuZUvar + 2 * nvZVvar + 1):(nXvar +
+    nuZUvar + 2 * nvZVvar + nZHvar)] <- crossprod(sweep(vHvar,
+    MARGIN = 1, STATS = -wHvar * ((2 * (pi * ((Wz)^2 + 1) *
+      ewz2 * (2 * sigx14_1 - 2 * sigx14_2)/sigx15^2) +
+      2/sigx15) * sigx13_2), FUN = "*"), Zvar)
+  hessll[(nXvar + nuZUvar + 2 * nvZVvar + 1):(nXvar + nuZUvar +
+    2 * nvZVvar + nZHvar), (nXvar + nuZUvar + 2 * nvZVvar +
+    1):(nXvar + nuZUvar + 2 * nvZVvar + nZHvar)] <- crossprod(sweep(Zvar,
+    MARGIN = 1, STATS = -wHvar * ((2 * sigx14_1 - 2 * sigx14_2) *
+      (2 * sigx14_1 + 2 * (pi * Wz * (2 * sigx4_2 + 2 *
+        sigx4_1)) - 2 * sigx14_2)/sigx15^2), FUN = "*"),
+    Zvar)
+  hessll[lower.tri(hessll)] <- t(hessll)[lower.tri(hessll)]
+  # hessll<-(hessll+(hessll))/2
+  return(hessll)
+}
+
+## probit specification class membership
+chesscnsfgenexponormlike_probit <- function(parm, nXvar, nuZUvar,
+  nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
+  beta <- parm[1:(nXvar)]
+  delta <- parm[(nXvar + 1):(nXvar + nuZUvar)]
+  phi1 <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
+  phi2 <- parm[(nXvar + nuZUvar + nvZVvar + 1):(nXvar + nuZUvar +
+    2 * nvZVvar)]
+  theta <- parm[(nXvar + nuZUvar + 2 * nvZVvar + 1):(nXvar +
+    nuZUvar + 2 * nvZVvar + nZHvar)]
+  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
+  ewusr <- exp(Wu/2)
+  ewu <- exp(Wu)
+  ewvsr1 <- exp(Wv1/2)
+  ewvsr2 <- exp(Wv2/2)
+  ewv1 <- exp(Wv1)
+  ewv2 <- exp(Wv2)
+  pwZ <- pnorm(Wz)
+  dwZ <- dnorm(Wz, 0, 1)
+  musig1 <- (ewvsr1/ewusr + S * (epsilon)/ewvsr1)
+  musig2 <- (ewvsr2/ewusr + S * (epsilon)/ewvsr2)
+  dmusig1 <- dnorm(-musig1, 0, 1)
+  dmusig2 <- dnorm(-musig2, 0, 1)
+  pmusig1 <- pnorm(-musig1)
+  pmusig2 <- pnorm(-musig2)
+  epsivu1 <- (2 * (ewvsr1/ewusr) + S * (epsilon)/ewvsr1)
+  epsivu2 <- (2 * (ewvsr2/ewusr) + S * (epsilon)/ewvsr2)
+  depsi1 <- dnorm(-epsivu1, 0, 1)
+  depsi2 <- dnorm(-epsivu2, 0, 1)
+  pepsi1 <- pnorm(-epsivu1)
+  pepsi2 <- pnorm(-epsivu2)
+  dpuv1 <- (depsi1/ewvsr1 - 2 * (pepsi1/ewusr))
+  dpuv2 <- (depsi2/ewvsr2 - 2 * (pepsi2/ewusr))
+  euv1 <- (2 * (ewv1/ewu) + S * (epsilon)/ewusr)
+  euv2 <- (2 * (ewv2/ewu) + S * (epsilon)/ewusr)
+  epsiu <- (S * (epsilon)/ewusr)
+  sigx0_1 <- exp(2 * (ewv1/ewu) + 2 * epsiu)
+  sigx0_2 <- exp(2 * (ewv2/ewu) + 2 * epsiu)
+  sigx1_1 <- (dmusig1/ewvsr1 - pmusig1/ewusr)
+  sigx1_2 <- (dmusig2/ewvsr2 - pmusig2/ewusr)
+  sigx2_1 <- exp(ewv1/(2 * ewu) + S * (epsilon)/ewusr)
+  sigx2_2 <- exp(ewv2/(2 * ewu) + S * (epsilon)/ewusr)
+  sigx3_1 <- ((sigx1_1 * sigx2_1 - dpuv1 * sigx0_1) * pwZ)
+  sigx3_2 <- ((sigx1_2 * sigx2_2 - dpuv2 * sigx0_2) * (1 -
+    pwZ))
+  sigx14_1 <- (sigx2_1 * pmusig1 - sigx0_1 * pepsi1)
+  sigx14_2 <- (sigx2_2 * pmusig2 - sigx0_2 * pepsi2)
+  sigx4_1 <- (sigx14_1 * pwZ)
+  sigx4_2 <- ((1 - pwZ) * sigx14_2)
+  sigx5_1 <- (dmusig1 * ewvsr1/ewusr)
+  sigx5_2 <- (dmusig2 * ewvsr2/ewusr)
+  sigx6_1 <- (ewu * ewv1/(2 * ewu)^2)
+  sigx6_2 <- (ewu * ewv2/(2 * ewu)^2)
+  sigx7_1 <- (0.5 * sigx5_1 - (0.5 * epsiu + 2 * sigx6_1) *
+    pmusig1)
+  sigx7_2 <- (0.5 * sigx5_2 - (0.5 * epsiu + 2 * sigx6_2) *
+    pmusig2)
+  sigx8_1 <- (depsi1 * ewvsr1/ewusr - euv1 * pepsi1)
+  sigx8_2 <- (depsi2 * ewvsr2/ewusr - euv2 * pepsi2)
+  epsiv1 <- (0.5 * (ewvsr1/ewusr) - 0.5 * (S * (epsilon)/ewvsr1))
+  epsiv2 <- (0.5 * (ewvsr2/ewusr) - 0.5 * (S * (epsilon)/ewvsr2))
+  sigx9_1 <- (ewv1 * pmusig1/(2 * ewu) - epsiv1 * dmusig1)
+  sigx9_2 <- (ewv2 * pmusig2/(2 * ewu) - epsiv2 * dmusig2)
+  sigx10_1 <- ((sigx7_1 * sigx2_1 - sigx8_1 * sigx0_1) * pwZ)
+  sigx10_2 <- ((sigx7_2 * sigx2_2 - sigx8_2 * sigx0_2) * (1 -
+    pwZ))
+  sigx11_1 <- (ewvsr1/ewusr - 0.5 * (S * (epsilon)/ewvsr1))
+  sigx11_2 <- (ewvsr2/ewusr - 0.5 * (S * (epsilon)/ewvsr2))
+  sigx12_1 <- (2 * (ewv1 * pepsi1/ewu) - depsi1 * sigx11_1)
+  sigx12_2 <- (2 * (ewv2 * pepsi2/ewu) - depsi2 * sigx11_2)
+  sigx13_1 <- (sigx2_1 * sigx9_1 - sigx12_1 * sigx0_1)
+  sigx13_2 <- (sigx2_2 * sigx9_2 - sigx12_2 * sigx0_2)
+  hessll <- matrix(nrow = nXvar + nuZUvar + 2 * nvZVvar + nZHvar,
+    ncol = nXvar + nuZUvar + 2 * nvZVvar + nZHvar)
+  hessll[1:nXvar, 1:nXvar] <- crossprod(sweep(Xvar, MARGIN = 1,
+    STATS = wHvar * (2 * ((((musig1/ewvsr1 - 1/ewusr) * dmusig1/ewvsr1 -
+      sigx1_1/ewusr) * sigx2_1 - ((epsivu1/ewvsr1 - 2/ewusr) *
+      depsi1/ewvsr1 - 2 * (dpuv1/ewusr)) * sigx0_1) * pwZ) +
+      2 * ((((musig2/ewvsr2 - 1/ewusr) * dmusig2/ewvsr2 -
+        sigx1_2/ewusr) * sigx2_2 - ((epsivu2/ewvsr2 -
+        2/ewusr) * depsi2/ewvsr2 - 2 * (dpuv2/ewusr)) *
+        sigx0_2) * (1 - pwZ)) - (2 * sigx3_1 + 2 * sigx3_2)^2/(2 *
+      sigx4_2 + 2 * sigx4_1))/(2 * sigx4_2 + 2 * sigx4_1),
+    FUN = "*"), Xvar)
+  hessll[1:nXvar, (nXvar + 1):(nXvar + nuZUvar)] <- crossprod(sweep(Xvar,
+    MARGIN = 1, STATS = wHvar * S * (2 * (((((0.5 + 0.5 *
+      epsiu + 2 * sigx6_1) * pmusig1 - 0.5 * sigx5_1)/ewusr +
+      (0.5 * (musig1/ewusr) - (0.5 * epsiu + 2 * sigx6_1)/ewvsr1) *
+        dmusig1) * sigx2_1 - ((epsivu1/ewusr - euv1/ewvsr1) *
+      depsi1 + (pepsi1 - 2 * sigx8_1)/ewusr) * sigx0_1) *
+      pwZ) + 2 * (((((0.5 + 0.5 * epsiu + 2 * sigx6_2) *
+      pmusig2 - 0.5 * sigx5_2)/ewusr + (0.5 * (musig2/ewusr) -
+      (0.5 * epsiu + 2 * sigx6_2)/ewvsr2) * dmusig2) *
+      sigx2_2 - ((epsivu2/ewusr - (2 * (ewv2/ewu) + S *
+      (epsilon)/ewusr)/ewvsr2) * depsi2 + (pepsi2 - 2 *
+      sigx8_2)/ewusr) * sigx0_2) * (1 - pwZ)) - (2 * sigx10_1 +
+      2 * sigx10_2) * (2 * sigx3_1 + 2 * sigx3_2)/(2 *
+      sigx4_2 + 2 * sigx4_1))/(2 * sigx4_2 + 2 * sigx4_1),
+    FUN = "*"), uHvar)
+  hessll[1:nXvar, (nXvar + nuZUvar + 1):(nXvar + nuZUvar +
+    nvZVvar)] <- crossprod(sweep(Xvar, MARGIN = 1, STATS = wHvar *
+    2 * (S * ((dmusig1 * (ewv1/(2 * ewu) - (epsiv1 * musig1 +
+    0.5))/ewvsr1 - sigx9_1/ewusr) * sigx2_1 - (((2 * (ewv1/ewu) -
+    (epsivu1 * sigx11_1 + 0.5)) * depsi1/ewvsr1 - 2 * (sigx12_1/ewusr)) *
+    sigx0_1 + (2 * sigx3_1 + 2 * sigx3_2) * sigx13_1/(2 *
+    sigx4_2 + 2 * sigx4_1))) * pwZ/(2 * sigx4_2 + 2 * sigx4_1)),
+    FUN = "*"), vHvar)
+  hessll[1:nXvar, (nXvar + nuZUvar + nvZVvar + 1):(nXvar +
+    nuZUvar + 2 * nvZVvar)] <- crossprod(sweep(Xvar, MARGIN = 1,
+    STATS = wHvar * 2 * (S * ((dmusig2 * (ewv2/(2 * ewu) -
+      (epsiv2 * musig2 + 0.5))/ewvsr2 - sigx9_2/ewusr) *
+      sigx2_2 - (((2 * (ewv2/ewu) - (epsivu2 * sigx11_2 +
+      0.5)) * depsi2/ewvsr2 - 2 * (sigx12_2/ewusr)) * sigx0_2 +
+      (2 * sigx3_1 + 2 * sigx3_2) * sigx13_2/(2 * sigx4_2 +
+        2 * sigx4_1))) * (1 - pwZ)/(2 * sigx4_2 + 2 *
+      sigx4_1)), FUN = "*"), vHvar)
+  hessll[1:nXvar, (nXvar + nuZUvar + 2 * nvZVvar + 1):(nXvar +
+    nuZUvar + 2 * nvZVvar + nZHvar)] <- crossprod(sweep(Xvar,
+    MARGIN = 1, STATS = wHvar * S * (2 * (sigx1_1 * sigx2_1 -
+      dpuv1 * sigx0_1) - ((2 * sigx3_1 + 2 * sigx3_2) *
+      (2 * sigx14_1 - 2 * sigx14_2)/(2 * sigx4_2 + 2 *
+      sigx4_1) + 2 * (sigx1_2 * sigx2_2 - dpuv2 * sigx0_2))) *
+      dwZ/(2 * sigx4_2 + 2 * sigx4_1), FUN = "*"), Zvar)
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + 1):(nXvar +
+    nuZUvar)] <- crossprod(sweep(uHvar, MARGIN = 1, STATS = wHvar *
+    (2 * ((((0.5 * (0.5 * (ewvsr1 * musig1/ewusr) - 0.5) -
+      0.5 * (0.5 * epsiu + 2 * sigx6_1)) * dmusig1 * ewvsr1/ewusr -
+      (sigx7_1 * (0.5 * epsiu + 2 * sigx6_1) + (2 * ((1 -
+        8 * (ewu^2/(2 * ewu)^2)) * ewu * ewv1/(2 * ewu)^2) -
+        0.25 * epsiu) * pmusig1)) * sigx2_1 - (((epsivu1 *
+      ewvsr1 - S * (epsilon))/ewusr - (0.5 + 2 * (ewv1/ewu))) *
+      depsi1 * ewvsr1/ewusr + (0.5 * epsiu + 2 * (ewv1/ewu)) *
+      pepsi1 - euv1 * sigx8_1) * sigx0_1) * pwZ) + 2 *
+      ((((0.5 * (0.5 * (ewvsr2 * musig2/ewusr) - 0.5) -
+        0.5 * (0.5 * epsiu + 2 * sigx6_2)) * dmusig2 *
+        ewvsr2/ewusr - (sigx7_2 * (0.5 * epsiu + 2 *
+        sigx6_2) + (2 * ((1 - 8 * (ewu^2/(2 * ewu)^2)) *
+        ewu * ewv2/(2 * ewu)^2) - 0.25 * epsiu) * pmusig2)) *
+        sigx2_2 - (((epsivu2 * ewvsr2 - S * (epsilon))/ewusr -
+        (0.5 + 2 * (ewv2/ewu))) * depsi2 * ewvsr2/ewusr +
+        (0.5 * epsiu + 2 * (ewv2/ewu)) * pepsi2 - euv2 *
+        sigx8_2) * sigx0_2) * (1 - pwZ)) - (2 * sigx10_1 +
+      2 * sigx10_2)^2/(2 * sigx4_2 + 2 * sigx4_1))/(2 *
+    sigx4_2 + 2 * sigx4_1), FUN = "*"), uHvar)
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + nuZUvar +
+    1):(nXvar + nuZUvar + nvZVvar)] <- crossprod(sweep(uHvar,
+    MARGIN = 1, STATS = wHvar * 2 * ((((dmusig1 * ewvsr1/(4 *
+      (ewu * ewusr)) - 2 * (ewu * pmusig1/(2 * ewu)^2)) *
+      ewv1 - ((0.5 * (epsiv1 * musig1) - 0.25) * dmusig1 *
+      ewvsr1/ewusr + (0.5 * epsiu + 2 * sigx6_1) * sigx9_1)) *
+      sigx2_1 - ((2 * sigx10_1 + 2 * sigx10_2) * sigx13_1/(2 *
+      sigx4_2 + 2 * sigx4_1) + (2 * ((depsi1 * ewvsr1/ewusr -
+      pepsi1) * ewv1/ewu) - ((epsivu1 * sigx11_1 - 0.5) *
+      depsi1 * ewvsr1/ewusr + sigx12_1 * euv1)) * sigx0_1)) *
+      pwZ/(2 * sigx4_2 + 2 * sigx4_1)), FUN = "*"), vHvar)
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + nuZUvar +
+    nvZVvar + 1):(nXvar + nuZUvar + 2 * nvZVvar)] <- crossprod(sweep(uHvar,
+    MARGIN = 1, STATS = wHvar * 2 * ((((dmusig2 * ewvsr2/(4 *
+      (ewu * ewusr)) - 2 * (ewu * pmusig2/(2 * ewu)^2)) *
+      ewv2 - ((0.5 * (epsiv2 * musig2) - 0.25) * dmusig2 *
+      ewvsr2/ewusr + (0.5 * epsiu + 2 * sigx6_2) * sigx9_2)) *
+      sigx2_2 - ((2 * sigx10_1 + 2 * sigx10_2) * sigx13_2/(2 *
+      sigx4_2 + 2 * sigx4_1) + (2 * ((depsi2 * ewvsr2/ewusr -
+      pepsi2) * ewv2/ewu) - ((epsivu2 * sigx11_2 - 0.5) *
+      depsi2 * ewvsr2/ewusr + sigx12_2 * (2 * (ewv2/ewu) +
+      S * (epsilon)/ewusr))) * sigx0_2)) * (1 - pwZ)/(2 *
+      sigx4_2 + 2 * sigx4_1)), FUN = "*"), vHvar)
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + nuZUvar +
+    2 * nvZVvar + 1):(nXvar + nuZUvar + 2 * nvZVvar + nZHvar)] <- crossprod(sweep(uHvar,
+    MARGIN = 1, STATS = wHvar * (2 * (sigx7_1 * sigx2_1 -
+      sigx8_1 * sigx0_1) - ((2 * sigx10_1 + 2 * sigx10_2) *
+      (2 * sigx14_1 - 2 * sigx14_2)/(2 * sigx4_2 + 2 *
+      sigx4_1) + 2 * (sigx7_2 * sigx2_2 - sigx8_2 * sigx0_2))) *
+      dwZ/(2 * sigx4_2 + 2 * sigx4_1), FUN = "*"), Zvar)
+  hessll[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar),
+    (nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)] <- crossprod(sweep(vHvar,
+    MARGIN = 1, STATS = wHvar * 2 * ((((sigx9_1/2 + (pmusig1 -
+      epsiv1 * dmusig1)/2) * ewv1/ewu - (0.25 * (ewvsr1/ewusr) +
+      0.25 * (S * (epsilon)/ewvsr1) - epsiv1^2 * musig1) *
+      dmusig1) * sigx2_1 - (((2 * sigx12_1 + 2 * (pepsi1 -
+      depsi1 * sigx11_1)) * ewv1/ewu - (0.25 * (S * (epsilon)/ewvsr1) +
+      0.5 * (ewvsr1/ewusr) - epsivu1 * sigx11_1^2) * depsi1) *
+      sigx0_1 + 2 * (pwZ * sigx13_1^2/(2 * sigx4_2 + 2 *
+      sigx4_1)))) * pwZ/(2 * sigx4_2 + 2 * sigx4_1)), FUN = "*"),
+    vHvar)
+  hessll[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar),
+    (nXvar + nuZUvar + nvZVvar + 1):(nXvar + nuZUvar + 2 *
+      nvZVvar)] <- crossprod(sweep(vHvar, MARGIN = 1, STATS = -wHvar *
+    (4 * ((1 - pwZ) * pwZ * sigx13_1 * sigx13_2/(2 * sigx4_2 +
+      2 * sigx4_1)^2)), FUN = "*"), vHvar)
+  hessll[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar),
+    (nXvar + nuZUvar + 2 * nvZVvar + 1):(nXvar + nuZUvar +
+      2 * nvZVvar + nZHvar)] <- crossprod(sweep(vHvar,
+    MARGIN = 1, STATS = wHvar * (2 - 2 * ((2 * sigx14_1 -
+      2 * sigx14_2) * pwZ/(2 * sigx4_2 + 2 * sigx4_1))) *
+      dwZ * sigx13_1/(2 * sigx4_2 + 2 * sigx4_1), FUN = "*"),
+    Zvar)
+  hessll[(nXvar + nuZUvar + nvZVvar + 1):(nXvar + nuZUvar +
+    2 * nvZVvar), (nXvar + nuZUvar + nvZVvar + 1):(nXvar +
+    nuZUvar + 2 * nvZVvar)] <- crossprod(sweep(vHvar, MARGIN = 1,
+    STATS = wHvar * 2 * ((((sigx9_2/2 + (pmusig2 - epsiv2 *
+      dmusig2)/2) * ewv2/ewu - (0.25 * (ewvsr2/ewusr) +
+      0.25 * (S * (epsilon)/ewvsr2) - epsiv2^2 * musig2) *
+      dmusig2) * sigx2_2 - (((2 * sigx12_2 + 2 * (pepsi2 -
+      depsi2 * sigx11_2)) * ewv2/ewu - (0.25 * (S * (epsilon)/ewvsr2) +
+      0.5 * (ewvsr2/ewusr) - epsivu2 * sigx11_2^2) * depsi2) *
+      sigx0_2 + 2 * ((1 - pwZ) * sigx13_2^2/(2 * sigx4_2 +
+      2 * sigx4_1)))) * (1 - pwZ)/(2 * sigx4_2 + 2 * sigx4_1)),
+    FUN = "*"), vHvar)
+  hessll[(nXvar + nuZUvar + nvZVvar + 1):(nXvar + nuZUvar +
+    2 * nvZVvar), (nXvar + nuZUvar + 2 * nvZVvar + 1):(nXvar +
+    nuZUvar + 2 * nvZVvar + nZHvar)] <- crossprod(sweep(vHvar,
+    MARGIN = 1, STATS = -wHvar * ((2 + 2 * ((1 - pwZ) * (2 *
+      sigx14_1 - 2 * sigx14_2)/(2 * sigx4_2 + 2 * sigx4_1))) *
+      dwZ * sigx13_2/(2 * sigx4_2 + 2 * sigx4_1)), FUN = "*"),
+    Zvar)
+  hessll[(nXvar + nuZUvar + 2 * nvZVvar + 1):(nXvar + nuZUvar +
+    2 * nvZVvar + nZHvar), (nXvar + nuZUvar + 2 * nvZVvar +
+    1):(nXvar + nuZUvar + 2 * nvZVvar + nZHvar)] <- crossprod(sweep(Zvar,
+    MARGIN = 1, STATS = -wHvar * (((2 * sigx14_1 - 2 * sigx14_2) *
+      dwZ/(2 * sigx4_2 + 2 * sigx4_1) + Wz) * (2 * sigx14_1 -
+      2 * sigx14_2) * dwZ/(2 * sigx4_2 + 2 * sigx4_1)),
+    FUN = "*"), Zvar)
+  hessll[lower.tri(hessll)] <- t(hessll)[lower.tri(hessll)]
+  # hessll<-(hessll+(hessll))/2
+  return(hessll)
+}
+
+## cloglog specification class membership
+chesscnsfgenexponormlike_cloglog <- function(parm, nXvar, nuZUvar,
+  nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
+  beta <- parm[1:(nXvar)]
+  delta <- parm[(nXvar + 1):(nXvar + nuZUvar)]
+  phi1 <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
+  phi2 <- parm[(nXvar + nuZUvar + nvZVvar + 1):(nXvar + nuZUvar +
+    2 * nvZVvar)]
+  theta <- parm[(nXvar + nuZUvar + 2 * nvZVvar + 1):(nXvar +
+    nuZUvar + 2 * nvZVvar + nZHvar)]
+  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
+  ewusr <- exp(Wu/2)
+  ewu <- exp(Wu)
+  ewvsr1 <- exp(Wv1/2)
+  ewvsr2 <- exp(Wv2/2)
+  ewv1 <- exp(Wv1)
+  ewv2 <- exp(Wv2)
+  ewz <- exp(Wz)
+  prZ <- exp(-ewz)
+  musig1 <- (ewvsr1/ewusr + S * (epsilon)/ewvsr1)
+  musig2 <- (ewvsr2/ewusr + S * (epsilon)/ewvsr2)
+  dmusig1 <- dnorm(-musig1, 0, 1)
+  dmusig2 <- dnorm(-musig2, 0, 1)
+  pmusig1 <- pnorm(-musig1)
+  pmusig2 <- pnorm(-musig2)
+  epsivu1 <- (2 * (ewvsr1/ewusr) + S * (epsilon)/ewvsr1)
+  epsivu2 <- (2 * (ewvsr2/ewusr) + S * (epsilon)/ewvsr2)
+  depsi1 <- dnorm(-epsivu1, 0, 1)
+  depsi2 <- dnorm(-epsivu2, 0, 1)
+  pepsi1 <- pnorm(-epsivu1)
+  pepsi2 <- pnorm(-epsivu2)
+  dpuv1 <- (depsi1/ewvsr1 - 2 * (pepsi1/ewusr))
+  dpuv2 <- (depsi2/ewvsr2 - 2 * (pepsi2/ewusr))
+  euv1 <- (2 * (ewv1/ewu) + S * (epsilon)/ewusr)
+  euv2 <- (2 * (ewv2/ewu) + S * (epsilon)/ewusr)
+  epsiu <- (S * (epsilon)/ewusr)
+  sigx0_1 <- exp(2 * (ewv1/ewu) + 2 * epsiu)
+  sigx0_2 <- exp(2 * (ewv2/ewu) + 2 * epsiu)
+  sigx1_1 <- (dmusig1/ewvsr1 - pmusig1/ewusr)
+  sigx1_2 <- (dmusig2/ewvsr2 - pmusig2/ewusr)
+  sigx2_1 <- exp(ewv1/(2 * ewu) + S * (epsilon)/ewusr)
+  sigx2_2 <- exp(ewv2/(2 * ewu) + S * (epsilon)/ewusr)
+  sigx3_1 <- ((sigx1_1 * sigx2_1 - dpuv1 * sigx0_1) * (1 -
+    prZ))
+  sigx3_2 <- ((sigx1_2 * sigx2_2 - dpuv2 * sigx0_2) * prZ)
+  sigx14_1 <- (sigx2_1 * pmusig1 - sigx0_1 * pepsi1)
+  sigx14_2 <- (sigx2_2 * pmusig2 - sigx0_2 * pepsi2)
+  sigx4_1 <- ((1 - prZ) * sigx14_1)
+  sigx4_2 <- (prZ * sigx14_2)
+  sigx5_1 <- (dmusig1 * ewvsr1/ewusr)
+  sigx5_2 <- (dmusig2 * ewvsr2/ewusr)
+  sigx6_1 <- (ewu * ewv1/(2 * ewu)^2)
+  sigx6_2 <- (ewu * ewv2/(2 * ewu)^2)
+  sigx7_1 <- (0.5 * sigx5_1 - (0.5 * epsiu + 2 * sigx6_1) *
+    pmusig1)
+  sigx7_2 <- (0.5 * sigx5_2 - (0.5 * epsiu + 2 * sigx6_2) *
+    pmusig2)
+  sigx8_1 <- (depsi1 * ewvsr1/ewusr - euv1 * pepsi1)
+  sigx8_2 <- (depsi2 * ewvsr2/ewusr - euv2 * pepsi2)
+  epsiv1 <- (0.5 * (ewvsr1/ewusr) - 0.5 * (S * (epsilon)/ewvsr1))
+  epsiv2 <- (0.5 * (ewvsr2/ewusr) - 0.5 * (S * (epsilon)/ewvsr2))
+  sigx9_1 <- (ewv1 * pmusig1/(2 * ewu) - epsiv1 * dmusig1)
+  sigx9_2 <- (ewv2 * pmusig2/(2 * ewu) - epsiv2 * dmusig2)
+  sigx10_1 <- ((sigx7_1 * sigx2_1 - sigx8_1 * sigx0_1) * (1 -
+    prZ))
+  sigx10_2 <- ((sigx7_2 * sigx2_2 - sigx8_2 * sigx0_2) * prZ)
+  sigx11_1 <- (ewvsr1/ewusr - 0.5 * (S * (epsilon)/ewvsr1))
+  sigx11_2 <- (ewvsr2/ewusr - 0.5 * (S * (epsilon)/ewvsr2))
+  sigx12_1 <- (2 * (ewv1 * pepsi1/ewu) - depsi1 * sigx11_1)
+  sigx12_2 <- (2 * (ewv2 * pepsi2/ewu) - depsi2 * sigx11_2)
+  sigx13_1 <- (sigx2_1 * sigx9_1 - sigx12_1 * sigx0_1)
+  sigx13_2 <- (sigx2_2 * sigx9_2 - sigx12_2 * sigx0_2)
+  hessll <- matrix(nrow = nXvar + nuZUvar + 2 * nvZVvar + nZHvar,
+    ncol = nXvar + nuZUvar + 2 * nvZVvar + nZHvar)
+  hessll[1:nXvar, 1:nXvar] <- crossprod(sweep(Xvar, MARGIN = 1,
+    STATS = wHvar * (2 * ((((musig1/ewvsr1 - 1/ewusr) * dmusig1/ewvsr1 -
+      sigx1_1/ewusr) * sigx2_1 - ((epsivu1/ewvsr1 - 2/ewusr) *
+      depsi1/ewvsr1 - 2 * (dpuv1/ewusr)) * sigx0_1) * (1 -
+      prZ)) + 2 * ((((musig2/ewvsr2 - 1/ewusr) * dmusig2/ewvsr2 -
+      sigx1_2/ewusr) * sigx2_2 - ((epsivu2/ewvsr2 - 2/ewusr) *
+      depsi2/ewvsr2 - 2 * (dpuv2/ewusr)) * sigx0_2) * prZ) -
+      (2 * sigx3_1 + 2 * sigx3_2)^2/(2 * sigx4_2 + 2 *
+        sigx4_1))/(2 * sigx4_2 + 2 * sigx4_1), FUN = "*"),
+    Xvar)
+  hessll[1:nXvar, (nXvar + 1):(nXvar + nuZUvar)] <- crossprod(sweep(Xvar,
+    MARGIN = 1, STATS = wHvar * S * (2 * (((((0.5 + 0.5 *
+      epsiu + 2 * sigx6_1) * pmusig1 - 0.5 * sigx5_1)/ewusr +
+      (0.5 * (musig1/ewusr) - (0.5 * epsiu + 2 * sigx6_1)/ewvsr1) *
+        dmusig1) * sigx2_1 - ((epsivu1/ewusr - euv1/ewvsr1) *
+      depsi1 + (pepsi1 - 2 * sigx8_1)/ewusr) * sigx0_1) *
+      (1 - prZ)) + 2 * (((((0.5 + 0.5 * epsiu + 2 * sigx6_2) *
+      pmusig2 - 0.5 * sigx5_2)/ewusr + (0.5 * (musig2/ewusr) -
+      (0.5 * epsiu + 2 * sigx6_2)/ewvsr2) * dmusig2) *
+      sigx2_2 - ((epsivu2/ewusr - (2 * (ewv2/ewu) + S *
+      (epsilon)/ewusr)/ewvsr2) * depsi2 + (pepsi2 - 2 *
+      sigx8_2)/ewusr) * sigx0_2) * prZ) - (2 * sigx10_1 +
+      2 * sigx10_2) * (2 * sigx3_1 + 2 * sigx3_2)/(2 *
+      sigx4_2 + 2 * sigx4_1))/(2 * sigx4_2 + 2 * sigx4_1),
+    FUN = "*"), uHvar)
+  hessll[1:nXvar, (nXvar + nuZUvar + 1):(nXvar + nuZUvar +
+    nvZVvar)] <- crossprod(sweep(Xvar, MARGIN = 1, STATS = wHvar *
+    2 * (S * ((dmusig1 * (ewv1/(2 * ewu) - (epsiv1 * musig1 +
+    0.5))/ewvsr1 - sigx9_1/ewusr) * sigx2_1 - (((2 * (ewv1/ewu) -
+    (epsivu1 * sigx11_1 + 0.5)) * depsi1/ewvsr1 - 2 * (sigx12_1/ewusr)) *
+    sigx0_1 + (2 * sigx3_1 + 2 * sigx3_2) * sigx13_1/(2 *
+    sigx4_2 + 2 * sigx4_1))) * (1 - prZ)/(2 * sigx4_2 + 2 *
+    sigx4_1)), FUN = "*"), vHvar)
+  hessll[1:nXvar, (nXvar + nuZUvar + nvZVvar + 1):(nXvar +
+    nuZUvar + 2 * nvZVvar)] <- crossprod(sweep(Xvar, MARGIN = 1,
+    STATS = wHvar * 2 * (S * ((dmusig2 * (ewv2/(2 * ewu) -
+      (epsiv2 * musig2 + 0.5))/ewvsr2 - sigx9_2/ewusr) *
+      sigx2_2 - (((2 * (ewv2/ewu) - (epsivu2 * sigx11_2 +
+      0.5)) * depsi2/ewvsr2 - 2 * (sigx12_2/ewusr)) * sigx0_2 +
+      (2 * sigx3_1 + 2 * sigx3_2) * sigx13_2/(2 * sigx4_2 +
+        2 * sigx4_1))) * prZ/(2 * sigx4_2 + 2 * sigx4_1)),
+    FUN = "*"), vHvar)
+  hessll[1:nXvar, (nXvar + nuZUvar + 2 * nvZVvar + 1):(nXvar +
+    nuZUvar + 2 * nvZVvar + nZHvar)] <- crossprod(sweep(Xvar,
+    MARGIN = 1, STATS = wHvar * S * (2 * (sigx1_1 * sigx2_1 -
+      dpuv1 * sigx0_1) - ((2 * sigx3_1 + 2 * sigx3_2) *
+      (2 * sigx14_1 - 2 * sigx14_2)/(2 * sigx4_1 + 2 *
+      sigx4_2) + 2 * (sigx1_2 * sigx2_2 - dpuv2 * sigx0_2))) *
+      prZ * ewz/(2 * sigx4_1 + 2 * sigx4_2), FUN = "*"),
+    Zvar)
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + 1):(nXvar +
+    nuZUvar)] <- crossprod(sweep(uHvar, MARGIN = 1, STATS = wHvar *
+    (2 * ((((0.5 * (0.5 * (ewvsr1 * musig1/ewusr) - 0.5) -
+      0.5 * (0.5 * epsiu + 2 * sigx6_1)) * dmusig1 * ewvsr1/ewusr -
+      (sigx7_1 * (0.5 * epsiu + 2 * sigx6_1) + (2 * ((1 -
+        8 * (ewu^2/(2 * ewu)^2)) * ewu * ewv1/(2 * ewu)^2) -
+        0.25 * epsiu) * pmusig1)) * sigx2_1 - (((epsivu1 *
+      ewvsr1 - S * (epsilon))/ewusr - (0.5 + 2 * (ewv1/ewu))) *
+      depsi1 * ewvsr1/ewusr + (0.5 * epsiu + 2 * (ewv1/ewu)) *
+      pepsi1 - euv1 * sigx8_1) * sigx0_1) * (1 - prZ)) +
+      2 * ((((0.5 * (0.5 * (ewvsr2 * musig2/ewusr) - 0.5) -
+        0.5 * (0.5 * epsiu + 2 * sigx6_2)) * dmusig2 *
+        ewvsr2/ewusr - (sigx7_2 * (0.5 * epsiu + 2 *
+        sigx6_2) + (2 * ((1 - 8 * (ewu^2/(2 * ewu)^2)) *
+        ewu * ewv2/(2 * ewu)^2) - 0.25 * epsiu) * pmusig2)) *
+        sigx2_2 - (((epsivu2 * ewvsr2 - S * (epsilon))/ewusr -
+        (0.5 + 2 * (ewv2/ewu))) * depsi2 * ewvsr2/ewusr +
+        (0.5 * epsiu + 2 * (ewv2/ewu)) * pepsi2 - euv2 *
+        sigx8_2) * sigx0_2) * prZ) - (2 * sigx10_1 +
+      2 * sigx10_2)^2/(2 * sigx4_2 + 2 * sigx4_1))/(2 *
+    sigx4_2 + 2 * sigx4_1), FUN = "*"), uHvar)
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + nuZUvar +
+    1):(nXvar + nuZUvar + nvZVvar)] <- crossprod(sweep(uHvar,
+    MARGIN = 1, STATS = wHvar * 2 * ((((dmusig1 * ewvsr1/(4 *
+      (ewu * ewusr)) - 2 * (ewu * pmusig1/(2 * ewu)^2)) *
+      ewv1 - ((0.5 * (epsiv1 * musig1) - 0.25) * dmusig1 *
+      ewvsr1/ewusr + (0.5 * epsiu + 2 * sigx6_1) * sigx9_1)) *
+      sigx2_1 - ((2 * sigx10_1 + 2 * sigx10_2) * sigx13_1/(2 *
+      sigx4_2 + 2 * sigx4_1) + (2 * ((depsi1 * ewvsr1/ewusr -
+      pepsi1) * ewv1/ewu) - ((epsivu1 * sigx11_1 - 0.5) *
+      depsi1 * ewvsr1/ewusr + sigx12_1 * euv1)) * sigx0_1)) *
+      (1 - prZ)/(2 * sigx4_2 + 2 * sigx4_1)), FUN = "*"),
+    vHvar)
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + nuZUvar +
+    nvZVvar + 1):(nXvar + nuZUvar + 2 * nvZVvar)] <- crossprod(sweep(uHvar,
+    MARGIN = 1, STATS = wHvar * 2 * ((((dmusig2 * ewvsr2/(4 *
+      (ewu * ewusr)) - 2 * (ewu * pmusig2/(2 * ewu)^2)) *
+      ewv2 - ((0.5 * (epsiv2 * musig2) - 0.25) * dmusig2 *
+      ewvsr2/ewusr + (0.5 * epsiu + 2 * sigx6_2) * sigx9_2)) *
+      sigx2_2 - ((2 * sigx10_1 + 2 * sigx10_2) * sigx13_2/(2 *
+      sigx4_2 + 2 * sigx4_1) + (2 * ((depsi2 * ewvsr2/ewusr -
+      pepsi2) * ewv2/ewu) - ((epsivu2 * sigx11_2 - 0.5) *
+      depsi2 * ewvsr2/ewusr + sigx12_2 * (2 * (ewv2/ewu) +
+      S * (epsilon)/ewusr))) * sigx0_2)) * prZ/(2 * sigx4_2 +
+      2 * sigx4_1)), FUN = "*"), vHvar)
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + nuZUvar +
+    2 * nvZVvar + 1):(nXvar + nuZUvar + 2 * nvZVvar + nZHvar)] <- crossprod(sweep(uHvar,
+    MARGIN = 1, STATS = wHvar * (2 * (sigx7_1 * sigx2_1 -
+      sigx8_1 * sigx0_1) - ((2 * sigx10_1 + 2 * sigx10_2) *
+      (2 * sigx14_1 - 2 * sigx14_2)/(2 * sigx4_1 + 2 *
+      sigx4_2) + 2 * (sigx7_2 * sigx2_2 - sigx8_2 * sigx0_2))) *
+      prZ * ewz/(2 * sigx4_1 + 2 * sigx4_2), FUN = "*"),
+    Zvar)
+  hessll[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar),
+    (nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)] <- crossprod(sweep(vHvar,
+    MARGIN = 1, STATS = wHvar * 2 * ((((sigx9_1/2 + (pmusig1 -
+      epsiv1 * dmusig1)/2) * ewv1/ewu - (0.25 * (ewvsr1/ewusr) +
+      0.25 * (S * (epsilon)/ewvsr1) - epsiv1^2 * musig1) *
+      dmusig1) * sigx2_1 - (((2 * sigx12_1 + 2 * (pepsi1 -
+      depsi1 * sigx11_1)) * ewv1/ewu - (0.25 * (S * (epsilon)/ewvsr1) +
+      0.5 * (ewvsr1/ewusr) - epsivu1 * sigx11_1^2) * depsi1) *
+      sigx0_1 + 2 * ((1 - prZ) * sigx13_1^2/(2 * sigx4_2 +
+      2 * sigx4_1)))) * (1 - prZ)/(2 * sigx4_2 + 2 * sigx4_1)),
+    FUN = "*"), vHvar)
+  hessll[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar),
+    (nXvar + nuZUvar + nvZVvar + 1):(nXvar + nuZUvar + 2 *
+      nvZVvar)] <- crossprod(sweep(vHvar, MARGIN = 1, STATS = -wHvar *
+    (4 * (prZ * (1 - prZ) * sigx13_1 * sigx13_2/(2 * sigx4_2 +
+      2 * sigx4_1)^2)), FUN = "*"), vHvar)
+  hessll[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar),
+    (nXvar + nuZUvar + 2 * nvZVvar + 1):(nXvar + nuZUvar +
+      2 * nvZVvar + nZHvar)] <- crossprod(sweep(vHvar,
+    MARGIN = 1, STATS = wHvar * (2 - 2 * ((1 - prZ) * (2 *
+      sigx14_1 - 2 * sigx14_2)/(2 * sigx4_1 + 2 * sigx4_2))) *
+      prZ * sigx13_1 * ewz/(2 * sigx4_1 + 2 * sigx4_2),
+    FUN = "*"), Zvar)
+  hessll[(nXvar + nuZUvar + nvZVvar + 1):(nXvar + nuZUvar +
+    2 * nvZVvar), (nXvar + nuZUvar + nvZVvar + 1):(nXvar +
+    nuZUvar + 2 * nvZVvar)] <- crossprod(sweep(vHvar, MARGIN = 1,
+    STATS = wHvar * 2 * ((((sigx9_2/2 + (pmusig2 - epsiv2 *
+      dmusig2)/2) * ewv2/ewu - (0.25 * (ewvsr2/ewusr) +
+      0.25 * (S * (epsilon)/ewvsr2) - epsiv2^2 * musig2) *
+      dmusig2) * sigx2_2 - (((2 * sigx12_2 + 2 * (pepsi2 -
+      depsi2 * sigx11_2)) * ewv2/ewu - (0.25 * (S * (epsilon)/ewvsr2) +
+      0.5 * (ewvsr2/ewusr) - epsivu2 * sigx11_2^2) * depsi2) *
+      sigx0_2 + 2 * (prZ * sigx13_2^2/(2 * sigx4_2 + 2 *
+      sigx4_1)))) * prZ/(2 * sigx4_2 + 2 * sigx4_1)), FUN = "*"),
+    vHvar)
+  hessll[(nXvar + nuZUvar + nvZVvar + 1):(nXvar + nuZUvar +
+    2 * nvZVvar), (nXvar + nuZUvar + 2 * nvZVvar + 1):(nXvar +
+    nuZUvar + 2 * nvZVvar + nZHvar)] <- crossprod(sweep(vHvar,
+    MARGIN = 1, STATS = -wHvar * ((2 + 2 * ((2 * sigx14_1 -
+      2 * sigx14_2) * prZ/(2 * sigx4_1 + 2 * sigx4_2))) *
+      prZ * sigx13_2 * ewz/(2 * sigx4_1 + 2 * sigx4_2)),
+    FUN = "*"), Zvar)
+  hessll[(nXvar + nuZUvar + 2 * nvZVvar + 1):(nXvar + nuZUvar +
+    2 * nvZVvar + nZHvar), (nXvar + nuZUvar + 2 * nvZVvar +
+    1):(nXvar + nuZUvar + 2 * nvZVvar + nZHvar)] <- crossprod(sweep(Zvar,
+    MARGIN = 1, STATS = wHvar * (1 - ((2 * sigx14_1 - 2 *
+      sigx14_2) * prZ/(2 * sigx4_1 + 2 * sigx4_2) + 1) *
+      ewz) * (2 * sigx14_1 - 2 * sigx14_2) * prZ * ewz/(2 *
+      sigx4_1 + 2 * sigx4_2), FUN = "*"), Zvar)
+  hessll[lower.tri(hessll)] <- t(hessll)[lower.tri(hessll)]
+  # hessll<-(hessll+(hessll))/2
+  return(hessll)
+}
+
 # different sigma_u
-chessmcesfgenexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
-  uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
+
+## logit specification class membership
+chessmcesfgenexponormlike_logit <- function(parm, nXvar, nuZUvar,
+  nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
   beta <- parm[1:(nXvar)]
   delta1 <- parm[(nXvar + 1):(nXvar + nuZUvar)]
   delta2 <- parm[(nXvar + nuZUvar + 1):(nXvar + 2 * nuZUvar)]
@@ -889,6 +2357,847 @@ chessmcesfgenexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
   return(hessll)
 }
 
+## cauchit specification class membership
+chessmcesfgenexponormlike_cauchit <- function(parm, nXvar, nuZUvar,
+  nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
+  beta <- parm[1:(nXvar)]
+  delta1 <- parm[(nXvar + 1):(nXvar + nuZUvar)]
+  delta2 <- parm[(nXvar + nuZUvar + 1):(nXvar + 2 * nuZUvar)]
+  phi1 <- parm[(nXvar + 2 * nuZUvar + 1):(nXvar + 2 * nuZUvar +
+    nvZVvar)]
+  phi2 <- parm[(nXvar + 2 * nuZUvar + nvZVvar + 1):(nXvar +
+    2 * nuZUvar + 2 * nvZVvar)]
+  theta <- parm[(nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(nXvar +
+    2 * nuZUvar + 2 * nvZVvar + nZHvar)]
+  Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
+  Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
+  ewusr1 <- exp(Wu1/2)
+  ewusr2 <- exp(Wu2/2)
+  ewu1 <- exp(Wu1)
+  ewu2 <- exp(Wu2)
+  ewvsr1 <- exp(Wv1/2)
+  ewvsr2 <- exp(Wv2/2)
+  ewv1 <- exp(Wv1)
+  ewv2 <- exp(Wv2)
+  ewz1 <- (0.5 + atan(Wz)/pi)
+  ewz2 <- (0.5 - atan(Wz)/pi)
+  musig1 <- (ewvsr1/ewusr1 + S * (epsilon)/ewvsr1)
+  musig2 <- (ewvsr2/ewusr2 + S * (epsilon)/ewvsr2)
+  dmusig1 <- dnorm(-musig1, 0, 1)
+  dmusig2 <- dnorm(-musig2, 0, 1)
+  pmusig1 <- pnorm(-musig1)
+  pmusig2 <- pnorm(-musig2)
+  epsivu1 <- (2 * (ewvsr1/ewusr1) + S * (epsilon)/ewvsr1)
+  epsivu2 <- (2 * (ewvsr2/ewusr2) + S * (epsilon)/ewvsr2)
+  depsi1 <- dnorm(-epsivu1, 0, 1)
+  depsi2 <- dnorm(-epsivu2, 0, 1)
+  pepsi1 <- pnorm(-epsivu1)
+  pepsi2 <- pnorm(-epsivu2)
+  dpuv1 <- (depsi1/ewvsr1 - 2 * (pepsi1/ewusr1))
+  dpuv2 <- (depsi2/ewvsr2 - 2 * (pepsi2/ewusr2))
+  euv1 <- (2 * (ewv1/ewu1) + S * (epsilon)/ewusr1)
+  euv2 <- (2 * (ewv2/ewu2) + S * (epsilon)/ewusr2)
+  epsiu1 <- (S * (epsilon)/ewusr1)
+  epsiu2 <- (S * (epsilon)/ewusr2)
+  sigx0_1 <- exp(2 * (ewv1/ewu1) + 2 * epsiu1)
+  sigx0_2 <- exp(2 * (ewv2/ewu2) + 2 * epsiu2)
+  sigx1_1 <- (dmusig1/ewvsr1 - pmusig1/ewusr1)
+  sigx1_2 <- (dmusig2/ewvsr2 - pmusig2/ewusr2)
+  sigx2_1 <- exp(ewv1/(2 * ewu1) + S * (epsilon)/ewusr1)
+  sigx2_2 <- exp(ewv2/(2 * ewu2) + S * (epsilon)/ewusr2)
+  sigx3_1 <- ((sigx1_1 * sigx2_1 - dpuv1 * sigx0_1) * ewz1/ewusr1)
+  sigx3_2 <- ((sigx1_2 * sigx2_2 - dpuv2 * sigx0_2) * ewz2/ewusr2)
+  sigx14_1 <- (sigx2_1 * pmusig1 - sigx0_1 * pepsi1)
+  sigx14_2 <- (sigx2_2 * pmusig2 - sigx0_2 * pepsi2)
+  sigx4_1 <- (ewz1 * sigx14_1/ewusr1)
+  sigx4_2 <- (ewz2 * sigx14_2/ewusr2)
+  sigx5_1 <- (dmusig1 * ewvsr1/ewusr1)
+  sigx5_2 <- (dmusig2 * ewvsr2/ewusr2)
+  sigx6_1 <- (ewu1 * ewv1/(2 * ewu1)^2)
+  sigx6_2 <- (ewu2 * ewv2/(2 * ewu2)^2)
+  sigx7_1 <- (0.5 * sigx5_1 - (0.5 * epsiu1 + 2 * sigx6_1) *
+    pmusig1)
+  sigx7_2 <- (0.5 * sigx5_2 - (0.5 * epsiu2 + 2 * sigx6_2) *
+    pmusig2)
+  sigx8_1 <- (depsi1 * ewvsr1/ewusr1 - euv1 * pepsi1)
+  sigx8_2 <- (depsi2 * ewvsr2/ewusr2 - euv2 * pepsi2)
+  epsiv1 <- (0.5 * (ewvsr1/ewusr1) - 0.5 * (S * (epsilon)/ewvsr1))
+  epsiv2 <- (0.5 * (ewvsr2/ewusr2) - 0.5 * (S * (epsilon)/ewvsr2))
+  sigx9_1 <- (ewv1 * pmusig1/(2 * ewu1) - epsiv1 * dmusig1)
+  sigx9_2 <- (ewv2 * pmusig2/(2 * ewu2) - epsiv2 * dmusig2)
+  sigx10_1 <- (sigx7_1 * sigx2_1 - (sigx8_1 * sigx0_1 + 0.5 *
+    sigx14_1))
+  sigx10_2 <- (sigx7_2 * sigx2_2 - (sigx8_2 * sigx0_2 + 0.5 *
+    sigx14_2))
+  sigx11_1 <- (ewvsr1/ewusr1 - 0.5 * (S * (epsilon)/ewvsr1))
+  sigx11_2 <- (ewvsr2/ewusr2 - 0.5 * (S * (epsilon)/ewvsr2))
+  sigx12_1 <- (2 * (ewv1 * pepsi1/ewu1) - depsi1 * sigx11_1)
+  sigx12_2 <- (2 * (ewv2 * pepsi2/ewu2) - depsi2 * sigx11_2)
+  sigx13_1 <- (sigx2_1 * sigx9_1 - sigx12_1 * sigx0_1)
+  sigx13_2 <- (sigx2_2 * sigx9_2 - sigx12_2 * sigx0_2)
+  sigx15 <- (pi * ((Wz)^2 + 1) * (2 * sigx4_2 + 2 * sigx4_1))
+  hessll <- matrix(nrow = nXvar + 2 * nuZUvar + 2 * nvZVvar +
+    nZHvar, ncol = nXvar + 2 * nuZUvar + 2 * nvZVvar + nZHvar)
+  hessll[1:nXvar, 1:nXvar] <- crossprod(sweep(Xvar, MARGIN = 1,
+    STATS = wHvar * (2 * ((((musig1/ewvsr1 - 1/ewusr1) *
+      dmusig1/ewvsr1 - sigx1_1/ewusr1) * sigx2_1 - ((epsivu1/ewvsr1 -
+      2/ewusr1) * depsi1/ewvsr1 - 2 * (dpuv1/ewusr1)) *
+      sigx0_1) * ewz1/ewusr1) + 2 * ((((musig2/ewvsr2 -
+      1/ewusr2) * dmusig2/ewvsr2 - sigx1_2/ewusr2) * sigx2_2 -
+      ((epsivu2/ewvsr2 - 2/ewusr2) * depsi2/ewvsr2 - 2 *
+        (dpuv2/ewusr2)) * sigx0_2) * ewz2/ewusr2) - (2 *
+      sigx3_1 + 2 * sigx3_2)^2/(2 * sigx4_2 + 2 * sigx4_1))/(2 *
+      sigx4_2 + 2 * sigx4_1), FUN = "*"), Xvar)
+  hessll[1:nXvar, (nXvar + 1):(nXvar + nuZUvar)] <- crossprod(sweep(Xvar,
+    MARGIN = 1, STATS = wHvar * 2 * (S * (((((0.5 + 0.5 *
+      epsiu1 + 2 * sigx6_1) * pmusig1 - 0.5 * sigx5_1)/ewusr1 +
+      (0.5 * (musig1/ewusr1) - (0.5 * epsiu1 + 2 * sigx6_1)/ewvsr1) *
+        dmusig1) * sigx2_1 - (((epsivu1/ewusr1 - euv1/ewvsr1) *
+      depsi1 + (pepsi1 - 2 * sigx8_1)/ewusr1) * sigx0_1 +
+      0.5 * (sigx1_1 * sigx2_1 - dpuv1 * sigx0_1)))/((2 *
+      sigx4_2 + 2 * sigx4_1) * ewusr1) - sigx10_1 * (2 *
+      sigx3_1 + 2 * sigx3_2) * ewusr1/((2 * sigx4_2 + 2 *
+      sigx4_1) * ewusr1)^2) * ewz1), FUN = "*"), uHvar)
+  hessll[1:nXvar, (nXvar + nuZUvar + 1):(nXvar + 2 * nuZUvar)] <- crossprod(sweep(Xvar,
+    MARGIN = 1, STATS = wHvar * 2 * (S * (((((0.5 + 0.5 *
+      epsiu2 + 2 * sigx6_2) * pmusig2 - 0.5 * sigx5_2)/ewusr2 +
+      (0.5 * (musig2/ewusr2) - (0.5 * epsiu2 + 2 * sigx6_2)/ewvsr2) *
+        dmusig2) * sigx2_2 - (((epsivu2/ewusr2 - euv2/ewvsr2) *
+      depsi2 + (pepsi2 - 2 * sigx8_2)/ewusr2) * sigx0_2 +
+      0.5 * (sigx1_2 * sigx2_2 - dpuv2 * sigx0_2)))/((2 *
+      sigx4_2 + 2 * sigx4_1) * ewusr2) - sigx10_2 * (2 *
+      sigx3_1 + 2 * sigx3_2) * ewusr2/((2 * sigx4_2 + 2 *
+      sigx4_1) * ewusr2)^2) * ewz2), FUN = "*"), uHvar)
+  hessll[1:nXvar, (nXvar + 2 * nuZUvar + 1):(nXvar + 2 * nuZUvar +
+    nvZVvar)] <- crossprod(sweep(Xvar, MARGIN = 1, STATS = wHvar *
+    2 * (S * (((dmusig1 * (ewv1/(2 * ewu1) - (epsiv1 * musig1 +
+    0.5))/ewvsr1 - sigx9_1/ewusr1) * sigx2_1 - ((2 * (ewv1/ewu1) -
+    (epsivu1 * sigx11_1 + 0.5)) * depsi1/ewvsr1 - 2 * (sigx12_1/ewusr1)) *
+    sigx0_1)/((2 * sigx4_2 + 2 * sigx4_1) * ewusr1) - (2 *
+    sigx3_1 + 2 * sigx3_2) * ewusr1 * sigx13_1/((2 * sigx4_2 +
+    2 * sigx4_1) * ewusr1)^2) * ewz1), FUN = "*"), vHvar)
+  hessll[1:nXvar, (nXvar + 2 * nuZUvar + nvZVvar + 1):(nXvar +
+    2 * nuZUvar + 2 * nvZVvar)] <- crossprod(sweep(Xvar,
+    MARGIN = 1, STATS = wHvar * 2 * (S * (((dmusig2 * (ewv2/(2 *
+      ewu2) - (epsiv2 * musig2 + 0.5))/ewvsr2 - sigx9_2/ewusr2) *
+      sigx2_2 - ((2 * (ewv2/ewu2) - (epsivu2 * sigx11_2 +
+      0.5)) * depsi2/ewvsr2 - 2 * (sigx12_2/ewusr2)) *
+      sigx0_2)/((2 * sigx4_2 + 2 * sigx4_1) * ewusr2) -
+      (2 * sigx3_1 + 2 * sigx3_2) * ewusr2 * sigx13_2/((2 *
+        sigx4_2 + 2 * sigx4_1) * ewusr2)^2) * ewz2),
+    FUN = "*"), vHvar)
+  hessll[1:nXvar, (nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(nXvar +
+    2 * nuZUvar + 2 * nvZVvar + nZHvar)] <- crossprod(sweep(Xvar,
+    MARGIN = 1, STATS = wHvar * S * ((2 * ((sigx1_1 * sigx2_1 -
+      dpuv1 * sigx0_1)/ewusr1) - 2 * ((sigx1_2 * sigx2_2 -
+      dpuv2 * sigx0_2)/ewusr2))/sigx15 - pi * ((Wz)^2 +
+      1) * (2 * sigx3_1 + 2 * sigx3_2) * (2 * (sigx14_1/ewusr1) -
+      2 * (sigx14_2/ewusr2))/sigx15^2), FUN = "*"), Zvar)
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + 1):(nXvar +
+    nuZUvar)] <- crossprod(sweep(uHvar, MARGIN = 1, STATS = wHvar *
+    2 * (((((0.5 * (0.5 * (ewvsr1 * musig1/ewusr1) - 0.5) -
+    0.5 * (0.5 * epsiu1 + 2 * sigx6_1)) * dmusig1 * ewvsr1/ewusr1 -
+    (sigx7_1 * (0.5 * epsiu1 + 2 * sigx6_1) + (2 * ((1 -
+      8 * (ewu1^2/(2 * ewu1)^2)) * ewu1 * ewv1/(2 * ewu1)^2) -
+      0.25 * epsiu1) * pmusig1)) * sigx2_1 - ((((epsivu1 *
+    ewvsr1 - S * (epsilon))/ewusr1 - (0.5 + 2 * (ewv1/ewu1))) *
+    depsi1 * ewvsr1/ewusr1 + (0.5 * epsiu1 + 2 * (ewv1/ewu1)) *
+    pepsi1 - euv1 * sigx8_1) * sigx0_1 + 0.5 * (sigx7_1 *
+    sigx2_1 - sigx8_1 * sigx0_1)))/((2 * sigx4_2 + 2 * sigx4_1) *
+    ewusr1) - sigx10_1 * (0.5 * ((2 * sigx4_2 + 2 * sigx4_1) *
+    ewusr1) + 2 * (sigx10_1 * ewz1))/((2 * sigx4_2 + 2 *
+    sigx4_1) * ewusr1)^2) * ewz1), FUN = "*"), uHvar)
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + nuZUvar +
+    1):(nXvar + 2 * nuZUvar)] <- crossprod(sweep(uHvar, MARGIN = 1,
+    STATS = -wHvar * (4 * (sigx10_1 * sigx10_2 * ewz2 * ewz1 *
+      ewusr2/(((2 * sigx4_2 + 2 * sigx4_1) * ewusr2)^2 *
+      ewusr1))), FUN = "*"), uHvar)
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + 2 * nuZUvar +
+    1):(nXvar + 2 * nuZUvar + nvZVvar)] <- crossprod(sweep(uHvar,
+    MARGIN = 1, STATS = wHvar * 2 * (((((dmusig1 * ewvsr1/(4 *
+      (ewu1 * ewusr1)) - 2 * (ewu1 * pmusig1/(2 * ewu1)^2)) *
+      ewv1 - ((0.5 * (epsiv1 * musig1) - 0.25) * dmusig1 *
+      ewvsr1/ewusr1 + (0.5 * epsiu1 + 2 * sigx6_1) * sigx9_1)) *
+      sigx2_1 - (2 * ((depsi1 * ewvsr1/ewusr1 - pepsi1) *
+      ewv1/ewu1) - ((epsivu1 * sigx11_1 - 0.5) * depsi1 *
+      ewvsr1/ewusr1 + sigx12_1 * euv1)) * sigx0_1)/((2 *
+      sigx4_2 + 2 * sigx4_1) * ewusr1) - (0.5 * ((2 * sigx4_2 +
+      2 * sigx4_1) * ewusr1) + 2 * (sigx10_1 * ewz1)) *
+      sigx13_1/((2 * sigx4_2 + 2 * sigx4_1) * ewusr1)^2) *
+      ewz1), FUN = "*"), vHvar)
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + 2 * nuZUvar +
+    nvZVvar + 1):(nXvar + 2 * nuZUvar + 2 * nvZVvar)] <- crossprod(sweep(uHvar,
+    MARGIN = 1, STATS = -wHvar * (4 * (sigx10_1 * ewz2 *
+      ewz1 * ewusr2 * sigx13_2/(((2 * sigx4_2 + 2 * sigx4_1) *
+      ewusr2)^2 * ewusr1))), FUN = "*"), vHvar)
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + 2 * nuZUvar +
+    2 * nvZVvar + 1):(nXvar + 2 * nuZUvar + 2 * nvZVvar +
+    nZHvar)] <- crossprod(sweep(uHvar, MARGIN = 1, STATS = wHvar *
+    sigx10_1 * (2/sigx15 - 2 * (pi * ((Wz)^2 + 1) * ewz1 *
+    (2 * (sigx14_1/ewusr1) - 2 * (sigx14_2/ewusr2))/sigx15^2))/ewusr1,
+    FUN = "*"), Zvar)
+  hessll[(nXvar + nuZUvar + 1):(nXvar + 2 * nuZUvar), (nXvar +
+    nuZUvar + 1):(nXvar + 2 * nuZUvar)] <- crossprod(sweep(uHvar,
+    MARGIN = 1, STATS = wHvar * 2 * (((((0.5 * (0.5 * (ewvsr2 *
+      musig2/ewusr2) - 0.5) - 0.5 * (0.5 * epsiu2 + 2 *
+      sigx6_2)) * dmusig2 * ewvsr2/ewusr2 - (sigx7_2 *
+      (0.5 * epsiu2 + 2 * sigx6_2) + (2 * ((1 - 8 * (ewu2^2/(2 *
+      ewu2)^2)) * ewu2 * ewv2/(2 * ewu2)^2) - 0.25 * epsiu2) *
+      pmusig2)) * sigx2_2 - ((((epsivu2 * ewvsr2 - S *
+      (epsilon))/ewusr2 - (0.5 + 2 * (ewv2/ewu2))) * depsi2 *
+      ewvsr2/ewusr2 + (0.5 * epsiu2 + 2 * (ewv2/ewu2)) *
+      pepsi2 - euv2 * sigx8_2) * sigx0_2 + 0.5 * (sigx7_2 *
+      sigx2_2 - sigx8_2 * sigx0_2)))/((2 * sigx4_2 + 2 *
+      sigx4_1) * ewusr2) - sigx10_2 * (0.5 * ((2 * sigx4_2 +
+      2 * sigx4_1) * ewusr2) + 2 * (sigx10_2 * ewz2))/((2 *
+      sigx4_2 + 2 * sigx4_1) * ewusr2)^2) * ewz2), FUN = "*"),
+    uHvar)
+  hessll[(nXvar + nuZUvar + 1):(nXvar + 2 * nuZUvar), (nXvar +
+    2 * nuZUvar + 1):(nXvar + 2 * nuZUvar + nvZVvar)] <- crossprod(sweep(uHvar,
+    MARGIN = 1, STATS = -wHvar * (4 * (sigx10_2 * ewz2 *
+      ewz1 * ewusr1 * sigx13_1/(((2 * sigx4_2 + 2 * sigx4_1) *
+      ewusr1)^2 * ewusr2))), FUN = "*"), vHvar)
+  hessll[(nXvar + nuZUvar + 1):(nXvar + 2 * nuZUvar), (nXvar +
+    2 * nuZUvar + nvZVvar + 1):(nXvar + 2 * nuZUvar + 2 *
+    nvZVvar)] <- crossprod(sweep(uHvar, MARGIN = 1, STATS = wHvar *
+    2 * (((((dmusig2 * ewvsr2/(4 * (ewu2 * ewusr2)) - 2 *
+    (ewu2 * pmusig2/(2 * ewu2)^2)) * ewv2 - ((0.5 * (epsiv2 *
+    musig2) - 0.25) * dmusig2 * ewvsr2/ewusr2 + (0.5 * epsiu2 +
+    2 * sigx6_2) * sigx9_2)) * sigx2_2 - (2 * ((depsi2 *
+    ewvsr2/ewusr2 - pepsi2) * ewv2/ewu2) - ((epsivu2 * sigx11_2 -
+    0.5) * depsi2 * ewvsr2/ewusr2 + sigx12_2 * euv2)) * sigx0_2)/((2 *
+    sigx4_2 + 2 * sigx4_1) * ewusr2) - (0.5 * ((2 * sigx4_2 +
+    2 * sigx4_1) * ewusr2) + 2 * (sigx10_2 * ewz2)) * sigx13_2/((2 *
+    sigx4_2 + 2 * sigx4_1) * ewusr2)^2) * ewz2), FUN = "*"),
+    vHvar)
+  hessll[(nXvar + nuZUvar + 1):(nXvar + 2 * nuZUvar), (nXvar +
+    2 * nuZUvar + 2 * nvZVvar + 1):(nXvar + 2 * nuZUvar +
+    2 * nvZVvar + nZHvar)] <- crossprod(sweep(uHvar, MARGIN = 1,
+    STATS = -wHvar * (sigx10_2 * (2 * (pi * ((Wz)^2 + 1) *
+      ewz2 * (2 * (sigx14_1/ewusr1) - 2 * (sigx14_2/ewusr2))/sigx15^2) +
+      2/sigx15)/ewusr2), FUN = "*"), Zvar)
+  hessll[(nXvar + 2 * nuZUvar + 1):(nXvar + 2 * nuZUvar + nvZVvar),
+    (nXvar + 2 * nuZUvar + 1):(nXvar + 2 * nuZUvar + nvZVvar)] <- crossprod(sweep(vHvar,
+    MARGIN = 1, STATS = wHvar * 2 * (((((sigx9_1/2 + (pmusig1 -
+      epsiv1 * dmusig1)/2) * ewv1/ewu1 - (0.25 * (ewvsr1/ewusr1) +
+      0.25 * (S * (epsilon)/ewvsr1) - epsiv1^2 * musig1) *
+      dmusig1) * sigx2_1 - ((2 * sigx12_1 + 2 * (pepsi1 -
+      depsi1 * sigx11_1)) * ewv1/ewu1 - (0.25 * (S * (epsilon)/ewvsr1) +
+      0.5 * (ewvsr1/ewusr1) - epsivu1 * sigx11_1^2) * depsi1) *
+      sigx0_1)/((2 * sigx4_2 + 2 * sigx4_1) * ewusr1) -
+      2 * (ewz1 * sigx13_1^2/((2 * sigx4_2 + 2 * sigx4_1) *
+        ewusr1)^2)) * ewz1), FUN = "*"), vHvar)
+  hessll[(nXvar + 2 * nuZUvar + 1):(nXvar + 2 * nuZUvar + nvZVvar),
+    (nXvar + 2 * nuZUvar + nvZVvar + 1):(nXvar + 2 * nuZUvar +
+      2 * nvZVvar)] <- crossprod(sweep(vHvar, MARGIN = 1,
+    STATS = -wHvar * (4 * (ewz2 * ewz1 * ewusr2 * sigx13_1 *
+      sigx13_2/(((2 * sigx4_2 + 2 * sigx4_1) * ewusr2)^2 *
+      ewusr1))), FUN = "*"), vHvar)
+  hessll[(nXvar + 2 * nuZUvar + 1):(nXvar + 2 * nuZUvar + nvZVvar),
+    (nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(nXvar + 2 *
+      nuZUvar + 2 * nvZVvar + nZHvar)] <- crossprod(sweep(vHvar,
+    MARGIN = 1, STATS = wHvar * (2/sigx15 - 2 * (pi * ((Wz)^2 +
+      1) * ewz1 * (2 * (sigx14_1/ewusr1) - 2 * (sigx14_2/ewusr2))/sigx15^2)) *
+      sigx13_1/ewusr1, FUN = "*"), Zvar)
+  hessll[(nXvar + 2 * nuZUvar + nvZVvar + 1):(nXvar + 2 * nuZUvar +
+    2 * nvZVvar), (nXvar + 2 * nuZUvar + nvZVvar + 1):(nXvar +
+    2 * nuZUvar + 2 * nvZVvar)] <- crossprod(sweep(vHvar,
+    MARGIN = 1, STATS = wHvar * 2 * (((((sigx9_2/2 + (pmusig2 -
+      epsiv2 * dmusig2)/2) * ewv2/ewu2 - (0.25 * (ewvsr2/ewusr2) +
+      0.25 * (S * (epsilon)/ewvsr2) - epsiv2^2 * musig2) *
+      dmusig2) * sigx2_2 - ((2 * sigx12_2 + 2 * (pepsi2 -
+      depsi2 * sigx11_2)) * ewv2/ewu2 - (0.25 * (S * (epsilon)/ewvsr2) +
+      0.5 * (ewvsr2/ewusr2) - epsivu2 * sigx11_2^2) * depsi2) *
+      sigx0_2)/((2 * sigx4_2 + 2 * sigx4_1) * ewusr2) -
+      2 * (ewz2 * sigx13_2^2/((2 * sigx4_2 + 2 * sigx4_1) *
+        ewusr2)^2)) * ewz2), FUN = "*"), vHvar)
+  hessll[(nXvar + 2 * nuZUvar + nvZVvar + 1):(nXvar + 2 * nuZUvar +
+    2 * nvZVvar), (nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(nXvar +
+    2 * nuZUvar + 2 * nvZVvar + nZHvar)] <- crossprod(sweep(vHvar,
+    MARGIN = 1, STATS = -wHvar * ((2 * (pi * ((Wz)^2 + 1) *
+      ewz2 * (2 * (sigx14_1/ewusr1) - 2 * (sigx14_2/ewusr2))/sigx15^2) +
+      2/sigx15) * sigx13_2/ewusr2), FUN = "*"), Zvar)
+  hessll[(nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(nXvar + 2 *
+    nuZUvar + 2 * nvZVvar + nZHvar), (nXvar + 2 * nuZUvar +
+    2 * nvZVvar + 1):(nXvar + 2 * nuZUvar + 2 * nvZVvar +
+    nZHvar)] <- crossprod(sweep(Zvar, MARGIN = 1, STATS = -wHvar *
+    ((2 * (sigx14_1/ewusr1) - 2 * (sigx14_2/ewusr2)) * (2 *
+      (sigx14_1/ewusr1) + 2 * (pi * Wz * (2 * sigx4_2 +
+      2 * sigx4_1)) - 2 * (sigx14_2/ewusr2))/sigx15^2),
+    FUN = "*"), Zvar)
+  hessll[lower.tri(hessll)] <- t(hessll)[lower.tri(hessll)]
+  # hessll<-(hessll+(hessll))/2
+  return(hessll)
+}
+
+## probit specification class membership
+chessmcesfgenexponormlike_probit <- function(parm, nXvar, nuZUvar,
+  nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
+  beta <- parm[1:(nXvar)]
+  delta1 <- parm[(nXvar + 1):(nXvar + nuZUvar)]
+  delta2 <- parm[(nXvar + nuZUvar + 1):(nXvar + 2 * nuZUvar)]
+  phi1 <- parm[(nXvar + 2 * nuZUvar + 1):(nXvar + 2 * nuZUvar +
+    nvZVvar)]
+  phi2 <- parm[(nXvar + 2 * nuZUvar + nvZVvar + 1):(nXvar +
+    2 * nuZUvar + 2 * nvZVvar)]
+  theta <- parm[(nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(nXvar +
+    2 * nuZUvar + 2 * nvZVvar + nZHvar)]
+  Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
+  Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
+  ewusr1 <- exp(Wu1/2)
+  ewusr2 <- exp(Wu2/2)
+  ewu1 <- exp(Wu1)
+  ewu2 <- exp(Wu2)
+  ewvsr1 <- exp(Wv1/2)
+  ewvsr2 <- exp(Wv2/2)
+  ewv1 <- exp(Wv1)
+  ewv2 <- exp(Wv2)
+  pwZ <- pnorm(Wz)
+  dwZ <- dnorm(Wz, 0, 1)
+  musig1 <- (ewvsr1/ewusr1 + S * (epsilon)/ewvsr1)
+  musig2 <- (ewvsr2/ewusr2 + S * (epsilon)/ewvsr2)
+  dmusig1 <- dnorm(-musig1, 0, 1)
+  dmusig2 <- dnorm(-musig2, 0, 1)
+  pmusig1 <- pnorm(-musig1)
+  pmusig2 <- pnorm(-musig2)
+  epsivu1 <- (2 * (ewvsr1/ewusr1) + S * (epsilon)/ewvsr1)
+  epsivu2 <- (2 * (ewvsr2/ewusr2) + S * (epsilon)/ewvsr2)
+  depsi1 <- dnorm(-epsivu1, 0, 1)
+  depsi2 <- dnorm(-epsivu2, 0, 1)
+  pepsi1 <- pnorm(-epsivu1)
+  pepsi2 <- pnorm(-epsivu2)
+  dpuv1 <- (depsi1/ewvsr1 - 2 * (pepsi1/ewusr1))
+  dpuv2 <- (depsi2/ewvsr2 - 2 * (pepsi2/ewusr2))
+  euv1 <- (2 * (ewv1/ewu1) + S * (epsilon)/ewusr1)
+  euv2 <- (2 * (ewv2/ewu2) + S * (epsilon)/ewusr2)
+  epsiu1 <- (S * (epsilon)/ewusr1)
+  epsiu2 <- (S * (epsilon)/ewusr2)
+  sigx0_1 <- exp(2 * (ewv1/ewu1) + 2 * epsiu1)
+  sigx0_2 <- exp(2 * (ewv2/ewu2) + 2 * epsiu2)
+  sigx1_1 <- (dmusig1/ewvsr1 - pmusig1/ewusr1)
+  sigx1_2 <- (dmusig2/ewvsr2 - pmusig2/ewusr2)
+  sigx2_1 <- exp(ewv1/(2 * ewu1) + S * (epsilon)/ewusr1)
+  sigx2_2 <- exp(ewv2/(2 * ewu2) + S * (epsilon)/ewusr2)
+  sigx3_1 <- ((sigx1_1 * sigx2_1 - dpuv1 * sigx0_1) * pwZ/ewusr1)
+  sigx3_2 <- ((sigx1_2 * sigx2_2 - dpuv2 * sigx0_2) * (1 -
+    pwZ)/ewusr2)
+  sigx14_1 <- (sigx2_1 * pmusig1 - sigx0_1 * pepsi1)
+  sigx14_2 <- (sigx2_2 * pmusig2 - sigx0_2 * pepsi2)
+  sigx4_1 <- (sigx14_1 * pwZ/ewusr1)
+  sigx4_2 <- ((1 - pwZ) * sigx14_2/ewusr2)
+  sigx5_1 <- (dmusig1 * ewvsr1/ewusr1)
+  sigx5_2 <- (dmusig2 * ewvsr2/ewusr2)
+  sigx6_1 <- (ewu1 * ewv1/(2 * ewu1)^2)
+  sigx6_2 <- (ewu2 * ewv2/(2 * ewu2)^2)
+  sigx7_1 <- (0.5 * sigx5_1 - (0.5 * epsiu1 + 2 * sigx6_1) *
+    pmusig1)
+  sigx7_2 <- (0.5 * sigx5_2 - (0.5 * epsiu2 + 2 * sigx6_2) *
+    pmusig2)
+  sigx8_1 <- (depsi1 * ewvsr1/ewusr1 - euv1 * pepsi1)
+  sigx8_2 <- (depsi2 * ewvsr2/ewusr2 - euv2 * pepsi2)
+  epsiv1 <- (0.5 * (ewvsr1/ewusr1) - 0.5 * (S * (epsilon)/ewvsr1))
+  epsiv2 <- (0.5 * (ewvsr2/ewusr2) - 0.5 * (S * (epsilon)/ewvsr2))
+  sigx9_1 <- (ewv1 * pmusig1/(2 * ewu1) - epsiv1 * dmusig1)
+  sigx9_2 <- (ewv2 * pmusig2/(2 * ewu2) - epsiv2 * dmusig2)
+  sigx10_1 <- (sigx7_1 * sigx2_1 - (sigx8_1 * sigx0_1 + 0.5 *
+    sigx14_1))
+  sigx10_2 <- (sigx7_2 * sigx2_2 - (sigx8_2 * sigx0_2 + 0.5 *
+    sigx14_2))
+  sigx11_1 <- (ewvsr1/ewusr1 - 0.5 * (S * (epsilon)/ewvsr1))
+  sigx11_2 <- (ewvsr2/ewusr2 - 0.5 * (S * (epsilon)/ewvsr2))
+  sigx12_1 <- (2 * (ewv1 * pepsi1/ewu1) - depsi1 * sigx11_1)
+  sigx12_2 <- (2 * (ewv2 * pepsi2/ewu2) - depsi2 * sigx11_2)
+  sigx13_1 <- (sigx2_1 * sigx9_1 - sigx12_1 * sigx0_1)
+  sigx13_2 <- (sigx2_2 * sigx9_2 - sigx12_2 * sigx0_2)
+  hessll <- matrix(nrow = nXvar + 2 * nuZUvar + 2 * nvZVvar +
+    nZHvar, ncol = nXvar + 2 * nuZUvar + 2 * nvZVvar + nZHvar)
+  hessll[1:nXvar, 1:nXvar] <- crossprod(sweep(Xvar, MARGIN = 1,
+    STATS = wHvar * (2 * ((((musig1/ewvsr1 - 1/ewusr1) *
+      dmusig1/ewvsr1 - sigx1_1/ewusr1) * sigx2_1 - ((epsivu1/ewvsr1 -
+      2/ewusr1) * depsi1/ewvsr1 - 2 * (dpuv1/ewusr1)) *
+      sigx0_1) * pwZ/ewusr1) + 2 * ((((musig2/ewvsr2 -
+      1/ewusr2) * dmusig2/ewvsr2 - sigx1_2/ewusr2) * sigx2_2 -
+      ((epsivu2/ewvsr2 - 2/ewusr2) * depsi2/ewvsr2 - 2 *
+        (dpuv2/ewusr2)) * sigx0_2) * (1 - pwZ)/ewusr2) -
+      (2 * sigx3_1 + 2 * sigx3_2)^2/(2 * sigx4_2 + 2 *
+        sigx4_1))/(2 * sigx4_2 + 2 * sigx4_1), FUN = "*"),
+    Xvar)
+  hessll[1:nXvar, (nXvar + 1):(nXvar + nuZUvar)] <- crossprod(sweep(Xvar,
+    MARGIN = 1, STATS = wHvar * 2 * (S * (((((0.5 + 0.5 *
+      epsiu1 + 2 * sigx6_1) * pmusig1 - 0.5 * sigx5_1)/ewusr1 +
+      (0.5 * (musig1/ewusr1) - (0.5 * epsiu1 + 2 * sigx6_1)/ewvsr1) *
+        dmusig1) * sigx2_1 - (((epsivu1/ewusr1 - euv1/ewvsr1) *
+      depsi1 + (pepsi1 - 2 * sigx8_1)/ewusr1) * sigx0_1 +
+      0.5 * (sigx1_1 * sigx2_1 - dpuv1 * sigx0_1)))/((2 *
+      sigx4_2 + 2 * sigx4_1) * ewusr1) - sigx10_1 * (2 *
+      sigx3_1 + 2 * sigx3_2) * ewusr1/((2 * sigx4_2 + 2 *
+      sigx4_1) * ewusr1)^2) * pwZ), FUN = "*"), uHvar)
+  hessll[1:nXvar, (nXvar + nuZUvar + 1):(nXvar + 2 * nuZUvar)] <- crossprod(sweep(Xvar,
+    MARGIN = 1, STATS = wHvar * 2 * (S * (((((0.5 + 0.5 *
+      epsiu2 + 2 * sigx6_2) * pmusig2 - 0.5 * sigx5_2)/ewusr2 +
+      (0.5 * (musig2/ewusr2) - (0.5 * epsiu2 + 2 * sigx6_2)/ewvsr2) *
+        dmusig2) * sigx2_2 - (((epsivu2/ewusr2 - euv2/ewvsr2) *
+      depsi2 + (pepsi2 - 2 * sigx8_2)/ewusr2) * sigx0_2 +
+      0.5 * (sigx1_2 * sigx2_2 - dpuv2 * sigx0_2)))/((2 *
+      sigx4_2 + 2 * sigx4_1) * ewusr2) - sigx10_2 * (2 *
+      sigx3_1 + 2 * sigx3_2) * ewusr2/((2 * sigx4_2 + 2 *
+      sigx4_1) * ewusr2)^2) * (1 - pwZ)), FUN = "*"), uHvar)
+  hessll[1:nXvar, (nXvar + 2 * nuZUvar + 1):(nXvar + 2 * nuZUvar +
+    nvZVvar)] <- crossprod(sweep(Xvar, MARGIN = 1, STATS = wHvar *
+    2 * (S * (((dmusig1 * (ewv1/(2 * ewu1) - (epsiv1 * musig1 +
+    0.5))/ewvsr1 - sigx9_1/ewusr1) * sigx2_1 - ((2 * (ewv1/ewu1) -
+    (epsivu1 * sigx11_1 + 0.5)) * depsi1/ewvsr1 - 2 * (sigx12_1/ewusr1)) *
+    sigx0_1)/((2 * sigx4_2 + 2 * sigx4_1) * ewusr1) - (2 *
+    sigx3_1 + 2 * sigx3_2) * ewusr1 * sigx13_1/((2 * sigx4_2 +
+    2 * sigx4_1) * ewusr1)^2) * pwZ), FUN = "*"), vHvar)
+  hessll[1:nXvar, (nXvar + 2 * nuZUvar + nvZVvar + 1):(nXvar +
+    2 * nuZUvar + 2 * nvZVvar)] <- crossprod(sweep(Xvar,
+    MARGIN = 1, STATS = wHvar * 2 * (S * (((dmusig2 * (ewv2/(2 *
+      ewu2) - (epsiv2 * musig2 + 0.5))/ewvsr2 - sigx9_2/ewusr2) *
+      sigx2_2 - ((2 * (ewv2/ewu2) - (epsivu2 * sigx11_2 +
+      0.5)) * depsi2/ewvsr2 - 2 * (sigx12_2/ewusr2)) *
+      sigx0_2)/((2 * sigx4_2 + 2 * sigx4_1) * ewusr2) -
+      (2 * sigx3_1 + 2 * sigx3_2) * ewusr2 * sigx13_2/((2 *
+        sigx4_2 + 2 * sigx4_1) * ewusr2)^2) * (1 - pwZ)),
+    FUN = "*"), vHvar)
+  hessll[1:nXvar, (nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(nXvar +
+    2 * nuZUvar + 2 * nvZVvar + nZHvar)] <- crossprod(sweep(Xvar,
+    MARGIN = 1, STATS = wHvar * S * (2 * ((sigx1_1 * sigx2_1 -
+      dpuv1 * sigx0_1)/ewusr1) - ((2 * sigx3_1 + 2 * sigx3_2) *
+      (2 * (sigx14_1/ewusr1) - 2 * (sigx14_2/ewusr2))/(2 *
+      sigx4_2 + 2 * sigx4_1) + 2 * ((sigx1_2 * sigx2_2 -
+      dpuv2 * sigx0_2)/ewusr2))) * dwZ/(2 * sigx4_2 + 2 *
+      sigx4_1), FUN = "*"), Zvar)
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + 1):(nXvar +
+    nuZUvar)] <- crossprod(sweep(uHvar, MARGIN = 1, STATS = wHvar *
+    2 * (((((0.5 * (0.5 * (ewvsr1 * musig1/ewusr1) - 0.5) -
+    0.5 * (0.5 * epsiu1 + 2 * sigx6_1)) * dmusig1 * ewvsr1/ewusr1 -
+    (sigx7_1 * (0.5 * epsiu1 + 2 * sigx6_1) + (2 * ((1 -
+      8 * (ewu1^2/(2 * ewu1)^2)) * ewu1 * ewv1/(2 * ewu1)^2) -
+      0.25 * epsiu1) * pmusig1)) * sigx2_1 - ((((epsivu1 *
+    ewvsr1 - S * (epsilon))/ewusr1 - (0.5 + 2 * (ewv1/ewu1))) *
+    depsi1 * ewvsr1/ewusr1 + (0.5 * epsiu1 + 2 * (ewv1/ewu1)) *
+    pepsi1 - euv1 * sigx8_1) * sigx0_1 + 0.5 * (sigx7_1 *
+    sigx2_1 - sigx8_1 * sigx0_1)))/((2 * sigx4_2 + 2 * sigx4_1) *
+    ewusr1) - sigx10_1 * (0.5 * ((2 * sigx4_2 + 2 * sigx4_1) *
+    ewusr1) + 2 * (sigx10_1 * pwZ))/((2 * sigx4_2 + 2 * sigx4_1) *
+    ewusr1)^2) * pwZ), FUN = "*"), uHvar)
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + nuZUvar +
+    1):(nXvar + 2 * nuZUvar)] <- crossprod(sweep(uHvar, MARGIN = 1,
+    STATS = -wHvar * (4 * (sigx10_1 * sigx10_2 * (1 - pwZ) *
+      pwZ * ewusr2/(((2 * sigx4_2 + 2 * sigx4_1) * ewusr2)^2 *
+      ewusr1))), FUN = "*"), uHvar)
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + 2 * nuZUvar +
+    1):(nXvar + 2 * nuZUvar + nvZVvar)] <- crossprod(sweep(uHvar,
+    MARGIN = 1, STATS = wHvar * 2 * (((((dmusig1 * ewvsr1/(4 *
+      (ewu1 * ewusr1)) - 2 * (ewu1 * pmusig1/(2 * ewu1)^2)) *
+      ewv1 - ((0.5 * (epsiv1 * musig1) - 0.25) * dmusig1 *
+      ewvsr1/ewusr1 + (0.5 * epsiu1 + 2 * sigx6_1) * sigx9_1)) *
+      sigx2_1 - (2 * ((depsi1 * ewvsr1/ewusr1 - pepsi1) *
+      ewv1/ewu1) - ((epsivu1 * sigx11_1 - 0.5) * depsi1 *
+      ewvsr1/ewusr1 + sigx12_1 * euv1)) * sigx0_1)/((2 *
+      sigx4_2 + 2 * sigx4_1) * ewusr1) - (0.5 * ((2 * sigx4_2 +
+      2 * sigx4_1) * ewusr1) + 2 * (sigx10_1 * pwZ)) *
+      sigx13_1/((2 * sigx4_2 + 2 * sigx4_1) * ewusr1)^2) *
+      pwZ), FUN = "*"), vHvar)
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + 2 * nuZUvar +
+    nvZVvar + 1):(nXvar + 2 * nuZUvar + 2 * nvZVvar)] <- crossprod(sweep(uHvar,
+    MARGIN = 1, STATS = -wHvar * (4 * (sigx10_1 * (1 - pwZ) *
+      pwZ * ewusr2 * sigx13_2/(((2 * sigx4_2 + 2 * sigx4_1) *
+      ewusr2)^2 * ewusr1))), FUN = "*"), vHvar)
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + 2 * nuZUvar +
+    2 * nvZVvar + 1):(nXvar + 2 * nuZUvar + 2 * nvZVvar +
+    nZHvar)] <- crossprod(sweep(uHvar, MARGIN = 1, STATS = wHvar *
+    sigx10_1 * (2 - 2 * ((2 * (sigx14_1/ewusr1) - 2 * (sigx14_2/ewusr2)) *
+    pwZ/(2 * sigx4_2 + 2 * sigx4_1))) * dwZ/((2 * sigx4_2 +
+    2 * sigx4_1) * ewusr1), FUN = "*"), Zvar)
+  hessll[(nXvar + nuZUvar + 1):(nXvar + 2 * nuZUvar), (nXvar +
+    nuZUvar + 1):(nXvar + 2 * nuZUvar)] <- crossprod(sweep(uHvar,
+    MARGIN = 1, STATS = wHvar * 2 * (((((0.5 * (0.5 * (ewvsr2 *
+      musig2/ewusr2) - 0.5) - 0.5 * (0.5 * epsiu2 + 2 *
+      sigx6_2)) * dmusig2 * ewvsr2/ewusr2 - (sigx7_2 *
+      (0.5 * epsiu2 + 2 * sigx6_2) + (2 * ((1 - 8 * (ewu2^2/(2 *
+      ewu2)^2)) * ewu2 * ewv2/(2 * ewu2)^2) - 0.25 * epsiu2) *
+      pmusig2)) * sigx2_2 - ((((epsivu2 * ewvsr2 - S *
+      (epsilon))/ewusr2 - (0.5 + 2 * (ewv2/ewu2))) * depsi2 *
+      ewvsr2/ewusr2 + (0.5 * epsiu2 + 2 * (ewv2/ewu2)) *
+      pepsi2 - euv2 * sigx8_2) * sigx0_2 + 0.5 * (sigx7_2 *
+      sigx2_2 - sigx8_2 * sigx0_2)))/((2 * sigx4_2 + 2 *
+      sigx4_1) * ewusr2) - sigx10_2 * (0.5 * ((2 * sigx4_2 +
+      2 * sigx4_1) * ewusr2) + 2 * (sigx10_2 * (1 - pwZ)))/((2 *
+      sigx4_2 + 2 * sigx4_1) * ewusr2)^2) * (1 - pwZ)),
+    FUN = "*"), uHvar)
+  hessll[(nXvar + nuZUvar + 1):(nXvar + 2 * nuZUvar), (nXvar +
+    2 * nuZUvar + 1):(nXvar + 2 * nuZUvar + nvZVvar)] <- crossprod(sweep(uHvar,
+    MARGIN = 1, STATS = -wHvar * (4 * (sigx10_2 * (1 - pwZ) *
+      pwZ * ewusr1 * sigx13_1/(((2 * sigx4_2 + 2 * sigx4_1) *
+      ewusr1)^2 * ewusr2))), FUN = "*"), vHvar)
+  hessll[(nXvar + nuZUvar + 1):(nXvar + 2 * nuZUvar), (nXvar +
+    2 * nuZUvar + nvZVvar + 1):(nXvar + 2 * nuZUvar + 2 *
+    nvZVvar)] <- crossprod(sweep(uHvar, MARGIN = 1, STATS = wHvar *
+    2 * (((((dmusig2 * ewvsr2/(4 * (ewu2 * ewusr2)) - 2 *
+    (ewu2 * pmusig2/(2 * ewu2)^2)) * ewv2 - ((0.5 * (epsiv2 *
+    musig2) - 0.25) * dmusig2 * ewvsr2/ewusr2 + (0.5 * epsiu2 +
+    2 * sigx6_2) * sigx9_2)) * sigx2_2 - (2 * ((depsi2 *
+    ewvsr2/ewusr2 - pepsi2) * ewv2/ewu2) - ((epsivu2 * sigx11_2 -
+    0.5) * depsi2 * ewvsr2/ewusr2 + sigx12_2 * euv2)) * sigx0_2)/((2 *
+    sigx4_2 + 2 * sigx4_1) * ewusr2) - (0.5 * ((2 * sigx4_2 +
+    2 * sigx4_1) * ewusr2) + 2 * (sigx10_2 * (1 - pwZ))) *
+    sigx13_2/((2 * sigx4_2 + 2 * sigx4_1) * ewusr2)^2) *
+    (1 - pwZ)), FUN = "*"), vHvar)
+  hessll[(nXvar + nuZUvar + 1):(nXvar + 2 * nuZUvar), (nXvar +
+    2 * nuZUvar + 2 * nvZVvar + 1):(nXvar + 2 * nuZUvar +
+    2 * nvZVvar + nZHvar)] <- crossprod(sweep(uHvar, MARGIN = 1,
+    STATS = -wHvar * (sigx10_2 * (2 + 2 * ((1 - pwZ) * (2 *
+      (sigx14_1/ewusr1) - 2 * (sigx14_2/ewusr2))/(2 * sigx4_2 +
+      2 * sigx4_1))) * dwZ/((2 * sigx4_2 + 2 * sigx4_1) *
+      ewusr2)), FUN = "*"), Zvar)
+  hessll[(nXvar + 2 * nuZUvar + 1):(nXvar + 2 * nuZUvar + nvZVvar),
+    (nXvar + 2 * nuZUvar + 1):(nXvar + 2 * nuZUvar + nvZVvar)] <- crossprod(sweep(vHvar,
+    MARGIN = 1, STATS = wHvar * 2 * (((((sigx9_1/2 + (pmusig1 -
+      epsiv1 * dmusig1)/2) * ewv1/ewu1 - (0.25 * (ewvsr1/ewusr1) +
+      0.25 * (S * (epsilon)/ewvsr1) - epsiv1^2 * musig1) *
+      dmusig1) * sigx2_1 - ((2 * sigx12_1 + 2 * (pepsi1 -
+      depsi1 * sigx11_1)) * ewv1/ewu1 - (0.25 * (S * (epsilon)/ewvsr1) +
+      0.5 * (ewvsr1/ewusr1) - epsivu1 * sigx11_1^2) * depsi1) *
+      sigx0_1)/((2 * sigx4_2 + 2 * sigx4_1) * ewusr1) -
+      2 * (pwZ * sigx13_1^2/((2 * sigx4_2 + 2 * sigx4_1) *
+        ewusr1)^2)) * pwZ), FUN = "*"), vHvar)
+  hessll[(nXvar + 2 * nuZUvar + 1):(nXvar + 2 * nuZUvar + nvZVvar),
+    (nXvar + 2 * nuZUvar + nvZVvar + 1):(nXvar + 2 * nuZUvar +
+      2 * nvZVvar)] <- crossprod(sweep(vHvar, MARGIN = 1,
+    STATS = -wHvar * (4 * ((1 - pwZ) * pwZ * ewusr2 * sigx13_1 *
+      sigx13_2/(((2 * sigx4_2 + 2 * sigx4_1) * ewusr2)^2 *
+      ewusr1))), FUN = "*"), vHvar)
+  hessll[(nXvar + 2 * nuZUvar + 1):(nXvar + 2 * nuZUvar + nvZVvar),
+    (nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(nXvar + 2 *
+      nuZUvar + 2 * nvZVvar + nZHvar)] <- crossprod(sweep(vHvar,
+    MARGIN = 1, STATS = wHvar * (2 - 2 * ((2 * (sigx14_1/ewusr1) -
+      2 * (sigx14_2/ewusr2)) * pwZ/(2 * sigx4_2 + 2 * sigx4_1))) *
+      dwZ * sigx13_1/((2 * sigx4_2 + 2 * sigx4_1) * ewusr1),
+    FUN = "*"), Zvar)
+  hessll[(nXvar + 2 * nuZUvar + nvZVvar + 1):(nXvar + 2 * nuZUvar +
+    2 * nvZVvar), (nXvar + 2 * nuZUvar + nvZVvar + 1):(nXvar +
+    2 * nuZUvar + 2 * nvZVvar)] <- crossprod(sweep(vHvar,
+    MARGIN = 1, STATS = wHvar * 2 * (((((sigx9_2/2 + (pmusig2 -
+      epsiv2 * dmusig2)/2) * ewv2/ewu2 - (0.25 * (ewvsr2/ewusr2) +
+      0.25 * (S * (epsilon)/ewvsr2) - epsiv2^2 * musig2) *
+      dmusig2) * sigx2_2 - ((2 * sigx12_2 + 2 * (pepsi2 -
+      depsi2 * sigx11_2)) * ewv2/ewu2 - (0.25 * (S * (epsilon)/ewvsr2) +
+      0.5 * (ewvsr2/ewusr2) - epsivu2 * sigx11_2^2) * depsi2) *
+      sigx0_2)/((2 * sigx4_2 + 2 * sigx4_1) * ewusr2) -
+      2 * ((1 - pwZ) * sigx13_2^2/((2 * sigx4_2 + 2 * sigx4_1) *
+        ewusr2)^2)) * (1 - pwZ)), FUN = "*"), vHvar)
+  hessll[(nXvar + 2 * nuZUvar + nvZVvar + 1):(nXvar + 2 * nuZUvar +
+    2 * nvZVvar), (nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(nXvar +
+    2 * nuZUvar + 2 * nvZVvar + nZHvar)] <- crossprod(sweep(vHvar,
+    MARGIN = 1, STATS = -wHvar * ((2 + 2 * ((1 - pwZ) * (2 *
+      (sigx14_1/ewusr1) - 2 * (sigx14_2/ewusr2))/(2 * sigx4_2 +
+      2 * sigx4_1))) * dwZ * sigx13_2/((2 * sigx4_2 + 2 *
+      sigx4_1) * ewusr2)), FUN = "*"), Zvar)
+  hessll[(nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(nXvar + 2 *
+    nuZUvar + 2 * nvZVvar + nZHvar), (nXvar + 2 * nuZUvar +
+    2 * nvZVvar + 1):(nXvar + 2 * nuZUvar + 2 * nvZVvar +
+    nZHvar)] <- crossprod(sweep(Zvar, MARGIN = 1, STATS = -wHvar *
+    (((2 * (sigx14_1/ewusr1) - 2 * (sigx14_2/ewusr2)) * dwZ/(2 *
+      sigx4_2 + 2 * sigx4_1) + Wz) * (2 * (sigx14_1/ewusr1) -
+      2 * (sigx14_2/ewusr2)) * dwZ/(2 * sigx4_2 + 2 * sigx4_1)),
+    FUN = "*"), Zvar)
+  hessll[lower.tri(hessll)] <- t(hessll)[lower.tri(hessll)]
+  # hessll<-(hessll+(hessll))/2
+  return(hessll)
+}
+
+## cloglog specification class membership
+chessmcesfgenexponormlike_cloglog <- function(parm, nXvar, nuZUvar,
+  nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar) {
+  beta <- parm[1:(nXvar)]
+  delta1 <- parm[(nXvar + 1):(nXvar + nuZUvar)]
+  delta2 <- parm[(nXvar + nuZUvar + 1):(nXvar + 2 * nuZUvar)]
+  phi1 <- parm[(nXvar + 2 * nuZUvar + 1):(nXvar + 2 * nuZUvar +
+    nvZVvar)]
+  phi2 <- parm[(nXvar + 2 * nuZUvar + nvZVvar + 1):(nXvar +
+    2 * nuZUvar + 2 * nvZVvar)]
+  theta <- parm[(nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(nXvar +
+    2 * nuZUvar + 2 * nvZVvar + nZHvar)]
+  Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
+  Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
+  ewusr1 <- exp(Wu1/2)
+  ewusr2 <- exp(Wu2/2)
+  ewu1 <- exp(Wu1)
+  ewu2 <- exp(Wu2)
+  ewvsr1 <- exp(Wv1/2)
+  ewvsr2 <- exp(Wv2/2)
+  ewv1 <- exp(Wv1)
+  ewv2 <- exp(Wv2)
+  ewz <- exp(Wz)
+  prZ <- exp(-ewz)
+  musig1 <- (ewvsr1/ewusr1 + S * (epsilon)/ewvsr1)
+  musig2 <- (ewvsr2/ewusr2 + S * (epsilon)/ewvsr2)
+  dmusig1 <- dnorm(-musig1, 0, 1)
+  dmusig2 <- dnorm(-musig2, 0, 1)
+  pmusig1 <- pnorm(-musig1)
+  pmusig2 <- pnorm(-musig2)
+  epsivu1 <- (2 * (ewvsr1/ewusr1) + S * (epsilon)/ewvsr1)
+  epsivu2 <- (2 * (ewvsr2/ewusr2) + S * (epsilon)/ewvsr2)
+  depsi1 <- dnorm(-epsivu1, 0, 1)
+  depsi2 <- dnorm(-epsivu2, 0, 1)
+  pepsi1 <- pnorm(-epsivu1)
+  pepsi2 <- pnorm(-epsivu2)
+  dpuv1 <- (depsi1/ewvsr1 - 2 * (pepsi1/ewusr1))
+  dpuv2 <- (depsi2/ewvsr2 - 2 * (pepsi2/ewusr2))
+  euv1 <- (2 * (ewv1/ewu1) + S * (epsilon)/ewusr1)
+  euv2 <- (2 * (ewv2/ewu2) + S * (epsilon)/ewusr2)
+  epsiu1 <- (S * (epsilon)/ewusr1)
+  epsiu2 <- (S * (epsilon)/ewusr2)
+  sigx0_1 <- exp(2 * (ewv1/ewu1) + 2 * epsiu1)
+  sigx0_2 <- exp(2 * (ewv2/ewu2) + 2 * epsiu2)
+  sigx1_1 <- (dmusig1/ewvsr1 - pmusig1/ewusr1)
+  sigx1_2 <- (dmusig2/ewvsr2 - pmusig2/ewusr2)
+  sigx2_1 <- exp(ewv1/(2 * ewu1) + S * (epsilon)/ewusr1)
+  sigx2_2 <- exp(ewv2/(2 * ewu2) + S * (epsilon)/ewusr2)
+  sigx3_1 <- ((sigx1_1 * sigx2_1 - dpuv1 * sigx0_1) * (1 -
+    prZ)/ewusr1)
+  sigx3_2 <- ((sigx1_2 * sigx2_2 - dpuv2 * sigx0_2) * prZ/ewusr2)
+  sigx14_1 <- (sigx2_1 * pmusig1 - sigx0_1 * pepsi1)
+  sigx14_2 <- (sigx2_2 * pmusig2 - sigx0_2 * pepsi2)
+  sigx4_1 <- ((1 - prZ) * sigx14_1/ewusr1)
+  sigx4_2 <- (prZ * sigx14_2/ewusr2)
+  sigx5_1 <- (dmusig1 * ewvsr1/ewusr1)
+  sigx5_2 <- (dmusig2 * ewvsr2/ewusr2)
+  sigx6_1 <- (ewu1 * ewv1/(2 * ewu1)^2)
+  sigx6_2 <- (ewu2 * ewv2/(2 * ewu2)^2)
+  sigx7_1 <- (0.5 * sigx5_1 - (0.5 * epsiu1 + 2 * sigx6_1) *
+    pmusig1)
+  sigx7_2 <- (0.5 * sigx5_2 - (0.5 * epsiu2 + 2 * sigx6_2) *
+    pmusig2)
+  sigx8_1 <- (depsi1 * ewvsr1/ewusr1 - euv1 * pepsi1)
+  sigx8_2 <- (depsi2 * ewvsr2/ewusr2 - euv2 * pepsi2)
+  epsiv1 <- (0.5 * (ewvsr1/ewusr1) - 0.5 * (S * (epsilon)/ewvsr1))
+  epsiv2 <- (0.5 * (ewvsr2/ewusr2) - 0.5 * (S * (epsilon)/ewvsr2))
+  sigx9_1 <- (ewv1 * pmusig1/(2 * ewu1) - epsiv1 * dmusig1)
+  sigx9_2 <- (ewv2 * pmusig2/(2 * ewu2) - epsiv2 * dmusig2)
+  sigx10_1 <- (sigx7_1 * sigx2_1 - (sigx8_1 * sigx0_1 + 0.5 *
+    sigx14_1))
+  sigx10_2 <- (sigx7_2 * sigx2_2 - (sigx8_2 * sigx0_2 + 0.5 *
+    sigx14_2))
+  sigx11_1 <- (ewvsr1/ewusr1 - 0.5 * (S * (epsilon)/ewvsr1))
+  sigx11_2 <- (ewvsr2/ewusr2 - 0.5 * (S * (epsilon)/ewvsr2))
+  sigx12_1 <- (2 * (ewv1 * pepsi1/ewu1) - depsi1 * sigx11_1)
+  sigx12_2 <- (2 * (ewv2 * pepsi2/ewu2) - depsi2 * sigx11_2)
+  sigx13_1 <- (sigx2_1 * sigx9_1 - sigx12_1 * sigx0_1)
+  sigx13_2 <- (sigx2_2 * sigx9_2 - sigx12_2 * sigx0_2)
+  hessll <- matrix(nrow = nXvar + 2 * nuZUvar + 2 * nvZVvar +
+    nZHvar, ncol = nXvar + 2 * nuZUvar + 2 * nvZVvar + nZHvar)
+  hessll[1:nXvar, 1:nXvar] <- crossprod(sweep(Xvar, MARGIN = 1,
+    STATS = wHvar * (2 * ((((musig1/ewvsr1 - 1/ewusr1) *
+      dmusig1/ewvsr1 - sigx1_1/ewusr1) * sigx2_1 - ((epsivu1/ewvsr1 -
+      2/ewusr1) * depsi1/ewvsr1 - 2 * (dpuv1/ewusr1)) *
+      sigx0_1) * (1 - prZ)/ewusr1) + 2 * ((((musig2/ewvsr2 -
+      1/ewusr2) * dmusig2/ewvsr2 - sigx1_2/ewusr2) * sigx2_2 -
+      ((epsivu2/ewvsr2 - 2/ewusr2) * depsi2/ewvsr2 - 2 *
+        (dpuv2/ewusr2)) * sigx0_2) * prZ/ewusr2) - (2 *
+      sigx3_1 + 2 * sigx3_2)^2/(2 * sigx4_2 + 2 * sigx4_1))/(2 *
+      sigx4_2 + 2 * sigx4_1), FUN = "*"), Xvar)
+  hessll[1:nXvar, (nXvar + 1):(nXvar + nuZUvar)] <- crossprod(sweep(Xvar,
+    MARGIN = 1, STATS = wHvar * 2 * (S * (((((0.5 + 0.5 *
+      epsiu1 + 2 * sigx6_1) * pmusig1 - 0.5 * sigx5_1)/ewusr1 +
+      (0.5 * (musig1/ewusr1) - (0.5 * epsiu1 + 2 * sigx6_1)/ewvsr1) *
+        dmusig1) * sigx2_1 - (((epsivu1/ewusr1 - euv1/ewvsr1) *
+      depsi1 + (pepsi1 - 2 * sigx8_1)/ewusr1) * sigx0_1 +
+      0.5 * (sigx1_1 * sigx2_1 - dpuv1 * sigx0_1)))/((2 *
+      sigx4_2 + 2 * sigx4_1) * ewusr1) - sigx10_1 * (2 *
+      sigx3_1 + 2 * sigx3_2) * ewusr1/((2 * sigx4_2 + 2 *
+      sigx4_1) * ewusr1)^2) * (1 - prZ)), FUN = "*"), uHvar)
+  hessll[1:nXvar, (nXvar + nuZUvar + 1):(nXvar + 2 * nuZUvar)] <- crossprod(sweep(Xvar,
+    MARGIN = 1, STATS = wHvar * 2 * (S * (((((0.5 + 0.5 *
+      epsiu2 + 2 * sigx6_2) * pmusig2 - 0.5 * sigx5_2)/ewusr2 +
+      (0.5 * (musig2/ewusr2) - (0.5 * epsiu2 + 2 * sigx6_2)/ewvsr2) *
+        dmusig2) * sigx2_2 - (((epsivu2/ewusr2 - euv2/ewvsr2) *
+      depsi2 + (pepsi2 - 2 * sigx8_2)/ewusr2) * sigx0_2 +
+      0.5 * (sigx1_2 * sigx2_2 - dpuv2 * sigx0_2)))/((2 *
+      sigx4_2 + 2 * sigx4_1) * ewusr2) - sigx10_2 * (2 *
+      sigx3_1 + 2 * sigx3_2) * ewusr2/((2 * sigx4_2 + 2 *
+      sigx4_1) * ewusr2)^2) * prZ), FUN = "*"), uHvar)
+  hessll[1:nXvar, (nXvar + 2 * nuZUvar + 1):(nXvar + 2 * nuZUvar +
+    nvZVvar)] <- crossprod(sweep(Xvar, MARGIN = 1, STATS = wHvar *
+    2 * (S * (((dmusig1 * (ewv1/(2 * ewu1) - (epsiv1 * musig1 +
+    0.5))/ewvsr1 - sigx9_1/ewusr1) * sigx2_1 - ((2 * (ewv1/ewu1) -
+    (epsivu1 * sigx11_1 + 0.5)) * depsi1/ewvsr1 - 2 * (sigx12_1/ewusr1)) *
+    sigx0_1)/((2 * sigx4_2 + 2 * sigx4_1) * ewusr1) - (2 *
+    sigx3_1 + 2 * sigx3_2) * ewusr1 * sigx13_1/((2 * sigx4_2 +
+    2 * sigx4_1) * ewusr1)^2) * (1 - prZ)), FUN = "*"), vHvar)
+  hessll[1:nXvar, (nXvar + 2 * nuZUvar + nvZVvar + 1):(nXvar +
+    2 * nuZUvar + 2 * nvZVvar)] <- crossprod(sweep(Xvar,
+    MARGIN = 1, STATS = wHvar * 2 * (S * (((dmusig2 * (ewv2/(2 *
+      ewu2) - (epsiv2 * musig2 + 0.5))/ewvsr2 - sigx9_2/ewusr2) *
+      sigx2_2 - ((2 * (ewv2/ewu2) - (epsivu2 * sigx11_2 +
+      0.5)) * depsi2/ewvsr2 - 2 * (sigx12_2/ewusr2)) *
+      sigx0_2)/((2 * sigx4_2 + 2 * sigx4_1) * ewusr2) -
+      (2 * sigx3_1 + 2 * sigx3_2) * ewusr2 * sigx13_2/((2 *
+        sigx4_2 + 2 * sigx4_1) * ewusr2)^2) * prZ), FUN = "*"),
+    vHvar)
+  hessll[1:nXvar, (nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(nXvar +
+    2 * nuZUvar + 2 * nvZVvar + nZHvar)] <- crossprod(sweep(Xvar,
+    MARGIN = 1, STATS = wHvar * S * (2 * ((sigx1_1 * sigx2_1 -
+      dpuv1 * sigx0_1)/ewusr1) - ((2 * sigx3_1 + 2 * sigx3_2) *
+      (2 * (sigx14_1/ewusr1) - 2 * (sigx14_2/ewusr2))/(2 *
+      sigx4_1 + 2 * sigx4_2) + 2 * ((sigx1_2 * sigx2_2 -
+      dpuv2 * sigx0_2)/ewusr2))) * prZ * ewz/(2 * sigx4_1 +
+      2 * sigx4_2), FUN = "*"), Zvar)
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + 1):(nXvar +
+    nuZUvar)] <- crossprod(sweep(uHvar, MARGIN = 1, STATS = wHvar *
+    2 * (((((0.5 * (0.5 * (ewvsr1 * musig1/ewusr1) - 0.5) -
+    0.5 * (0.5 * epsiu1 + 2 * sigx6_1)) * dmusig1 * ewvsr1/ewusr1 -
+    (sigx7_1 * (0.5 * epsiu1 + 2 * sigx6_1) + (2 * ((1 -
+      8 * (ewu1^2/(2 * ewu1)^2)) * ewu1 * ewv1/(2 * ewu1)^2) -
+      0.25 * epsiu1) * pmusig1)) * sigx2_1 - ((((epsivu1 *
+    ewvsr1 - S * (epsilon))/ewusr1 - (0.5 + 2 * (ewv1/ewu1))) *
+    depsi1 * ewvsr1/ewusr1 + (0.5 * epsiu1 + 2 * (ewv1/ewu1)) *
+    pepsi1 - euv1 * sigx8_1) * sigx0_1 + 0.5 * (sigx7_1 *
+    sigx2_1 - sigx8_1 * sigx0_1)))/((2 * sigx4_2 + 2 * sigx4_1) *
+    ewusr1) - sigx10_1 * (0.5 * ((2 * sigx4_2 + 2 * sigx4_1) *
+    ewusr1) + 2 * (sigx10_1 * (1 - prZ)))/((2 * sigx4_2 +
+    2 * sigx4_1) * ewusr1)^2) * (1 - prZ)), FUN = "*"), uHvar)
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + nuZUvar +
+    1):(nXvar + 2 * nuZUvar)] <- crossprod(sweep(uHvar, MARGIN = 1,
+    STATS = -wHvar * (4 * (sigx10_1 * sigx10_2 * prZ * (1 -
+      prZ) * ewusr2/(((2 * sigx4_2 + 2 * sigx4_1) * ewusr2)^2 *
+      ewusr1))), FUN = "*"), uHvar)
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + 2 * nuZUvar +
+    1):(nXvar + 2 * nuZUvar + nvZVvar)] <- crossprod(sweep(uHvar,
+    MARGIN = 1, STATS = wHvar * 2 * (((((dmusig1 * ewvsr1/(4 *
+      (ewu1 * ewusr1)) - 2 * (ewu1 * pmusig1/(2 * ewu1)^2)) *
+      ewv1 - ((0.5 * (epsiv1 * musig1) - 0.25) * dmusig1 *
+      ewvsr1/ewusr1 + (0.5 * epsiu1 + 2 * sigx6_1) * sigx9_1)) *
+      sigx2_1 - (2 * ((depsi1 * ewvsr1/ewusr1 - pepsi1) *
+      ewv1/ewu1) - ((epsivu1 * sigx11_1 - 0.5) * depsi1 *
+      ewvsr1/ewusr1 + sigx12_1 * euv1)) * sigx0_1)/((2 *
+      sigx4_2 + 2 * sigx4_1) * ewusr1) - (0.5 * ((2 * sigx4_2 +
+      2 * sigx4_1) * ewusr1) + 2 * (sigx10_1 * (1 - prZ))) *
+      sigx13_1/((2 * sigx4_2 + 2 * sigx4_1) * ewusr1)^2) *
+      (1 - prZ)), FUN = "*"), vHvar)
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + 2 * nuZUvar +
+    nvZVvar + 1):(nXvar + 2 * nuZUvar + 2 * nvZVvar)] <- crossprod(sweep(uHvar,
+    MARGIN = 1, STATS = -wHvar * (4 * (sigx10_1 * prZ * (1 -
+      prZ) * ewusr2 * sigx13_2/(((2 * sigx4_2 + 2 * sigx4_1) *
+      ewusr2)^2 * ewusr1))), FUN = "*"), vHvar)
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + 2 * nuZUvar +
+    2 * nvZVvar + 1):(nXvar + 2 * nuZUvar + 2 * nvZVvar +
+    nZHvar)] <- crossprod(sweep(uHvar, MARGIN = 1, STATS = wHvar *
+    sigx10_1 * (2 - 2 * ((1 - prZ) * (2 * (sigx14_1/ewusr1) -
+    2 * (sigx14_2/ewusr2))/(2 * sigx4_1 + 2 * sigx4_2))) *
+    prZ * ewz/((2 * sigx4_1 + 2 * sigx4_2) * ewusr1), FUN = "*"),
+    Zvar)
+  hessll[(nXvar + nuZUvar + 1):(nXvar + 2 * nuZUvar), (nXvar +
+    nuZUvar + 1):(nXvar + 2 * nuZUvar)] <- crossprod(sweep(uHvar,
+    MARGIN = 1, STATS = wHvar * 2 * (((((0.5 * (0.5 * (ewvsr2 *
+      musig2/ewusr2) - 0.5) - 0.5 * (0.5 * epsiu2 + 2 *
+      sigx6_2)) * dmusig2 * ewvsr2/ewusr2 - (sigx7_2 *
+      (0.5 * epsiu2 + 2 * sigx6_2) + (2 * ((1 - 8 * (ewu2^2/(2 *
+      ewu2)^2)) * ewu2 * ewv2/(2 * ewu2)^2) - 0.25 * epsiu2) *
+      pmusig2)) * sigx2_2 - ((((epsivu2 * ewvsr2 - S *
+      (epsilon))/ewusr2 - (0.5 + 2 * (ewv2/ewu2))) * depsi2 *
+      ewvsr2/ewusr2 + (0.5 * epsiu2 + 2 * (ewv2/ewu2)) *
+      pepsi2 - euv2 * sigx8_2) * sigx0_2 + 0.5 * (sigx7_2 *
+      sigx2_2 - sigx8_2 * sigx0_2)))/((2 * sigx4_2 + 2 *
+      sigx4_1) * ewusr2) - sigx10_2 * (0.5 * ((2 * sigx4_2 +
+      2 * sigx4_1) * ewusr2) + 2 * (sigx10_2 * prZ))/((2 *
+      sigx4_2 + 2 * sigx4_1) * ewusr2)^2) * prZ), FUN = "*"),
+    uHvar)
+  hessll[(nXvar + nuZUvar + 1):(nXvar + 2 * nuZUvar), (nXvar +
+    2 * nuZUvar + 1):(nXvar + 2 * nuZUvar + nvZVvar)] <- crossprod(sweep(uHvar,
+    MARGIN = 1, STATS = -wHvar * (4 * (sigx10_2 * prZ * (1 -
+      prZ) * ewusr1 * sigx13_1/(((2 * sigx4_2 + 2 * sigx4_1) *
+      ewusr1)^2 * ewusr2))), FUN = "*"), vHvar)
+  hessll[(nXvar + nuZUvar + 1):(nXvar + 2 * nuZUvar), (nXvar +
+    2 * nuZUvar + nvZVvar + 1):(nXvar + 2 * nuZUvar + 2 *
+    nvZVvar)] <- crossprod(sweep(uHvar, MARGIN = 1, STATS = wHvar *
+    2 * (((((dmusig2 * ewvsr2/(4 * (ewu2 * ewusr2)) - 2 *
+    (ewu2 * pmusig2/(2 * ewu2)^2)) * ewv2 - ((0.5 * (epsiv2 *
+    musig2) - 0.25) * dmusig2 * ewvsr2/ewusr2 + (0.5 * epsiu2 +
+    2 * sigx6_2) * sigx9_2)) * sigx2_2 - (2 * ((depsi2 *
+    ewvsr2/ewusr2 - pepsi2) * ewv2/ewu2) - ((epsivu2 * sigx11_2 -
+    0.5) * depsi2 * ewvsr2/ewusr2 + sigx12_2 * euv2)) * sigx0_2)/((2 *
+    sigx4_2 + 2 * sigx4_1) * ewusr2) - (0.5 * ((2 * sigx4_2 +
+    2 * sigx4_1) * ewusr2) + 2 * (sigx10_2 * prZ)) * sigx13_2/((2 *
+    sigx4_2 + 2 * sigx4_1) * ewusr2)^2) * prZ), FUN = "*"),
+    vHvar)
+  hessll[(nXvar + nuZUvar + 1):(nXvar + 2 * nuZUvar), (nXvar +
+    2 * nuZUvar + 2 * nvZVvar + 1):(nXvar + 2 * nuZUvar +
+    2 * nvZVvar + nZHvar)] <- crossprod(sweep(uHvar, MARGIN = 1,
+    STATS = -wHvar * (sigx10_2 * (2 + 2 * ((2 * (sigx14_1/ewusr1) -
+      2 * (sigx14_2/ewusr2)) * prZ/(2 * sigx4_1 + 2 * sigx4_2))) *
+      prZ * ewz/((2 * sigx4_1 + 2 * sigx4_2) * ewusr2)),
+    FUN = "*"), Zvar)
+  hessll[(nXvar + 2 * nuZUvar + 1):(nXvar + 2 * nuZUvar + nvZVvar),
+    (nXvar + 2 * nuZUvar + 1):(nXvar + 2 * nuZUvar + nvZVvar)] <- crossprod(sweep(vHvar,
+    MARGIN = 1, STATS = wHvar * 2 * (((((sigx9_1/2 + (pmusig1 -
+      epsiv1 * dmusig1)/2) * ewv1/ewu1 - (0.25 * (ewvsr1/ewusr1) +
+      0.25 * (S * (epsilon)/ewvsr1) - epsiv1^2 * musig1) *
+      dmusig1) * sigx2_1 - ((2 * sigx12_1 + 2 * (pepsi1 -
+      depsi1 * sigx11_1)) * ewv1/ewu1 - (0.25 * (S * (epsilon)/ewvsr1) +
+      0.5 * (ewvsr1/ewusr1) - epsivu1 * sigx11_1^2) * depsi1) *
+      sigx0_1)/((2 * sigx4_2 + 2 * sigx4_1) * ewusr1) -
+      2 * ((1 - prZ) * sigx13_1^2/((2 * sigx4_2 + 2 * sigx4_1) *
+        ewusr1)^2)) * (1 - prZ)), FUN = "*"), vHvar)
+  hessll[(nXvar + 2 * nuZUvar + 1):(nXvar + 2 * nuZUvar + nvZVvar),
+    (nXvar + 2 * nuZUvar + nvZVvar + 1):(nXvar + 2 * nuZUvar +
+      2 * nvZVvar)] <- crossprod(sweep(vHvar, MARGIN = 1,
+    STATS = -wHvar * (4 * (prZ * (1 - prZ) * ewusr2 * sigx13_1 *
+      sigx13_2/(((2 * sigx4_2 + 2 * sigx4_1) * ewusr2)^2 *
+      ewusr1))), FUN = "*"), vHvar)
+  hessll[(nXvar + 2 * nuZUvar + 1):(nXvar + 2 * nuZUvar + nvZVvar),
+    (nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(nXvar + 2 *
+      nuZUvar + 2 * nvZVvar + nZHvar)] <- crossprod(sweep(vHvar,
+    MARGIN = 1, STATS = wHvar * (2 - 2 * ((1 - prZ) * (2 *
+      (sigx14_1/ewusr1) - 2 * (sigx14_2/ewusr2))/(2 * sigx4_1 +
+      2 * sigx4_2))) * prZ * sigx13_1 * ewz/((2 * sigx4_1 +
+      2 * sigx4_2) * ewusr1), FUN = "*"), Zvar)
+  hessll[(nXvar + 2 * nuZUvar + nvZVvar + 1):(nXvar + 2 * nuZUvar +
+    2 * nvZVvar), (nXvar + 2 * nuZUvar + nvZVvar + 1):(nXvar +
+    2 * nuZUvar + 2 * nvZVvar)] <- crossprod(sweep(vHvar,
+    MARGIN = 1, STATS = wHvar * 2 * (((((sigx9_2/2 + (pmusig2 -
+      epsiv2 * dmusig2)/2) * ewv2/ewu2 - (0.25 * (ewvsr2/ewusr2) +
+      0.25 * (S * (epsilon)/ewvsr2) - epsiv2^2 * musig2) *
+      dmusig2) * sigx2_2 - ((2 * sigx12_2 + 2 * (pepsi2 -
+      depsi2 * sigx11_2)) * ewv2/ewu2 - (0.25 * (S * (epsilon)/ewvsr2) +
+      0.5 * (ewvsr2/ewusr2) - epsivu2 * sigx11_2^2) * depsi2) *
+      sigx0_2)/((2 * sigx4_2 + 2 * sigx4_1) * ewusr2) -
+      2 * (prZ * sigx13_2^2/((2 * sigx4_2 + 2 * sigx4_1) *
+        ewusr2)^2)) * prZ), FUN = "*"), vHvar)
+  hessll[(nXvar + 2 * nuZUvar + nvZVvar + 1):(nXvar + 2 * nuZUvar +
+    2 * nvZVvar), (nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(nXvar +
+    2 * nuZUvar + 2 * nvZVvar + nZHvar)] <- crossprod(sweep(vHvar,
+    MARGIN = 1, STATS = -wHvar * ((2 + 2 * ((2 * (sigx14_1/ewusr1) -
+      2 * (sigx14_2/ewusr2)) * prZ/(2 * sigx4_1 + 2 * sigx4_2))) *
+      prZ * sigx13_2 * ewz/((2 * sigx4_1 + 2 * sigx4_2) *
+      ewusr2)), FUN = "*"), Zvar)
+  hessll[(nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(nXvar + 2 *
+    nuZUvar + 2 * nvZVvar + nZHvar), (nXvar + 2 * nuZUvar +
+    2 * nvZVvar + 1):(nXvar + 2 * nuZUvar + 2 * nvZVvar +
+    nZHvar)] <- crossprod(sweep(Zvar, MARGIN = 1, STATS = wHvar *
+    (1 - ((2 * (sigx14_1/ewusr1) - 2 * (sigx14_2/ewusr2)) *
+      prZ/(2 * sigx4_1 + 2 * sigx4_2) + 1) * ewz) * (2 *
+    (sigx14_1/ewusr1) - 2 * (sigx14_2/ewusr2)) * prZ * ewz/(2 *
+    sigx4_1 + 2 * sigx4_2), FUN = "*"), Zvar)
+  hessll[lower.tri(hessll)] <- t(hessll)[lower.tri(hessll)]
+  # hessll<-(hessll+(hessll))/2
+  return(hessll)
+}
+
 # Optimization using different algorithms ----------
 #' optimizations solve for cnsf generalized exponential-normal distribution
 #' @param start starting value for optimization
@@ -915,7 +3224,9 @@ chessmcesfgenexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param qac qac option for maxLik
 #' @noRd
 # same sigma_u
-cnsfgenexponormAlgOpt <- function(start, olsParam, dataTable,
+
+## logit specification class membership
+cnsfgenexponormAlgOpt_logit <- function(start, olsParam, dataTable,
   S, wHvar, nXvar, uHvar, nuZUvar, vHvar, nvZVvar, Zvar, nZHvar,
   Yvar, Xvar, method, printInfo, itermax, stepmax, tol, gradtol,
   hessianType, qac) {
@@ -927,7 +3238,7 @@ cnsfgenexponormAlgOpt <- function(start, olsParam, dataTable,
     printInfo = printInfo, tol = tol)
   initGenExpo <- start_st$initGenExpo
   startVal <- start_st$StartVal
-  startLoglik <- sum(ccnsfgenexponormlike(startVal, nXvar = nXvar,
+  startLoglik <- sum(ccnsfgenexponormlike_logit(startVal, nXvar = nXvar,
     nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
     vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar,
     Zvar = Zvar, nZHvar = nZHvar))
@@ -940,43 +3251,44 @@ cnsfgenexponormAlgOpt <- function(start, olsParam, dataTable,
   }
   cat("CNSF Estimation...\n")
   mleObj <- switch(method, ucminf = ucminf(par = startVal,
-    fn = function(parm) -sum(ccnsfgenexponormlike(parm, nXvar = nXvar,
-      nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
-      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar,
-      Zvar = Zvar, nZHvar = nZHvar)), gr = function(parm) -colSums(cgradcnsfgenexponormlike(parm,
+    fn = function(parm) -sum(ccnsfgenexponormlike_logit(parm,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+    gr = function(parm) -colSums(cgradcnsfgenexponormlike_logit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
     hessian = 0, control = list(trace = printInfo, maxeval = itermax,
       stepmax = stepmax, xtol = tol, grtol = gradtol)),
-    maxLikAlgo = maxRoutine(fn = ccnsfgenexponormlike, grad = cgradcnsfgenexponormlike,
-      hess = chesscnsfgenexponormlike, start = startVal,
-      finalHessian = if (hessianType == 2) "bhhh" else TRUE,
-      control = list(printLevel = if (printInfo) 2 else 0,
+    maxLikAlgo = maxRoutine(fn = ccnsfgenexponormlike_logit,
+      grad = cgradcnsfgenexponormlike_logit, hess = chesscnsfgenexponormlike_logit,
+      start = startVal, finalHessian = if (hessianType ==
+        2) "bhhh" else TRUE, control = list(printLevel = if (printInfo) 2 else 0,
         iterlim = itermax, reltol = tol, tol = tol, qac = qac),
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
-    sr1 = trust.optim(x = startVal, fn = function(parm) -sum(ccnsfgenexponormlike(parm,
+    sr1 = trust.optim(x = startVal, fn = function(parm) -sum(ccnsfgenexponormlike_logit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
-      gr = function(parm) -colSums(cgradcnsfgenexponormlike(parm,
+      gr = function(parm) -colSums(cgradcnsfgenexponormlike_logit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
       method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
         stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 4L else 0,
         report.precision = 1L)), sparse = trust.optim(x = startVal,
-      fn = function(parm) -sum(ccnsfgenexponormlike(parm,
+      fn = function(parm) -sum(ccnsfgenexponormlike_logit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
-      gr = function(parm) -colSums(cgradcnsfgenexponormlike(parm,
+      gr = function(parm) -colSums(cgradcnsfgenexponormlike_logit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
-      hs = function(parm) as(-chesscnsfgenexponormlike(parm,
+      hs = function(parm) as(-chesscnsfgenexponormlike_logit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
@@ -984,36 +3296,36 @@ cnsfgenexponormAlgOpt <- function(start, olsParam, dataTable,
         cgtol = gradtol, stop.trust.radius = tol, prec = tol,
         report.level = if (printInfo) 4L else 0, report.precision = 1L,
         preconditioner = 1L)), mla = mla(b = startVal,
-      fn = function(parm) -sum(ccnsfgenexponormlike(parm,
+      fn = function(parm) -sum(ccnsfgenexponormlike_logit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
-      gr = function(parm) -colSums(cgradcnsfgenexponormlike(parm,
+      gr = function(parm) -colSums(cgradcnsfgenexponormlike_logit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
-      hess = function(parm) -chesscnsfgenexponormlike(parm,
+      hess = function(parm) -chesscnsfgenexponormlike_logit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
       print.info = printInfo, maxiter = itermax, epsa = gradtol,
       epsb = gradtol), nlminb = nlminb(start = startVal,
-      objective = function(parm) -sum(ccnsfgenexponormlike(parm,
+      objective = function(parm) -sum(ccnsfgenexponormlike_logit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
-      gradient = function(parm) -colSums(cgradcnsfgenexponormlike(parm,
+      gradient = function(parm) -colSums(cgradcnsfgenexponormlike_logit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
-      hessian = function(parm) -chesscnsfgenexponormlike(parm,
+      hessian = function(parm) -chesscnsfgenexponormlike_logit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
       control = list(iter.max = itermax, trace = printInfo,
         eval.max = itermax, rel.tol = tol, x.tol = tol)))
   if (method %in% c("ucminf", "nlminb")) {
-    mleObj$gradient <- colSums(cgradcnsfgenexponormlike(mleObj$par,
+    mleObj$gradient <- colSums(cgradcnsfgenexponormlike_logit(mleObj$par,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar))
@@ -1036,21 +3348,456 @@ cnsfgenexponormAlgOpt <- function(start, olsParam, dataTable,
   }
   if (hessianType != 2) {
     if (method %in% c("ucminf", "nlminb"))
-      mleObj$hessian <- chesscnsfgenexponormlike(parm = mleObj$par,
+      mleObj$hessian <- chesscnsfgenexponormlike_logit(parm = mleObj$par,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
     if (method == "sr1")
-      mleObj$hessian <- chesscnsfgenexponormlike(parm = mleObj$solution,
+      mleObj$hessian <- chesscnsfgenexponormlike_logit(parm = mleObj$solution,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
   }
-  mleObj$logL_OBS <- ccnsfgenexponormlike(parm = mlParam, nXvar = nXvar,
-    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
-    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar,
-    Zvar = Zvar, nZHvar = nZHvar)
-  mleObj$gradL_OBS <- cgradcnsfgenexponormlike(parm = mlParam,
+  mleObj$logL_OBS <- ccnsfgenexponormlike_logit(parm = mlParam,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
+  mleObj$gradL_OBS <- cgradcnsfgenexponormlike_logit(parm = mlParam,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
+  return(list(startVal = startVal, startLoglik = startLoglik,
+    mleObj = mleObj, mlParam = mlParam, initGenExpo = initGenExpo))
+}
+
+## cauchit specification class membership
+cnsfgenexponormAlgOpt_cauchit <- function(start, olsParam, dataTable,
+  S, wHvar, nXvar, uHvar, nuZUvar, vHvar, nvZVvar, Zvar, nZHvar,
+  Yvar, Xvar, method, printInfo, itermax, stepmax, tol, gradtol,
+  hessianType, qac) {
+  start_st <- if (!is.null(start))
+    start else cstcnsfgenexponorm(olsObj = olsParam, epsiRes = dataTable[["olsResiduals"]],
+    S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar, uHvar = uHvar,
+    nuZUvar = nuZUvar, vHvar = vHvar, nvZVvar = nvZVvar,
+    nXvar = nXvar, Xvar = Xvar, Yvar = Yvar, itermax = itermax,
+    printInfo = printInfo, tol = tol)
+  initGenExpo <- start_st$initGenExpo
+  startVal <- start_st$StartVal
+  startLoglik <- sum(ccnsfgenexponormlike_cauchit(startVal,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar))
+  if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
+    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
+      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
+      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
+      sann = function(...) maxSANN(...))
+    method <- "maxLikAlgo"
+  }
+  cat("CNSF Estimation...\n")
+  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+    fn = function(parm) -sum(ccnsfgenexponormlike_cauchit(parm,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+    gr = function(parm) -colSums(cgradcnsfgenexponormlike_cauchit(parm,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+    hessian = 0, control = list(trace = printInfo, maxeval = itermax,
+      stepmax = stepmax, xtol = tol, grtol = gradtol)),
+    maxLikAlgo = maxRoutine(fn = ccnsfgenexponormlike_cauchit,
+      grad = cgradcnsfgenexponormlike_cauchit, hess = chesscnsfgenexponormlike_cauchit,
+      start = startVal, finalHessian = if (hessianType ==
+        2) "bhhh" else TRUE, control = list(printLevel = if (printInfo) 2 else 0,
+        iterlim = itermax, reltol = tol, tol = tol, qac = qac),
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
+    sr1 = trust.optim(x = startVal, fn = function(parm) -sum(ccnsfgenexponormlike_cauchit(parm,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      gr = function(parm) -colSums(cgradcnsfgenexponormlike_cauchit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
+        stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 4L else 0,
+        report.precision = 1L)), sparse = trust.optim(x = startVal,
+      fn = function(parm) -sum(ccnsfgenexponormlike_cauchit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      gr = function(parm) -colSums(cgradcnsfgenexponormlike_cauchit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      hs = function(parm) as(-chesscnsfgenexponormlike_cauchit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
+        "dgCMatrix"), method = "Sparse", control = list(maxit = itermax,
+        cgtol = gradtol, stop.trust.radius = tol, prec = tol,
+        report.level = if (printInfo) 4L else 0, report.precision = 1L,
+        preconditioner = 1L)), mla = mla(b = startVal,
+      fn = function(parm) -sum(ccnsfgenexponormlike_cauchit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      gr = function(parm) -colSums(cgradcnsfgenexponormlike_cauchit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      hess = function(parm) -chesscnsfgenexponormlike_cauchit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
+      print.info = printInfo, maxiter = itermax, epsa = gradtol,
+      epsb = gradtol), nlminb = nlminb(start = startVal,
+      objective = function(parm) -sum(ccnsfgenexponormlike_cauchit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      gradient = function(parm) -colSums(cgradcnsfgenexponormlike_cauchit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      hessian = function(parm) -chesscnsfgenexponormlike_cauchit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
+      control = list(iter.max = itermax, trace = printInfo,
+        eval.max = itermax, rel.tol = tol, x.tol = tol)))
+  if (method %in% c("ucminf", "nlminb")) {
+    mleObj$gradient <- colSums(cgradcnsfgenexponormlike_cauchit(mleObj$par,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar))
+  }
+  mlParam <- if (method %in% c("ucminf", "nlminb")) {
+    mleObj$par
+  } else {
+    if (method == "maxLikAlgo") {
+      mleObj$estimate
+    } else {
+      if (method %in% c("sr1", "sparse")) {
+        names(mleObj$solution) <- names(startVal)
+        mleObj$solution
+      } else {
+        if (method == "mla") {
+          mleObj$b
+        }
+      }
+    }
+  }
+  if (hessianType != 2) {
+    if (method %in% c("ucminf", "nlminb"))
+      mleObj$hessian <- chesscnsfgenexponormlike_cauchit(parm = mleObj$par,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
+    if (method == "sr1")
+      mleObj$hessian <- chesscnsfgenexponormlike_cauchit(parm = mleObj$solution,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
+  }
+  mleObj$logL_OBS <- ccnsfgenexponormlike_cauchit(parm = mlParam,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
+  mleObj$gradL_OBS <- cgradcnsfgenexponormlike_cauchit(parm = mlParam,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
+  return(list(startVal = startVal, startLoglik = startLoglik,
+    mleObj = mleObj, mlParam = mlParam, initGenExpo = initGenExpo))
+}
+
+## probit specification class membership
+cnsfgenexponormAlgOpt_probit <- function(start, olsParam, dataTable,
+  S, wHvar, nXvar, uHvar, nuZUvar, vHvar, nvZVvar, Zvar, nZHvar,
+  Yvar, Xvar, method, printInfo, itermax, stepmax, tol, gradtol,
+  hessianType, qac) {
+  start_st <- if (!is.null(start))
+    start else cstcnsfgenexponorm(olsObj = olsParam, epsiRes = dataTable[["olsResiduals"]],
+    S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar, uHvar = uHvar,
+    nuZUvar = nuZUvar, vHvar = vHvar, nvZVvar = nvZVvar,
+    nXvar = nXvar, Xvar = Xvar, Yvar = Yvar, itermax = itermax,
+    printInfo = printInfo, tol = tol)
+  initGenExpo <- start_st$initGenExpo
+  startVal <- start_st$StartVal
+  startLoglik <- sum(ccnsfgenexponormlike_probit(startVal,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar))
+  if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
+    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
+      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
+      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
+      sann = function(...) maxSANN(...))
+    method <- "maxLikAlgo"
+  }
+  cat("CNSF Estimation...\n")
+  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+    fn = function(parm) -sum(ccnsfgenexponormlike_probit(parm,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+    gr = function(parm) -colSums(cgradcnsfgenexponormlike_probit(parm,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+    hessian = 0, control = list(trace = printInfo, maxeval = itermax,
+      stepmax = stepmax, xtol = tol, grtol = gradtol)),
+    maxLikAlgo = maxRoutine(fn = ccnsfgenexponormlike_probit,
+      grad = cgradcnsfgenexponormlike_probit, hess = chesscnsfgenexponormlike_probit,
+      start = startVal, finalHessian = if (hessianType ==
+        2) "bhhh" else TRUE, control = list(printLevel = if (printInfo) 2 else 0,
+        iterlim = itermax, reltol = tol, tol = tol, qac = qac),
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
+    sr1 = trust.optim(x = startVal, fn = function(parm) -sum(ccnsfgenexponormlike_probit(parm,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      gr = function(parm) -colSums(cgradcnsfgenexponormlike_probit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
+        stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 4L else 0,
+        report.precision = 1L)), sparse = trust.optim(x = startVal,
+      fn = function(parm) -sum(ccnsfgenexponormlike_probit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      gr = function(parm) -colSums(cgradcnsfgenexponormlike_probit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      hs = function(parm) as(-chesscnsfgenexponormlike_probit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
+        "dgCMatrix"), method = "Sparse", control = list(maxit = itermax,
+        cgtol = gradtol, stop.trust.radius = tol, prec = tol,
+        report.level = if (printInfo) 4L else 0, report.precision = 1L,
+        preconditioner = 1L)), mla = mla(b = startVal,
+      fn = function(parm) -sum(ccnsfgenexponormlike_probit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      gr = function(parm) -colSums(cgradcnsfgenexponormlike_probit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      hess = function(parm) -chesscnsfgenexponormlike_probit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
+      print.info = printInfo, maxiter = itermax, epsa = gradtol,
+      epsb = gradtol), nlminb = nlminb(start = startVal,
+      objective = function(parm) -sum(ccnsfgenexponormlike_probit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      gradient = function(parm) -colSums(cgradcnsfgenexponormlike_probit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      hessian = function(parm) -chesscnsfgenexponormlike_probit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
+      control = list(iter.max = itermax, trace = printInfo,
+        eval.max = itermax, rel.tol = tol, x.tol = tol)))
+  if (method %in% c("ucminf", "nlminb")) {
+    mleObj$gradient <- colSums(cgradcnsfgenexponormlike_probit(mleObj$par,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar))
+  }
+  mlParam <- if (method %in% c("ucminf", "nlminb")) {
+    mleObj$par
+  } else {
+    if (method == "maxLikAlgo") {
+      mleObj$estimate
+    } else {
+      if (method %in% c("sr1", "sparse")) {
+        names(mleObj$solution) <- names(startVal)
+        mleObj$solution
+      } else {
+        if (method == "mla") {
+          mleObj$b
+        }
+      }
+    }
+  }
+  if (hessianType != 2) {
+    if (method %in% c("ucminf", "nlminb"))
+      mleObj$hessian <- chesscnsfgenexponormlike_probit(parm = mleObj$par,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
+    if (method == "sr1")
+      mleObj$hessian <- chesscnsfgenexponormlike_probit(parm = mleObj$solution,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
+  }
+  mleObj$logL_OBS <- ccnsfgenexponormlike_probit(parm = mlParam,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
+  mleObj$gradL_OBS <- cgradcnsfgenexponormlike_probit(parm = mlParam,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
+  return(list(startVal = startVal, startLoglik = startLoglik,
+    mleObj = mleObj, mlParam = mlParam, initGenExpo = initGenExpo))
+}
+
+## cloglog specification class membership
+cnsfgenexponormAlgOpt_cloglog <- function(start, olsParam, dataTable,
+  S, wHvar, nXvar, uHvar, nuZUvar, vHvar, nvZVvar, Zvar, nZHvar,
+  Yvar, Xvar, method, printInfo, itermax, stepmax, tol, gradtol,
+  hessianType, qac) {
+  start_st <- if (!is.null(start))
+    start else cstcnsfgenexponorm(olsObj = olsParam, epsiRes = dataTable[["olsResiduals"]],
+    S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar, uHvar = uHvar,
+    nuZUvar = nuZUvar, vHvar = vHvar, nvZVvar = nvZVvar,
+    nXvar = nXvar, Xvar = Xvar, Yvar = Yvar, itermax = itermax,
+    printInfo = printInfo, tol = tol)
+  initGenExpo <- start_st$initGenExpo
+  startVal <- start_st$StartVal
+  startLoglik <- sum(ccnsfgenexponormlike_cloglog(startVal,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar))
+  if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
+    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
+      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
+      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
+      sann = function(...) maxSANN(...))
+    method <- "maxLikAlgo"
+  }
+  cat("CNSF Estimation...\n")
+  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+    fn = function(parm) -sum(ccnsfgenexponormlike_cloglog(parm,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+    gr = function(parm) -colSums(cgradcnsfgenexponormlike_cloglog(parm,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+    hessian = 0, control = list(trace = printInfo, maxeval = itermax,
+      stepmax = stepmax, xtol = tol, grtol = gradtol)),
+    maxLikAlgo = maxRoutine(fn = ccnsfgenexponormlike_cloglog,
+      grad = cgradcnsfgenexponormlike_cloglog, hess = chesscnsfgenexponormlike_cloglog,
+      start = startVal, finalHessian = if (hessianType ==
+        2) "bhhh" else TRUE, control = list(printLevel = if (printInfo) 2 else 0,
+        iterlim = itermax, reltol = tol, tol = tol, qac = qac),
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
+    sr1 = trust.optim(x = startVal, fn = function(parm) -sum(ccnsfgenexponormlike_cloglog(parm,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      gr = function(parm) -colSums(cgradcnsfgenexponormlike_cloglog(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
+        stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 4L else 0,
+        report.precision = 1L)), sparse = trust.optim(x = startVal,
+      fn = function(parm) -sum(ccnsfgenexponormlike_cloglog(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      gr = function(parm) -colSums(cgradcnsfgenexponormlike_cloglog(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      hs = function(parm) as(-chesscnsfgenexponormlike_cloglog(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
+        "dgCMatrix"), method = "Sparse", control = list(maxit = itermax,
+        cgtol = gradtol, stop.trust.radius = tol, prec = tol,
+        report.level = if (printInfo) 4L else 0, report.precision = 1L,
+        preconditioner = 1L)), mla = mla(b = startVal,
+      fn = function(parm) -sum(ccnsfgenexponormlike_cloglog(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      gr = function(parm) -colSums(cgradcnsfgenexponormlike_cloglog(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      hess = function(parm) -chesscnsfgenexponormlike_cloglog(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
+      print.info = printInfo, maxiter = itermax, epsa = gradtol,
+      epsb = gradtol), nlminb = nlminb(start = startVal,
+      objective = function(parm) -sum(ccnsfgenexponormlike_cloglog(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      gradient = function(parm) -colSums(cgradcnsfgenexponormlike_cloglog(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      hessian = function(parm) -chesscnsfgenexponormlike_cloglog(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
+      control = list(iter.max = itermax, trace = printInfo,
+        eval.max = itermax, rel.tol = tol, x.tol = tol)))
+  if (method %in% c("ucminf", "nlminb")) {
+    mleObj$gradient <- colSums(cgradcnsfgenexponormlike_cloglog(mleObj$par,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar))
+  }
+  mlParam <- if (method %in% c("ucminf", "nlminb")) {
+    mleObj$par
+  } else {
+    if (method == "maxLikAlgo") {
+      mleObj$estimate
+    } else {
+      if (method %in% c("sr1", "sparse")) {
+        names(mleObj$solution) <- names(startVal)
+        mleObj$solution
+      } else {
+        if (method == "mla") {
+          mleObj$b
+        }
+      }
+    }
+  }
+  if (hessianType != 2) {
+    if (method %in% c("ucminf", "nlminb"))
+      mleObj$hessian <- chesscnsfgenexponormlike_cloglog(parm = mleObj$par,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
+    if (method == "sr1")
+      mleObj$hessian <- chesscnsfgenexponormlike_cloglog(parm = mleObj$solution,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
+  }
+  mleObj$logL_OBS <- ccnsfgenexponormlike_cloglog(parm = mlParam,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
+  mleObj$gradL_OBS <- cgradcnsfgenexponormlike_cloglog(parm = mlParam,
     nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
     uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
     S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
@@ -1059,7 +3806,9 @@ cnsfgenexponormAlgOpt <- function(start, olsParam, dataTable,
 }
 
 # different sigma_u
-mcesfgenexponormAlgOpt <- function(start, olsParam, dataTable,
+
+## logit specification class membership
+mcesfgenexponormAlgOpt_logit <- function(start, olsParam, dataTable,
   S, wHvar, nXvar, uHvar, nuZUvar, vHvar, nvZVvar, Zvar, nZHvar,
   Yvar, Xvar, method, printInfo, itermax, stepmax, tol, gradtol,
   hessianType, qac) {
@@ -1071,10 +3820,10 @@ mcesfgenexponormAlgOpt <- function(start, olsParam, dataTable,
     printInfo = printInfo, tol = tol)
   initGenExpo <- start_st$initGenExpo
   startVal <- start_st$StartVal
-  startLoglik <- sum(cmcesfgenexponormlike(startVal, nXvar = nXvar,
-    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
-    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar,
-    Zvar = Zvar, nZHvar = nZHvar))
+  startLoglik <- sum(cmcesfgenexponormlike_logit(startVal,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar))
   if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
     maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
       bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
@@ -1082,46 +3831,46 @@ mcesfgenexponormAlgOpt <- function(start, olsParam, dataTable,
       sann = function(...) maxSANN(...))
     method <- "maxLikAlgo"
   }
-  cat("CNSF Estimation...\n")
+  cat("MCESF Estimation...\n")
   mleObj <- switch(method, ucminf = ucminf(par = startVal,
-    fn = function(parm) -sum(cmcesfgenexponormlike(parm,
+    fn = function(parm) -sum(cmcesfgenexponormlike_logit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
-    gr = function(parm) -colSums(cgradmcesfgenexponormlike(parm,
+    gr = function(parm) -colSums(cgradmcesfgenexponormlike_logit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
     hessian = 0, control = list(trace = printInfo, maxeval = itermax,
       stepmax = stepmax, xtol = tol, grtol = gradtol)),
-    maxLikAlgo = maxRoutine(fn = cmcesfgenexponormlike, grad = cgradmcesfgenexponormlike,
-      hess = chessmcesfgenexponormlike, start = startVal,
-      finalHessian = if (hessianType == 2) "bhhh" else TRUE,
-      control = list(printLevel = if (printInfo) 2 else 0,
+    maxLikAlgo = maxRoutine(fn = cmcesfgenexponormlike_logit,
+      grad = cgradmcesfgenexponormlike_logit, hess = chessmcesfgenexponormlike_logit,
+      start = startVal, finalHessian = if (hessianType ==
+        2) "bhhh" else TRUE, control = list(printLevel = if (printInfo) 2 else 0,
         iterlim = itermax, reltol = tol, tol = tol, qac = qac),
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
-    sr1 = trust.optim(x = startVal, fn = function(parm) -sum(cmcesfgenexponormlike(parm,
+    sr1 = trust.optim(x = startVal, fn = function(parm) -sum(cmcesfgenexponormlike_logit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
-      gr = function(parm) -colSums(cgradmcesfgenexponormlike(parm,
+      gr = function(parm) -colSums(cgradmcesfgenexponormlike_logit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
       method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
         stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 4L else 0,
         report.precision = 1L)), sparse = trust.optim(x = startVal,
-      fn = function(parm) -sum(cmcesfgenexponormlike(parm,
+      fn = function(parm) -sum(cmcesfgenexponormlike_logit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
-      gr = function(parm) -colSums(cgradmcesfgenexponormlike(parm,
+      gr = function(parm) -colSums(cgradmcesfgenexponormlike_logit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
-      hs = function(parm) as(-chessmcesfgenexponormlike(parm,
+      hs = function(parm) as(-chessmcesfgenexponormlike_logit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
@@ -1129,36 +3878,36 @@ mcesfgenexponormAlgOpt <- function(start, olsParam, dataTable,
         cgtol = gradtol, stop.trust.radius = tol, prec = tol,
         report.level = if (printInfo) 4L else 0, report.precision = 1L,
         preconditioner = 1L)), mla = mla(b = startVal,
-      fn = function(parm) -sum(cmcesfgenexponormlike(parm,
+      fn = function(parm) -sum(cmcesfgenexponormlike_logit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
-      gr = function(parm) -colSums(cgradmcesfgenexponormlike(parm,
+      gr = function(parm) -colSums(cgradmcesfgenexponormlike_logit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
-      hess = function(parm) -chessmcesfgenexponormlike(parm,
+      hess = function(parm) -chessmcesfgenexponormlike_logit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
       print.info = printInfo, maxiter = itermax, epsa = gradtol,
       epsb = gradtol), nlminb = nlminb(start = startVal,
-      objective = function(parm) -sum(cmcesfgenexponormlike(parm,
+      objective = function(parm) -sum(cmcesfgenexponormlike_logit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
-      gradient = function(parm) -colSums(cgradmcesfgenexponormlike(parm,
+      gradient = function(parm) -colSums(cgradmcesfgenexponormlike_logit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
-      hessian = function(parm) -chessmcesfgenexponormlike(parm,
+      hessian = function(parm) -chessmcesfgenexponormlike_logit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
       control = list(iter.max = itermax, trace = printInfo,
         eval.max = itermax, rel.tol = tol, x.tol = tol)))
   if (method %in% c("ucminf", "nlminb")) {
-    mleObj$gradient <- colSums(cgradmcesfgenexponormlike(mleObj$par,
+    mleObj$gradient <- colSums(cgradmcesfgenexponormlike_logit(mleObj$par,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar))
@@ -1181,21 +3930,456 @@ mcesfgenexponormAlgOpt <- function(start, olsParam, dataTable,
   }
   if (hessianType != 2) {
     if (method %in% c("ucminf", "nlminb"))
-      mleObj$hessian <- chessmcesfgenexponormlike(parm = mleObj$par,
+      mleObj$hessian <- chessmcesfgenexponormlike_logit(parm = mleObj$par,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
     if (method == "sr1")
-      mleObj$hessian <- chessmcesfgenexponormlike(parm = mleObj$solution,
+      mleObj$hessian <- chessmcesfgenexponormlike_logit(parm = mleObj$solution,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
   }
-  mleObj$logL_OBS <- cmcesfgenexponormlike(parm = mlParam,
+  mleObj$logL_OBS <- cmcesfgenexponormlike_logit(parm = mlParam,
     nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
     uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
     S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
-  mleObj$gradL_OBS <- cgradmcesfgenexponormlike(parm = mlParam,
+  mleObj$gradL_OBS <- cgradmcesfgenexponormlike_logit(parm = mlParam,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
+  return(list(startVal = startVal, startLoglik = startLoglik,
+    mleObj = mleObj, mlParam = mlParam, initGenExpo = initGenExpo))
+}
+
+## cauchit specification class membership
+mcesfgenexponormAlgOpt_cauchit <- function(start, olsParam, dataTable,
+  S, wHvar, nXvar, uHvar, nuZUvar, vHvar, nvZVvar, Zvar, nZHvar,
+  Yvar, Xvar, method, printInfo, itermax, stepmax, tol, gradtol,
+  hessianType, qac) {
+  start_st <- if (!is.null(start))
+    start else cstmcesfgenexponorm(olsObj = olsParam, epsiRes = dataTable[["olsResiduals"]],
+    S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar, uHvar = uHvar,
+    nuZUvar = nuZUvar, vHvar = vHvar, nvZVvar = nvZVvar,
+    nXvar = nXvar, Xvar = Xvar, Yvar = Yvar, itermax = itermax,
+    printInfo = printInfo, tol = tol)
+  initGenExpo <- start_st$initGenExpo
+  startVal <- start_st$StartVal
+  startLoglik <- sum(cmcesfgenexponormlike_cauchit(startVal,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar))
+  if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
+    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
+      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
+      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
+      sann = function(...) maxSANN(...))
+    method <- "maxLikAlgo"
+  }
+  cat("MCESF Estimation...\n")
+  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+    fn = function(parm) -sum(cmcesfgenexponormlike_cauchit(parm,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+    gr = function(parm) -colSums(cgradmcesfgenexponormlike_cauchit(parm,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+    hessian = 0, control = list(trace = printInfo, maxeval = itermax,
+      stepmax = stepmax, xtol = tol, grtol = gradtol)),
+    maxLikAlgo = maxRoutine(fn = cmcesfgenexponormlike_cauchit,
+      grad = cgradmcesfgenexponormlike_cauchit, hess = chessmcesfgenexponormlike_cauchit,
+      start = startVal, finalHessian = if (hessianType ==
+        2) "bhhh" else TRUE, control = list(printLevel = if (printInfo) 2 else 0,
+        iterlim = itermax, reltol = tol, tol = tol, qac = qac),
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
+    sr1 = trust.optim(x = startVal, fn = function(parm) -sum(cmcesfgenexponormlike_cauchit(parm,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      gr = function(parm) -colSums(cgradmcesfgenexponormlike_cauchit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
+        stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 4L else 0,
+        report.precision = 1L)), sparse = trust.optim(x = startVal,
+      fn = function(parm) -sum(cmcesfgenexponormlike_cauchit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      gr = function(parm) -colSums(cgradmcesfgenexponormlike_cauchit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      hs = function(parm) as(-chessmcesfgenexponormlike_cauchit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
+        "dgCMatrix"), method = "Sparse", control = list(maxit = itermax,
+        cgtol = gradtol, stop.trust.radius = tol, prec = tol,
+        report.level = if (printInfo) 4L else 0, report.precision = 1L,
+        preconditioner = 1L)), mla = mla(b = startVal,
+      fn = function(parm) -sum(cmcesfgenexponormlike_cauchit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      gr = function(parm) -colSums(cgradmcesfgenexponormlike_cauchit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      hess = function(parm) -chessmcesfgenexponormlike_cauchit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
+      print.info = printInfo, maxiter = itermax, epsa = gradtol,
+      epsb = gradtol), nlminb = nlminb(start = startVal,
+      objective = function(parm) -sum(cmcesfgenexponormlike_cauchit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      gradient = function(parm) -colSums(cgradmcesfgenexponormlike_cauchit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      hessian = function(parm) -chessmcesfgenexponormlike_cauchit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
+      control = list(iter.max = itermax, trace = printInfo,
+        eval.max = itermax, rel.tol = tol, x.tol = tol)))
+  if (method %in% c("ucminf", "nlminb")) {
+    mleObj$gradient <- colSums(cgradmcesfgenexponormlike_cauchit(mleObj$par,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar))
+  }
+  mlParam <- if (method %in% c("ucminf", "nlminb")) {
+    mleObj$par
+  } else {
+    if (method == "maxLikAlgo") {
+      mleObj$estimate
+    } else {
+      if (method %in% c("sr1", "sparse")) {
+        names(mleObj$solution) <- names(startVal)
+        mleObj$solution
+      } else {
+        if (method == "mla") {
+          mleObj$b
+        }
+      }
+    }
+  }
+  if (hessianType != 2) {
+    if (method %in% c("ucminf", "nlminb"))
+      mleObj$hessian <- chessmcesfgenexponormlike_cauchit(parm = mleObj$par,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
+    if (method == "sr1")
+      mleObj$hessian <- chessmcesfgenexponormlike_cauchit(parm = mleObj$solution,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
+  }
+  mleObj$logL_OBS <- cmcesfgenexponormlike_cauchit(parm = mlParam,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
+  mleObj$gradL_OBS <- cgradmcesfgenexponormlike_cauchit(parm = mlParam,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
+  return(list(startVal = startVal, startLoglik = startLoglik,
+    mleObj = mleObj, mlParam = mlParam, initGenExpo = initGenExpo))
+}
+
+## probit specification class membership
+mcesfgenexponormAlgOpt_probit <- function(start, olsParam, dataTable,
+  S, wHvar, nXvar, uHvar, nuZUvar, vHvar, nvZVvar, Zvar, nZHvar,
+  Yvar, Xvar, method, printInfo, itermax, stepmax, tol, gradtol,
+  hessianType, qac) {
+  start_st <- if (!is.null(start))
+    start else cstmcesfgenexponorm(olsObj = olsParam, epsiRes = dataTable[["olsResiduals"]],
+    S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar, uHvar = uHvar,
+    nuZUvar = nuZUvar, vHvar = vHvar, nvZVvar = nvZVvar,
+    nXvar = nXvar, Xvar = Xvar, Yvar = Yvar, itermax = itermax,
+    printInfo = printInfo, tol = tol)
+  initGenExpo <- start_st$initGenExpo
+  startVal <- start_st$StartVal
+  startLoglik <- sum(cmcesfgenexponormlike_probit(startVal,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar))
+  if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
+    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
+      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
+      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
+      sann = function(...) maxSANN(...))
+    method <- "maxLikAlgo"
+  }
+  cat("MCESF Estimation...\n")
+  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+    fn = function(parm) -sum(cmcesfgenexponormlike_probit(parm,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+    gr = function(parm) -colSums(cgradmcesfgenexponormlike_probit(parm,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+    hessian = 0, control = list(trace = printInfo, maxeval = itermax,
+      stepmax = stepmax, xtol = tol, grtol = gradtol)),
+    maxLikAlgo = maxRoutine(fn = cmcesfgenexponormlike_probit,
+      grad = cgradmcesfgenexponormlike_probit, hess = chessmcesfgenexponormlike_probit,
+      start = startVal, finalHessian = if (hessianType ==
+        2) "bhhh" else TRUE, control = list(printLevel = if (printInfo) 2 else 0,
+        iterlim = itermax, reltol = tol, tol = tol, qac = qac),
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
+    sr1 = trust.optim(x = startVal, fn = function(parm) -sum(cmcesfgenexponormlike_probit(parm,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      gr = function(parm) -colSums(cgradmcesfgenexponormlike_probit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
+        stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 4L else 0,
+        report.precision = 1L)), sparse = trust.optim(x = startVal,
+      fn = function(parm) -sum(cmcesfgenexponormlike_probit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      gr = function(parm) -colSums(cgradmcesfgenexponormlike_probit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      hs = function(parm) as(-chessmcesfgenexponormlike_probit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
+        "dgCMatrix"), method = "Sparse", control = list(maxit = itermax,
+        cgtol = gradtol, stop.trust.radius = tol, prec = tol,
+        report.level = if (printInfo) 4L else 0, report.precision = 1L,
+        preconditioner = 1L)), mla = mla(b = startVal,
+      fn = function(parm) -sum(cmcesfgenexponormlike_probit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      gr = function(parm) -colSums(cgradmcesfgenexponormlike_probit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      hess = function(parm) -chessmcesfgenexponormlike_probit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
+      print.info = printInfo, maxiter = itermax, epsa = gradtol,
+      epsb = gradtol), nlminb = nlminb(start = startVal,
+      objective = function(parm) -sum(cmcesfgenexponormlike_probit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      gradient = function(parm) -colSums(cgradmcesfgenexponormlike_probit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      hessian = function(parm) -chessmcesfgenexponormlike_probit(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
+      control = list(iter.max = itermax, trace = printInfo,
+        eval.max = itermax, rel.tol = tol, x.tol = tol)))
+  if (method %in% c("ucminf", "nlminb")) {
+    mleObj$gradient <- colSums(cgradmcesfgenexponormlike_probit(mleObj$par,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar))
+  }
+  mlParam <- if (method %in% c("ucminf", "nlminb")) {
+    mleObj$par
+  } else {
+    if (method == "maxLikAlgo") {
+      mleObj$estimate
+    } else {
+      if (method %in% c("sr1", "sparse")) {
+        names(mleObj$solution) <- names(startVal)
+        mleObj$solution
+      } else {
+        if (method == "mla") {
+          mleObj$b
+        }
+      }
+    }
+  }
+  if (hessianType != 2) {
+    if (method %in% c("ucminf", "nlminb"))
+      mleObj$hessian <- chessmcesfgenexponormlike_probit(parm = mleObj$par,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
+    if (method == "sr1")
+      mleObj$hessian <- chessmcesfgenexponormlike_probit(parm = mleObj$solution,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
+  }
+  mleObj$logL_OBS <- cmcesfgenexponormlike_probit(parm = mlParam,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
+  mleObj$gradL_OBS <- cgradmcesfgenexponormlike_probit(parm = mlParam,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
+  return(list(startVal = startVal, startLoglik = startLoglik,
+    mleObj = mleObj, mlParam = mlParam, initGenExpo = initGenExpo))
+}
+
+## cloglog specification class membership
+mcesfgenexponormAlgOpt_cloglog <- function(start, olsParam, dataTable,
+  S, wHvar, nXvar, uHvar, nuZUvar, vHvar, nvZVvar, Zvar, nZHvar,
+  Yvar, Xvar, method, printInfo, itermax, stepmax, tol, gradtol,
+  hessianType, qac) {
+  start_st <- if (!is.null(start))
+    start else cstmcesfgenexponorm(olsObj = olsParam, epsiRes = dataTable[["olsResiduals"]],
+    S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar, uHvar = uHvar,
+    nuZUvar = nuZUvar, vHvar = vHvar, nvZVvar = nvZVvar,
+    nXvar = nXvar, Xvar = Xvar, Yvar = Yvar, itermax = itermax,
+    printInfo = printInfo, tol = tol)
+  initGenExpo <- start_st$initGenExpo
+  startVal <- start_st$StartVal
+  startLoglik <- sum(cmcesfgenexponormlike_cloglog(startVal,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar))
+  if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
+    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
+      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
+      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
+      sann = function(...) maxSANN(...))
+    method <- "maxLikAlgo"
+  }
+  cat("MCESF Estimation...\n")
+  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+    fn = function(parm) -sum(cmcesfgenexponormlike_cloglog(parm,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+    gr = function(parm) -colSums(cgradmcesfgenexponormlike_cloglog(parm,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+    hessian = 0, control = list(trace = printInfo, maxeval = itermax,
+      stepmax = stepmax, xtol = tol, grtol = gradtol)),
+    maxLikAlgo = maxRoutine(fn = cmcesfgenexponormlike_cloglog,
+      grad = cgradmcesfgenexponormlike_cloglog, hess = chessmcesfgenexponormlike_cloglog,
+      start = startVal, finalHessian = if (hessianType ==
+        2) "bhhh" else TRUE, control = list(printLevel = if (printInfo) 2 else 0,
+        iterlim = itermax, reltol = tol, tol = tol, qac = qac),
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
+    sr1 = trust.optim(x = startVal, fn = function(parm) -sum(cmcesfgenexponormlike_cloglog(parm,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      gr = function(parm) -colSums(cgradmcesfgenexponormlike_cloglog(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
+        stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 4L else 0,
+        report.precision = 1L)), sparse = trust.optim(x = startVal,
+      fn = function(parm) -sum(cmcesfgenexponormlike_cloglog(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      gr = function(parm) -colSums(cgradmcesfgenexponormlike_cloglog(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      hs = function(parm) as(-chessmcesfgenexponormlike_cloglog(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
+        "dgCMatrix"), method = "Sparse", control = list(maxit = itermax,
+        cgtol = gradtol, stop.trust.radius = tol, prec = tol,
+        report.level = if (printInfo) 4L else 0, report.precision = 1L,
+        preconditioner = 1L)), mla = mla(b = startVal,
+      fn = function(parm) -sum(cmcesfgenexponormlike_cloglog(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      gr = function(parm) -colSums(cgradmcesfgenexponormlike_cloglog(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      hess = function(parm) -chessmcesfgenexponormlike_cloglog(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
+      print.info = printInfo, maxiter = itermax, epsa = gradtol,
+      epsb = gradtol), nlminb = nlminb(start = startVal,
+      objective = function(parm) -sum(cmcesfgenexponormlike_cloglog(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      gradient = function(parm) -colSums(cgradmcesfgenexponormlike_cloglog(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
+      hessian = function(parm) -chessmcesfgenexponormlike_cloglog(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
+      control = list(iter.max = itermax, trace = printInfo,
+        eval.max = itermax, rel.tol = tol, x.tol = tol)))
+  if (method %in% c("ucminf", "nlminb")) {
+    mleObj$gradient <- colSums(cgradmcesfgenexponormlike_cloglog(mleObj$par,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar))
+  }
+  mlParam <- if (method %in% c("ucminf", "nlminb")) {
+    mleObj$par
+  } else {
+    if (method == "maxLikAlgo") {
+      mleObj$estimate
+    } else {
+      if (method %in% c("sr1", "sparse")) {
+        names(mleObj$solution) <- names(startVal)
+        mleObj$solution
+      } else {
+        if (method == "mla") {
+          mleObj$b
+        }
+      }
+    }
+  }
+  if (hessianType != 2) {
+    if (method %in% c("ucminf", "nlminb"))
+      mleObj$hessian <- chessmcesfgenexponormlike_cloglog(parm = mleObj$par,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
+    if (method == "sr1")
+      mleObj$hessian <- chessmcesfgenexponormlike_cloglog(parm = mleObj$solution,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
+  }
+  mleObj$logL_OBS <- cmcesfgenexponormlike_cloglog(parm = mlParam,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
+  mleObj$gradL_OBS <- cgradmcesfgenexponormlike_cloglog(parm = mlParam,
     nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
     uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
     S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)
@@ -1209,7 +4393,9 @@ mcesfgenexponormAlgOpt <- function(start, olsParam, dataTable,
 #' @param level level for confidence interval
 #' @noRd
 # same sigma_u
-ccnsfgenexponormeff <- function(object, level) {
+
+## logit specification class membership
+ccnsfgenexponormeff_logit <- function(object, level) {
   beta <- object$mlParam[1:(object$nXvar)]
   delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
@@ -1306,8 +4492,304 @@ ccnsfgenexponormeff <- function(object, level) {
   return(res)
 }
 
+## cauchit specification class membership
+ccnsfgenexponormeff_cauchit <- function(object, level) {
+  beta <- object$mlParam[1:(object$nXvar)]
+  delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+    object$nuZUvar)]
+  phi1 <- object$mlParam[(object$nXvar + object$nuZUvar + 1):(object$nXvar +
+    object$nuZUvar + object$nvZVvar)]
+  phi2 <- object$mlParam[(object$nXvar + object$nuZUvar + object$nvZVvar +
+    1):(object$nXvar + object$nuZUvar + 2 * object$nvZVvar)]
+  theta <- object$mlParam[(object$nXvar + object$nuZUvar +
+    2 * object$nvZVvar + 1):(object$nXvar + object$nuZUvar +
+    2 * object$nvZVvar + object$nZHvar)]
+  Xvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 1)
+  uHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 2)
+  vHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 3)
+  Zvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 4)
+  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
+    as.numeric(crossprod(matrix(beta), t(Xvar)))
+  A1 <- object$S * epsilon/exp(Wu/2) + exp(Wv1)/(2 * exp(Wu))
+  B1 <- 2 * object$S * epsilon/exp(Wu/2) + 2 * exp(Wv1)/exp(Wu)
+  a1 <- -object$S * epsilon/exp(Wv1/2) - exp(Wv1/2)/exp(Wu/2)
+  b1 <- -object$S * epsilon/exp(Wv1/2) - 2 * exp(Wv1/2)/exp(Wu/2)
+  A2 <- object$S * epsilon/exp(Wu/2) + exp(Wv2)/(2 * exp(Wu))
+  B2 <- 2 * object$S * epsilon/exp(Wu/2) + 2 * exp(Wv2)/exp(Wu)
+  a2 <- -object$S * epsilon/exp(Wv2/2) - exp(Wv2/2)/exp(Wu/2)
+  b2 <- -object$S * epsilon/exp(Wv2/2) - 2 * exp(Wv2/2)/exp(Wu/2)
+  Pi1 <- 2/exp(Wu/2) * (exp(A1) * pnorm(a1) - exp(B1) * pnorm(b1))
+  Pi2 <- 2/exp(Wu/2) * (exp(A2) * pnorm(a2) - exp(B2) * pnorm(b2))
+  Probc1 <- 1/pi * atan(Wz) + 1/2
+  Probc2 <- 1 - Probc1
+  Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
+  Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
+  Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
+  P_cond_c <- ifelse(Group_c == 1, Pcond_c1, Pcond_c2)
+  u_c1 <- exp(Wv1/2) * (exp(A1) * (dnorm(a1) + a1 * pnorm(a1)) -
+    exp(B1) * (dnorm(b1) + b1 * pnorm(b1)))/(exp(A1) * pnorm(a1) -
+    exp(B1) * pnorm(b1))
+  u_c2 <- exp(Wv2/2) * (exp(A2) * (dnorm(a2) + a2 * pnorm(a2)) -
+    exp(B2) * (dnorm(b2) + b2 * pnorm(b2)))/(exp(A2) * pnorm(a2) -
+    exp(B2) * pnorm(b2))
+  u_c <- ifelse(Group_c == 1, u_c1, u_c2)
+  ineff_c1 <- ifelse(Group_c == 1, u_c1, NA)
+  ineff_c2 <- ifelse(Group_c == 2, u_c2, NA)
+  if (object$logDepVar == TRUE) {
+    teJLMS_c1 <- exp(-u_c1)
+    teJLMS_c2 <- exp(-u_c2)
+    teJLMS_c <- ifelse(Group_c == 1, teJLMS_c1, teJLMS_c2)
+    teBC_c1 <- (exp(A1) * exp(-a1 * exp(Wv1/2) + exp(Wv1)/2) *
+      pnorm(a1 - exp(Wv1/2)) - exp(B1) * exp(-b1 * exp(Wv1/2) +
+      exp(Wv1)/2) * pnorm(b1 - exp(Wv1/2)))/(exp(A1) *
+      pnorm(a1) - exp(B1) * pnorm(b1))
+    teBC_c2 <- (exp(A2) * exp(-a2 * exp(Wv2/2) + exp(Wv2)/2) *
+      pnorm(a2 - exp(Wv2/2)) - exp(B2) * exp(-b2 * exp(Wv2/2) +
+      exp(Wv2)/2) * pnorm(b2 - exp(Wv2/2)))/(exp(A2) *
+      pnorm(a2) - exp(B2) * pnorm(b2))
+    teBC_c <- ifelse(Group_c == 1, teBC_c1, teBC_c2)
+    effBC_c1 <- ifelse(Group_c == 1, teBC_c1, NA)
+    effBC_c2 <- ifelse(Group_c == 2, teBC_c2, NA)
+    teBC_reciprocal_c1 <- (exp(A1) * exp(a1 * exp(Wv1/2) +
+      exp(Wv1)/2) * pnorm(a1 + exp(Wv1/2)) - exp(B1) *
+      exp(b1 * exp(Wv1/2) + exp(Wv1)/2) * pnorm(b1 + exp(Wv1/2)))/(exp(A1) *
+      pnorm(a1) - exp(B1) * pnorm(b1))
+    teBC_reciprocal_c2 <- (exp(A2) * exp(a2 * exp(Wv2/2) +
+      exp(Wv2)/2) * pnorm(a2 + exp(Wv2/2)) - exp(B2) *
+      exp(b2 * exp(Wv2/2) + exp(Wv2)/2) * pnorm(b2 + exp(Wv2/2)))/(exp(A2) *
+      pnorm(a2) - exp(B2) * pnorm(b2))
+    teBC_reciprocal_c <- ifelse(Group_c == 1, teBC_reciprocal_c1,
+      teBC_reciprocal_c2)
+    ReffBC_c1 <- ifelse(Group_c == 1, teBC_reciprocal_c1,
+      NA)
+    ReffBC_c2 <- ifelse(Group_c == 2, teBC_reciprocal_c2,
+      NA)
+    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+      u_c = u_c, teJLMS_c = teJLMS_c, teBC_c = teBC_c,
+      teBC_reciprocal_c = teBC_reciprocal_c, PosteriorProb_c1 = Pcond_c1,
+      PriorProb_c1 = Probc1, u_c1 = u_c1, teBC_c1 = teBC_c1,
+      teBC_reciprocal_c1 = teBC_reciprocal_c1, PosteriorProb_c2 = Pcond_c2,
+      PriorProb_c2 = Probc2, u_c2 = u_c2, teBC_c2 = teBC_c2,
+      teBC_reciprocal_c2 = teBC_reciprocal_c2, ineff_c1 = ineff_c1,
+      ineff_c2 = ineff_c2, effBC_c1 = effBC_c1, effBC_c2 = effBC_c2,
+      ReffBC_c1 = ReffBC_c1, ReffBC_c2 = ReffBC_c2)
+  } else {
+    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+      u_c = u_c, PosteriorProb_c1 = Pcond_c1, PriorProb_c1 = Probc1,
+      u_c1 = u_c1, PosteriorProb_c2 = Pcond_c2, PriorProb_c2 = Probc2,
+      u_c2 = u_c2, ineff_c1 = ineff_c1, ineff_c2 = ineff_c2)
+  }
+  return(res)
+}
+
+## probit specification class membership
+ccnsfgenexponormeff_probit <- function(object, level) {
+  beta <- object$mlParam[1:(object$nXvar)]
+  delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+    object$nuZUvar)]
+  phi1 <- object$mlParam[(object$nXvar + object$nuZUvar + 1):(object$nXvar +
+    object$nuZUvar + object$nvZVvar)]
+  phi2 <- object$mlParam[(object$nXvar + object$nuZUvar + object$nvZVvar +
+    1):(object$nXvar + object$nuZUvar + 2 * object$nvZVvar)]
+  theta <- object$mlParam[(object$nXvar + object$nuZUvar +
+    2 * object$nvZVvar + 1):(object$nXvar + object$nuZUvar +
+    2 * object$nvZVvar + object$nZHvar)]
+  Xvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 1)
+  uHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 2)
+  vHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 3)
+  Zvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 4)
+  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
+    as.numeric(crossprod(matrix(beta), t(Xvar)))
+  A1 <- object$S * epsilon/exp(Wu/2) + exp(Wv1)/(2 * exp(Wu))
+  B1 <- 2 * object$S * epsilon/exp(Wu/2) + 2 * exp(Wv1)/exp(Wu)
+  a1 <- -object$S * epsilon/exp(Wv1/2) - exp(Wv1/2)/exp(Wu/2)
+  b1 <- -object$S * epsilon/exp(Wv1/2) - 2 * exp(Wv1/2)/exp(Wu/2)
+  A2 <- object$S * epsilon/exp(Wu/2) + exp(Wv2)/(2 * exp(Wu))
+  B2 <- 2 * object$S * epsilon/exp(Wu/2) + 2 * exp(Wv2)/exp(Wu)
+  a2 <- -object$S * epsilon/exp(Wv2/2) - exp(Wv2/2)/exp(Wu/2)
+  b2 <- -object$S * epsilon/exp(Wv2/2) - 2 * exp(Wv2/2)/exp(Wu/2)
+  Pi1 <- 2/exp(Wu/2) * (exp(A1) * pnorm(a1) - exp(B1) * pnorm(b1))
+  Pi2 <- 2/exp(Wu/2) * (exp(A2) * pnorm(a2) - exp(B2) * pnorm(b2))
+  Probc1 <- pnorm(Wz)
+  Probc2 <- 1 - Probc1
+  Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
+  Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
+  Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
+  P_cond_c <- ifelse(Group_c == 1, Pcond_c1, Pcond_c2)
+  u_c1 <- exp(Wv1/2) * (exp(A1) * (dnorm(a1) + a1 * pnorm(a1)) -
+    exp(B1) * (dnorm(b1) + b1 * pnorm(b1)))/(exp(A1) * pnorm(a1) -
+    exp(B1) * pnorm(b1))
+  u_c2 <- exp(Wv2/2) * (exp(A2) * (dnorm(a2) + a2 * pnorm(a2)) -
+    exp(B2) * (dnorm(b2) + b2 * pnorm(b2)))/(exp(A2) * pnorm(a2) -
+    exp(B2) * pnorm(b2))
+  u_c <- ifelse(Group_c == 1, u_c1, u_c2)
+  ineff_c1 <- ifelse(Group_c == 1, u_c1, NA)
+  ineff_c2 <- ifelse(Group_c == 2, u_c2, NA)
+  if (object$logDepVar == TRUE) {
+    teJLMS_c1 <- exp(-u_c1)
+    teJLMS_c2 <- exp(-u_c2)
+    teJLMS_c <- ifelse(Group_c == 1, teJLMS_c1, teJLMS_c2)
+    teBC_c1 <- (exp(A1) * exp(-a1 * exp(Wv1/2) + exp(Wv1)/2) *
+      pnorm(a1 - exp(Wv1/2)) - exp(B1) * exp(-b1 * exp(Wv1/2) +
+      exp(Wv1)/2) * pnorm(b1 - exp(Wv1/2)))/(exp(A1) *
+      pnorm(a1) - exp(B1) * pnorm(b1))
+    teBC_c2 <- (exp(A2) * exp(-a2 * exp(Wv2/2) + exp(Wv2)/2) *
+      pnorm(a2 - exp(Wv2/2)) - exp(B2) * exp(-b2 * exp(Wv2/2) +
+      exp(Wv2)/2) * pnorm(b2 - exp(Wv2/2)))/(exp(A2) *
+      pnorm(a2) - exp(B2) * pnorm(b2))
+    teBC_c <- ifelse(Group_c == 1, teBC_c1, teBC_c2)
+    effBC_c1 <- ifelse(Group_c == 1, teBC_c1, NA)
+    effBC_c2 <- ifelse(Group_c == 2, teBC_c2, NA)
+    teBC_reciprocal_c1 <- (exp(A1) * exp(a1 * exp(Wv1/2) +
+      exp(Wv1)/2) * pnorm(a1 + exp(Wv1/2)) - exp(B1) *
+      exp(b1 * exp(Wv1/2) + exp(Wv1)/2) * pnorm(b1 + exp(Wv1/2)))/(exp(A1) *
+      pnorm(a1) - exp(B1) * pnorm(b1))
+    teBC_reciprocal_c2 <- (exp(A2) * exp(a2 * exp(Wv2/2) +
+      exp(Wv2)/2) * pnorm(a2 + exp(Wv2/2)) - exp(B2) *
+      exp(b2 * exp(Wv2/2) + exp(Wv2)/2) * pnorm(b2 + exp(Wv2/2)))/(exp(A2) *
+      pnorm(a2) - exp(B2) * pnorm(b2))
+    teBC_reciprocal_c <- ifelse(Group_c == 1, teBC_reciprocal_c1,
+      teBC_reciprocal_c2)
+    ReffBC_c1 <- ifelse(Group_c == 1, teBC_reciprocal_c1,
+      NA)
+    ReffBC_c2 <- ifelse(Group_c == 2, teBC_reciprocal_c2,
+      NA)
+    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+      u_c = u_c, teJLMS_c = teJLMS_c, teBC_c = teBC_c,
+      teBC_reciprocal_c = teBC_reciprocal_c, PosteriorProb_c1 = Pcond_c1,
+      PriorProb_c1 = Probc1, u_c1 = u_c1, teBC_c1 = teBC_c1,
+      teBC_reciprocal_c1 = teBC_reciprocal_c1, PosteriorProb_c2 = Pcond_c2,
+      PriorProb_c2 = Probc2, u_c2 = u_c2, teBC_c2 = teBC_c2,
+      teBC_reciprocal_c2 = teBC_reciprocal_c2, ineff_c1 = ineff_c1,
+      ineff_c2 = ineff_c2, effBC_c1 = effBC_c1, effBC_c2 = effBC_c2,
+      ReffBC_c1 = ReffBC_c1, ReffBC_c2 = ReffBC_c2)
+  } else {
+    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+      u_c = u_c, PosteriorProb_c1 = Pcond_c1, PriorProb_c1 = Probc1,
+      u_c1 = u_c1, PosteriorProb_c2 = Pcond_c2, PriorProb_c2 = Probc2,
+      u_c2 = u_c2, ineff_c1 = ineff_c1, ineff_c2 = ineff_c2)
+  }
+  return(res)
+}
+
+## cloglog specification class membership
+ccnsfgenexponormeff_cloglog <- function(object, level) {
+  beta <- object$mlParam[1:(object$nXvar)]
+  delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+    object$nuZUvar)]
+  phi1 <- object$mlParam[(object$nXvar + object$nuZUvar + 1):(object$nXvar +
+    object$nuZUvar + object$nvZVvar)]
+  phi2 <- object$mlParam[(object$nXvar + object$nuZUvar + object$nvZVvar +
+    1):(object$nXvar + object$nuZUvar + 2 * object$nvZVvar)]
+  theta <- object$mlParam[(object$nXvar + object$nuZUvar +
+    2 * object$nvZVvar + 1):(object$nXvar + object$nuZUvar +
+    2 * object$nvZVvar + object$nZHvar)]
+  Xvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 1)
+  uHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 2)
+  vHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 3)
+  Zvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 4)
+  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
+    as.numeric(crossprod(matrix(beta), t(Xvar)))
+  A1 <- object$S * epsilon/exp(Wu/2) + exp(Wv1)/(2 * exp(Wu))
+  B1 <- 2 * object$S * epsilon/exp(Wu/2) + 2 * exp(Wv1)/exp(Wu)
+  a1 <- -object$S * epsilon/exp(Wv1/2) - exp(Wv1/2)/exp(Wu/2)
+  b1 <- -object$S * epsilon/exp(Wv1/2) - 2 * exp(Wv1/2)/exp(Wu/2)
+  A2 <- object$S * epsilon/exp(Wu/2) + exp(Wv2)/(2 * exp(Wu))
+  B2 <- 2 * object$S * epsilon/exp(Wu/2) + 2 * exp(Wv2)/exp(Wu)
+  a2 <- -object$S * epsilon/exp(Wv2/2) - exp(Wv2/2)/exp(Wu/2)
+  b2 <- -object$S * epsilon/exp(Wv2/2) - 2 * exp(Wv2/2)/exp(Wu/2)
+  Pi1 <- 2/exp(Wu/2) * (exp(A1) * pnorm(a1) - exp(B1) * pnorm(b1))
+  Pi2 <- 2/exp(Wu/2) * (exp(A2) * pnorm(a2) - exp(B2) * pnorm(b2))
+  Probc1 <- 1 - exp(-exp(Wz))
+  Probc2 <- 1 - Probc1
+  Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
+  Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
+  Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
+  P_cond_c <- ifelse(Group_c == 1, Pcond_c1, Pcond_c2)
+  u_c1 <- exp(Wv1/2) * (exp(A1) * (dnorm(a1) + a1 * pnorm(a1)) -
+    exp(B1) * (dnorm(b1) + b1 * pnorm(b1)))/(exp(A1) * pnorm(a1) -
+    exp(B1) * pnorm(b1))
+  u_c2 <- exp(Wv2/2) * (exp(A2) * (dnorm(a2) + a2 * pnorm(a2)) -
+    exp(B2) * (dnorm(b2) + b2 * pnorm(b2)))/(exp(A2) * pnorm(a2) -
+    exp(B2) * pnorm(b2))
+  u_c <- ifelse(Group_c == 1, u_c1, u_c2)
+  ineff_c1 <- ifelse(Group_c == 1, u_c1, NA)
+  ineff_c2 <- ifelse(Group_c == 2, u_c2, NA)
+  if (object$logDepVar == TRUE) {
+    teJLMS_c1 <- exp(-u_c1)
+    teJLMS_c2 <- exp(-u_c2)
+    teJLMS_c <- ifelse(Group_c == 1, teJLMS_c1, teJLMS_c2)
+    teBC_c1 <- (exp(A1) * exp(-a1 * exp(Wv1/2) + exp(Wv1)/2) *
+      pnorm(a1 - exp(Wv1/2)) - exp(B1) * exp(-b1 * exp(Wv1/2) +
+      exp(Wv1)/2) * pnorm(b1 - exp(Wv1/2)))/(exp(A1) *
+      pnorm(a1) - exp(B1) * pnorm(b1))
+    teBC_c2 <- (exp(A2) * exp(-a2 * exp(Wv2/2) + exp(Wv2)/2) *
+      pnorm(a2 - exp(Wv2/2)) - exp(B2) * exp(-b2 * exp(Wv2/2) +
+      exp(Wv2)/2) * pnorm(b2 - exp(Wv2/2)))/(exp(A2) *
+      pnorm(a2) - exp(B2) * pnorm(b2))
+    teBC_c <- ifelse(Group_c == 1, teBC_c1, teBC_c2)
+    effBC_c1 <- ifelse(Group_c == 1, teBC_c1, NA)
+    effBC_c2 <- ifelse(Group_c == 2, teBC_c2, NA)
+    teBC_reciprocal_c1 <- (exp(A1) * exp(a1 * exp(Wv1/2) +
+      exp(Wv1)/2) * pnorm(a1 + exp(Wv1/2)) - exp(B1) *
+      exp(b1 * exp(Wv1/2) + exp(Wv1)/2) * pnorm(b1 + exp(Wv1/2)))/(exp(A1) *
+      pnorm(a1) - exp(B1) * pnorm(b1))
+    teBC_reciprocal_c2 <- (exp(A2) * exp(a2 * exp(Wv2/2) +
+      exp(Wv2)/2) * pnorm(a2 + exp(Wv2/2)) - exp(B2) *
+      exp(b2 * exp(Wv2/2) + exp(Wv2)/2) * pnorm(b2 + exp(Wv2/2)))/(exp(A2) *
+      pnorm(a2) - exp(B2) * pnorm(b2))
+    teBC_reciprocal_c <- ifelse(Group_c == 1, teBC_reciprocal_c1,
+      teBC_reciprocal_c2)
+    ReffBC_c1 <- ifelse(Group_c == 1, teBC_reciprocal_c1,
+      NA)
+    ReffBC_c2 <- ifelse(Group_c == 2, teBC_reciprocal_c2,
+      NA)
+    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+      u_c = u_c, teJLMS_c = teJLMS_c, teBC_c = teBC_c,
+      teBC_reciprocal_c = teBC_reciprocal_c, PosteriorProb_c1 = Pcond_c1,
+      PriorProb_c1 = Probc1, u_c1 = u_c1, teBC_c1 = teBC_c1,
+      teBC_reciprocal_c1 = teBC_reciprocal_c1, PosteriorProb_c2 = Pcond_c2,
+      PriorProb_c2 = Probc2, u_c2 = u_c2, teBC_c2 = teBC_c2,
+      teBC_reciprocal_c2 = teBC_reciprocal_c2, ineff_c1 = ineff_c1,
+      ineff_c2 = ineff_c2, effBC_c1 = effBC_c1, effBC_c2 = effBC_c2,
+      ReffBC_c1 = ReffBC_c1, ReffBC_c2 = ReffBC_c2)
+  } else {
+    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+      u_c = u_c, PosteriorProb_c1 = Pcond_c1, PriorProb_c1 = Probc1,
+      u_c1 = u_c1, PosteriorProb_c2 = Pcond_c2, PriorProb_c2 = Probc2,
+      u_c2 = u_c2, ineff_c1 = ineff_c1, ineff_c2 = ineff_c2)
+  }
+  return(res)
+}
+
 # different sigma_u
-cmcesfgenexponormeff <- function(object, level) {
+
+## logit specification class membership
+cmcesfgenexponormeff_logit <- function(object, level) {
   beta <- object$mlParam[1:(object$nXvar)]
   delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
@@ -1347,6 +4829,312 @@ cmcesfgenexponormeff <- function(object, level) {
   Pi1 <- 2/exp(Wu1/2) * (exp(A1) * pnorm(a1) - exp(B1) * pnorm(b1))
   Pi2 <- 2/exp(Wu2/2) * (exp(A2) * pnorm(a2) - exp(B2) * pnorm(b2))
   Probc1 <- exp(Wz)/(1 + exp(Wz))
+  Probc2 <- 1 - Probc1
+  Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
+  Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
+  Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
+  P_cond_c <- ifelse(Group_c == 1, Pcond_c1, Pcond_c2)
+  u_c1 <- exp(Wv1/2) * (exp(A1) * (dnorm(a1) + a1 * pnorm(a1)) -
+    exp(B1) * (dnorm(b1) + b1 * pnorm(b1)))/(exp(A1) * pnorm(a1) -
+    exp(B1) * pnorm(b1))
+  u_c2 <- exp(Wv2/2) * (exp(A2) * (dnorm(a2) + a2 * pnorm(a2)) -
+    exp(B2) * (dnorm(b2) + b2 * pnorm(b2)))/(exp(A2) * pnorm(a2) -
+    exp(B2) * pnorm(b2))
+  u_c <- ifelse(Group_c == 1, u_c1, u_c2)
+  ineff_c1 <- ifelse(Group_c == 1, u_c1, NA)
+  ineff_c2 <- ifelse(Group_c == 2, u_c2, NA)
+  if (object$logDepVar == TRUE) {
+    teJLMS_c1 <- exp(-u_c1)
+    teJLMS_c2 <- exp(-u_c2)
+    teJLMS_c <- ifelse(Group_c == 1, teJLMS_c1, teJLMS_c2)
+    teBC_c1 <- (exp(A1) * exp(-a1 * exp(Wv1/2) + exp(Wv1)/2) *
+      pnorm(a1 - exp(Wv1/2)) - exp(B1) * exp(-b1 * exp(Wv1/2) +
+      exp(Wv1)/2) * pnorm(b1 - exp(Wv1/2)))/(exp(A1) *
+      pnorm(a1) - exp(B1) * pnorm(b1))
+    teBC_c2 <- (exp(A2) * exp(-a2 * exp(Wv2/2) + exp(Wv2)/2) *
+      pnorm(a2 - exp(Wv2/2)) - exp(B2) * exp(-b2 * exp(Wv2/2) +
+      exp(Wv2)/2) * pnorm(b2 - exp(Wv2/2)))/(exp(A2) *
+      pnorm(a2) - exp(B2) * pnorm(b2))
+    teBC_c <- ifelse(Group_c == 1, teBC_c1, teBC_c2)
+    effBC_c1 <- ifelse(Group_c == 1, teBC_c1, NA)
+    effBC_c2 <- ifelse(Group_c == 2, teBC_c2, NA)
+    teBC_reciprocal_c1 <- (exp(A1) * exp(a1 * exp(Wv1/2) +
+      exp(Wv1)/2) * pnorm(a1 + exp(Wv1/2)) - exp(B1) *
+      exp(b1 * exp(Wv1/2) + exp(Wv1)/2) * pnorm(b1 + exp(Wv1/2)))/(exp(A1) *
+      pnorm(a1) - exp(B1) * pnorm(b1))
+    teBC_reciprocal_c2 <- (exp(A2) * exp(a2 * exp(Wv2/2) +
+      exp(Wv2)/2) * pnorm(a2 + exp(Wv2/2)) - exp(B2) *
+      exp(b2 * exp(Wv2/2) + exp(Wv2)/2) * pnorm(b2 + exp(Wv2/2)))/(exp(A2) *
+      pnorm(a2) - exp(B2) * pnorm(b2))
+    teBC_reciprocal_c <- ifelse(Group_c == 1, teBC_reciprocal_c1,
+      teBC_reciprocal_c2)
+    ReffBC_c1 <- ifelse(Group_c == 1, teBC_reciprocal_c1,
+      NA)
+    ReffBC_c2 <- ifelse(Group_c == 2, teBC_reciprocal_c2,
+      NA)
+    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+      u_c = u_c, teJLMS_c = teJLMS_c, teBC_c = teBC_c,
+      teBC_reciprocal_c = teBC_reciprocal_c, PosteriorProb_c1 = Pcond_c1,
+      PriorProb_c1 = Probc1, u_c1 = u_c1, teBC_c1 = teBC_c1,
+      teBC_reciprocal_c1 = teBC_reciprocal_c1, PosteriorProb_c2 = Pcond_c2,
+      PriorProb_c2 = Probc2, u_c2 = u_c2, teBC_c2 = teBC_c2,
+      teBC_reciprocal_c2 = teBC_reciprocal_c2, ineff_c1 = ineff_c1,
+      ineff_c2 = ineff_c2, effBC_c1 = effBC_c1, effBC_c2 = effBC_c2,
+      ReffBC_c1 = ReffBC_c1, ReffBC_c2 = ReffBC_c2)
+  } else {
+    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+      u_c = u_c, PosteriorProb_c1 = Pcond_c1, PriorProb_c1 = Probc1,
+      u_c1 = u_c1, PosteriorProb_c2 = Pcond_c2, PriorProb_c2 = Probc2,
+      u_c2 = u_c2, ineff_c1 = ineff_c1, ineff_c2 = ineff_c2)
+  }
+  return(res)
+}
+
+## cauchit specification class membership
+cmcesfgenexponormeff_cauchit <- function(object, level) {
+  beta <- object$mlParam[1:(object$nXvar)]
+  delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+    object$nuZUvar)]
+  delta2 <- object$mlParam[(object$nXvar + object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar)]
+  phi1 <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar + object$nvZVvar)]
+  phi2 <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 1):(object$nXvar + 2 * object$nuZUvar +
+    2 * object$nvZVvar)]
+  theta <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    2 * object$nvZVvar + 1):(object$nXvar + 2 * object$nuZUvar +
+    2 * object$nvZVvar + object$nZHvar)]
+  Xvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 1)
+  uHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 2)
+  vHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 3)
+  Zvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 4)
+  Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
+  Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
+    as.numeric(crossprod(matrix(beta), t(Xvar)))
+  A1 <- object$S * epsilon/exp(Wu1/2) + exp(Wv1)/(2 * exp(Wu1))
+  B1 <- 2 * object$S * epsilon/exp(Wu1/2) + 2 * exp(Wv1)/exp(Wu1)
+  a1 <- -object$S * epsilon/exp(Wv1/2) - exp(Wv1/2)/exp(Wu1/2)
+  b1 <- -object$S * epsilon/exp(Wv1/2) - 2 * exp(Wv1/2)/exp(Wu1/2)
+  A2 <- object$S * epsilon/exp(Wu2/2) + exp(Wv2)/(2 * exp(Wu2))
+  B2 <- 2 * object$S * epsilon/exp(Wu2/2) + 2 * exp(Wv2)/exp(Wu2)
+  a2 <- -object$S * epsilon/exp(Wv2/2) - exp(Wv2/2)/exp(Wu2/2)
+  b2 <- -object$S * epsilon/exp(Wv2/2) - 2 * exp(Wv2/2)/exp(Wu2/2)
+  Pi1 <- 2/exp(Wu1/2) * (exp(A1) * pnorm(a1) - exp(B1) * pnorm(b1))
+  Pi2 <- 2/exp(Wu2/2) * (exp(A2) * pnorm(a2) - exp(B2) * pnorm(b2))
+  Probc1 <- 1/pi * atan(Wz) + 1/2
+  Probc2 <- 1 - Probc1
+  Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
+  Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
+  Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
+  P_cond_c <- ifelse(Group_c == 1, Pcond_c1, Pcond_c2)
+  u_c1 <- exp(Wv1/2) * (exp(A1) * (dnorm(a1) + a1 * pnorm(a1)) -
+    exp(B1) * (dnorm(b1) + b1 * pnorm(b1)))/(exp(A1) * pnorm(a1) -
+    exp(B1) * pnorm(b1))
+  u_c2 <- exp(Wv2/2) * (exp(A2) * (dnorm(a2) + a2 * pnorm(a2)) -
+    exp(B2) * (dnorm(b2) + b2 * pnorm(b2)))/(exp(A2) * pnorm(a2) -
+    exp(B2) * pnorm(b2))
+  u_c <- ifelse(Group_c == 1, u_c1, u_c2)
+  ineff_c1 <- ifelse(Group_c == 1, u_c1, NA)
+  ineff_c2 <- ifelse(Group_c == 2, u_c2, NA)
+  if (object$logDepVar == TRUE) {
+    teJLMS_c1 <- exp(-u_c1)
+    teJLMS_c2 <- exp(-u_c2)
+    teJLMS_c <- ifelse(Group_c == 1, teJLMS_c1, teJLMS_c2)
+    teBC_c1 <- (exp(A1) * exp(-a1 * exp(Wv1/2) + exp(Wv1)/2) *
+      pnorm(a1 - exp(Wv1/2)) - exp(B1) * exp(-b1 * exp(Wv1/2) +
+      exp(Wv1)/2) * pnorm(b1 - exp(Wv1/2)))/(exp(A1) *
+      pnorm(a1) - exp(B1) * pnorm(b1))
+    teBC_c2 <- (exp(A2) * exp(-a2 * exp(Wv2/2) + exp(Wv2)/2) *
+      pnorm(a2 - exp(Wv2/2)) - exp(B2) * exp(-b2 * exp(Wv2/2) +
+      exp(Wv2)/2) * pnorm(b2 - exp(Wv2/2)))/(exp(A2) *
+      pnorm(a2) - exp(B2) * pnorm(b2))
+    teBC_c <- ifelse(Group_c == 1, teBC_c1, teBC_c2)
+    effBC_c1 <- ifelse(Group_c == 1, teBC_c1, NA)
+    effBC_c2 <- ifelse(Group_c == 2, teBC_c2, NA)
+    teBC_reciprocal_c1 <- (exp(A1) * exp(a1 * exp(Wv1/2) +
+      exp(Wv1)/2) * pnorm(a1 + exp(Wv1/2)) - exp(B1) *
+      exp(b1 * exp(Wv1/2) + exp(Wv1)/2) * pnorm(b1 + exp(Wv1/2)))/(exp(A1) *
+      pnorm(a1) - exp(B1) * pnorm(b1))
+    teBC_reciprocal_c2 <- (exp(A2) * exp(a2 * exp(Wv2/2) +
+      exp(Wv2)/2) * pnorm(a2 + exp(Wv2/2)) - exp(B2) *
+      exp(b2 * exp(Wv2/2) + exp(Wv2)/2) * pnorm(b2 + exp(Wv2/2)))/(exp(A2) *
+      pnorm(a2) - exp(B2) * pnorm(b2))
+    teBC_reciprocal_c <- ifelse(Group_c == 1, teBC_reciprocal_c1,
+      teBC_reciprocal_c2)
+    ReffBC_c1 <- ifelse(Group_c == 1, teBC_reciprocal_c1,
+      NA)
+    ReffBC_c2 <- ifelse(Group_c == 2, teBC_reciprocal_c2,
+      NA)
+    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+      u_c = u_c, teJLMS_c = teJLMS_c, teBC_c = teBC_c,
+      teBC_reciprocal_c = teBC_reciprocal_c, PosteriorProb_c1 = Pcond_c1,
+      PriorProb_c1 = Probc1, u_c1 = u_c1, teBC_c1 = teBC_c1,
+      teBC_reciprocal_c1 = teBC_reciprocal_c1, PosteriorProb_c2 = Pcond_c2,
+      PriorProb_c2 = Probc2, u_c2 = u_c2, teBC_c2 = teBC_c2,
+      teBC_reciprocal_c2 = teBC_reciprocal_c2, ineff_c1 = ineff_c1,
+      ineff_c2 = ineff_c2, effBC_c1 = effBC_c1, effBC_c2 = effBC_c2,
+      ReffBC_c1 = ReffBC_c1, ReffBC_c2 = ReffBC_c2)
+  } else {
+    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+      u_c = u_c, PosteriorProb_c1 = Pcond_c1, PriorProb_c1 = Probc1,
+      u_c1 = u_c1, PosteriorProb_c2 = Pcond_c2, PriorProb_c2 = Probc2,
+      u_c2 = u_c2, ineff_c1 = ineff_c1, ineff_c2 = ineff_c2)
+  }
+  return(res)
+}
+
+## probit specification class membership
+cmcesfgenexponormeff_probit <- function(object, level) {
+  beta <- object$mlParam[1:(object$nXvar)]
+  delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+    object$nuZUvar)]
+  delta2 <- object$mlParam[(object$nXvar + object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar)]
+  phi1 <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar + object$nvZVvar)]
+  phi2 <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 1):(object$nXvar + 2 * object$nuZUvar +
+    2 * object$nvZVvar)]
+  theta <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    2 * object$nvZVvar + 1):(object$nXvar + 2 * object$nuZUvar +
+    2 * object$nvZVvar + object$nZHvar)]
+  Xvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 1)
+  uHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 2)
+  vHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 3)
+  Zvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 4)
+  Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
+  Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
+    as.numeric(crossprod(matrix(beta), t(Xvar)))
+  A1 <- object$S * epsilon/exp(Wu1/2) + exp(Wv1)/(2 * exp(Wu1))
+  B1 <- 2 * object$S * epsilon/exp(Wu1/2) + 2 * exp(Wv1)/exp(Wu1)
+  a1 <- -object$S * epsilon/exp(Wv1/2) - exp(Wv1/2)/exp(Wu1/2)
+  b1 <- -object$S * epsilon/exp(Wv1/2) - 2 * exp(Wv1/2)/exp(Wu1/2)
+  A2 <- object$S * epsilon/exp(Wu2/2) + exp(Wv2)/(2 * exp(Wu2))
+  B2 <- 2 * object$S * epsilon/exp(Wu2/2) + 2 * exp(Wv2)/exp(Wu2)
+  a2 <- -object$S * epsilon/exp(Wv2/2) - exp(Wv2/2)/exp(Wu2/2)
+  b2 <- -object$S * epsilon/exp(Wv2/2) - 2 * exp(Wv2/2)/exp(Wu2/2)
+  Pi1 <- 2/exp(Wu1/2) * (exp(A1) * pnorm(a1) - exp(B1) * pnorm(b1))
+  Pi2 <- 2/exp(Wu2/2) * (exp(A2) * pnorm(a2) - exp(B2) * pnorm(b2))
+  Probc1 <- pnorm(Wz)
+  Probc2 <- 1 - Probc1
+  Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
+  Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
+  Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
+  P_cond_c <- ifelse(Group_c == 1, Pcond_c1, Pcond_c2)
+  u_c1 <- exp(Wv1/2) * (exp(A1) * (dnorm(a1) + a1 * pnorm(a1)) -
+    exp(B1) * (dnorm(b1) + b1 * pnorm(b1)))/(exp(A1) * pnorm(a1) -
+    exp(B1) * pnorm(b1))
+  u_c2 <- exp(Wv2/2) * (exp(A2) * (dnorm(a2) + a2 * pnorm(a2)) -
+    exp(B2) * (dnorm(b2) + b2 * pnorm(b2)))/(exp(A2) * pnorm(a2) -
+    exp(B2) * pnorm(b2))
+  u_c <- ifelse(Group_c == 1, u_c1, u_c2)
+  ineff_c1 <- ifelse(Group_c == 1, u_c1, NA)
+  ineff_c2 <- ifelse(Group_c == 2, u_c2, NA)
+  if (object$logDepVar == TRUE) {
+    teJLMS_c1 <- exp(-u_c1)
+    teJLMS_c2 <- exp(-u_c2)
+    teJLMS_c <- ifelse(Group_c == 1, teJLMS_c1, teJLMS_c2)
+    teBC_c1 <- (exp(A1) * exp(-a1 * exp(Wv1/2) + exp(Wv1)/2) *
+      pnorm(a1 - exp(Wv1/2)) - exp(B1) * exp(-b1 * exp(Wv1/2) +
+      exp(Wv1)/2) * pnorm(b1 - exp(Wv1/2)))/(exp(A1) *
+      pnorm(a1) - exp(B1) * pnorm(b1))
+    teBC_c2 <- (exp(A2) * exp(-a2 * exp(Wv2/2) + exp(Wv2)/2) *
+      pnorm(a2 - exp(Wv2/2)) - exp(B2) * exp(-b2 * exp(Wv2/2) +
+      exp(Wv2)/2) * pnorm(b2 - exp(Wv2/2)))/(exp(A2) *
+      pnorm(a2) - exp(B2) * pnorm(b2))
+    teBC_c <- ifelse(Group_c == 1, teBC_c1, teBC_c2)
+    effBC_c1 <- ifelse(Group_c == 1, teBC_c1, NA)
+    effBC_c2 <- ifelse(Group_c == 2, teBC_c2, NA)
+    teBC_reciprocal_c1 <- (exp(A1) * exp(a1 * exp(Wv1/2) +
+      exp(Wv1)/2) * pnorm(a1 + exp(Wv1/2)) - exp(B1) *
+      exp(b1 * exp(Wv1/2) + exp(Wv1)/2) * pnorm(b1 + exp(Wv1/2)))/(exp(A1) *
+      pnorm(a1) - exp(B1) * pnorm(b1))
+    teBC_reciprocal_c2 <- (exp(A2) * exp(a2 * exp(Wv2/2) +
+      exp(Wv2)/2) * pnorm(a2 + exp(Wv2/2)) - exp(B2) *
+      exp(b2 * exp(Wv2/2) + exp(Wv2)/2) * pnorm(b2 + exp(Wv2/2)))/(exp(A2) *
+      pnorm(a2) - exp(B2) * pnorm(b2))
+    teBC_reciprocal_c <- ifelse(Group_c == 1, teBC_reciprocal_c1,
+      teBC_reciprocal_c2)
+    ReffBC_c1 <- ifelse(Group_c == 1, teBC_reciprocal_c1,
+      NA)
+    ReffBC_c2 <- ifelse(Group_c == 2, teBC_reciprocal_c2,
+      NA)
+    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+      u_c = u_c, teJLMS_c = teJLMS_c, teBC_c = teBC_c,
+      teBC_reciprocal_c = teBC_reciprocal_c, PosteriorProb_c1 = Pcond_c1,
+      PriorProb_c1 = Probc1, u_c1 = u_c1, teBC_c1 = teBC_c1,
+      teBC_reciprocal_c1 = teBC_reciprocal_c1, PosteriorProb_c2 = Pcond_c2,
+      PriorProb_c2 = Probc2, u_c2 = u_c2, teBC_c2 = teBC_c2,
+      teBC_reciprocal_c2 = teBC_reciprocal_c2, ineff_c1 = ineff_c1,
+      ineff_c2 = ineff_c2, effBC_c1 = effBC_c1, effBC_c2 = effBC_c2,
+      ReffBC_c1 = ReffBC_c1, ReffBC_c2 = ReffBC_c2)
+  } else {
+    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+      u_c = u_c, PosteriorProb_c1 = Pcond_c1, PriorProb_c1 = Probc1,
+      u_c1 = u_c1, PosteriorProb_c2 = Pcond_c2, PriorProb_c2 = Probc2,
+      u_c2 = u_c2, ineff_c1 = ineff_c1, ineff_c2 = ineff_c2)
+  }
+  return(res)
+}
+
+## cloglog specification class membership
+cmcesfgenexponormeff_cloglog <- function(object, level) {
+  beta <- object$mlParam[1:(object$nXvar)]
+  delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+    object$nuZUvar)]
+  delta2 <- object$mlParam[(object$nXvar + object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar)]
+  phi1 <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar + object$nvZVvar)]
+  phi2 <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 1):(object$nXvar + 2 * object$nuZUvar +
+    2 * object$nvZVvar)]
+  theta <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    2 * object$nvZVvar + 1):(object$nXvar + 2 * object$nuZUvar +
+    2 * object$nvZVvar + object$nZHvar)]
+  Xvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 1)
+  uHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 2)
+  vHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 3)
+  Zvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 4)
+  Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
+  Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
+    as.numeric(crossprod(matrix(beta), t(Xvar)))
+  A1 <- object$S * epsilon/exp(Wu1/2) + exp(Wv1)/(2 * exp(Wu1))
+  B1 <- 2 * object$S * epsilon/exp(Wu1/2) + 2 * exp(Wv1)/exp(Wu1)
+  a1 <- -object$S * epsilon/exp(Wv1/2) - exp(Wv1/2)/exp(Wu1/2)
+  b1 <- -object$S * epsilon/exp(Wv1/2) - 2 * exp(Wv1/2)/exp(Wu1/2)
+  A2 <- object$S * epsilon/exp(Wu2/2) + exp(Wv2)/(2 * exp(Wu2))
+  B2 <- 2 * object$S * epsilon/exp(Wu2/2) + 2 * exp(Wv2)/exp(Wu2)
+  a2 <- -object$S * epsilon/exp(Wv2/2) - exp(Wv2/2)/exp(Wu2/2)
+  b2 <- -object$S * epsilon/exp(Wv2/2) - 2 * exp(Wv2/2)/exp(Wu2/2)
+  Pi1 <- 2/exp(Wu1/2) * (exp(A1) * pnorm(a1) - exp(B1) * pnorm(b1))
+  Pi2 <- 2/exp(Wu2/2) * (exp(A2) * pnorm(a2) - exp(B2) * pnorm(b2))
+  Probc1 <- 1 - exp(-exp(Wz))
   Probc2 <- 1 - Probc1
   Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
   Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
@@ -1413,7 +5201,9 @@ cmcesfgenexponormeff <- function(object, level) {
 #' @param object object of class sfacross
 #' @noRd
 # same sigma_u
-ccnsfmarggenexponorm_Eu <- function(object) {
+
+## logit specification class membership
+ccnsfmarggenexponorm_Eu_logit <- function(object) {
   beta <- object$mlParam[1:(object$nXvar)]
   delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
@@ -1464,7 +5254,7 @@ ccnsfmarggenexponorm_Eu <- function(object) {
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
-ccnsfmarggenexponorm_Vu <- function(object) {
+ccnsfmarggenexponorm_Vu_logit <- function(object) {
   beta <- object$mlParam[1:(object$nXvar)]
   delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
@@ -1515,8 +5305,319 @@ ccnsfmarggenexponorm_Vu <- function(object) {
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
+## cauchit specification class membership
+ccnsfmarggenexponorm_Eu_cauchit <- function(object) {
+  beta <- object$mlParam[1:(object$nXvar)]
+  delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+    object$nuZUvar)]
+  phi1 <- object$mlParam[(object$nXvar + object$nuZUvar + 1):(object$nXvar +
+    object$nuZUvar + object$nvZVvar)]
+  phi2 <- object$mlParam[(object$nXvar + object$nuZUvar + object$nvZVvar +
+    1):(object$nXvar + object$nuZUvar + 2 * object$nvZVvar)]
+  theta <- object$mlParam[(object$nXvar + object$nuZUvar +
+    2 * object$nvZVvar + 1):(object$nXvar + object$nuZUvar +
+    2 * object$nvZVvar + object$nZHvar)]
+  Xvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 1)
+  uHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 2)
+  vHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 3)
+  Zvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 4)
+  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
+    as.numeric(crossprod(matrix(beta), t(Xvar)))
+  A1 <- object$S * epsilon/exp(Wu/2) + exp(Wv1)/(2 * exp(Wu))
+  B1 <- 2 * object$S * epsilon/exp(Wu/2) + 2 * exp(Wv1)/exp(Wu)
+  a1 <- -object$S * epsilon/exp(Wv1/2) - exp(Wv1/2)/exp(Wu/2)
+  b1 <- -object$S * epsilon/exp(Wv1/2) - 2 * exp(Wv1/2)/exp(Wu/2)
+  A2 <- object$S * epsilon/exp(Wu/2) + exp(Wv2)/(2 * exp(Wu))
+  B2 <- 2 * object$S * epsilon/exp(Wu/2) + 2 * exp(Wv2)/exp(Wu)
+  a2 <- -object$S * epsilon/exp(Wv2/2) - exp(Wv2/2)/exp(Wu/2)
+  b2 <- -object$S * epsilon/exp(Wv2/2) - 2 * exp(Wv2/2)/exp(Wu/2)
+  Pi1 <- 2/exp(Wu/2) * (exp(A1) * pnorm(a1) - exp(B1) * pnorm(b1))
+  Pi2 <- 2/exp(Wu/2) * (exp(A2) * pnorm(a2) - exp(B2) * pnorm(b2))
+  Probc1 <- 1/pi * atan(Wz) + 1/2
+  Probc2 <- 1 - Probc1
+  Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
+  Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
+  Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
+  margEff1 <- kronecker(matrix(delta[2:object$nuZUvar] * 3/4,
+    nrow = 1), matrix(exp(Wu/2), ncol = 1))
+  margEff2 <- kronecker(matrix(delta[2:object$nuZUvar] * 3/4,
+    nrow = 1), matrix(exp(Wu/2), ncol = 1))
+  margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  return(bind_cols(margEff1, margEff2, margEff_c))
+}
+
+ccnsfmarggenexponorm_Vu_cauchit <- function(object) {
+  beta <- object$mlParam[1:(object$nXvar)]
+  delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+    object$nuZUvar)]
+  phi1 <- object$mlParam[(object$nXvar + object$nuZUvar + 1):(object$nXvar +
+    object$nuZUvar + object$nvZVvar)]
+  phi2 <- object$mlParam[(object$nXvar + object$nuZUvar + object$nvZVvar +
+    1):(object$nXvar + object$nuZUvar + 2 * object$nvZVvar)]
+  theta <- object$mlParam[(object$nXvar + object$nuZUvar +
+    2 * object$nvZVvar + 1):(object$nXvar + object$nuZUvar +
+    2 * object$nvZVvar + object$nZHvar)]
+  Xvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 1)
+  uHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 2)
+  vHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 3)
+  Zvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 4)
+  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
+    as.numeric(crossprod(matrix(beta), t(Xvar)))
+  A1 <- object$S * epsilon/exp(Wu/2) + exp(Wv1)/(2 * exp(Wu))
+  B1 <- 2 * object$S * epsilon/exp(Wu/2) + 2 * exp(Wv1)/exp(Wu)
+  a1 <- -object$S * epsilon/exp(Wv1/2) - exp(Wv1/2)/exp(Wu/2)
+  b1 <- -object$S * epsilon/exp(Wv1/2) - 2 * exp(Wv1/2)/exp(Wu/2)
+  A2 <- object$S * epsilon/exp(Wu/2) + exp(Wv2)/(2 * exp(Wu))
+  B2 <- 2 * object$S * epsilon/exp(Wu/2) + 2 * exp(Wv2)/exp(Wu)
+  a2 <- -object$S * epsilon/exp(Wv2/2) - exp(Wv2/2)/exp(Wu/2)
+  b2 <- -object$S * epsilon/exp(Wv2/2) - 2 * exp(Wv2/2)/exp(Wu/2)
+  Pi1 <- 2/exp(Wu/2) * (exp(A1) * pnorm(a1) - exp(B1) * pnorm(b1))
+  Pi2 <- 2/exp(Wu/2) * (exp(A2) * pnorm(a2) - exp(B2) * pnorm(b2))
+  Probc1 <- 1/pi * atan(Wz) + 1/2
+  Probc2 <- 1 - Probc1
+  Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
+  Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
+  Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
+  margEff1 <- kronecker(matrix(delta[2:object$nuZUvar] * 5/4,
+    nrow = 1), matrix(exp(Wu), ncol = 1))
+  margEff2 <- kronecker(matrix(delta[2:object$nuZUvar] * 5/4,
+    nrow = 1), matrix(exp(Wu), ncol = 1))
+  margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  return(bind_cols(margEff1, margEff2, margEff_c))
+}
+
+## probit specification class membership
+ccnsfmarggenexponorm_Eu_probit <- function(object) {
+  beta <- object$mlParam[1:(object$nXvar)]
+  delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+    object$nuZUvar)]
+  phi1 <- object$mlParam[(object$nXvar + object$nuZUvar + 1):(object$nXvar +
+    object$nuZUvar + object$nvZVvar)]
+  phi2 <- object$mlParam[(object$nXvar + object$nuZUvar + object$nvZVvar +
+    1):(object$nXvar + object$nuZUvar + 2 * object$nvZVvar)]
+  theta <- object$mlParam[(object$nXvar + object$nuZUvar +
+    2 * object$nvZVvar + 1):(object$nXvar + object$nuZUvar +
+    2 * object$nvZVvar + object$nZHvar)]
+  Xvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 1)
+  uHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 2)
+  vHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 3)
+  Zvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 4)
+  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
+    as.numeric(crossprod(matrix(beta), t(Xvar)))
+  A1 <- object$S * epsilon/exp(Wu/2) + exp(Wv1)/(2 * exp(Wu))
+  B1 <- 2 * object$S * epsilon/exp(Wu/2) + 2 * exp(Wv1)/exp(Wu)
+  a1 <- -object$S * epsilon/exp(Wv1/2) - exp(Wv1/2)/exp(Wu/2)
+  b1 <- -object$S * epsilon/exp(Wv1/2) - 2 * exp(Wv1/2)/exp(Wu/2)
+  A2 <- object$S * epsilon/exp(Wu/2) + exp(Wv2)/(2 * exp(Wu))
+  B2 <- 2 * object$S * epsilon/exp(Wu/2) + 2 * exp(Wv2)/exp(Wu)
+  a2 <- -object$S * epsilon/exp(Wv2/2) - exp(Wv2/2)/exp(Wu/2)
+  b2 <- -object$S * epsilon/exp(Wv2/2) - 2 * exp(Wv2/2)/exp(Wu/2)
+  Pi1 <- 2/exp(Wu/2) * (exp(A1) * pnorm(a1) - exp(B1) * pnorm(b1))
+  Pi2 <- 2/exp(Wu/2) * (exp(A2) * pnorm(a2) - exp(B2) * pnorm(b2))
+  Probc1 <- pnorm(Wz)
+  Probc2 <- 1 - Probc1
+  Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
+  Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
+  Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
+  margEff1 <- kronecker(matrix(delta[2:object$nuZUvar] * 3/4,
+    nrow = 1), matrix(exp(Wu/2), ncol = 1))
+  margEff2 <- kronecker(matrix(delta[2:object$nuZUvar] * 3/4,
+    nrow = 1), matrix(exp(Wu/2), ncol = 1))
+  margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  return(bind_cols(margEff1, margEff2, margEff_c))
+}
+
+ccnsfmarggenexponorm_Vu_probit <- function(object) {
+  beta <- object$mlParam[1:(object$nXvar)]
+  delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+    object$nuZUvar)]
+  phi1 <- object$mlParam[(object$nXvar + object$nuZUvar + 1):(object$nXvar +
+    object$nuZUvar + object$nvZVvar)]
+  phi2 <- object$mlParam[(object$nXvar + object$nuZUvar + object$nvZVvar +
+    1):(object$nXvar + object$nuZUvar + 2 * object$nvZVvar)]
+  theta <- object$mlParam[(object$nXvar + object$nuZUvar +
+    2 * object$nvZVvar + 1):(object$nXvar + object$nuZUvar +
+    2 * object$nvZVvar + object$nZHvar)]
+  Xvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 1)
+  uHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 2)
+  vHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 3)
+  Zvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 4)
+  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
+    as.numeric(crossprod(matrix(beta), t(Xvar)))
+  A1 <- object$S * epsilon/exp(Wu/2) + exp(Wv1)/(2 * exp(Wu))
+  B1 <- 2 * object$S * epsilon/exp(Wu/2) + 2 * exp(Wv1)/exp(Wu)
+  a1 <- -object$S * epsilon/exp(Wv1/2) - exp(Wv1/2)/exp(Wu/2)
+  b1 <- -object$S * epsilon/exp(Wv1/2) - 2 * exp(Wv1/2)/exp(Wu/2)
+  A2 <- object$S * epsilon/exp(Wu/2) + exp(Wv2)/(2 * exp(Wu))
+  B2 <- 2 * object$S * epsilon/exp(Wu/2) + 2 * exp(Wv2)/exp(Wu)
+  a2 <- -object$S * epsilon/exp(Wv2/2) - exp(Wv2/2)/exp(Wu/2)
+  b2 <- -object$S * epsilon/exp(Wv2/2) - 2 * exp(Wv2/2)/exp(Wu/2)
+  Pi1 <- 2/exp(Wu/2) * (exp(A1) * pnorm(a1) - exp(B1) * pnorm(b1))
+  Pi2 <- 2/exp(Wu/2) * (exp(A2) * pnorm(a2) - exp(B2) * pnorm(b2))
+  Probc1 <- pnorm(Wz)
+  Probc2 <- 1 - Probc1
+  Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
+  Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
+  Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
+  margEff1 <- kronecker(matrix(delta[2:object$nuZUvar] * 5/4,
+    nrow = 1), matrix(exp(Wu), ncol = 1))
+  margEff2 <- kronecker(matrix(delta[2:object$nuZUvar] * 5/4,
+    nrow = 1), matrix(exp(Wu), ncol = 1))
+  margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  return(bind_cols(margEff1, margEff2, margEff_c))
+}
+
+## cloglog specification class membership
+ccnsfmarggenexponorm_Eu_cloglog <- function(object) {
+  beta <- object$mlParam[1:(object$nXvar)]
+  delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+    object$nuZUvar)]
+  phi1 <- object$mlParam[(object$nXvar + object$nuZUvar + 1):(object$nXvar +
+    object$nuZUvar + object$nvZVvar)]
+  phi2 <- object$mlParam[(object$nXvar + object$nuZUvar + object$nvZVvar +
+    1):(object$nXvar + object$nuZUvar + 2 * object$nvZVvar)]
+  theta <- object$mlParam[(object$nXvar + object$nuZUvar +
+    2 * object$nvZVvar + 1):(object$nXvar + object$nuZUvar +
+    2 * object$nvZVvar + object$nZHvar)]
+  Xvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 1)
+  uHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 2)
+  vHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 3)
+  Zvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 4)
+  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
+    as.numeric(crossprod(matrix(beta), t(Xvar)))
+  A1 <- object$S * epsilon/exp(Wu/2) + exp(Wv1)/(2 * exp(Wu))
+  B1 <- 2 * object$S * epsilon/exp(Wu/2) + 2 * exp(Wv1)/exp(Wu)
+  a1 <- -object$S * epsilon/exp(Wv1/2) - exp(Wv1/2)/exp(Wu/2)
+  b1 <- -object$S * epsilon/exp(Wv1/2) - 2 * exp(Wv1/2)/exp(Wu/2)
+  A2 <- object$S * epsilon/exp(Wu/2) + exp(Wv2)/(2 * exp(Wu))
+  B2 <- 2 * object$S * epsilon/exp(Wu/2) + 2 * exp(Wv2)/exp(Wu)
+  a2 <- -object$S * epsilon/exp(Wv2/2) - exp(Wv2/2)/exp(Wu/2)
+  b2 <- -object$S * epsilon/exp(Wv2/2) - 2 * exp(Wv2/2)/exp(Wu/2)
+  Pi1 <- 2/exp(Wu/2) * (exp(A1) * pnorm(a1) - exp(B1) * pnorm(b1))
+  Pi2 <- 2/exp(Wu/2) * (exp(A2) * pnorm(a2) - exp(B2) * pnorm(b2))
+  Probc1 <- 1 - exp(-exp(Wz))
+  Probc2 <- 1 - Probc1
+  Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
+  Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
+  Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
+  margEff1 <- kronecker(matrix(delta[2:object$nuZUvar] * 3/4,
+    nrow = 1), matrix(exp(Wu/2), ncol = 1))
+  margEff2 <- kronecker(matrix(delta[2:object$nuZUvar] * 3/4,
+    nrow = 1), matrix(exp(Wu/2), ncol = 1))
+  margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  return(bind_cols(margEff1, margEff2, margEff_c))
+}
+
+ccnsfmarggenexponorm_Vu_cloglog <- function(object) {
+  beta <- object$mlParam[1:(object$nXvar)]
+  delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+    object$nuZUvar)]
+  phi1 <- object$mlParam[(object$nXvar + object$nuZUvar + 1):(object$nXvar +
+    object$nuZUvar + object$nvZVvar)]
+  phi2 <- object$mlParam[(object$nXvar + object$nuZUvar + object$nvZVvar +
+    1):(object$nXvar + object$nuZUvar + 2 * object$nvZVvar)]
+  theta <- object$mlParam[(object$nXvar + object$nuZUvar +
+    2 * object$nvZVvar + 1):(object$nXvar + object$nuZUvar +
+    2 * object$nvZVvar + object$nZHvar)]
+  Xvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 1)
+  uHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 2)
+  vHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 3)
+  Zvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 4)
+  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
+    as.numeric(crossprod(matrix(beta), t(Xvar)))
+  A1 <- object$S * epsilon/exp(Wu/2) + exp(Wv1)/(2 * exp(Wu))
+  B1 <- 2 * object$S * epsilon/exp(Wu/2) + 2 * exp(Wv1)/exp(Wu)
+  a1 <- -object$S * epsilon/exp(Wv1/2) - exp(Wv1/2)/exp(Wu/2)
+  b1 <- -object$S * epsilon/exp(Wv1/2) - 2 * exp(Wv1/2)/exp(Wu/2)
+  A2 <- object$S * epsilon/exp(Wu/2) + exp(Wv2)/(2 * exp(Wu))
+  B2 <- 2 * object$S * epsilon/exp(Wu/2) + 2 * exp(Wv2)/exp(Wu)
+  a2 <- -object$S * epsilon/exp(Wv2/2) - exp(Wv2/2)/exp(Wu/2)
+  b2 <- -object$S * epsilon/exp(Wv2/2) - 2 * exp(Wv2/2)/exp(Wu/2)
+  Pi1 <- 2/exp(Wu/2) * (exp(A1) * pnorm(a1) - exp(B1) * pnorm(b1))
+  Pi2 <- 2/exp(Wu/2) * (exp(A2) * pnorm(a2) - exp(B2) * pnorm(b2))
+  Probc1 <- 1 - exp(-exp(Wz))
+  Probc2 <- 1 - Probc1
+  Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
+  Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
+  Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
+  margEff1 <- kronecker(matrix(delta[2:object$nuZUvar] * 5/4,
+    nrow = 1), matrix(exp(Wu), ncol = 1))
+  margEff2 <- kronecker(matrix(delta[2:object$nuZUvar] * 5/4,
+    nrow = 1), matrix(exp(Wu), ncol = 1))
+  margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  return(bind_cols(margEff1, margEff2, margEff_c))
+}
+
 # different sigma_u
-cmcesfmarggenexponorm_Eu <- function(object) {
+
+## logit specification class membership
+cmcesfmarggenexponorm_Eu_logit <- function(object) {
   beta <- object$mlParam[1:(object$nXvar)]
   delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
@@ -1571,7 +5672,7 @@ cmcesfmarggenexponorm_Eu <- function(object) {
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
-cmcesfmarggenexponorm_Vu <- function(object) {
+cmcesfmarggenexponorm_Vu_logit <- function(object) {
   beta <- object$mlParam[1:(object$nXvar)]
   delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
@@ -1611,6 +5712,339 @@ cmcesfmarggenexponorm_Vu <- function(object) {
   Pi1 <- 2/exp(Wu1/2) * (exp(A1) * pnorm(a1) - exp(B1) * pnorm(b1))
   Pi2 <- 2/exp(Wu2/2) * (exp(A2) * pnorm(a2) - exp(B2) * pnorm(b2))
   Probc1 <- exp(Wz)/(1 + exp(Wz))
+  Probc2 <- 1 - Probc1
+  Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
+  Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
+  Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
+  margEff1 <- kronecker(matrix(delta1[2:object$nuZUvar] * 5/4,
+    nrow = 1), matrix(exp(Wu1), ncol = 1))
+  margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar] * 5/4,
+    nrow = 1), matrix(exp(Wu2), ncol = 1))
+  margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  return(bind_cols(margEff1, margEff2, margEff_c))
+}
+
+## cauchit specification class membership
+cmcesfmarggenexponorm_Eu_cauchit <- function(object) {
+  beta <- object$mlParam[1:(object$nXvar)]
+  delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+    object$nuZUvar)]
+  delta2 <- object$mlParam[(object$nXvar + object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar)]
+  phi1 <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar + object$nvZVvar)]
+  phi2 <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 1):(object$nXvar + 2 * object$nuZUvar +
+    2 * object$nvZVvar)]
+  theta <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    2 * object$nvZVvar + 1):(object$nXvar + 2 * object$nuZUvar +
+    2 * object$nvZVvar + object$nZHvar)]
+  Xvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 1)
+  uHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 2)
+  vHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 3)
+  Zvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 4)
+  Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
+  Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
+    as.numeric(crossprod(matrix(beta), t(Xvar)))
+  A1 <- object$S * epsilon/exp(Wu1/2) + exp(Wv1)/(2 * exp(Wu1))
+  B1 <- 2 * object$S * epsilon/exp(Wu1/2) + 2 * exp(Wv1)/exp(Wu1)
+  a1 <- -object$S * epsilon/exp(Wv1/2) - exp(Wv1/2)/exp(Wu1/2)
+  b1 <- -object$S * epsilon/exp(Wv1/2) - 2 * exp(Wv1/2)/exp(Wu1/2)
+  A2 <- object$S * epsilon/exp(Wu2/2) + exp(Wv2)/(2 * exp(Wu2))
+  B2 <- 2 * object$S * epsilon/exp(Wu2/2) + 2 * exp(Wv2)/exp(Wu2)
+  a2 <- -object$S * epsilon/exp(Wv2/2) - exp(Wv2/2)/exp(Wu2/2)
+  b2 <- -object$S * epsilon/exp(Wv2/2) - 2 * exp(Wv2/2)/exp(Wu2/2)
+  Pi1 <- 2/exp(Wu1/2) * (exp(A1) * pnorm(a1) - exp(B1) * pnorm(b1))
+  Pi2 <- 2/exp(Wu2/2) * (exp(A2) * pnorm(a2) - exp(B2) * pnorm(b2))
+  Probc1 <- 1/pi * atan(Wz) + 1/2
+  Probc2 <- 1 - Probc1
+  Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
+  Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
+  Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
+  margEff1 <- kronecker(matrix(delta1[2:object$nuZUvar] * 3/4,
+    nrow = 1), matrix(exp(Wu1/2), ncol = 1))
+  margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar] * 3/4,
+    nrow = 1), matrix(exp(Wu2/2), ncol = 1))
+  margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  return(bind_cols(margEff1, margEff2, margEff_c))
+}
+
+cmcesfmarggenexponorm_Vu_cauchit <- function(object) {
+  beta <- object$mlParam[1:(object$nXvar)]
+  delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+    object$nuZUvar)]
+  delta2 <- object$mlParam[(object$nXvar + object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar)]
+  phi1 <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar + object$nvZVvar)]
+  phi2 <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 1):(object$nXvar + 2 * object$nuZUvar +
+    2 * object$nvZVvar)]
+  theta <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    2 * object$nvZVvar + 1):(object$nXvar + 2 * object$nuZUvar +
+    2 * object$nvZVvar + object$nZHvar)]
+  Xvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 1)
+  uHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 2)
+  vHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 3)
+  Zvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 4)
+  Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
+  Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
+    as.numeric(crossprod(matrix(beta), t(Xvar)))
+  A1 <- object$S * epsilon/exp(Wu1/2) + exp(Wv1)/(2 * exp(Wu1))
+  B1 <- 2 * object$S * epsilon/exp(Wu1/2) + 2 * exp(Wv1)/exp(Wu1)
+  a1 <- -object$S * epsilon/exp(Wv1/2) - exp(Wv1/2)/exp(Wu1/2)
+  b1 <- -object$S * epsilon/exp(Wv1/2) - 2 * exp(Wv1/2)/exp(Wu1/2)
+  A2 <- object$S * epsilon/exp(Wu2/2) + exp(Wv2)/(2 * exp(Wu2))
+  B2 <- 2 * object$S * epsilon/exp(Wu2/2) + 2 * exp(Wv2)/exp(Wu2)
+  a2 <- -object$S * epsilon/exp(Wv2/2) - exp(Wv2/2)/exp(Wu2/2)
+  b2 <- -object$S * epsilon/exp(Wv2/2) - 2 * exp(Wv2/2)/exp(Wu2/2)
+  Pi1 <- 2/exp(Wu1/2) * (exp(A1) * pnorm(a1) - exp(B1) * pnorm(b1))
+  Pi2 <- 2/exp(Wu2/2) * (exp(A2) * pnorm(a2) - exp(B2) * pnorm(b2))
+  Probc1 <- 1/pi * atan(Wz) + 1/2
+  Probc2 <- 1 - Probc1
+  Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
+  Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
+  Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
+  margEff1 <- kronecker(matrix(delta1[2:object$nuZUvar] * 5/4,
+    nrow = 1), matrix(exp(Wu1), ncol = 1))
+  margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar] * 5/4,
+    nrow = 1), matrix(exp(Wu2), ncol = 1))
+  margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  return(bind_cols(margEff1, margEff2, margEff_c))
+}
+
+## probit specification class membership
+cmcesfmarggenexponorm_Eu_probit <- function(object) {
+  beta <- object$mlParam[1:(object$nXvar)]
+  delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+    object$nuZUvar)]
+  delta2 <- object$mlParam[(object$nXvar + object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar)]
+  phi1 <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar + object$nvZVvar)]
+  phi2 <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 1):(object$nXvar + 2 * object$nuZUvar +
+    2 * object$nvZVvar)]
+  theta <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    2 * object$nvZVvar + 1):(object$nXvar + 2 * object$nuZUvar +
+    2 * object$nvZVvar + object$nZHvar)]
+  Xvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 1)
+  uHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 2)
+  vHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 3)
+  Zvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 4)
+  Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
+  Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
+    as.numeric(crossprod(matrix(beta), t(Xvar)))
+  A1 <- object$S * epsilon/exp(Wu1/2) + exp(Wv1)/(2 * exp(Wu1))
+  B1 <- 2 * object$S * epsilon/exp(Wu1/2) + 2 * exp(Wv1)/exp(Wu1)
+  a1 <- -object$S * epsilon/exp(Wv1/2) - exp(Wv1/2)/exp(Wu1/2)
+  b1 <- -object$S * epsilon/exp(Wv1/2) - 2 * exp(Wv1/2)/exp(Wu1/2)
+  A2 <- object$S * epsilon/exp(Wu2/2) + exp(Wv2)/(2 * exp(Wu2))
+  B2 <- 2 * object$S * epsilon/exp(Wu2/2) + 2 * exp(Wv2)/exp(Wu2)
+  a2 <- -object$S * epsilon/exp(Wv2/2) - exp(Wv2/2)/exp(Wu2/2)
+  b2 <- -object$S * epsilon/exp(Wv2/2) - 2 * exp(Wv2/2)/exp(Wu2/2)
+  Pi1 <- 2/exp(Wu1/2) * (exp(A1) * pnorm(a1) - exp(B1) * pnorm(b1))
+  Pi2 <- 2/exp(Wu2/2) * (exp(A2) * pnorm(a2) - exp(B2) * pnorm(b2))
+  Probc1 <- pnorm(Wz)
+  Probc2 <- 1 - Probc1
+  Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
+  Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
+  Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
+  margEff1 <- kronecker(matrix(delta1[2:object$nuZUvar] * 3/4,
+    nrow = 1), matrix(exp(Wu1/2), ncol = 1))
+  margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar] * 3/4,
+    nrow = 1), matrix(exp(Wu2/2), ncol = 1))
+  margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  return(bind_cols(margEff1, margEff2, margEff_c))
+}
+
+cmcesfmarggenexponorm_Vu_probit <- function(object) {
+  beta <- object$mlParam[1:(object$nXvar)]
+  delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+    object$nuZUvar)]
+  delta2 <- object$mlParam[(object$nXvar + object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar)]
+  phi1 <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar + object$nvZVvar)]
+  phi2 <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 1):(object$nXvar + 2 * object$nuZUvar +
+    2 * object$nvZVvar)]
+  theta <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    2 * object$nvZVvar + 1):(object$nXvar + 2 * object$nuZUvar +
+    2 * object$nvZVvar + object$nZHvar)]
+  Xvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 1)
+  uHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 2)
+  vHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 3)
+  Zvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 4)
+  Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
+  Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
+    as.numeric(crossprod(matrix(beta), t(Xvar)))
+  A1 <- object$S * epsilon/exp(Wu1/2) + exp(Wv1)/(2 * exp(Wu1))
+  B1 <- 2 * object$S * epsilon/exp(Wu1/2) + 2 * exp(Wv1)/exp(Wu1)
+  a1 <- -object$S * epsilon/exp(Wv1/2) - exp(Wv1/2)/exp(Wu1/2)
+  b1 <- -object$S * epsilon/exp(Wv1/2) - 2 * exp(Wv1/2)/exp(Wu1/2)
+  A2 <- object$S * epsilon/exp(Wu2/2) + exp(Wv2)/(2 * exp(Wu2))
+  B2 <- 2 * object$S * epsilon/exp(Wu2/2) + 2 * exp(Wv2)/exp(Wu2)
+  a2 <- -object$S * epsilon/exp(Wv2/2) - exp(Wv2/2)/exp(Wu2/2)
+  b2 <- -object$S * epsilon/exp(Wv2/2) - 2 * exp(Wv2/2)/exp(Wu2/2)
+  Pi1 <- 2/exp(Wu1/2) * (exp(A1) * pnorm(a1) - exp(B1) * pnorm(b1))
+  Pi2 <- 2/exp(Wu2/2) * (exp(A2) * pnorm(a2) - exp(B2) * pnorm(b2))
+  Probc1 <- pnorm(Wz)
+  Probc2 <- 1 - Probc1
+  Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
+  Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
+  Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
+  margEff1 <- kronecker(matrix(delta1[2:object$nuZUvar] * 5/4,
+    nrow = 1), matrix(exp(Wu1), ncol = 1))
+  margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar] * 5/4,
+    nrow = 1), matrix(exp(Wu2), ncol = 1))
+  margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  return(bind_cols(margEff1, margEff2, margEff_c))
+}
+
+## cloglog specification class membership
+cmcesfmarggenexponorm_Eu_cloglog <- function(object) {
+  beta <- object$mlParam[1:(object$nXvar)]
+  delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+    object$nuZUvar)]
+  delta2 <- object$mlParam[(object$nXvar + object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar)]
+  phi1 <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar + object$nvZVvar)]
+  phi2 <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 1):(object$nXvar + 2 * object$nuZUvar +
+    2 * object$nvZVvar)]
+  theta <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    2 * object$nvZVvar + 1):(object$nXvar + 2 * object$nuZUvar +
+    2 * object$nvZVvar + object$nZHvar)]
+  Xvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 1)
+  uHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 2)
+  vHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 3)
+  Zvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 4)
+  Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
+  Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
+    as.numeric(crossprod(matrix(beta), t(Xvar)))
+  A1 <- object$S * epsilon/exp(Wu1/2) + exp(Wv1)/(2 * exp(Wu1))
+  B1 <- 2 * object$S * epsilon/exp(Wu1/2) + 2 * exp(Wv1)/exp(Wu1)
+  a1 <- -object$S * epsilon/exp(Wv1/2) - exp(Wv1/2)/exp(Wu1/2)
+  b1 <- -object$S * epsilon/exp(Wv1/2) - 2 * exp(Wv1/2)/exp(Wu1/2)
+  A2 <- object$S * epsilon/exp(Wu2/2) + exp(Wv2)/(2 * exp(Wu2))
+  B2 <- 2 * object$S * epsilon/exp(Wu2/2) + 2 * exp(Wv2)/exp(Wu2)
+  a2 <- -object$S * epsilon/exp(Wv2/2) - exp(Wv2/2)/exp(Wu2/2)
+  b2 <- -object$S * epsilon/exp(Wv2/2) - 2 * exp(Wv2/2)/exp(Wu2/2)
+  Pi1 <- 2/exp(Wu1/2) * (exp(A1) * pnorm(a1) - exp(B1) * pnorm(b1))
+  Pi2 <- 2/exp(Wu2/2) * (exp(A2) * pnorm(a2) - exp(B2) * pnorm(b2))
+  Probc1 <- 1 - exp(-exp(Wz))
+  Probc2 <- 1 - Probc1
+  Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
+  Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
+  Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
+  margEff1 <- kronecker(matrix(delta1[2:object$nuZUvar] * 3/4,
+    nrow = 1), matrix(exp(Wu1/2), ncol = 1))
+  margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar] * 3/4,
+    nrow = 1), matrix(exp(Wu2/2), ncol = 1))
+  margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  return(bind_cols(margEff1, margEff2, margEff_c))
+}
+
+cmcesfmarggenexponorm_Vu <- function(object) {
+  beta <- object$mlParam[1:(object$nXvar)]
+  delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+    object$nuZUvar)]
+  delta2 <- object$mlParam[(object$nXvar + object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar)]
+  phi1 <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar + object$nvZVvar)]
+  phi2 <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 1):(object$nXvar + 2 * object$nuZUvar +
+    2 * object$nvZVvar)]
+  theta <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    2 * object$nvZVvar + 1):(object$nXvar + 2 * object$nuZUvar +
+    2 * object$nvZVvar + object$nZHvar)]
+  Xvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 1)
+  uHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 2)
+  vHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 3)
+  Zvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 4)
+  Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
+  Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
+  Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
+  Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
+  Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
+    as.numeric(crossprod(matrix(beta), t(Xvar)))
+  A1 <- object$S * epsilon/exp(Wu1/2) + exp(Wv1)/(2 * exp(Wu1))
+  B1 <- 2 * object$S * epsilon/exp(Wu1/2) + 2 * exp(Wv1)/exp(Wu1)
+  a1 <- -object$S * epsilon/exp(Wv1/2) - exp(Wv1/2)/exp(Wu1/2)
+  b1 <- -object$S * epsilon/exp(Wv1/2) - 2 * exp(Wv1/2)/exp(Wu1/2)
+  A2 <- object$S * epsilon/exp(Wu2/2) + exp(Wv2)/(2 * exp(Wu2))
+  B2 <- 2 * object$S * epsilon/exp(Wu2/2) + 2 * exp(Wv2)/exp(Wu2)
+  a2 <- -object$S * epsilon/exp(Wv2/2) - exp(Wv2/2)/exp(Wu2/2)
+  b2 <- -object$S * epsilon/exp(Wv2/2) - 2 * exp(Wv2/2)/exp(Wu2/2)
+  Pi1 <- 2/exp(Wu1/2) * (exp(A1) * pnorm(a1) - exp(B1) * pnorm(b1))
+  Pi2 <- 2/exp(Wu2/2) * (exp(A2) * pnorm(a2) - exp(B2) * pnorm(b2))
+  Probc1 <- 1 - exp(-exp(Wz))
   Probc2 <- 1 - Probc1
   Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
   Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
