@@ -95,19 +95,6 @@
 #' (default), the step length is decreased while also moving closer to the pure
 #' gradient direction. See \code{\link[maxLik:maxBHHH]{maxBHHH}} and
 #' \code{\link[maxLik:maxNR]{maxNR}}.
-#' @param initStart Logical. If \code{TRUE}, the model is jump-started using an
-#' alternative algorithm (\code{'nlminb'}) within certain bounds. Default =
-#' \code{FALSE}.
-#' @param initAlg Character. Algorithm used to jump-start the latent class
-#' model. Only \code{'nlminb'} is currently available.
-#' @param initIter Maximum number of iterations for the algorihtm when
-#' \code{initStart = TRUE}. Default = \code{100}.
-#' @param initFactorLB A numeric value indicating by which factor the starting
-#' value should be multiplied to define the lower bounds for the jump-start
-#' algorithm. Default = \code{0.5}.
-#' @param initFactorUB A numeric value indicating by which factor the starting
-#' value should be multiplied to define the upper bounds for the jump-start
-#' algorithm. Default = \code{1.5}.
 #' @param x an object of class lcmcross (returned by the function \code{\link{lcmcross}}).
 #' @param ... additional arguments of frontier are passed to lcmcross; 
 #' additional arguments of the print, bread, estfun, nobs methods are currently ignored.
@@ -116,11 +103,11 @@
 #' LCM is an estimation of a finite mixture of production functions:
 #'
 #' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd("y_i = \\\alpha_j + \\\mathbf{x_i^{\\\prime}} \\\bm{\\\beta_j} + v_{i|j} - Su_{i|j}")
+#' katex::math_to_rd('y_i = \\\alpha_j + \\\mathbf{x_i^{\\\prime}} \\\bm{\\\beta_j} + v_{i|j} - Su_{i|j}')
 #' }
 #'
 #' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd("\\\epsilon_{i|j} = v_{i|j} - Su_{i|j}")
+#' katex::math_to_rd('\\\epsilon_{i|j} = v_{i|j} - Su_{i|j}')
 #' }
 #'
 #' where \eqn{i} is the observation, \eqn{j} is the class, \eqn{y} is the
@@ -136,19 +123,19 @@
 #' class \eqn{j} is defined as: 
 #' 
 #' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd("P(i|j) = \\\frac{2}{\\\sqrt{\\\sigma_{u|j}^2 + \\\sigma_{v|j}^2}}\\\phi\\\\left(\\\frac{S\\\epsilon_{i|j}}{\\\sqrt{\\\sigma_{u|j}^2 +\\\sigma_{v|j}^2}}\\\\right)\\\Phi\\\\left(\\\frac{\\\mu_{i*|j}}{\\\sigma_{*|j}}\\\\right)")
+#' katex::math_to_rd('P(i|j) = \\\frac{2}{\\\sqrt{\\\sigma_{u|j}^2 + \\\sigma_{v|j}^2}}\\\phi\\\\left(\\\frac{S\\\epsilon_{i|j}}{\\\sqrt{\\\sigma_{u|j}^2 +\\\sigma_{v|j}^2}}\\\\right)\\\Phi\\\\left(\\\frac{\\\mu_{i*|j}}{\\\sigma_{*|j}}\\\\right)')
 #' }
 #'
 #' where 
 #' 
 #' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd("\\\mu_{i*|j}=\\\frac{- S\\\epsilon_{i|j}\\\sigma_{u|j}^2}{\\\sigma_{u|j}^2 + \\\sigma_{v|j}^2}")
+#' katex::math_to_rd('\\\mu_{i*|j}=\\\frac{- S\\\epsilon_{i|j}\\\sigma_{u|j}^2}{\\\sigma_{u|j}^2 + \\\sigma_{v|j}^2}')
 #' }
 #'
 #' and 
 #' 
 #' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd("\\\sigma_*^2 = \\\frac{\\\sigma_{u|j}^2 \\\sigma_{v|j}^2}{\\\sigma_{u|j}^2 + \\\sigma_{v|j}^2}")
+#' katex::math_to_rd('\\\sigma_*^2 = \\\frac{\\\sigma_{u|j}^2 \\\sigma_{v|j}^2}{\\\sigma_{u|j}^2 + \\\sigma_{v|j}^2}')
 #' }
 #'
 #' The prior probability of using a particular technology can depend on some
@@ -156,7 +143,7 @@
 #' using a logit specification: 
 #' 
 #' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd("\\\pi(i,j) = \\\frac{\\\exp{(\\\theta_j'Z_{hi})}}{\\\sum_{m=1}^{J}\\\exp{(\\\theta_m'Z_{hi})}}")
+#' katex::math_to_rd('\\\pi(i,j) = \\\frac{\\\exp{(\\\theta_j'Z_{hi})}}{\\\sum_{m=1}^{J}\\\exp{(\\\theta_m'Z_{hi})}}')
 #' }
 #'
 #' with \eqn{Z_h} the covariates, \eqn{\theta} the coefficients estimated for
@@ -174,7 +161,7 @@
 #' probability is obtained using Bayes' rule, as follows for class \eqn{j}:
 #' 
 #' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd("w\\\\left(j|i\\\\right)=\\\frac{P\\\\left(i|j\\\\right)\\\pi\\\\left(i,j\\\\right)}{\\\sum_{m=1}^JP\\\\left(i|m\\\\right)\\\pi\\\\left(i, m\\\\right)}")
+#' katex::math_to_rd('w\\\\left(j|i\\\\right)=\\\frac{P\\\\left(i|j\\\\right)\\\pi\\\\left(i,j\\\\right)}{\\\sum_{m=1}^JP\\\\left(i|m\\\\right)\\\pi\\\\left(i, m\\\\right)}')
 #' }
 #'
 #' To accommodate heteroscedasticity in the variance parameters of the error
@@ -297,7 +284,7 @@
 #' cross-section where the probability of belonging to a class a priori is not
 #' permanent (not fixed over time).
 #'
-# @author K Hervé Dakpo, Yann Desjeux, Laure Latruffe and Arne Henningsen
+# @author K Hervé Dakpo
 #'
 #' @seealso \code{\link[=print.lcmcross]{print}} for printing \code{lcmcross} object.
 #' 
@@ -391,8 +378,7 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
   data, subset, weights, wscale = TRUE, S = 1L, udist = "hnormal",
   start = NULL, lcmClasses = 2, method = "bfgs", hessianType = 1,
   itermax = 2000L, printInfo = FALSE, tol = 1e-12, gradtol = 1e-06,
-  stepmax = 0.1, qac = "marquardt", initStart = FALSE, initAlg = "nlminb",
-  initIter = 100, initFactorLB = 0.5, initFactorUB = 1.5) {
+  stepmax = 0.1, qac = "marquardt") {
   # u distribution check -------
   udist <- tolower(udist)
   if (udist != "hnormal") {
@@ -498,10 +484,6 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
     stop("argument 'logDepVar' must be a single logical value",
       call. = FALSE)
   }
-  if (length(initStart) != 1 || !is.logical(initStart[1])) {
-    stop("argument 'initStart' must be a single logical value",
-      call. = FALSE)
-  }
   if (!(lcmClasses %in% 2:5)) {
     stop("argument 'lcmClasses' must be comprised between 2 and 5",
       call. = FALSE)
@@ -525,10 +507,6 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
     "cg", "sann", "sr1", "mla", "sparse", "nlminb"))) {
     stop("Unknown or non-available optimization algorithm: ",
       paste(method), call. = FALSE)
-  }
-  initAlg <- tolower(initAlg)
-  if (initAlg != "nlminb") {
-    stop("Only 'nlminb' is available as initialization algorithm ")
   }
   # Check hessian type -------
   if (length(hessianType) != 1 || !(hessianType %in% c(1L,
@@ -572,27 +550,6 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
   }
   if (!(qac %in% c("marquardt", "stephalving"))) {
     stop("argument 'qac' must be either 'marquardt' or 'stephalving'",
-      call. = FALSE)
-  }
-  if (!is.numeric(initIter) || length(initIter) != 1) {
-    stop("argument 'initIter' must be a single numeric scalar",
-      call. = FALSE)
-  }
-  if (initIter != round(initIter)) {
-    stop("argument 'initIter' must be an integer", call. = FALSE)
-  }
-  if (initIter <= 0) {
-    stop("argument 'initIter' must be positive", call. = FALSE)
-  }
-  initIter <- as.integer(initIter)
-  if (!is.numeric(initFactorLB) || length(initFactorLB) !=
-    1) {
-    stop("argument 'initFactorLB' must be a single numeric value",
-      call. = FALSE)
-  }
-  if (!is.numeric(initFactorUB) || length(initFactorUB) !=
-    1) {
-    stop("argument 'initFactorUB' must be a single numeric value",
       call. = FALSE)
   }
   # Step 1: OLS -------
@@ -639,8 +596,7 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
     nZHvar = nZHvar, Xvar = Xvar, S = S, wHvar = wHvar, method = method,
     printInfo = printInfo, itermax = itermax, stepmax = stepmax,
     tol = tol, gradtol = gradtol, hessianType = hessianType,
-    qac = qac, initStart = initStart, initAlg = initAlg,
-    initIter = initIter, initFactorLB = initFactorLB, initFactorUB = initFactorUB)
+    qac = qac)
   ## MLE run -------
   mleList <- tryCatch(switch(as.character(lcmClasses), `2` = do.call(LCM2ChnormAlgOpt,
     FunArgs), `3` = do.call(LCM3ChnormAlgOpt, FunArgs), `4` = do.call(LCM4ChnormAlgOpt,
@@ -776,29 +732,31 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
   returnObj$isWeights <- !all.equal(wHvar, rep(1, N))
   returnObj$optType <- mleList$type
   returnObj$nIter <- mleList$nIter
-  returnObj$initStart <- initStart
   returnObj$optStatus <- mleList$status
   returnObj$startLoglik <- mleList$startLoglik
   returnObj$nClasses <- lcmClasses
   returnObj$mlLoglik <- mleList$mleLoglik
   returnObj$mlParam <- mleList$mlParam
-  returnObj$mlParamMatrix <- rbind(matrix(mleList$mlParam[1:(lcmClasses * (nXvar + nuZUvar + nvZVvar))], 
-                                    ncol = lcmClasses), 
-  cbind(matrix(mleList$mlParam[(lcmClasses * (nXvar + nuZUvar + nvZVvar) + 1):(lcmClasses * (nXvar + nuZUvar + nvZVvar) + (lcmClasses -
-                1) * nZHvar)], ncol = lcmClasses - 1), NA))
+  returnObj$mlParamMatrix <- rbind(matrix(mleList$mlParam[1:(lcmClasses *
+    (nXvar + nuZUvar + nvZVvar))], ncol = lcmClasses), cbind(matrix(mleList$mlParam[(lcmClasses *
+    (nXvar + nuZUvar + nvZVvar) + 1):(lcmClasses * (nXvar +
+    nuZUvar + nvZVvar) + (lcmClasses - 1) * nZHvar)], ncol = lcmClasses -
+    1), NA))
   colnames(returnObj$mlParamMatrix) <- paste0("Class", 1:lcmClasses)
-  d1names <- names(mleList$mlParam)[c(1:(nXvar + nuZUvar + nvZVvar), (lcmClasses * (nXvar + nuZUvar + nvZVvar) + 1):(lcmClasses * (nXvar + nuZUvar + nvZVvar) + nZHvar))]
+  d1names <- names(mleList$mlParam)[c(1:(nXvar + nuZUvar +
+    nvZVvar), (lcmClasses * (nXvar + nuZUvar + nvZVvar) +
+    1):(lcmClasses * (nXvar + nuZUvar + nvZVvar) + nZHvar))]
   rownames(returnObj$mlParamMatrix) <- gsub("Cl1", "Cl", d1names)
   returnObj$gradient <- mleList$gradient
   returnObj$gradL_OBS <- mleList$mleObj$gradL_OBS
   returnObj$gradientNorm <- sqrt(sum(mleList$gradient^2))
   returnObj$invHessian <- mleList$invHessian
   returnObj$hessianType <- if (hessianType == 1) {
-    "Analytic/Numeric Hessian"
+    "Analytic Hessian"
   } else {
     if (hessianType == 2) {
       "BHHH Hessian"
-    } 
+    }
   }
   returnObj$mlDate <- mleDate
   rm(mleList)
@@ -829,7 +787,7 @@ bread.lcmcross <- function(x, ...) {
   if (x$hessianType == "Analytic Hessian") {
     return(x$invHessian * x$Nobs)
   } else {
-    cat("Computing Analytical Hessian")
+    cat("Computing Analytical Hessian \n")
     Yvar <- model.response(model.frame(x$formula, data = x$dataTable))
     Xvar <- model.matrix(x$formula, rhs = 1, data = x$dataTable)
     uHvar <- model.matrix(x$formula, rhs = 2, data = x$dataTable)

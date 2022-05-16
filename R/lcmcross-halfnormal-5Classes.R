@@ -2055,17 +2055,11 @@ chessLCMhalfnormlike5C <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param gradtol gradient tolerance
 #' @param hessianType how hessian is computed
 #' @param qac qac option for maxLik
-#' @param initStart logical to jump-start using nlminb
-#' @param initAlg jump-start algorithm: only nlmimb
-#' @param initIter jump-start maximum iteration
-#' @param initFactorLB jump-start lower bound
-#' @param initFactorUB jump-start upper bound
 #' @noRd
 LCM5ChnormAlgOpt <- function(start, olsParam, dataTable, S, wHvar,
   nXvar, uHvar, nuZUvar, vHvar, nvZVvar, Zvar, nZHvar, Yvar,
   Xvar, method, printInfo, itermax, stepmax, tol, gradtol,
-  hessianType, qac, initStart, initAlg, initIter, initFactorLB,
-  initFactorUB) {
+  hessianType, qac) {
   if (!is.null(start)) {
     startVal <- start
   } else {
@@ -2076,31 +2070,6 @@ LCM5ChnormAlgOpt <- function(start, olsParam, dataTable, S, wHvar,
       itermax = itermax, tol = tol, printInfo = printInfo)
     initHalf <- start_st$initHalf
     startVal <- start_st$StartVal
-  }
-  if (initStart) {
-    startMat <- cbind(startVal, initFactorLB * startVal,
-      initFactorUB * startVal)
-    startMat <- cbind(startMat, apply(startMat[, 2:3], 1,
-      which.min), apply(startMat[, 2:3], 1, which.max))
-    startMat <- cbind(startMat, ifelse(startMat[, 4] == 1,
-      startMat[, 2], startMat[, 3]), ifelse(startMat[,
-      5] == 1, startMat[, 2], startMat[, 3]))
-    initModel <- nlminb(start = startVal, objective = function(parm) -sum(cLCMhalfnormlike5C(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
-      gradient = function(parm) -colSums(cgradLCMhalfnormlike5C(parm,
-        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
-      hessian = function(parm) -chessLCMhalfnormlike5C(parm,
-        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-        S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
-      lower = startMat[, 6], upper = startMat[, 7], control = list(iter.max = initIter,
-        trace = if (printInfo) 1 else 0, eval.max = initIter,
-        rel.tol = tol, x.tol = tol))
-    startVal <- initModel$par
   }
   startLoglik <- sum(cLCMhalfnormlike5C(startVal, nXvar = nXvar,
     nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
@@ -2607,18 +2576,13 @@ cmargLCM5Chalfnorm_Eu <- function(object) {
     nrow = 1), matrix(exp(Wu5/2) * dnorm(0), ncol = 1))
   colnames(margEff_c5) <- paste0("Eu_", colnames(uHvar)[-1],
     "_c5")
-  margEff_c <- matrix(nrow = nrow(margEff_c1), ncol = ncol(margEff_c1))
-  for (c in 1:ncol(margEff_c1)) {
-    margEff_c[, c] <- ifelse(Group_c == 1, margEff_c1[, c],
-      ifelse(Group_c == 2, margEff_c2[, c], ifelse(Group_c ==
-        3, margEff_c3[, c], ifelse(Group_c == 4, margEff_c4[,
-        c], margEff_c5[, c]))))
-  }
+  margEff_c <- ifelse(Group_c == 1, margEff_c1, ifelse(Group_c ==
+    2, margEff_c2, ifelse(Group_c == 3, margEff_c3, ifelse(Group_c ==
+    4, margEff_c4, margEff_c5))))
   colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
     "_c")
-  margEff <- bind_cols(as_tibble(margEff_c), as_tibble(margEff_c1),
-    as_tibble(margEff_c2), as_tibble(margEff_c3), as_tibble(margEff_c4),
-    as_tibble(margEff_c5))
+  margEff <- bind_cols(margEff_c, margEff_c1, margEff_c2, margEff_c3,
+    margEff_c4, margEff_c5)
   return(margEff)
 }
 
@@ -2774,17 +2738,12 @@ cmargLCM5Chalfnorm_Vu <- function(object) {
     ncol = 1))
   colnames(margEff_c5) <- paste0("Vu_", colnames(uHvar)[-1],
     "_c5")
-  margEff_c <- matrix(nrow = nrow(margEff_c1), ncol = ncol(margEff_c1))
-  for (c in 1:ncol(margEff_c1)) {
-    margEff_c[, c] <- ifelse(Group_c == 1, margEff_c1[, c],
-      ifelse(Group_c == 2, margEff_c2[, c], ifelse(Group_c ==
-        3, margEff_c3[, c], ifelse(Group_c == 4, margEff_c4[,
-        c], margEff_c5[, c]))))
-  }
+  margEff_c <- ifelse(Group_c == 1, margEff_c1, ifelse(Group_c ==
+    2, margEff_c2, ifelse(Group_c == 3, margEff_c3, ifelse(Group_c ==
+    4, margEff_c4, margEff_c5))))
   colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
     "_c")
-  margEff <- bind_cols(as_tibble(margEff_c), as_tibble(margEff_c1),
-    as_tibble(margEff_c2), as_tibble(margEff_c3), as_tibble(margEff_c4),
-    as_tibble(margEff_c5))
+  margEff <- bind_cols(margEff_c, margEff_c1, margEff_c2, margEff_c3,
+    margEff_c4, margEff_c5)
   return(margEff)
 }
