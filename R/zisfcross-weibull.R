@@ -3556,9 +3556,12 @@ czisfmargweibullnorm_Eu_logit <- function(object) {
   margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar -
     1)
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -3604,9 +3607,12 @@ czisfmargweibullnorm_Vu_logit <- function(object) {
   margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar -
     1)
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -3652,9 +3658,12 @@ czisfmargweibullnorm_Eu_cauchit <- function(object) {
   margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar -
     1)
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -3700,9 +3709,12 @@ czisfmargweibullnorm_Vu_cauchit <- function(object) {
   margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar -
     1)
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -3748,9 +3760,12 @@ czisfmargweibullnorm_Eu_probit <- function(object) {
   margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar -
     1)
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -3796,9 +3811,12 @@ czisfmargweibullnorm_Vu_probit <- function(object) {
   margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar -
     1)
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -3844,9 +3862,12 @@ czisfmargweibullnorm_Eu_cloglog <- function(object) {
   margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar -
     1)
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -3892,9 +3913,12 @@ czisfmargweibullnorm_Vu_cloglog <- function(object) {
   margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar -
     1)
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -3945,9 +3969,12 @@ cmnsfmargweibullnorm_Eu_logit <- function(object) {
   margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar -
     1)
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -3996,9 +4023,12 @@ cmnsfmargweibullnorm_Vu_logit <- function(object) {
   margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar -
     1)
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -4047,9 +4077,12 @@ cmnsfmargweibullnorm_Eu_cauchit <- function(object) {
   margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar -
     1)
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -4098,9 +4131,12 @@ cmnsfmargweibullnorm_Vu_cauchit <- function(object) {
   margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar -
     1)
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -4149,9 +4185,12 @@ cmnsfmargweibullnorm_Eu_probit <- function(object) {
   margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar -
     1)
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -4200,9 +4239,12 @@ cmnsfmargweibullnorm_Vu_probit <- function(object) {
   margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar -
     1)
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -4251,9 +4293,12 @@ cmnsfmargweibullnorm_Eu_cloglog <- function(object) {
   margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar -
     1)
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -4302,8 +4347,11 @@ cmnsfmargweibullnorm_Vu_cloglog <- function(object) {
   margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar -
     1)
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
