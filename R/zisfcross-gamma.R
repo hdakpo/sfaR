@@ -4969,4 +4969,3 @@ cmnsfmarggammanorm_Vu_cloglog <- function(object) {
   colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
-

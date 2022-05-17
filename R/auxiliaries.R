@@ -254,6 +254,16 @@ formDist_lcmcross <- function(formula, uhet, vhet, thet) {
   return(formula)
 }
 
+#' @param formula formula for model
+#' @param uhet heteroscedasticity in u
+#' @param vhet heteroscedasticity in v
+#' @param thet separating variables for GZISF
+#' @noRd
+formDist_gzisfcross <- function(formula, uhet, vhet, thet) {
+  formula <- as.Formula(formula, uhet, vhet, thet)
+  return(formula)
+}
+
 #' @param udist inefficiency term distribution
 #' @param formula formula for model
 #' @param uhet heteroscedasticity in u
@@ -271,6 +281,38 @@ formDist_selectioncross <- function(udist, formula, uhet, vhet) {
 #' @param qhet separating variables for ZISF
 #' @noRd
 formDist_zisfcross <- function(udist, formula, muhet, uhet, vhet,
+  qhet) {
+  if (udist %in% c("tnormal", "lognormal")) {
+    formula <- as.Formula(formula, muhet, uhet, vhet, qhet)
+  } else {
+    formula <- as.Formula(formula, uhet, vhet, qhet)
+  }
+  return(formula)
+}
+
+#' @param udist inefficiency term distribution
+#' @param formula formula for model
+#' @param uhet heteroscedasticity in u
+#' @param vhet heteroscedasticity in v
+#' @param qhet separating variables for CNSF
+#' @noRd
+formDist_cnsfcross <- function(udist, formula, muhet, uhet, vhet,
+  qhet) {
+  if (udist %in% c("tnormal", "lognormal")) {
+    formula <- as.Formula(formula, muhet, uhet, vhet, qhet)
+  } else {
+    formula <- as.Formula(formula, uhet, vhet, qhet)
+  }
+  return(formula)
+}
+
+#' @param udist inefficiency term distribution
+#' @param formula formula for model
+#' @param uhet heteroscedasticity in u
+#' @param vhet heteroscedasticity in v
+#' @param qhet separating variables for MISF
+#' @noRd
+formDist_misfcross <- function(udist, formula, muhet, uhet, vhet,
   qhet) {
   if (udist %in% c("tnormal", "lognormal")) {
     formula <- as.Formula(formula, muhet, uhet, vhet, qhet)
@@ -540,6 +582,22 @@ fName_lcmcross <- function(Xvar, uHvar, vHvar, Zvar, nZHvar,
 #' @param Xvar variables in main formula (e.g. inputs/outputs)
 #' @param uHvar heteroscedasticity variables in u
 #' @param vHvar heteroscedasticity variables in v
+#' @param Zvar separating variables in GZISF
+#' @param nZHvar number of separating variables in GZISF
+#' @param gzisfClasses number of classes in GZISF
+#' @noRd
+fName_gzisfcross <- function(Xvar, uHvar, vHvar, Zvar, nZHvar,
+  gzisfClasses) {
+  c(rep(c(colnames(Xvar), paste0("Zu_", colnames(uHvar)), paste0("Zv_",
+    colnames(vHvar))), gzisfClasses - 1), c(colnames(Xvar),
+    paste0("Zv_", colnames(vHvar))), paste0(rep(paste0("Cl",
+    1:(gzisfClasses - 1)), each = nZHvar), "_", rep(colnames(Zvar),
+    gzisfClasses - 1)))
+}
+
+#' @param Xvar variables in main formula (e.g. inputs/outputs)
+#' @param uHvar heteroscedasticity variables in u
+#' @param vHvar heteroscedasticity variables in v
 #' @noRd
 fName_uvr_selectioncross <- function(Xvar, uHvar, vHvar) {
   c(colnames(Xvar), c(paste0("Zu_", colnames(uHvar)), paste0("Zv_",
@@ -551,6 +609,7 @@ fName_uvr_selectioncross <- function(Xvar, uHvar, vHvar) {
 #' @param uHvar heteroscedasticity variables in u
 #' @param vHvar heteroscedasticity variables in v
 #' @param Zvar separating variables in ZISF
+#' @param sigmavType option for two sided error term
 #' @noRd
 fName_mu_zisfcross <- function(Xvar, muHvar, uHvar, vHvar, Zvar,
   sigmavType) {
@@ -573,6 +632,7 @@ fName_mu_zisfcross <- function(Xvar, muHvar, uHvar, vHvar, Zvar,
 #' @param uHvar heteroscedasticity variables in u
 #' @param vHvar heteroscedasticity variables in v
 #' @param Zvar separating variables in ZISF
+#' @param sigmavType option for two sided error term
 #' @noRd
 fName_uv_zisfcross <- function(Xvar, udist, uHvar, vHvar, Zvar,
   sigmavType) {
@@ -587,7 +647,7 @@ fName_uv_zisfcross <- function(Xvar, udist, uHvar, vHvar, Zvar,
       } else {
         if (udist == "tslaplace") {
           c(paste0("Zu_", colnames(uHvar)), paste0("Zv_",
-          colnames(vHvar)), "lambda", paste0("Cl_",
+          colnames(vHvar)), "lambda", paste0("ZI_",
           colnames(Zvar)))
         } else {
           c(paste0("Zu_", colnames(uHvar)), paste0("Zv_",
@@ -620,6 +680,135 @@ fName_uv_zisfcross <- function(Xvar, udist, uHvar, vHvar, Zvar,
       })
     }
   }
+}
+
+#' @param Xvar variables in main formula (e.g. inputs/outputs)
+#' @param muHvar heterogeneity variables in mu
+#' @param uHvar heteroscedasticity variables in u
+#' @param vHvar heteroscedasticity variables in v
+#' @param Zvar separating variables in CNSF
+#' @param sigmauType option for one sided error term
+#' @noRd
+fName_mu_cnsfcross <- function(Xvar, muHvar, uHvar, vHvar, Zvar,
+  sigmauType) {
+  if (sigmauType == "common") {
+    c(colnames(Xvar), c(paste0("Zmu_", colnames(muHvar)),
+      paste0("Zu_", colnames(uHvar)), paste0("Zv_", colnames(vHvar)),
+      paste0("Zv_", colnames(vHvar)), paste0("CNSF_", colnames(Zvar))))
+  } else {
+    if (sigmauType == "different") {
+      c(colnames(Xvar), c(paste0("Zmu_", colnames(muHvar)),
+        paste0("Zmu_", colnames(muHvar)), paste0("Zu_",
+          colnames(uHvar)), paste0("Zu_", colnames(uHvar)),
+        paste0("Zv_", colnames(vHvar)), paste0("Zv_",
+          colnames(vHvar)), paste0("CNSF_", colnames(Zvar))))
+    }
+  }
+}
+
+#' @param Xvar variables in main formula (e.g. inputs/outputs)
+#' @param udist inefficiency distribution
+#' @param uHvar heteroscedasticity variables in u
+#' @param vHvar heteroscedasticity variables in v
+#' @param Zvar separating variables in CNSF
+#' @param sigmauType option for one sided error term
+#' @noRd
+fName_uv_cnsfcross <- function(Xvar, udist, uHvar, vHvar, Zvar,
+  sigmauType) {
+  if (sigmauType == "common") {
+    c(colnames(Xvar), if (udist == "gamma") {
+      c(paste0("Zu_", colnames(uHvar)), paste0("Zv_", colnames(vHvar)),
+        paste0("Zv_", colnames(vHvar)), "P", paste0("CNSF_",
+          colnames(Zvar)))
+    } else {
+      if (udist == "weibull") {
+        c(paste0("Zu_", colnames(uHvar)), paste0("Zv_",
+          colnames(vHvar)), paste0("Zv_", colnames(vHvar)),
+          "k", paste0("CNSF_", colnames(Zvar)))
+      } else {
+        if (udist == "tslaplace") {
+          c(paste0("Zu_", colnames(uHvar)), paste0("Zv_",
+          colnames(vHvar)), paste0("Zv_", colnames(vHvar)),
+          "lambda", paste0("CNSF_", colnames(Zvar)))
+        } else {
+          c(paste0("Zu_", colnames(uHvar)), paste0("Zv_",
+          colnames(vHvar)), paste0("Zv_", colnames(vHvar)),
+          paste0("CNSF_", colnames(Zvar)))
+        }
+      }
+    })
+  } else {
+    if (sigmauType == "different") {
+      c(colnames(Xvar), if (udist == "gamma") {
+        c(paste0("Zu_", colnames(uHvar)), paste0("Zu_",
+          colnames(uHvar)), paste0("Zv_", colnames(vHvar)),
+          paste0("Zv_", colnames(vHvar)), "P", paste0("CNSF_",
+          colnames(Zvar)))
+      } else {
+        if (udist == "weibull") {
+          c(paste0("Zu_", colnames(uHvar)), paste0("Zu_",
+          colnames(uHvar)), paste0("Zv_", colnames(vHvar)),
+          paste0("Zv_", colnames(vHvar)), "k", paste0("CNSF_",
+            colnames(Zvar)))
+        } else {
+          if (udist == "tslaplace") {
+          c(paste0("Zu_", colnames(uHvar)), paste0("Zu_",
+            colnames(uHvar)), paste0("Zv_", colnames(vHvar)),
+            paste0("Zv_", colnames(vHvar)), "lambda",
+            paste0("CNSF_", colnames(Zvar)))
+          } else {
+          c(paste0("Zu_", colnames(uHvar)), paste0("Zu_",
+            colnames(uHvar)), paste0("Zv_", colnames(vHvar)),
+            paste0("Zv_", colnames(vHvar)), paste0("CNSF_",
+            colnames(Zvar)))
+          }
+        }
+      })
+    }
+  }
+}
+
+#' @param Xvar variables in main formula (e.g. inputs/outputs)
+#' @param muHvar heterogeneity variables in mu
+#' @param uHvar heteroscedasticity variables in u
+#' @param vHvar heteroscedasticity variables in v
+#' @param Zvar separating variables in MISF
+#' @noRd
+fName_mu_misfcross <- function(Xvar, muHvar, uHvar, vHvar, Zvar) {
+  c(colnames(Xvar), c(paste0("Zmu_", colnames(muHvar)), paste0("Zmu_",
+    colnames(muHvar)), paste0("Zu_", colnames(uHvar)), paste0("Zu_",
+    colnames(uHvar)), paste0("Zv_", colnames(vHvar)), paste0("MISF_",
+    colnames(Zvar))))
+}
+
+#' @param Xvar variables in main formula (e.g. inputs/outputs)
+#' @param udist inefficiency distribution
+#' @param uHvar heteroscedasticity variables in u
+#' @param vHvar heteroscedasticity variables in v
+#' @param Zvar separating variables in CNSF
+#' @noRd
+fName_uv_misfcross <- function(Xvar, udist, uHvar, vHvar, Zvar) {
+  c(colnames(Xvar), if (udist == "gamma") {
+    c(paste0("Zu_", colnames(uHvar)), paste0("Zu_", colnames(uHvar)),
+      paste0("Zv_", colnames(vHvar)), "P", paste0("MISF_",
+        colnames(Zvar)))
+  } else {
+    if (udist == "weibull") {
+      c(paste0("Zu_", colnames(uHvar)), paste0("Zu_", colnames(uHvar)),
+        paste0("Zv_", colnames(vHvar)), "k", paste0("MISF_",
+          colnames(Zvar)))
+    } else {
+      if (udist == "tslaplace") {
+        c(paste0("Zu_", colnames(uHvar)), paste0("Zu_",
+          colnames(uHvar)), paste0("Zv_", colnames(vHvar)),
+          "lambda", paste0("MISF_", colnames(Zvar)))
+      } else {
+        c(paste0("Zu_", colnames(uHvar)), paste0("Zu_",
+          colnames(uHvar)), paste0("Zv_", colnames(vHvar)),
+          paste0("MISF_", colnames(Zvar)))
+      }
+    }
+  })
 }
 
 #' @param Xvar variables in main formula (e.g. inputs/outputs)
@@ -815,6 +1004,30 @@ zisfdist <- function(udist) {
     gamma = "Gamma Normal ZISF model", lognormal = "Log-Normal Normal ZISF model",
     weibull = "Weibull Normal ZISF model", genexponential = "Generalized-Exponential Normal ZISF model",
     tslaplace = "Truncated Skewed-Laplace Normal ZISF model")
+}
+
+# CNSF + distribution ----------
+#' @param udist inefficiency distribution
+#' @noRd
+cnsfdist <- function(udist) {
+  switch(udist, tnormal = "Truncated-Normal Normal CNSF model",
+    hnormal = "Normal-Half Normal CNSF Model", exponential = "Exponential Normal CNSF model",
+    rayleigh = "Rayleigh Normal CNSF model", uniform = "Uniform Normal CNSF model",
+    gamma = "Gamma Normal CNSF model", lognormal = "Log-Normal Normal CNSF model",
+    weibull = "Weibull Normal CNSF model", genexponential = "Generalized-Exponential Normal CNSF model",
+    tslaplace = "Truncated Skewed-Laplace Normal CNSF model")
+}
+
+# MISF + distribution ----------
+#' @param udist inefficiency distribution
+#' @noRd
+misfdist <- function(udist) {
+  switch(udist, tnormal = "Truncated-Normal Normal MISF model",
+    hnormal = "Normal-Half Normal MISF Model", exponential = "Exponential Normal MISF model",
+    rayleigh = "Rayleigh Normal MISF model", uniform = "Uniform Normal MISF model",
+    gamma = "Gamma Normal MISF model", lognormal = "Log-Normal Normal MISF model",
+    weibull = "Weibull Normal MISF model", genexponential = "Generalized-Exponential Normal MISF model",
+    tslaplace = "Truncated Skewed-Laplace Normal MISF model")
 }
 
 # variance of u ----------
@@ -1017,7 +1230,7 @@ probit_gradient <- function(beta, Xvar, Yvar, wHvar) {
   sweep(Xvar, MARGIN = 1, STATS = gx, FUN = "*")
 }
 
-# Likelihood for logit model ----------
+# Likelihood for logit model (not used) ----------
 
 ## Likelihood ----------
 logit_likelihood <- function(beta, Xvar, Yvar, wHvar) {
@@ -1034,7 +1247,7 @@ logit_gradient <- function(beta, Xvar, Yvar, wHvar) {
   sweep(Xvar, MARGIN = 1, STATS = gx, FUN = "*")
 }
 
-# Likelihood for cauchit model ----------
+# Likelihood for cauchit model (not used) ----------
 
 ## Likelihood ----------
 cauchit_likelihood <- function(beta, Xvar, Yvar, wHvar) {
@@ -1051,7 +1264,7 @@ cauchit_gradient <- function(beta, Xvar, Yvar, wHvar) {
   sweep(Xvar, MARGIN = 1, STATS = gx, FUN = "*")
 }
 
-# Likelihood for cloglog model ----------
+# Likelihood for cloglog model (not used) ----------
 
 ## Likelihood ----------
 cloglog_likelihood <- function(beta, Xvar, Yvar, wHvar) {

@@ -4,7 +4,7 @@
 \alias{ic}
 \alias{ic.sfacross}
 \alias{ic.lcmcross}
-\alias{ic.selectioncross}
+\alias{ic.sfaselectioncross}
 \alias{ic.zisfcross}
 \title{Extract information criteria of stochastic frontier models}
 \usage{
@@ -12,13 +12,14 @@
 
 \method{ic}{lcmcross}(object, IC = "AIC", ...)
 
-\method{ic}{selectioncross}(object, IC = "AIC", ...)
+\method{ic}{sfaselectioncross}(object, IC = "AIC", ...)
 
 \method{ic}{zisfcross}(object, IC = "AIC", ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.}
+by \code{\link{sfacross}}, \code{\link{lcmcross}},
+\code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.}
 
 \item{IC}{Character string. Information criterion measure. Three criteria
 are available: \itemize{ \item \code{'AIC'} for Akaike information criterion
@@ -34,7 +35,8 @@ are available: \itemize{ \item \code{'AIC'} for Akaike information criterion
 \description{
 \code{\link{ic}} returns information criterion from classic or latent class
 stochastic frontier models estimated with \code{\link{sfacross}},
-\code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.
+\code{\link{lcmcross}}, \code{\link{sfaselectioncross}} or
+\code{\link{zisfcross}}.
 }
 \details{
 The different information criteria are computed as follows: \itemize{ \item
@@ -48,10 +50,10 @@ estimated and \eqn{N} the number of observations.
 ## Using data on Swiss railway
 # LCM (cost function) half normal distribution
 cb_2c_u <- lcmcross(formula = LNCT ~ LNQ2 + LNQ3 + LNNET + LNPK + LNPL,
-    udist = 'hnormal', uhet = ~ 1, data = swissrailways, S = -1, method='ucminf')
-  ic(cb_2c_u)
-  ic(cb_2c_u, IC = 'BIC')
-  ic(cb_2c_u, IC = 'HQIC')
+udist = 'hnormal', uhet = ~ 1, data = swissrailways, S = -1, method='ucminf')
+ic(cb_2c_u)
+ic(cb_2c_u, IC = 'BIC')
+ic(cb_2c_u, IC = 'HQIC')
 
 }
 \seealso{
@@ -61,8 +63,8 @@ fitting function.
 \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 model fitting function.
 
-\code{\link{selectioncross}} for sample selection in stochastic frontier model
-fitting function.
+\code{\link{sfaselectioncross}} for sample selection in stochastic frontier
+model fitting function.
 
 \code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
 fitting function.

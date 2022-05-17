@@ -15,99 +15,129 @@
 
 #' Compute conditional (in-)efficiency estimates of stochastic frontier models
 #'
-#' \code{\link{efficiencies}} returns (in-)efficiency estimates of models estimated with
-#' \code{\link{sfacross}}, \code{\link{lcmcross}} \code{\link{selectioncross}}, or \code{\link{zisfcross}}.
+#' \code{\link{efficiencies}} returns (in-)efficiency estimates of models 
+#' estimated with \code{\link{sfacross}}, \code{\link{lcmcross}} 
+#' \code{\link{sfaselectioncross}}, or \code{\link{zisfcross}}.
 #' 
 #' @name efficiencies
 #'
-#' @details The conditional inefficiency is obtained following Jondrow \emph{et al.}
-#' (1982) and the conditional efficiency is computed following Battese and
-#' Coelli (1988). In some cases the conditional mode is also returned (Jondrow
-#' \emph{et al.} 1982). The confidence interval is computed following Horrace
-#' and Schmidt (1996), Hjalmarsson \emph{et al.} (1996), or Berra and Sharma
-#' (1999) (see \sQuote{Value} section).
+#' @details The conditional inefficiency is obtained following 
+#' Jondrow \emph{et al.} (1982) and the conditional efficiency is computed 
+#' following Battese and Coelli (1988). In some cases the conditional mode is 
+#' also returned (Jondrow \emph{et al.} 1982). The confidence interval is 
+#' computed following Horrace and Schmidt (1996), Hjalmarsson \emph{et al.} 
+#' (1996), or Berra and Sharma (1999) (see \sQuote{Value} section).
 #'
 #' In the case of the half normal distribution for the one-sided error term,
 #' the formulae are as follows (for notations, see the \sQuote{Details} section
-#' of \code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}):
+#' of \code{\link{sfacross}}, \code{\link{lcmcross}}, 
+#' \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}):
 #'
 #' \itemize{ \item The conditional inefficiency is }
 #' 
 #' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('E\\\\left\\\\lbrack u_i|\\\epsilon_i\\\\right\\\\rbrack=\\\mu_{i\\\ast} + \\\sigma_\\\ast\\\frac{\\\phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)}{\\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)}') 
+#' katex::math_to_rd('E\\\\left\\\\lbrack u_i|\\\epsilon_i\\\\right
+#' \\\\rbrack=\\\mu_{i\\\ast} + \\\sigma_\\\ast\\\frac{\\\phi
+#' \\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)}{
+#' \\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)}') 
 #' }
 #'
 #' where
 #' 
 #' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('\\\mu_{i\\\ast}=\\\frac{-S\\\epsilon_i\\\sigma_u^2}{\\\sigma_u^2 + \\\sigma_v^2}') 
+#' katex::math_to_rd('\\\mu_{i\\\ast}=\\\frac{-S\\\epsilon_i\\\sigma_u^2}{
+#' \\\sigma_u^2 + \\\sigma_v^2}') 
 #' }
 #'
 #' and
 #' 
 #' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('\\\sigma_\\\ast^2 = \\\frac{\\\sigma_u^2 \\\sigma_v^2}{\\\sigma_u^2 + \\\sigma_v^2}') 
+#' katex::math_to_rd('\\\sigma_\\\ast^2 = \\\frac{\\\sigma_u^2 \\\sigma_v^2}{
+#' \\\sigma_u^2 + \\\sigma_v^2}') 
 #' }
 #' 
 #' \itemize{ \item The Battese and Coelli (1988) conditional efficiency is
 #' obtained by: } 
 #' 
 #' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('E\\\\left\\\\lbrack\\\exp{\\\\left(-u_i\\\\right)}|\\\\epsilon_i\\\\right\\\\rbrack = \\\exp{\\\\left(-\\\mu_{i\\\ast}+\\\frac{1}{2}\\\sigma_\\\ast^2\\\\right)}\\\frac{\\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}-\\\sigma_\\\ast\\\\right)}{\\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\right)}') 
+#' katex::math_to_rd('E\\\\left\\\\lbrack\\\exp{\\\\left(-u_i\\\\right)}
+#' |\\\\epsilon_i\\\\right\\\\rbrack = \\\exp{\\\\left(-\\\mu_{i\\\ast}+
+#' \\\frac{1}{2}\\\sigma_\\\ast^2\\\\right)}\\\frac{\\\Phi\\\\left(
+#' \\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}-\\\sigma_\\\ast\\\\right)}{
+#' \\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\right)}') 
 #' }
 #' 
-#' \itemize{ \item The reciprocal of the Battese and Coelli (1988) conditional efficiency is
-#' obtained by: } 
+#' \itemize{ \item The reciprocal of the Battese and Coelli (1988) conditional 
+#' efficiency is obtained by: } 
 #' 
 #' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('E\\\\left\\\\lbrack\\\exp{\\\\left(u_i\\\\right)}|\\\epsilon_i\\\\right\\\\rbrack = \\\exp{\\\\left(\\\mu_{i\\\ast}+\\\frac{1}{2}\\\sigma_\\\ast^2\\\\right)} \\\frac{\\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}+\\\sigma_\\\ast\\\\right)}{\\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)}') 
+#' katex::math_to_rd('E\\\\left\\\\lbrack\\\exp{\\\\left(u_i\\\\right)}
+#' |\\\epsilon_i\\\\right\\\\rbrack = \\\exp{\\\\left(\\\mu_{i\\\ast}+
+#' \\\frac{1}{2}\\\sigma_\\\ast^2\\\\right)} \\\frac{\\\Phi\\\\left(
+#' \\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}+\\\sigma_\\\ast\\\\right)}{
+#' \\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)}') 
 #' }
 #' 
 #' \itemize{ \item The conditional mode is computed using: }
 #' 
 #' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('M\\\\left\\\\lbrack u_i|\\\epsilon_i\\\\right\\\\rbrack= \\\mu_{i\\\ast} \\\quad \\\hbox{For} \\\quad \\\mu_{i\\\ast} > 0') 
+#' katex::math_to_rd('M\\\\left\\\\lbrack u_i|\\\epsilon_i\\\\right
+#' \\\\rbrack= \\\mu_{i\\\ast} \\\quad \\\hbox{For} \\\quad 
+#' \\\mu_{i\\\ast} > 0') 
 #' }
 #' 
 #' and
 #' 
 #' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('M\\\\left\\\\lbrack u_i|\\\epsilon_i\\\\right\\\\rbrack= 0 \\\quad \\\hbox{For} \\\quad \\\mu_{i\\\ast} \\\\leq 0') 
+#' katex::math_to_rd('M\\\\left\\\\lbrack u_i|\\\epsilon_i\\\\right
+#' \\\\rbrack= 0 \\\quad \\\hbox{For} \\\quad \\\mu_{i\\\ast} \\\\leq 0') 
 #' } 
 #' 
 #' \itemize{ \item The confidence intervals are obtained with: }
 #' 
 #' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('\\\mu_{i\\\ast} + I_L\\\sigma_\\\ast \\\\leq E\\\\left\\\\lbrack u_i|\\\epsilon_i\\\\right\\\\rbrack \\\\leq \\\mu_{i\\\ast} + I_U\\\sigma_\\\ast') 
+#' katex::math_to_rd('\\\mu_{i\\\ast} + I_L\\\sigma_\\\ast \\\\leq 
+#' E\\\\left\\\\lbrack u_i|\\\epsilon_i\\\\right\\\\rbrack \\\\leq 
+#' \\\mu_{i\\\ast} + I_U\\\sigma_\\\ast') 
 #' }
 #'
-#' with \eqn{LB_i = \mu_{i*} + I_L\sigma_*} and \eqn{UB_i = \mu_{i*} + I_U\sigma_*}
+#' with \eqn{LB_i = \mu_{i*} + I_L\sigma_*} and 
+#' \eqn{UB_i = \mu_{i*} + I_U\sigma_*}
 #'
 #' and
 #' 
 #' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('I_L = \\\Phi^{-1}\\\\left\\\\lbrace 1 -\\\\left(1-\\\frac{\\\alpha}{2}\\\\right)\\\\left\\\\lbrack 1-\\\Phi\\\\left(-\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)\\\\right\\\\rbrack\\\\right\\\\rbrace') 
+#' katex::math_to_rd('I_L = \\\Phi^{-1}\\\\left\\\\lbrace 1 -
+#' \\\\left(1-\\\frac{\\\alpha}{2}\\\\right)\\\\left\\\\lbrack 1-
+#' \\\Phi\\\\left(-\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)
+#' \\\\right\\\\rbrack\\\\right\\\\rbrace') 
 #' }
 #'
 #' and
 #' 
 #' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('I_U = \\\Phi^{-1}\\\\left\\\\lbrace 1-\\\frac{\\\alpha}{2}\\\\left\\\\lbrack 1-\\\Phi\\\\left(-\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)\\\\right\\\\rbrack\\\\right\\\\rbrace') 
+#' katex::math_to_rd('I_U = \\\Phi^{-1}\\\\left\\\\lbrace 1-
+#' \\\frac{\\\alpha}{2}\\\\left\\\\lbrack 1-\\\Phi
+#' \\\\left(-\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)
+#' \\\\right\\\\rbrack\\\\right\\\\rbrace') 
 #' }
 #'
 #' Thus
 #' 
 #' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('\\\exp{\\\\left(-UB_i\\\\right)} \\\\leq E\\\\left\\\\lbrack\\\exp{\\\\left(-u_i\\\\right)}|\\\epsilon_i\\\\right\\\\rbrack \\\\leq\\\exp{\\\\left(-LB_i\\\\right)}') 
+#' katex::math_to_rd('\\\exp{\\\\left(-UB_i\\\\right)} \\\\leq E\\\\left
+#' \\\\lbrack\\\exp{\\\\left(-u_i\\\\right)}|\\\epsilon_i\\\\right\\\\rbrack 
+#' \\\\leq\\\exp{\\\\left(-LB_i\\\\right)}') 
 #' }
 #'
 #' @param object A stochastic frontier model returned
-#' by \code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.
+#' by \code{\link{sfacross}}, \code{\link{lcmcross}},
+#'  \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.
 #' @param level A number between between 0 and 0.9999 used for the computation
 #' of (in-)efficiency confidence intervals (defaut = \code{0.95}). Only used
 #' when \code{udist} = \code{'hnormal'}, \code{'exponential'}, \code{'tnormal'}
-#' or \code{'uniform'} in \code{\link{sfacross}}. The option is also available for
-#' \code{\link{lcmcross}}, or \code{\link{selectioncross}}.
+#' or \code{'uniform'} in \code{\link{sfacross}}. The option is also available 
+#' for \code{\link{lcmcross}}, or \code{\link{sfaselectioncross}}.
 #' @param newData Optional data frame that is used to calculate the efficiency 
 #' estimates. If NULL (the default), the efficiency estimates are calculated 
 #' for the observations that were used in the estimation.
@@ -136,8 +166,8 @@
 #'
 #' \item{teJLMS}{\eqn{\exp{(-E[u|\epsilon])}}. When the argument \code{udist} of
 #' \link{sfacross} is set to \code{'uniform'}, \code{teJLMS1} =
-#' \eqn{\exp{(-E[u_1|\epsilon])}} and \code{teJLMS2} = \eqn{\exp{(-E[u_2|\epsilon])}}. Only when
-#' \code{logDepVar = TRUE}.}
+#' \eqn{\exp{(-E[u_1|\epsilon])}} and \code{teJLMS2} = 
+#' \eqn{\exp{(-E[u_2|\epsilon])}}. Only when \code{logDepVar = TRUE}.}
 #'
 #' \item{m}{Conditional model. Only when the argument \code{udist} of
 #' \link{sfacross} is set to \code{'hnormal'}, \code{'exponential'},
@@ -148,14 +178,15 @@
 #' \code{'tnormal'}, \code{'uniform'}, or \code{'rayleigh'}.}
 #'
 #' \item{teBC}{Battese and Coelli (1988) conditional efficiency. Only when, in
-#' the function \link{sfacross}, \code{logDepVar = TRUE}. In the case \code{udist =
-#' 'uniform'}, two conditional efficiency estimates are returned: \code{teBC1}
-#' which is the classic conditional efficiency following Battese and Coelli
-#' (1988) and \code{teBC2} when \eqn{\theta/\sigma_v \longrightarrow \infty}
-#' (see Nguyen, 2010).}
+#' the function \link{sfacross}, \code{logDepVar = TRUE}. In the case 
+#' \code{udist = 'uniform'}, two conditional efficiency estimates are returned:
+#' \code{teBC1} which is the classic conditional efficiency following 
+#' Battese and Coelli (1988) and \code{teBC2} when 
+#' \eqn{\theta/\sigma_v \longrightarrow \infty} (see Nguyen, 2010).}
 #' 
-#' \item{teBC_reciprocal}{Reciprocal of Battese and Coelli (1988) conditional efficiency. 
-#' Similar to \code{teBC} except that it is computed as \eqn{E\left[\exp{(u)}|\epsilon\right]}.}
+#' \item{teBC_reciprocal}{Reciprocal of Battese and Coelli (1988) conditional 
+#' efficiency. Similar to \code{teBC} except that it is computed as 
+#' \eqn{E\left[\exp{(u)}|\epsilon\right]}.}
 #'
 #' \item{teBCLB}{Lower bound for Battese and Coelli (1988) conditional
 #' efficiency. Only when, in the function \link{sfacross}, \code{logDepVar =
@@ -180,11 +211,11 @@
 #' \item{teJLMS_c}{\eqn{\exp{(-E[u_c|\epsilon_c])}}. Only when, in the function
 #' \link{lcmcross}, \code{logDepVar = TRUE}.}
 #' 
-#' \item{teBC_c}{\eqn{E\left[\exp{(-u_c)}|\epsilon_c\right]}. Only when, in the function
-#' \link{lcmcross}, \code{logDepVar = TRUE}.}
+#' \item{teBC_c}{\eqn{E\left[\exp{(-u_c)}|\epsilon_c\right]}. Only when, in the
+#'  function \link{lcmcross}, \code{logDepVar = TRUE}.}
 #' 
-#' \item{teBC_reciprocal_c}{\eqn{E\left[\exp{(u_c)}|\epsilon_c\right]}. Only when, in the function
-#' \link{lcmcross}, \code{logDepVar = TRUE}.}
+#' \item{teBC_reciprocal_c}{\eqn{E\left[\exp{(u_c)}|\epsilon_c\right]}. Only 
+#' when, in the function \link{lcmcross}, \code{logDepVar = TRUE}.}
 #'
 #' \item{PosteriorProb_c#}{Posterior probability of class #.}
 #'
@@ -193,12 +224,15 @@
 #' \item{u_c#}{Conditional inefficiency associated to class #, regardless of
 #' \code{Group_c}.}
 #' 
-#' \item{teBC_c#}{Conditional efficiency (\eqn{E\left[\exp{(-u_c)}|\epsilon_c\right]}) associated to class #, regardless of
-#' \code{Group_c}. Only when, in the function \link{lcmcross}, \code{logDepVar = TRUE}.}
+#' \item{teBC_c#}{Conditional efficiency 
+#' (\eqn{E\left[\exp{(-u_c)}|\epsilon_c\right]}) associated to class #, 
+#' regardless of \code{Group_c}. Only when, in the function \link{lcmcross}, 
+#' \code{logDepVar = TRUE}.}
 #' 
-#' \item{teBC_reciprocal_c#}{Reciprocal conditional efficiency (\eqn{E\left[\exp{(u_c)}|\epsilon_c\right]}) 
-#' associated to class #, regardless of \code{Group_c}. 
-#' Only when, in the function \link{lcmcross}, \code{logDepVar = TRUE}.}
+#' \item{teBC_reciprocal_c#}{Reciprocal conditional efficiency 
+#' (\eqn{E\left[\exp{(u_c)}|\epsilon_c\right]}) associated to class #, 
+#' regardless of \code{Group_c}. Only when, in the function \link{lcmcross}, 
+#' \code{logDepVar = TRUE}.}
 #'
 #' \item{ineff_c#}{Conditional inefficiency (\code{u_c}) for observations in
 #' class # only.}
@@ -206,11 +240,11 @@
 #' \item{effBC_c#}{Conditional efficiency (\code{teBC_c}) for observations in
 #' class # only.}
 #' 
-#' \item{ReffBC_c#}{Reciprocal conditional efficiency (\code{teBC_reciprocal_c}) for observations in
-#' class # only.}
+#' \item{ReffBC_c#}{Reciprocal conditional efficiency (\code{teBC_reciprocal_c}) 
+#' for observations in class # only.}
 #' 
-#' \bold{- For object of class \code{'selectioncross'} the following elements are
-#' returned:}
+#' \bold{- For object of class \code{'sfaselectioncross'} the following elements 
+#' are returned:}
 #'
 #' \item{u}{Conditional inefficiency.} 
 #' \item{uLB}{Lower bound for conditional inefficiency.} 
@@ -228,59 +262,75 @@
 #' \bold{- For object of class \code{'zisfcross'} the following elements are
 #' returned:}
 #'
-#' \item{Group_c}{Most probable class for each observation. In our case \code{class 1} is 
-#' the inefficient class while \code{class 2} is the efficient class.}
+#' \item{Group_c}{Most probable class for each observation. In our case 
+#' \code{class 1} is the inefficient class while \code{class 2} is the 
+#' efficient class.}
 #'
 #' \item{PosteriorProb_c}{Highest posterior probability.}
 #' 
-#' \item{odRatio}{Posterior odds ratio \eqn{R_i = \frac{Post. Prob. Class 2}{Post. Prob. Class 1}}.}
+#' \item{odRatio}{Posterior odds ratio 
+#' \eqn{R_i = \frac{Post. Prob. Class 2}{Post. Prob. Class 1}}.}
 #' 
 #' \item{u_c}{Conditional inefficiency of the most probable class given the
-#' posterior probability. In the case of the \code{'uniform'} distribution, two conditional inefficiency
-#' estimates are returned: \code{u1_c} and \code{u2_c}.}
+#' posterior probability. In the case of the \code{'uniform'} distribution, two 
+#' conditional inefficiency estimates are returned: \code{u1_c} and 
+#' \code{u2_c}.}
 #' 
 #' \item{teJLMS_c}{\eqn{\exp{(-E[u_c|\epsilon_c])}}. Only when, in the function
-#' \link{zisfcross}, \code{logDepVar = TRUE}. In the case of the \code{'uniform'} distribution, two conditional efficiency
+#' \link{zisfcross}, \code{logDepVar = TRUE}. In the case of the 
+#' \code{'uniform'} distribution, two conditional efficiency
 #' estimates are returned: \code{teJLMS1_c} and \code{teJLMS2_c}.}
 #' 
-#' \item{teBC_c}{\eqn{E\left[\exp{(-u_c)}|\epsilon_c\right]}. Only when, in the function
-#' \link{zisfcross}, \code{logDepVar = TRUE}. In the case of the \code{'uniform'} distribution, two conditional efficiency
+#' \item{teBC_c}{\eqn{E\left[\exp{(-u_c)}|\epsilon_c\right]}. Only when, 
+#' in the function \link{zisfcross}, \code{logDepVar = TRUE}. In the case of 
+#' the \code{'uniform'} distribution, two conditional efficiency
 #' estimates are returned: \code{teBC1_c} and \code{teBC2_c}.}
 #' 
-#' \item{teBC_reciprocal_c}{\eqn{E\left[\exp{(u_c)}|\epsilon_c\right]}. Only when, in the function
-#' \link{zisfcross}, \code{logDepVar = TRUE}. In the case of the \code{'uniform'} distribution, two conditional reciprocal efficiency
-#' estimates are returned: \code{teBC1_reciprocal_c} and \code{teBC2_reciprocal_c}.}
+#' \item{teBC_reciprocal_c}{\eqn{E\left[\exp{(u_c)}|\epsilon_c\right]}. 
+#' Only when, in the function \link{zisfcross}, \code{logDepVar = TRUE}. In the
+#'  case of the \code{'uniform'} distribution, two conditional reciprocal 
+#'  efficiency estimates are returned: \code{teBC1_reciprocal_c} and 
+#'  \code{teBC2_reciprocal_c}.}
 #'
 #' \item{PosteriorProb_c#}{Posterior probability of class #.}
 #'
 #' \item{PriorProb_c#}{Prior probability of class #.}
 #'
 #' \item{u_c#}{Conditional inefficiency associated to class #, regardless of
-#' \code{Group_c}. In the case of the \code{'uniform'} distribution, two conditional inefficiency
-#' estimates are returned: \code{u1_c#} and \code{u2_c#}.}
+#' \code{Group_c}. In the case of the \code{'uniform'} distribution, two 
+#' conditional inefficiency estimates are returned: 
+#' \code{u1_c#} and \code{u2_c#}.}
 #' 
-#' \item{teBC_c#}{Conditional efficiency (\eqn{E\left[\exp{(-u_c)}|\epsilon_c\right]}) associated to class #, regardless of
-#' \code{Group_c}. Only when, in the function \link{zisfcross}, \code{logDepVar = TRUE}. In the case of the \code{'uniform'} distribution, two conditional efficiency
-#' estimates are returned: \code{teBC1_c#} and \code{teBC2_c#}.}
+#' \item{teBC_c#}{Conditional efficiency 
+#' (\eqn{E\left[\exp{(-u_c)}|\epsilon_c\right]}) associated to class #, 
+#' regardless of \code{Group_c}. Only when, in the function \link{zisfcross}, 
+#' \code{logDepVar = TRUE}. In the case of the \code{'uniform'} distribution, 
+#' two conditional efficiency estimates are returned: \code{teBC1_c#} and 
+#' \code{teBC2_c#}.}
 #' 
-#' \item{teBC_reciprocal_c#}{Reciprocal conditional efficiency (\eqn{E\left[\exp{(u_c)}|\epsilon_c\right]}) 
-#' associated to class #, regardless of \code{Group_c}. 
-#' Only when, in the function \link{zisfcross}, \code{logDepVar = TRUE}. In the case of the \code{'uniform'} distribution, two conditional reciprocal efficiency
-#' estimates are returned: \code{teBC1_reciprocal_c#} and \code{teBC2_reciprocal_c#}.}
+#' \item{teBC_reciprocal_c#}{Reciprocal conditional efficiency 
+#' (\eqn{E\left[\exp{(u_c)}|\epsilon_c\right]}) associated to class #, 
+#' regardless of \code{Group_c}. Only when, in the function \link{zisfcross}, 
+#' \code{logDepVar = TRUE}. In the case of the \code{'uniform'} distribution,
+#' two conditional reciprocal efficiency estimates are returned:
+#'  \code{teBC1_reciprocal_c#} and \code{teBC2_reciprocal_c#}.}
 #'
 #' \item{ineff_c#}{Conditional inefficiency (\code{u_c}) for observations in
-#' class # only. In the case of the \code{'uniform'} distribution, two conditional inefficiency
-#' estimates are returned: \code{ineff1_c#} and \code{ineff2_c#}.}
+#' class # only. In the case of the \code{'uniform'} distribution, two 
+#' conditional inefficiency estimates are returned: \code{ineff1_c#} and
+#'  \code{ineff2_c#}.}
 #' 
 #' \item{effBC_c#}{Conditional efficiency (\code{teBC_c}) for observations in
-#' class # only. In the case of the \code{'uniform'} distribution, two conditional efficiency
-#' estimates are returned: \code{effBC1_c#} and \code{effBC2_c#}.}
+#' class # only. In the case of the \code{'uniform'} distribution, two 
+#' conditional efficiency estimates are returned: \code{effBC1_c#} and 
+#' \code{effBC2_c#}.}
 #' 
-#' \item{ReffBC_c#}{Reciprocal conditional efficiency (\code{teBC_reciprocal_c}) for observations in
-#' class # only. In the case of the \code{'uniform'} distribution, two conditional reciprocal efficiency
+#' \item{ReffBC_c#}{Reciprocal conditional efficiency 
+#' (\code{teBC_reciprocal_c}) for observations in class # only. In the case of 
+#' the \code{'uniform'} distribution, two conditional reciprocal efficiency
 #' estimates are returned: \code{ReffBC1_c#} and \code{ReffBC2_c#}.}
 #'
-# @author K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
+# @author K Hervé Dakpo
 #'
 #' @seealso \code{\link{sfacross}}, for the stochastic frontier analysis model
 #' fitting function.
@@ -288,8 +338,8 @@
 #' \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 #' model fitting function.
 #' 
-#' \code{\link{selectioncross}} for sample selection in stochastic frontier model
-#' fitting function.
+#' \code{\link{sfaselectioncross}} for sample selection in stochastic frontier 
+#' model fitting function.
 #' 
 #' \code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
 #' fitting function.
@@ -323,12 +373,12 @@
 #' ## Using data on fossil fuel fired steam electric power generation plants in the U.S.
 #' # Translog SFA (cost function) truncated normal with scaling property
 #' tl_u_ts <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) + log(wl/wf) +
-#'     log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) + I(log(wl/wf) *
-#'     log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)), udist = 'tnormal',
-#'     muhet = ~ regu, uhet = ~ regu, data = utility, S = -1, scaling = TRUE, method = 'mla')
-#'   eff.tl_u_ts <- efficiencies(tl_u_ts)
-#'   head(eff.tl_u_ts)
-#'   summary(eff.tl_u_ts)
+#' log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) + I(log(wl/wf) *
+#' log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)), udist = 'tnormal',
+#' muhet = ~ regu, uhet = ~ regu, data = utility, S = -1, scaling = TRUE, method = 'mla')
+#' eff.tl_u_ts <- efficiencies(tl_u_ts)
+#' head(eff.tl_u_ts)
+#' summary(eff.tl_u_ts)
 #'
 #' @aliases efficiencies.sfacross
 #' @export
@@ -434,11 +484,11 @@ efficiencies.lcmcross <- function(object, level = 0.95, newData = NULL,
   return(data.frame(EffRes))
 }
 
-# conditional efficiencies selectioncross ----------
+# conditional efficiencies sfaselectioncross ----------
 #' @rdname efficiencies
-#' @aliases efficiencies.selectioncross
+#' @aliases efficiencies.sfaselectioncross
 #' @export
-efficiencies.selectioncross <- function(object, level = 0.95,
+efficiencies.sfaselectioncross <- function(object, level = 0.95,
   newData = NULL, ...) {
   if (level < 0 || level > 0.9999) {
     stop("'level' must be between 0 and 0.9999", call. = FALSE)
@@ -470,44 +520,100 @@ efficiencies.zisfcross <- function(object, level = 0.95, newData = NULL,
     object$dataTable <- newData
     object$Nobs <- dim(newData)[1]
   }
-  if (object$sigmavType == "common") {
-    if (object$udist == "hnormal") {
-      EffRes <- czisfhalfnormeff(object = object, level = level)
-    } else {
-      if (object$udist == "exponential") {
-        EffRes <- czisfexponormeff(object = object, level = level)
+  if (object$linkF == "logit") {
+    if (object$sigmavType == "common") {
+      if (object$udist == "hnormal") {
+        EffRes <- czisfhalfnormeff_logit(object = object,
+          level = level)
       } else {
-        if (object$udist == "gamma") {
-          EffRes <- czisfgammanormeff(object = object,
+        if (object$udist == "exponential") {
+          EffRes <- czisfexponormeff_logit(object = object,
           level = level)
         } else {
+          if (object$udist == "gamma") {
+          EffRes <- czisfgammanormeff_logit(object = object,
+            level = level)
+          } else {
           if (object$udist == "rayleigh") {
-          EffRes <- czisfraynormeff(object = object,
+            EffRes <- czisfraynormeff_logit(object = object,
             level = level)
           } else {
-          if (object$udist == "uniform") {
-            EffRes <- czisfuninormeff(object = object,
-            level = level)
-          } else {
+            if (object$udist == "uniform") {
+            EffRes <- czisfuninormeff_logit(object = object,
+              level = level)
+            } else {
             if (object$udist == "tnormal") {
-            EffRes <- czisftruncnormeff(object = object,
+              EffRes <- czisftruncnormeff_logit(object = object,
               level = level)
             } else {
-            if (object$udist == "lognormal") {
-              EffRes <- czisflognormeff(object = object,
-              level = level)
-            } else {
+              if (object$udist == "lognormal") {
+              EffRes <- czisflognormeff_logit(object = object,
+                level = level)
+              } else {
               if (object$udist == "genexponential") {
-              EffRes <- czisfgenexponormeff(object = object,
+                EffRes <- czisfgenexponormeff_logit(object = object,
                 level = level)
               } else {
-              if (object$udist == "tslaplace") {
-                EffRes <- czisftslnormeff(object = object,
-                level = level)
-              } else {
-                if (object$udist == "weibull") {
-                EffRes <- czisfweibullnormeff(object = object,
+                if (object$udist == "tslaplace") {
+                EffRes <- czisftslnormeff_logit(object = object,
                   level = level)
+                } else {
+                if (object$udist == "weibull") {
+                  EffRes <- czisfweibullnormeff_logit(object = object,
+                  level = level)
+                }
+                }
+              }
+              }
+            }
+            }
+          }
+          }
+        }
+      }
+    } else {
+      if (object$sigmavType == "different") {
+        if (object$udist == "hnormal") {
+          EffRes <- cmnsfhalfnormeff_logit(object = object,
+          level = level)
+        } else {
+          if (object$udist == "exponential") {
+          EffRes <- cmnsfexponormeff_logit(object = object,
+            level = level)
+          } else {
+          if (object$udist == "gamma") {
+            EffRes <- cmnsfgammanormeff_logit(object = object,
+            level = level)
+          } else {
+            if (object$udist == "rayleigh") {
+            EffRes <- cmnsfraynormeff_logit(object = object,
+              level = level)
+            } else {
+            if (object$udist == "uniform") {
+              EffRes <- cmnsfuninormeff_logit(object = object,
+              level = level)
+            } else {
+              if (object$udist == "tnormal") {
+              EffRes <- cmnsftruncnormeff_logit(object = object,
+                level = level)
+              } else {
+              if (object$udist == "lognormal") {
+                EffRes <- cmnsflognormeff_logit(object = object,
+                level = level)
+              } else {
+                if (object$udist == "genexponential") {
+                EffRes <- cmnsfgenexponormeff_logit(object = object,
+                  level = level)
+                } else {
+                if (object$udist == "tslaplace") {
+                  EffRes <- cmnsftslnormeff_logit(object = object,
+                  level = level)
+                } else {
+                  if (object$udist == "weibull") {
+                  EffRes <- cmnsfweibullnormeff_logit(object = object,
+                    level = level)
+                  }
+                }
                 }
               }
               }
@@ -519,45 +625,312 @@ efficiencies.zisfcross <- function(object, level = 0.95, newData = NULL,
       }
     }
   } else {
-    if (object$sigmavType == "different") {
-      if (object$udist == "hnormal") {
-        EffRes <- cmnsfhalfnormeff(object = object, level = level)
-      } else {
-        if (object$udist == "exponential") {
-          EffRes <- cmnsfexponormeff(object = object,
+    if (object$linkF == "cauchit") {
+      if (object$sigmavType == "common") {
+        if (object$udist == "hnormal") {
+          EffRes <- czisfhalfnormeff_cauchit(object = object,
           level = level)
         } else {
+          if (object$udist == "exponential") {
+          EffRes <- czisfexponormeff_cauchit(object = object,
+            level = level)
+          } else {
           if (object$udist == "gamma") {
-          EffRes <- cmnsfgammanormeff(object = object,
+            EffRes <- czisfgammanormeff_cauchit(object = object,
             level = level)
           } else {
-          if (object$udist == "rayleigh") {
-            EffRes <- cmnsfraynormeff(object = object,
-            level = level)
-          } else {
+            if (object$udist == "rayleigh") {
+            EffRes <- czisfraynormeff_cauchit(object = object,
+              level = level)
+            } else {
             if (object$udist == "uniform") {
-            EffRes <- cmnsfuninormeff(object = object,
+              EffRes <- czisfuninormeff_cauchit(object = object,
               level = level)
             } else {
-            if (object$udist == "tnormal") {
-              EffRes <- cmnsftruncnormeff(object = object,
-              level = level)
-            } else {
+              if (object$udist == "tnormal") {
+              EffRes <- czisftruncnormeff_cauchit(object = object,
+                level = level)
+              } else {
               if (object$udist == "lognormal") {
-              EffRes <- cmnsflognormeff(object = object,
+                EffRes <- czisflognormeff_cauchit(object = object,
                 level = level)
               } else {
-              if (object$udist == "genexponential") {
-                EffRes <- cmnsfgenexponormeff(object = object,
-                level = level)
-              } else {
-                if (object$udist == "tslaplace") {
-                EffRes <- cmnsftslnormeff(object = object,
+                if (object$udist == "genexponential") {
+                EffRes <- czisfgenexponormeff_cauchit(object = object,
                   level = level)
                 } else {
-                if (object$udist == "weibull") {
-                  EffRes <- cmnsfweibullnormeff(object = object,
+                if (object$udist == "tslaplace") {
+                  EffRes <- czisftslnormeff_cauchit(object = object,
                   level = level)
+                } else {
+                  if (object$udist == "weibull") {
+                  EffRes <- czisfweibullnormeff_cauchit(object = object,
+                    level = level)
+                  }
+                }
+                }
+              }
+              }
+            }
+            }
+          }
+          }
+        }
+      } else {
+        if (object$sigmavType == "different") {
+          if (object$udist == "hnormal") {
+          EffRes <- cmnsfhalfnormeff_cauchit(object = object,
+            level = level)
+          } else {
+          if (object$udist == "exponential") {
+            EffRes <- cmnsfexponormeff_cauchit(object = object,
+            level = level)
+          } else {
+            if (object$udist == "gamma") {
+            EffRes <- cmnsfgammanormeff_cauchit(object = object,
+              level = level)
+            } else {
+            if (object$udist == "rayleigh") {
+              EffRes <- cmnsfraynormeff_cauchit(object = object,
+              level = level)
+            } else {
+              if (object$udist == "uniform") {
+              EffRes <- cmnsfuninormeff_cauchit(object = object,
+                level = level)
+              } else {
+              if (object$udist == "tnormal") {
+                EffRes <- cmnsftruncnormeff_cauchit(object = object,
+                level = level)
+              } else {
+                if (object$udist == "lognormal") {
+                EffRes <- cmnsflognormeff_cauchit(object = object,
+                  level = level)
+                } else {
+                if (object$udist == "genexponential") {
+                  EffRes <- cmnsfgenexponormeff_cauchit(object = object,
+                  level = level)
+                } else {
+                  if (object$udist == "tslaplace") {
+                  EffRes <- cmnsftslnormeff_cauchit(object = object,
+                    level = level)
+                  } else {
+                  if (object$udist == "weibull") {
+                    EffRes <- cmnsfweibullnormeff_cauchit(object = object,
+                    level = level)
+                  }
+                  }
+                }
+                }
+              }
+              }
+            }
+            }
+          }
+          }
+        }
+      }
+    } else {
+      if (object$linkF == "probit") {
+        if (object$sigmavType == "common") {
+          if (object$udist == "hnormal") {
+          EffRes <- czisfhalfnormeff_probit(object = object,
+            level = level)
+          } else {
+          if (object$udist == "exponential") {
+            EffRes <- czisfexponormeff_probit(object = object,
+            level = level)
+          } else {
+            if (object$udist == "gamma") {
+            EffRes <- czisfgammanormeff_probit(object = object,
+              level = level)
+            } else {
+            if (object$udist == "rayleigh") {
+              EffRes <- czisfraynormeff_probit(object = object,
+              level = level)
+            } else {
+              if (object$udist == "uniform") {
+              EffRes <- czisfuninormeff_probit(object = object,
+                level = level)
+              } else {
+              if (object$udist == "tnormal") {
+                EffRes <- czisftruncnormeff_probit(object = object,
+                level = level)
+              } else {
+                if (object$udist == "lognormal") {
+                EffRes <- czisflognormeff_probit(object = object,
+                  level = level)
+                } else {
+                if (object$udist == "genexponential") {
+                  EffRes <- czisfgenexponormeff_probit(object = object,
+                  level = level)
+                } else {
+                  if (object$udist == "tslaplace") {
+                  EffRes <- czisftslnormeff_probit(object = object,
+                    level = level)
+                  } else {
+                  if (object$udist == "weibull") {
+                    EffRes <- czisfweibullnormeff_probit(object = object,
+                    level = level)
+                  }
+                  }
+                }
+                }
+              }
+              }
+            }
+            }
+          }
+          }
+        } else {
+          if (object$sigmavType == "different") {
+          if (object$udist == "hnormal") {
+            EffRes <- cmnsfhalfnormeff_probit(object = object,
+            level = level)
+          } else {
+            if (object$udist == "exponential") {
+            EffRes <- cmnsfexponormeff_probit(object = object,
+              level = level)
+            } else {
+            if (object$udist == "gamma") {
+              EffRes <- cmnsfgammanormeff_probit(object = object,
+              level = level)
+            } else {
+              if (object$udist == "rayleigh") {
+              EffRes <- cmnsfraynormeff_probit(object = object,
+                level = level)
+              } else {
+              if (object$udist == "uniform") {
+                EffRes <- cmnsfuninormeff_probit(object = object,
+                level = level)
+              } else {
+                if (object$udist == "tnormal") {
+                EffRes <- cmnsftruncnormeff_probit(object = object,
+                  level = level)
+                } else {
+                if (object$udist == "lognormal") {
+                  EffRes <- cmnsflognormeff_probit(object = object,
+                  level = level)
+                } else {
+                  if (object$udist == "genexponential") {
+                  EffRes <- cmnsfgenexponormeff_probit(object = object,
+                    level = level)
+                  } else {
+                  if (object$udist == "tslaplace") {
+                    EffRes <- cmnsftslnormeff_probit(object = object,
+                    level = level)
+                  } else {
+                    if (object$udist == "weibull") {
+                    EffRes <- cmnsfweibullnormeff_probit(object = object,
+                      level = level)
+                    }
+                  }
+                  }
+                }
+                }
+              }
+              }
+            }
+            }
+          }
+          }
+        }
+      } else {
+        if (object$linkF == "cloglog") {
+          if (object$sigmavType == "common") {
+          if (object$udist == "hnormal") {
+            EffRes <- czisfhalfnormeff_cloglog(object = object,
+            level = level)
+          } else {
+            if (object$udist == "exponential") {
+            EffRes <- czisfexponormeff_cloglog(object = object,
+              level = level)
+            } else {
+            if (object$udist == "gamma") {
+              EffRes <- czisfgammanormeff_cloglog(object = object,
+              level = level)
+            } else {
+              if (object$udist == "rayleigh") {
+              EffRes <- czisfraynormeff_cloglog(object = object,
+                level = level)
+              } else {
+              if (object$udist == "uniform") {
+                EffRes <- czisfuninormeff_cloglog(object = object,
+                level = level)
+              } else {
+                if (object$udist == "tnormal") {
+                EffRes <- czisftruncnormeff_cloglog(object = object,
+                  level = level)
+                } else {
+                if (object$udist == "lognormal") {
+                  EffRes <- czisflognormeff_cloglog(object = object,
+                  level = level)
+                } else {
+                  if (object$udist == "genexponential") {
+                  EffRes <- czisfgenexponormeff_cloglog(object = object,
+                    level = level)
+                  } else {
+                  if (object$udist == "tslaplace") {
+                    EffRes <- czisftslnormeff_cloglog(object = object,
+                    level = level)
+                  } else {
+                    if (object$udist == "weibull") {
+                    EffRes <- czisfweibullnormeff_cloglog(object = object,
+                      level = level)
+                    }
+                  }
+                  }
+                }
+                }
+              }
+              }
+            }
+            }
+          }
+          } else {
+          if (object$sigmavType == "different") {
+            if (object$udist == "hnormal") {
+            EffRes <- cmnsfhalfnormeff_cloglog(object = object,
+              level = level)
+            } else {
+            if (object$udist == "exponential") {
+              EffRes <- cmnsfexponormeff_cloglog(object = object,
+              level = level)
+            } else {
+              if (object$udist == "gamma") {
+              EffRes <- cmnsfgammanormeff_cloglog(object = object,
+                level = level)
+              } else {
+              if (object$udist == "rayleigh") {
+                EffRes <- cmnsfraynormeff_cloglog(object = object,
+                level = level)
+              } else {
+                if (object$udist == "uniform") {
+                EffRes <- cmnsfuninormeff_cloglog(object = object,
+                  level = level)
+                } else {
+                if (object$udist == "tnormal") {
+                  EffRes <- cmnsftruncnormeff_cloglog(object = object,
+                  level = level)
+                } else {
+                  if (object$udist == "lognormal") {
+                  EffRes <- cmnsflognormeff_cloglog(object = object,
+                    level = level)
+                  } else {
+                  if (object$udist == "genexponential") {
+                    EffRes <- cmnsfgenexponormeff_cloglog(object = object,
+                    level = level)
+                  } else {
+                    if (object$udist == "tslaplace") {
+                    EffRes <- cmnsftslnormeff_cloglog(object = object,
+                      level = level)
+                    } else {
+                    if (object$udist == "weibull") {
+                      EffRes <- cmnsfweibullnormeff_cloglog(object = object,
+                      level = level)
+                    }
+                    }
+                  }
+                  }
                 }
                 }
               }

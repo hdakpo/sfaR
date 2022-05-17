@@ -17,16 +17,18 @@
 #'
 #' \code{\link{fitted}} returns the fitted frontier values from classic or
 #' latent class stochastic frontier models estimated with
-#' \code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.
+#' \code{\link{sfacross}}, \code{\link{lcmcross}}, 
+#' \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.
 #'
 #' @param object A stochastic frontier model returned
-#' by \code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.
+#' by \code{\link{sfacross}}, \code{\link{lcmcross}}, 
+#' \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.
 #' @param ... Currently ignored.
 #'
 #' @name fitted
 #'
-#' @return In the case of an object of class \code{'sfacross'}, \code{'selectioncross'} or 
-#' \code{'selectioncross'}, a vector of
+#' @return In the case of an object of class \code{'sfacross'}, 
+#' \code{'sfaselectioncross'} or \code{'zisfcross'}, a vector of
 #' fitted values is returned.
 #'
 #' In the case of an object of class \code{'lcmcross'}, a data frame containing
@@ -36,7 +38,7 @@
 #' @note The fitted values are ordered in the same way as the corresponding
 #' observations in the dataset used for the estimation.
 #' 
-# @author K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
+# @author K Hervé Dakpo
 #' 
 #' @seealso \code{\link{sfacross}}, for the stochastic frontier analysis model
 #' fitting function.
@@ -44,8 +46,8 @@
 #' \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 #' model fitting function.
 #' 
-#' \code{\link{selectioncross}} for sample selection in stochastic frontier model
-#' fitting function.
+#' \code{\link{sfaselectioncross}} for sample selection in stochastic frontier 
+#' model fitting function.
 #' 
 #' \code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
 #' fitting function.
@@ -56,9 +58,10 @@
 #'
 #' ## Using data on eighty-two countries production (DGP)
 #' # LCM Cobb Douglas (production function) half normal distribution
-#' cb_2c_h <- lcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal', data = worldprod)
-#'   fit.cb_2c_h <- fitted(cb_2c_h)
-#'   head(fit.cb_2c_h)
+#' cb_2c_h <- lcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal', 
+#' data = worldprod)
+#' fit.cb_2c_h <- fitted(cb_2c_h)
+#' head(fit.cb_2c_h)
 #'
 #' @aliases fitted.sfacross
 #' @export
@@ -94,11 +97,11 @@ fitted.lcmcross <- function(object, ...) {
   }
 }
 
-# fitted values for selectioncross ----------
+# fitted values for sfaselectioncross ----------
 #' @rdname fitted
-#' @aliases fitted.selectioncross
+#' @aliases fitted.sfaselectioncross
 #' @export
-fitted.selectioncross <- function(object, ...) {
+fitted.sfaselectioncross <- function(object, ...) {
   object$dataTable$mlFitted
 }
 

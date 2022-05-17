@@ -23,16 +23,18 @@
 #' of observations of the model frame (number of rows in the model
 #' frame), because sometimes the model frame is further reduced by the
 #' estimation procedure especially in the presence of NA. In the case of 
-#' `selectioncross`, `nobs` returns the number of observations used in the 
-#' selection equation.
+#' `sfaselectioncross`, `nobs` returns the number of observations used in the 
+#' frontier equation.
 #'
 #' @name nobs
 #' 
-#' @param object a `sfacross`, `lcmcross`, `selectioncross` or `zisfcross` object for which the number of
-#'     total observations is to be extracted,
+#' @param object a `sfacross`, `lcmcross`, `sfaselectioncross` or `zisfcross` 
+#' object for which the number of total observations is to be extracted,
 #' @param \dots further arguments.
 #' 
 #' @return A single number, normally an integer.
+#' 
+# @author K Hervé Dakpo
 #' 
 #' @keywords attribute
 #' 
@@ -41,9 +43,9 @@
 #' ## Using data on fossil fuel fired steam electric power generation plants in U.S.
 #' # Translog (cost function) half normal with heteroscedasticity
 #' tl_u_h <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
-#'     log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
-#'     I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
-#'     udist = 'hnormal', uhet = ~ regu, data = utility, S = -1, method = 'bfgs')
+#' log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+#' I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+#' udist = 'hnormal', uhet = ~ regu, data = utility, S = -1, method = 'bfgs')
 #'     
 #'  nobs(tl_u_h)
 #' 
@@ -54,7 +56,7 @@ nobs.sfacross <- function(object, ...) {
   return(object$Nobs)
 }
 
-# Eobjecttract number of observations for lcmcros ----------
+# Extract number of observations for lcmcros ----------
 #' @rdname nobs
 #' @aliases nobs.lcmcross
 #' @export
@@ -62,15 +64,15 @@ nobs.lcmcross <- function(object, ...) {
   return(object$Nobs)
 }
 
-# Eobjecttract number of observations for selectioncros ----------
+# Extract number of observations for sfaselectioncros ----------
 #' @rdname nobs
-#' @aliases nobs.selectioncross
+#' @aliases nobs.sfaselectioncross
 #' @export
-nobs.selectioncross <- function(object, ...) {
+nobs.sfaselectioncross <- function(object, ...) {
   return(object$Nobs)
 }
 
-# Eobjecttract number of observations for zisfcros ----------
+# Extract number of observations for zisfcros ----------
 #' @rdname nobs
 #' @aliases nobs.zisfcross
 #' @export

@@ -17,20 +17,24 @@
 #' 
 #' @description
 #' From an object of class \code{'summary.sfacross'}, \code{'summary.lcmcross'},
-#' \code{'summary.selectioncross'} or \code{'summary.zisfcross'}, \code{\link{coef}} extracts the coefficients,
-#' their standard errors, z-values, and (asymptotic) P-values.
+#' \code{'summary.sfaselectioncross'} or \code{'summary.zisfcross'}, 
+#' \code{\link{coef}} extracts the coefficients, their standard errors, 
+#' z-values, and (asymptotic) P-values.
 #'
-#' From on object of class \code{'sfacross'}, \code{'lcmcross'}, \code{'selectioncross'} or 
-#' \code{'zisfcross'}, it extracts only the estimated coefficients.
+#' From on object of class \code{'sfacross'}, \code{'lcmcross'},
+#'  \code{'sfaselectioncross'} or \code{'zisfcross'}, it extracts only the 
+#'  estimated coefficients.
 #'
 #' @name coef
 #'
 #' @param object A stochastic frontier model returned
-#' by \code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or 
-#' \code{\link{zisfcross}}, or an object of class
-#' \code{'summary.sfacross'}, \code{'summary.lcmcross'}, \code{'summary.selectioncross'} or \code{'summary.zisfcross'} .
+#' by \code{\link{sfacross}}, \code{\link{lcmcross}}, 
+#' \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}, or an object of 
+#' class \code{'summary.sfacross'}, \code{'summary.lcmcross'}, 
+#' \code{'summary.sfaselectioncross'} or \code{'summary.zisfcross'} .
 #' @param extraPar Logical (default = \code{FALSE}). Only applies to objects of
-#' class \code{'sfacross'}, \code{'lcmcross'}, \code{'selectioncross'} or \code{'zisfcross'}. If \code{TRUE}, additional
+#' class \code{'sfacross'}, \code{'lcmcross'}, \code{'sfaselectioncross'} or 
+#' \code{'zisfcross'}. If \code{TRUE}, additional
 #' parameters are returned:
 #'
 #' \code{sigmaSq} = \code{sigmauSq} + \code{sigmavSq}
@@ -53,19 +57,20 @@
 #' @param ... Currently ignored.
 #'
 #' @return For objects of class \code{'summary.sfacross'},
-#' \code{'summary.lcmcross'}, \code{'summary.selectioncross'} or 
+#' \code{'summary.lcmcross'}, \code{'summary.sfaselectioncross'} or 
 #' \code{'summary.zisfcross'}, \code{\link{coef}} returns a matrix with four
 #' columns. Namely, the estimated coefficients, their standard errors,
 #' z-values, and (asymptotic) P-values.
 #'
-#' For objects of class \code{'sfacross'}, \code{'lcmcross'}, \code{'selectioncross'} or \code{'zisfcross'},
+#' For objects of class \code{'sfacross'}, \code{'lcmcross'}, 
+#' \code{'sfaselectioncross'} or \code{'zisfcross'},
 #' \code{\link{coef}} returns a numeric vector of the estimated coefficients.
 #' If \code{extraPar = TRUE}, additional parameters, detailed in the section
 #' \sQuote{Arguments}, are also returned. In the case of object of class
 #' \code{'lcmcross'}, each additional parameter terminates with \code{'#'} that
 #' represents the class number.
 #'
-# @author K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
+# @author K Hervé Dakpo
 #'
 #' @seealso \code{\link{sfacross}}, for the stochastic frontier analysis model
 #' fitting function.
@@ -73,8 +78,8 @@
 #' \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 #' model fitting function.
 #' 
-#' \code{\link{selectioncross}} for sample selection in stochastic frontier model
-#' fitting function.
+#' \code{\link{sfaselectioncross}} for sample selection in stochastic frontier 
+#' model fitting function.
 #' 
 #' \code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
 #' fitting function.
@@ -86,12 +91,12 @@
 #' ## Using data on fossil fuel fired steam electric power generation plants in the U.S.
 #' # Translog SFA (cost function) truncated normal with scaling property
 #' tl_u_ts <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
-#'     log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
-#'     I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
-#'     udist = 'tnormal', muhet = ~ regu, uhet = ~ regu, data = utility, S = -1,
-#'     scaling = TRUE, method = 'mla')
-#'   coef(tl_u_ts, extraPar = TRUE)
-#'   coef(summary(tl_u_ts))
+#' log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+#' I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+#' udist = 'tnormal', muhet = ~ regu, uhet = ~ regu, data = utility, S = -1,
+#' scaling = TRUE, method = 'mla')
+#' coef(tl_u_ts, extraPar = TRUE)
+#' coef(summary(tl_u_ts))
 #'
 #' @aliases coef.sfacross
 #' @export
@@ -355,11 +360,12 @@ coef.summary.lcmcross <- function(object, ...) {
   object$mlRes
 }
 
-# coefficients from selectioncross ----------
+# coefficients from sfaselectioncross ----------
 #' @rdname coef
-#' @aliases coef.selectioncross
+#' @aliases coef.sfaselectioncross
 #' @export
-coef.selectioncross <- function(object, extraPar = FALSE, ...) {
+coef.sfaselectioncross <- function(object, extraPar = FALSE,
+  ...) {
   if (length(extraPar) != 1 || !is.logical(extraPar[1]))
     stop("argument 'extraPar' must be a single logical value",
       call. = FALSE)
@@ -369,10 +375,10 @@ coef.selectioncross <- function(object, extraPar = FALSE, ...) {
       object$nuZUvar)]
     phi <- object$mlParam[(object$nXvar + object$nuZUvar +
       1):(object$nXvar + object$nuZUvar + object$nvZVvar)]
-    uHvar <- model.matrix(object$formula, data = object$dataTable,
-      rhs = 2)
-    vHvar <- model.matrix(object$formula, data = object$dataTable,
-      rhs = 3)
+    uHvar <- model.matrix(object$formula, data = object$dataTable[object$dataTable$selectDum ==
+      1, ], rhs = 2)
+    vHvar <- model.matrix(object$formula, data = object$dataTable[object$dataTable$selectDum ==
+      1, ], rhs = 3)
     Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
     Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
     if (object$nuZUvar > 1 || object$nvZVvar > 1)
@@ -387,11 +393,11 @@ coef.selectioncross <- function(object, extraPar = FALSE, ...) {
   return(cRes)
 }
 
-# coefficients from summary.selectioncross ----------
+# coefficients from summary.sfaselectioncross ----------
 #' @rdname coef
-#' @aliases coef.summary.selectioncross
+#' @aliases coef.summary.sfaselectioncross
 #' @export
-coef.summary.selectioncross <- function(object, ...) {
+coef.summary.sfaselectioncross <- function(object, ...) {
   object$mlRes
 }
 

@@ -5654,6 +5654,10 @@ cmnsfmargtruncnorm_Vu_logit <- function(object) {
   Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
   Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
   Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
+  Lambda <- mu/exp(Wu/2)
+  m1 <- exp(Wu/2) * (Lambda + dnorm(Lambda)/pnorm(Lambda))
+  m2 <- exp(Wu) * (1 - Lambda * dnorm(Lambda)/pnorm(Lambda) -
+                     (dnorm(Lambda)/pnorm(Lambda))^2)
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
     as.numeric(crossprod(matrix(beta), t(Xvar)))
   mustar <- (mu * exp(Wv1) - exp(Wu) * object$S * epsilon)/(exp(Wu) +
@@ -5795,6 +5799,9 @@ cmnsfmargtruncnorm_Vu_cauchit <- function(object) {
   Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
   Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
   Lambda <- mu/exp(Wu/2)
+  m1 <- exp(Wu/2) * (Lambda + dnorm(Lambda)/pnorm(Lambda))
+  m2 <- exp(Wu) * (1 - Lambda * dnorm(Lambda)/pnorm(Lambda) -
+                     (dnorm(Lambda)/pnorm(Lambda))^2)
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
     as.numeric(crossprod(matrix(beta), t(Xvar)))
   mustar <- (mu * exp(Wv1) - exp(Wu) * object$S * epsilon)/(exp(Wu) +
@@ -5936,6 +5943,9 @@ cmnsfmargtruncnorm_Vu_probit <- function(object) {
   Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
   Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
   Lambda <- mu/exp(Wu/2)
+  m1 <- exp(Wu/2) * (Lambda + dnorm(Lambda)/pnorm(Lambda))
+  m2 <- exp(Wu) * (1 - Lambda * dnorm(Lambda)/pnorm(Lambda) -
+                     (dnorm(Lambda)/pnorm(Lambda))^2)
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
     as.numeric(crossprod(matrix(beta), t(Xvar)))
   mustar <- (mu * exp(Wv1) - exp(Wu) * object$S * epsilon)/(exp(Wu) +
@@ -6077,6 +6087,9 @@ cmnsfmargtruncnorm_Vu_cloglog <- function(object) {
   Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
   Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
   Lambda <- mu/exp(Wu/2)
+  m1 <- exp(Wu/2) * (Lambda + dnorm(Lambda)/pnorm(Lambda))
+  m2 <- exp(Wu) * (1 - Lambda * dnorm(Lambda)/pnorm(Lambda) -
+                     (dnorm(Lambda)/pnorm(Lambda))^2)
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
     as.numeric(crossprod(matrix(beta), t(Xvar)))
   mustar <- (mu * exp(Wv1) - exp(Wu) * object$S * epsilon)/(exp(Wu) +

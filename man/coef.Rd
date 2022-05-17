@@ -6,8 +6,8 @@
 \alias{coef.summary.sfacross}
 \alias{coef.lcmcross}
 \alias{coef.summary.lcmcross}
-\alias{coef.selectioncross}
-\alias{coef.summary.selectioncross}
+\alias{coef.sfaselectioncross}
+\alias{coef.summary.sfaselectioncross}
 \alias{coef.zisfcross}
 \alias{coef.summary.zisfcross}
 \title{Extract coefficients of stochastic frontier models}
@@ -20,9 +20,9 @@
 
 \method{coef}{summary.lcmcross}(object, ...)
 
-\method{coef}{selectioncross}(object, extraPar = FALSE, ...)
+\method{coef}{sfaselectioncross}(object, extraPar = FALSE, ...)
 
-\method{coef}{summary.selectioncross}(object, ...)
+\method{coef}{summary.sfaselectioncross}(object, ...)
 
 \method{coef}{zisfcross}(object, extraPar = FALSE, ...)
 
@@ -30,12 +30,14 @@
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or
-\code{\link{zisfcross}}, or an object of class
-\code{'summary.sfacross'}, \code{'summary.lcmcross'}, \code{'summary.selectioncross'} or \code{'summary.zisfcross'} .}
+by \code{\link{sfacross}}, \code{\link{lcmcross}},
+\code{\link{sfaselectioncross}} or \code{\link{zisfcross}}, or an object of
+class \code{'summary.sfacross'}, \code{'summary.lcmcross'},
+\code{'summary.sfaselectioncross'} or \code{'summary.zisfcross'} .}
 
 \item{extraPar}{Logical (default = \code{FALSE}). Only applies to objects of
-class \code{'sfacross'}, \code{'lcmcross'}, \code{'selectioncross'} or \code{'zisfcross'}. If \code{TRUE}, additional
+class \code{'sfacross'}, \code{'lcmcross'}, \code{'sfaselectioncross'} or
+\code{'zisfcross'}. If \code{TRUE}, additional
 parameters are returned:
 
 \code{sigmaSq} = \code{sigmauSq} + \code{sigmavSq}
@@ -60,12 +62,13 @@ parameters are returned:
 }
 \value{
 For objects of class \code{'summary.sfacross'},
-\code{'summary.lcmcross'}, \code{'summary.selectioncross'} or
+\code{'summary.lcmcross'}, \code{'summary.sfaselectioncross'} or
 \code{'summary.zisfcross'}, \code{\link{coef}} returns a matrix with four
 columns. Namely, the estimated coefficients, their standard errors,
 z-values, and (asymptotic) P-values.
 
-For objects of class \code{'sfacross'}, \code{'lcmcross'}, \code{'selectioncross'} or \code{'zisfcross'},
+For objects of class \code{'sfacross'}, \code{'lcmcross'},
+\code{'sfaselectioncross'} or \code{'zisfcross'},
 \code{\link{coef}} returns a numeric vector of the estimated coefficients.
 If \code{extraPar = TRUE}, additional parameters, detailed in the section
 \sQuote{Arguments}, are also returned. In the case of object of class
@@ -74,23 +77,25 @@ represents the class number.
 }
 \description{
 From an object of class \code{'summary.sfacross'}, \code{'summary.lcmcross'},
-\code{'summary.selectioncross'} or \code{'summary.zisfcross'}, \code{\link{coef}} extracts the coefficients,
-their standard errors, z-values, and (asymptotic) P-values.
+\code{'summary.sfaselectioncross'} or \code{'summary.zisfcross'},
+\code{\link{coef}} extracts the coefficients, their standard errors,
+z-values, and (asymptotic) P-values.
 
-From on object of class \code{'sfacross'}, \code{'lcmcross'}, \code{'selectioncross'} or
-\code{'zisfcross'}, it extracts only the estimated coefficients.
+From on object of class \code{'sfacross'}, \code{'lcmcross'},
+\code{'sfaselectioncross'} or \code{'zisfcross'}, it extracts only the
+estimated coefficients.
 }
 \examples{
 
 ## Using data on fossil fuel fired steam electric power generation plants in the U.S.
 # Translog SFA (cost function) truncated normal with scaling property
 tl_u_ts <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
-    log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
-    I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
-    udist = 'tnormal', muhet = ~ regu, uhet = ~ regu, data = utility, S = -1,
-    scaling = TRUE, method = 'mla')
-  coef(tl_u_ts, extraPar = TRUE)
-  coef(summary(tl_u_ts))
+log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+udist = 'tnormal', muhet = ~ regu, uhet = ~ regu, data = utility, S = -1,
+scaling = TRUE, method = 'mla')
+coef(tl_u_ts, extraPar = TRUE)
+coef(summary(tl_u_ts))
 
 }
 \seealso{
@@ -100,8 +105,8 @@ fitting function.
 \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 model fitting function.
 
-\code{\link{selectioncross}} for sample selection in stochastic frontier model
-fitting function.
+\code{\link{sfaselectioncross}} for sample selection in stochastic frontier
+model fitting function.
 
 \code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
 fitting function.

@@ -4,7 +4,7 @@
 \alias{marginal}
 \alias{marginal.sfacross}
 \alias{marginal.lcmcross}
-\alias{marginal.selectioncross}
+\alias{marginal.sfaselectioncross}
 \alias{marginal.zisfcross}
 \title{Marginal effects of the inefficiency drivers in stochastic frontier models}
 \usage{
@@ -12,17 +12,19 @@
 
 \method{marginal}{lcmcross}(object, newData = NULL, ...)
 
-\method{marginal}{selectioncross}(object, newData = NULL, ...)
+\method{marginal}{sfaselectioncross}(object, newData = NULL, ...)
 
 \method{marginal}{zisfcross}(object, newData = NULL, ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.}
+by \code{\link{sfacross}}, \code{\link{lcmcross}},
+\code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.}
 
-\item{newData}{Optional data frame that is used to calculate the marginal effect of \eqn{Z} variables on
-inefficiency. If NULL (the default), the marginal estimates are calculated
-for the observations that were used in the estimation.}
+\item{newData}{Optional data frame that is used to calculate the marginal
+effect of \eqn{Z} variables on inefficiency. If NULL (the default), the
+marginal estimates are calculated for the observations that were used in the
+estimation.}
 
 \item{...}{Currently ignored.}
 }
@@ -40,12 +42,13 @@ frontier model, each variable terminates with
 \description{
 This function returns marginal effects of the inefficiency drivers from
 classic or latent class stochastic frontier models estimated with
-\code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.
+\code{\link{sfacross}}, \code{\link{lcmcross}},
+\code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.
 }
 \details{
-\code{\link{marginal}} operates in the presence of exogenous variables that
-explain inefficiency, namely the inefficiency drivers (\eqn{uhet = ~ Z_u} or
-\eqn{muhet = ~ Z_{mu}}).
+\code{\link{marginal}} operates in the presence of exogenous
+variables that explain inefficiency, namely the inefficiency drivers
+(\eqn{uhet = ~ Z_u} or \eqn{muhet = ~ Z_{mu}}).
 
 Two components are computed for each variable: the marginal effects on the
 expected inefficiency (\eqn{\frac{\partial E[u]}{\partial Z_{(m)u}}}) and
@@ -59,15 +62,16 @@ inefficiency and its drivers.
 }
 \examples{
 
-## Using data on fossil fuel fired steam electric power generation plants in the U.S.
+## Using data on fossil fuel fired steam electric power generation plants in
+the U.S.
 # Translog SFA (cost function) truncated normal with scaling property
 tl_u_ts <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
-    log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
-    I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
-    udist = 'tnormal', muhet = ~ regu + wl, uhet = ~ regu + wl, data = utility, S = -1,
-    scaling = TRUE, method = 'mla')
-  marg.tl_u_ts <- marginal(tl_u_ts)
-  summary(marg.tl_u_ts)
+log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+udist = 'tnormal', muhet = ~ regu + wl, uhet = ~ regu + wl, data = utility, 
+S = -1, scaling = TRUE, method = 'mla')
+marg.tl_u_ts <- marginal(tl_u_ts)
+summary(marg.tl_u_ts)
 
 ## Using data on eighty-two countries production (DGP)
 # LCM Cobb Douglas (production function) half normal distribution
@@ -89,8 +93,8 @@ fitting function.
 \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 model fitting function.
 
-\code{\link{selectioncross}} for sample selection in stochastic frontier model
-fitting function.
+\code{\link{sfaselectioncross}} for sample selection in stochastic frontier
+model fitting function.
 
 \code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
 fitting function.

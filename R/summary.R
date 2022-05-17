@@ -16,14 +16,14 @@
 #' Summary of results for stochastic frontier models
 #'
 #' Create and print summary results for stochastic frontier models returned by 
-#' \code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or
-#' \code{\link{zisfcross}}.
+#' \code{\link{sfacross}}, \code{\link{lcmcross}}, 
+#' \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.
 #'
 #' @param object An object of either class \code{'sfacross'} returned by the
 #' function \code{\link{sfacross}}, or class \code{'lcmcross'} returned by the
-#' function \code{\link{lcmcross}}, or class \code{'selectioncross'} returned by the
-#' function \code{\link{selectioncross}}, or class \code{'zisfcross'} returned by the
-#' function \code{\link{zisfcross}}.
+#' function \code{\link{lcmcross}}, or class \code{'sfaselectioncross'} returned 
+#' by the function \code{\link{sfaselectioncross}}, or class \code{'zisfcross'} 
+#' returned by the function \code{\link{zisfcross}}.
 #' @param grad Logical. Default = \code{FALSE}. If \code{TRUE}, the gradient
 #' for the maximum likelihood (ML) estimates of the different parameters is
 #' returned.
@@ -32,15 +32,19 @@
 #' returned.
 #' @param ... Currently ignored.
 #' @param x An object of either class \code{'summary.sfacross'},
-#' \code{'summary.lcmcross'}, \code{'summary.selectioncross'} or \code{'summary.zisfcross'}.
+#' \code{'summary.lcmcross'}, \code{'summary.sfaselectioncross'} or 
+#' \code{'summary.zisfcross'}.
 #' @param digits Numeric. Number of digits displayed in values.
 #'
 #' @name summary
 #'
 #' @return The \code{\link{summary}} method returns a list of class
-#' \code{'summary.sfacross'}, \code{'summary.lcmcross'}, \code{'summary.selectioncross'} \code{'summary.zisfcross'}
-#' that contains the same elements as an object returned by \code{\link{sfacross}},
-#' \code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}} with the following additional elements:
+#' \code{'summary.sfacross'}, \code{'summary.lcmcross'}, 
+#' \code{'summary.sfaselectioncross'} \code{'summary.zisfcross'}
+#' that contains the same elements as an object returned by 
+#' \code{\link{sfacross}}, \code{\link{lcmcross}}, 
+#' \code{\link{sfaselectioncross}} or \code{\link{zisfcross}} with the following 
+#' additional elements:
 #'
 #' \item{AIC}{Akaike information criterion.}
 #'
@@ -48,33 +52,34 @@
 #'
 #' \item{HQIC}{Hannan-Quinn information criterion.}
 #'
-#' \item{sigmavSq}{For \code{object} of class \code{'sfacross'} or \code{'selectioncross'}. Variance of
+#' \item{sigmavSq}{For \code{object} of class \code{'sfacross'} or 
+#' \code{'sfaselectioncross'}. Variance of
 #' the two-sided error term (\eqn{\sigma_v^2}).}
 #'
-#' \item{sigmauSq}{For \code{object} of class \code{'sfacross'} or \code{'selectioncross'}.
-#' Parametrization of the variance of the one-sided error term
-#' (\eqn{\sigma_u^2}).}
+#' \item{sigmauSq}{For \code{object} of class \code{'sfacross'} or 
+#' \code{'sfaselectioncross'}. Parametrization of the variance of the one-sided
+#'  error term (\eqn{\sigma_u^2}).}
 #'
-#' \item{Varu}{For \code{object} of class \code{'sfacross'} or \code{'selectioncross'}. Variance of the
-#' one-sided error term.}
+#' \item{Varu}{For \code{object} of class \code{'sfacross'} or 
+#' \code{'sfaselectioncross'}. Variance of the one-sided error term.}
 #'
 #' \item{THETA}{For \code{object} of class \code{'sfacross'} with \code{'udist
 #' = uniform'}.  \eqn{\Theta} value in the case the uniform distribution is
 #' defined as: \eqn{u_i \in [0, \Theta]}.}
 #'
-#' \item{Eu}{For \code{object} of class \code{'sfacross'} or \code{'selectioncross'}. Expected
-#' unconditional inefficiency.}
+#' \item{Eu}{For \code{object} of class \code{'sfacross'} or 
+#' \code{'sfaselectioncross'}. Expected unconditional inefficiency.}
 #'
-#' \item{Expu}{For \code{object} of class \code{'sfacross'} or \code{'selectioncross'}. Expected
-#' unconditional efficiency.}
+#' \item{Expu}{For \code{object} of class \code{'sfacross'} or 
+#' \code{'sfaselectioncross'}. Expected unconditional efficiency.}
 #'
 #' \item{olsRes}{For \code{object} of class \code{'sfacross'}. Matrix of OLS
 #' estimates, their standard errors, t-values, P-values, and when \code{ci =
 #' TRUE} their confidence intervals.}
 #' 
-#' \item{ols2StepRes}{For \code{object} of class \code{'selectioncross'}. Matrix of OLS
-#' 2 step estimates, their standard errors, t-values, P-values, and when \code{ci =
-#' TRUE} their confidence intervals.}
+#' \item{ols2StepRes}{For \code{object} of class \code{'sfaselectioncross'}. 
+#' Matrix of OLS 2 step estimates, their standard errors, t-values, P-values,
+#' and when \code{ci = TRUE} their confidence intervals.}
 #'
 #' \item{mlRes}{Matrix of ML estimates, their standard errors, z-values,
 #' asymptotic P-values, and when \code{grad = TRUE} their gradient, \code{ci =
@@ -85,7 +90,7 @@
 #'
 #' \item{df}{Degree of freedom for the inefficiency model.}
 #' 
-# @author K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
+# @author K Hervé Dakpo
 #' 
 #' @seealso \code{\link{sfacross}}, for the stochastic frontier analysis model
 #' fitting function.
@@ -93,8 +98,8 @@
 #' \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 #' model fitting function.
 #' 
-#' \code{\link{selectioncross}} for sample selection in stochastic frontier model
-#' fitting function.
+#' \code{\link{sfaselectioncross}} for sample selection in stochastic frontier 
+#' model fitting function.
 #' 
 #' \code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
 #' fitting function.
@@ -138,11 +143,11 @@
 #' ## Using data on fossil fuel fired steam electric power generation plants in the U.S.
 #' # Translog SFA (cost function) truncated normal with scaling property
 #' tl_u_ts <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
-#'     log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
-#'     I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
-#'     udist = 'tnormal', muhet = ~ regu, uhet = ~ regu, data = utility, S = -1,
-#'     scaling = TRUE, method = 'mla')
-#'   summary(tl_u_ts, grad = TRUE, ci = TRUE)
+#' log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+#' I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+#' udist = 'tnormal', muhet = ~ regu, uhet = ~ regu, data = utility, S = -1,
+#' scaling = TRUE, method = 'mla')
+#' summary(tl_u_ts, grad = TRUE, ci = TRUE)
 #'
 #' @aliases summary.sfacross
 #' @export
@@ -1454,11 +1459,11 @@ print.summary.lcmcross <- function(x, digits = max(3, getOption("digits") -
   invisible(x)
 }
 
-# summary for selectioncross ----------
+# summary for sfaselectioncross ----------
 #' @rdname summary
-#' @aliases summary.selectioncross
+#' @aliases summary.sfaselectioncross
 #' @export
-summary.selectioncross <- function(object, grad = FALSE, ci = FALSE,
+summary.sfaselectioncross <- function(object, grad = FALSE, ci = FALSE,
   ...) {
   if (length(grad) != 1 || !is.logical(grad[1])) {
     stop("argument 'grad' must be a single logical value",
@@ -1476,10 +1481,10 @@ summary.selectioncross <- function(object, grad = FALSE, ci = FALSE,
     object$nuZUvar)]
   phi <- object$mlParam[(object$nXvar + object$nuZUvar + 1):(object$nXvar +
     object$nuZUvar + object$nvZVvar)]
-  uHvar <- model.matrix(object$formula, data = object$dataTable,
-    rhs = 2)
-  vHvar <- model.matrix(object$formula, data = object$dataTable,
-    rhs = 3)
+  uHvar <- model.matrix(object$formula, data = object$dataTable[object$dataTable$selectDum ==
+    1, ], rhs = 2)
+  vHvar <- model.matrix(object$formula, data = object$dataTable[object$dataTable$selectDum ==
+    1, ], rhs = 3)
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
   object$sigmavSq <- mean(exp(Wv))
@@ -1571,12 +1576,12 @@ summary.selectioncross <- function(object, grad = FALSE, ci = FALSE,
   return(object)
 }
 
-# print summary for selectioncross ----------
+# print summary for sfaselectioncross ----------
 #' @rdname summary
-#' @aliases print.summary.selectioncross
+#' @aliases print.summary.sfaselectioncross
 #' @export
-print.summary.selectioncross <- function(x, digits = max(3, getOption("digits") -
-  2), ...) {
+print.summary.sfaselectioncross <- function(x, digits = max(3,
+  getOption("digits") - 2), ...) {
   mlRes <- x$mlRes
   if (dim(mlRes)[2] == 4) {
     mlRes[, 1] <- as.numeric(formatC(x$mlRes[, 1], digits = digits,
@@ -2036,6 +2041,9 @@ print.summary.zisfcross <- function(x, digits = max(3, getOption("digits") -
     `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
     "\n")
   cat(zisfdist(x$udist), "\n")
+  cat("Class Membership link function:", paste0(rep(" ", lengthSum -
+    nchar("Class Membership link function:") - nchar(x$linkF)),
+    collapse = ""), x$linkF, "\n")
   cat("Dependent Variable:", paste0(rep(" ", lengthSum - nchar("Dependent Variable:") -
     nchar(paste0(attr(x$formula, "lhs")))), collapse = ""),
     paste0(attr(x$formula, "lhs")), "\n")

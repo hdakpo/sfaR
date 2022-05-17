@@ -17,11 +17,12 @@
 #'
 #' \code{\link{logLik}} extracts the log-likelihood value(s) from classic or
 #' latent class stochastic frontier models estimated with
-#' \code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or 
-#' \code{\link{zisfcross}}.
+#' \code{\link{sfacross}}, \code{\link{lcmcross}}, 
+#' \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.
 #'
 #' @param object A stochastic frontier model returned
-#' by \code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.
+#' by \code{\link{sfacross}}, \code{\link{lcmcross}}, 
+#' \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.
 #' @param individual Logical. If \code{FALSE} (default), the sum of all
 #' observations' log-likelihood values is returned. If \code{TRUE}, a vector of
 #' each observation's log-likelihood value is returned.
@@ -29,15 +30,15 @@
 #'
 #' @name logLik
 #'
-#' @return \code{\link{logLik}} returns either an object of class \code{'logLik'},
-#' which is the log-likelihood value
-#' with the total number of observations (\code{nobs}) and the
-#' number of free parameters (\code{df}) as attributes, when \code{individual = FALSE},
-#' or a list of elements, containing the log-likelihood of each observation
-#' (\code{logLik}), the total number of observations (\code{Nobs}) and the
-#' number of free parameters (\code{df}), when \code{individual = TRUE}.
+#' @return \code{\link{logLik}} returns either an object of class 
+#' \code{'logLik'}, which is the log-likelihood value with the total number of 
+#' observations (\code{nobs}) and the number of free parameters (\code{df}) as 
+#' attributes, when \code{individual = FALSE}, or a list of elements, containing 
+#' the log-likelihood of each observation (\code{logLik}), the total number of 
+#' observations (\code{Nobs}) and the number of free parameters (\code{df}), 
+#' when \code{individual = TRUE}.
 #'
-# @author K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
+# @author K Hervé Dakpo
 #'
 #' @seealso \code{\link{sfacross}}, for the stochastic frontier analysis model
 #' fitting function.
@@ -45,8 +46,8 @@
 #' \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 #' model fitting function.
 #' 
-#' \code{\link{selectioncross}} for sample selection in stochastic frontier model
-#' fitting function.
+#' \code{\link{sfaselectioncross}} for sample selection in stochastic frontier 
+#' model fitting function.
 #' 
 #' \code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
 #' fitting function.
@@ -58,16 +59,17 @@
 #' ## Using data on fossil fuel fired steam electric power generation plants in the U.S.
 #' # Translog SFA (cost function) truncated normal with scaling property
 #' tl_u_ts <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
-#'     log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
-#'     I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
-#'     udist = 'tnormal', muhet = ~ regu, uhet = ~ regu, data = utility, S = -1,
-#'     scaling = TRUE, method = 'mla')
-#'   logLik(tl_u_ts)
+#' log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+#' I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+#' udist = 'tnormal', muhet = ~ regu, uhet = ~ regu, data = utility, S = -1,
+#' scaling = TRUE, method = 'mla')
+#' logLik(tl_u_ts)
 #'
 #' ## Using data on eighty-two countries production (DGP)
 #' # LCM Cobb Douglas (production function) half normal distribution
-#' cb_2c_h <- lcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal', data = worldprod, S = 1)
-#'   logLik(cb_2c_h, individual = TRUE)
+#' cb_2c_h <- lcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal', 
+#' data = worldprod, S = 1)
+#' logLik(cb_2c_h, individual = TRUE)
 #'
 #' @aliases logLik.sfacross
 #' @export
@@ -85,10 +87,10 @@ logLik.sfacross <- function(object, individual = FALSE, ...) {
     return(LL)
   } else {
     LL <- object$mlLoglik
-    attributes( LL )$nobs <- object$Nobs
-    attributes( LL )$df <- object$nParm
-    class( LL ) <- "logLik"
-    return( LL )
+    attributes(LL)$nobs <- object$Nobs
+    attributes(LL)$df <- object$nParm
+    class(LL) <- "logLik"
+    return(LL)
   }
 }
 
@@ -108,18 +110,19 @@ logLik.lcmcross <- function(object, individual = FALSE, ...) {
     return(LL)
   } else {
     LL <- object$mlLoglik
-    attributes( LL )$nobs <- object$Nobs
-    attributes( LL )$df <- object$nParm
-    class( LL ) <- "logLik"
-    return( LL )
+    attributes(LL)$nobs <- object$Nobs
+    attributes(LL)$df <- object$nParm
+    class(LL) <- "logLik"
+    return(LL)
   }
 }
 
-# log likelihood extraction for selectioncross ----------
+# log likelihood extraction for sfaselectioncross
+# ----------
 #' @rdname logLik
-#' @aliases logLik.selectioncross
+#' @aliases logLik.sfaselectioncross
 #' @export
-logLik.selectioncross <- function(object, individual = FALSE,
+logLik.sfaselectioncross <- function(object, individual = FALSE,
   ...) {
   if (length(individual) != 1 || !is.logical(individual[1]))
     stop("argument 'individual' must be a single logical value",
@@ -132,10 +135,10 @@ logLik.selectioncross <- function(object, individual = FALSE,
     return(LL)
   } else {
     LL <- object$mlLoglik
-    attributes( LL )$nobs <- object$Nobs
-    attributes( LL )$df <- object$nParm
-    class( LL ) <- "logLik"
-    return( LL )
+    attributes(LL)$nobs <- object$Nobs
+    attributes(LL)$df <- object$nParm
+    class(LL) <- "logLik"
+    return(LL)
   }
 }
 
@@ -155,9 +158,9 @@ logLik.zisfcross <- function(object, individual = FALSE, ...) {
     return(LL)
   } else {
     LL <- object$mlLoglik
-    attributes( LL )$nobs <- object$Nobs
-    attributes( LL )$df <- object$nParm
-    class( LL ) <- "logLik"
-    return( LL )
+    attributes(LL)$nobs <- object$Nobs
+    attributes(LL)$df <- object$nParm
+    class(LL) <- "logLik"
+    return(LL)
   }
 }
