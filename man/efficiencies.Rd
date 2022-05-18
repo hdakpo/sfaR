@@ -6,6 +6,7 @@
 \alias{efficiencies.lcmcross}
 \alias{efficiencies.sfaselectioncross}
 \alias{efficiencies.zisfcross}
+\alias{efficiencies.cnsfcross}
 \title{Compute conditional (in-)efficiency estimates of stochastic frontier models}
 \usage{
 \method{efficiencies}{sfacross}(object, level = 0.95, newData = NULL, ...)
@@ -15,17 +16,19 @@
 \method{efficiencies}{sfaselectioncross}(object, level = 0.95, newData = NULL, ...)
 
 \method{efficiencies}{zisfcross}(object, level = 0.95, newData = NULL, ...)
+
+\method{efficiencies}{cnsfcross}(object, level = 0.95, newData = NULL, ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{sfacross}}, \code{\link{lcmcross}},
+by \code{\link{cnsfcross}}, \code{\link{lcmcross}},
 \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.}
 
 \item{level}{A number between between 0 and 0.9999 used for the computation
 of (in-)efficiency confidence intervals (defaut = \code{0.95}). Only used
 when \code{udist} = \code{'hnormal'}, \code{'exponential'}, \code{'tnormal'}
 or \code{'uniform'} in \code{\link{sfacross}}. The option is also available
-for \code{\link{lcmcross}}, or \code{\link{sfaselectioncross}}.}
+for \code{\link{sfaselectioncross}}.}
 
 \item{newData}{Optional data frame that is used to calculate the efficiency
 estimates. If NULL (the default), the efficiency estimates are calculated
@@ -38,75 +41,32 @@ A data frame that contains individual (in-)efficiency estimates.
 These are ordered in the same way as the corresponding observations in the
 dataset used for the estimation.
 
-\bold{- For object of class \code{'sfacross'} the following elements are
-returned:}
-
-\item{u}{Conditional inefficiency. In the case argument \code{udist} of
-\link{sfacross} is set to \code{'uniform'}, two conditional inefficiency
-estimates are returned: \code{u1} for the classic conditional inefficiency
-following Jondrow \emph{et al.} (1982), and \code{u2} which is obtained when
-\eqn{\theta/\sigma_v \longrightarrow \infty} (see Nguyen, 2010).}
-
-\item{uLB}{Lower bound for conditional inefficiency. Only when the argument
-\code{udist} of \link{sfacross} is set to \code{'hnormal'},
-\code{'exponential'}, \code{'tnormal'} or \code{'uniform'}.}
-
-\item{uUB}{Upper bound for conditional inefficiency. Only when the argument
-\code{udist} of \link{sfacross} is set to \code{'hnormal'},
-\code{'exponential'}, \code{'tnormal'} or \code{'uniform'}.}
-
-\item{teJLMS}{\eqn{\exp{(-E[u|\epsilon])}}. When the argument \code{udist} of
-\link{sfacross} is set to \code{'uniform'}, \code{teJLMS1} =
-\eqn{\exp{(-E[u_1|\epsilon])}} and \code{teJLMS2} =
-\eqn{\exp{(-E[u_2|\epsilon])}}. Only when \code{logDepVar = TRUE}.}
-
-\item{m}{Conditional model. Only when the argument \code{udist} of
-\link{sfacross} is set to \code{'hnormal'}, \code{'exponential'},
-\code{'tnormal'}, or \code{'rayleigh'}.}
-
-\item{teMO}{\eqn{\exp{(-m)}}. Only when, in the function \link{sfacross},
-\code{logDepVar = TRUE} and \code{udist = 'hnormal'}, \code{'exponential'},
-\code{'tnormal'}, \code{'uniform'}, or \code{'rayleigh'}.}
-
-\item{teBC}{Battese and Coelli (1988) conditional efficiency. Only when, in
-the function \link{sfacross}, \code{logDepVar = TRUE}. In the case
-\code{udist = 'uniform'}, two conditional efficiency estimates are returned:
-\code{teBC1} which is the classic conditional efficiency following
-Battese and Coelli (1988) and \code{teBC2} when
-\eqn{\theta/\sigma_v \longrightarrow \infty} (see Nguyen, 2010).}
-
-\item{teBC_reciprocal}{Reciprocal of Battese and Coelli (1988) conditional
-efficiency. Similar to \code{teBC} except that it is computed as
-\eqn{E\left[\exp{(u)}|\epsilon\right]}.}
-
-\item{teBCLB}{Lower bound for Battese and Coelli (1988) conditional
-efficiency. Only when, in the function \link{sfacross}, \code{logDepVar =
-TRUE} and \code{udist = 'hnormal'}, \code{'exponential'}, \code{'tnormal'},
-or \code{'uniform'}.}
-
-\item{teBCUB}{Upper bound for Battese and Coelli (1988) conditional
-efficiency. Only when, in the function \link{sfacross}, \code{logDepVar =
-TRUE} and \code{udist = 'hnormal'}, \code{'exponential'}, \code{'tnormal'},
-or \code{'uniform'}.}
-
-\bold{- For object of class \code{'lcmcross'} the following elements are
+\bold{- For object of class \code{'cnsfcross'}, or \code{'lcmcross'}, or
+\code{'zisfcross'} the following elements are
 returned:}
 
 \item{Group_c}{Most probable class for each observation.}
 
 \item{PosteriorProb_c}{Highest posterior probability.}
 
+\item{odRatio}{Posterior odds ratio
+\eqn{R_i = \frac{Post. Prob. Class 2}{Post. Prob. Class 1}}. Only for object
+of class \code{'zisfcross'}}.
+
 \item{u_c}{Conditional inefficiency of the most probable class given the
 posterior probability.}
 
 \item{teJLMS_c}{\eqn{\exp{(-E[u_c|\epsilon_c])}}. Only when, in the function
-\link{lcmcross}, \code{logDepVar = TRUE}.}
+\link{cnsfcross}, or \link{lcmcross}, or \link{zisfcross},
+\code{logDepVar = TRUE}.}
 
 \item{teBC_c}{\eqn{E\left[\exp{(-u_c)}|\epsilon_c\right]}. Only when, in the
-function \link{lcmcross}, \code{logDepVar = TRUE}.}
+function \link{cnsfcross}, or \link{lcmcross}, or \link{zisfcross},
+\code{logDepVar = TRUE}.}
 
 \item{teBC_reciprocal_c}{\eqn{E\left[\exp{(u_c)}|\epsilon_c\right]}. Only
-when, in the function \link{lcmcross}, \code{logDepVar = TRUE}.}
+when, in the function \link{cnsfcross}, or \link{lcmcross}, or
+\link{zisfcross}, \code{logDepVar = TRUE}.}
 
 \item{PosteriorProb_c#}{Posterior probability of class #.}
 
@@ -117,13 +77,13 @@ when, in the function \link{lcmcross}, \code{logDepVar = TRUE}.}
 
 \item{teBC_c#}{Conditional efficiency
 (\eqn{E\left[\exp{(-u_c)}|\epsilon_c\right]}) associated to class #,
-regardless of \code{Group_c}. Only when, in the function \link{lcmcross},
-\code{logDepVar = TRUE}.}
+regardless of \code{Group_c}. Only when, in the function \link{cnsfcross},
+or \link{lcmcross}, or \link{zisfcross}, \code{logDepVar = TRUE}.}
 
 \item{teBC_reciprocal_c#}{Reciprocal conditional efficiency
 (\eqn{E\left[\exp{(u_c)}|\epsilon_c\right]}) associated to class #,
-regardless of \code{Group_c}. Only when, in the function \link{lcmcross},
-\code{logDepVar = TRUE}.}
+regardless of \code{Group_c}. Only when, in the function \link{cnsfcross},
+or \link{lcmcross}, or \link{zisfcross}, \code{logDepVar = TRUE}.}
 
 \item{ineff_c#}{Conditional inefficiency (\code{u_c}) for observations in
 class # only.}
@@ -134,97 +94,75 @@ class # only.}
 \item{ReffBC_c#}{Reciprocal conditional efficiency (\code{teBC_reciprocal_c})
 for observations in class # only.}
 
-\bold{- For object of class \code{'sfaselectioncross'} the following elements
-are returned:}
+\bold{- For object of class \code{'sfacross'} or \code{'sfaselectioncross'}
+the following elements are returned:}
 
-\item{u}{Conditional inefficiency.}
-\item{uLB}{Lower bound for conditional inefficiency.}
-\item{uUB}{Upper bound for conditional inefficiency.}
-\item{teJLMS}{\eqn{\exp{(-u)}}. Only when \code{logDepVar = TRUE}.}
-\item{m}{Conditional mode.}
-\item{teMO}{\eqn{\exp{(-m)}}. Only when \code{logDepVar = TRUE}.}
-\item{teBC}{Battese and Coelli (1988) conditional efficiency. Only when
-\code{logDepVar = TRUE}.}
+\item{u}{Conditional inefficiency. In the case argument \code{udist} of
+\link{sfacross} is set to \code{'uniform'}, two conditional inefficiency
+estimates are returned: \code{u1} for the classic conditional inefficiency
+following Jondrow \emph{et al.} (1982), and \code{u2} which is obtained when
+\eqn{\theta/\sigma_v \longrightarrow \infty} (see Nguyen, 2010).}
+
+\item{uLB}{Lower bound for conditional inefficiency. Only when the argument
+\code{udist} of \link{sfacross} is set to \code{'hnormal'},
+\code{'exponential'}, \code{'tnormal'} or \code{'uniform'}. For object of
+class \code{'sfaselectioncross'}, only the \code{'hnormal'} distribution is
+available.}
+
+\item{uUB}{Upper bound for conditional inefficiency. Only when the argument
+\code{udist} of \link{sfacross} is set to \code{'hnormal'},
+\code{'exponential'}, \code{'tnormal'} or \code{'uniform'}. For object of
+class \code{'sfaselectioncross'}, only the \code{'hnormal'} distribution is
+available.}
+
+\item{teJLMS}{\eqn{\exp{(-E[u|\epsilon])}}. When the argument \code{udist} of
+\link{sfacross} is set to \code{'uniform'}, \code{teJLMS1} =
+\eqn{\exp{(-E[u_1|\epsilon])}} and \code{teJLMS2} =
+\eqn{\exp{(-E[u_2|\epsilon])}}. Only when \code{logDepVar = TRUE}.}
+
+\item{m}{Conditional model. Only when the argument \code{udist} of
+\link{sfacross} is set to \code{'hnormal'}, \code{'exponential'},
+\code{'tnormal'}, or \code{'rayleigh'}. For object of class
+\code{'sfaselectioncross'}, only the \code{'hnormal'} distribution is
+available.}
+
+\item{teMO}{\eqn{\exp{(-m)}}. Only when, in the function \link{sfacross},
+\code{logDepVar = TRUE} and \code{udist = 'hnormal'}, \code{'exponential'},
+\code{'tnormal'}, \code{'uniform'}, or \code{'rayleigh'}. For object of
+class \code{'sfaselectioncross'}, only the \code{'hnormal'} distribution is
+available.}
+
+\item{teBC}{Battese and Coelli (1988) conditional efficiency. Only when, in
+the function \link{sfacross} or \code{'sfaselectioncross'},
+\code{logDepVar = TRUE}. In the case \code{udist = 'uniform'}, two
+conditional efficiency estimates are returned:
+\code{teBC1} which is the classic conditional efficiency following
+Battese and Coelli (1988) and \code{teBC2} when
+\eqn{\theta/\sigma_v \longrightarrow \infty} (see Nguyen, 2010).}
+
+\item{teBC_reciprocal}{Reciprocal of Battese and Coelli (1988) conditional
+efficiency. Similar to \code{teBC} except that it is computed as
+\eqn{E\left[\exp{(u)}|\epsilon\right]}.}
+
 \item{teBCLB}{Lower bound for Battese and Coelli (1988) conditional
-efficiency. Only when \code{logDepVar = TRUE}.}
+efficiency. Only when, in the function \link{sfacross}, or
+\code{'sfaselectioncross'}, \code{logDepVar = TRUE} and
+\code{udist = 'hnormal'}, \code{'exponential'}, \code{'tnormal'},
+or \code{'uniform'}. For object of class \code{'sfaselectioncross'}, only
+the \code{'hnormal'} distribution is available.}
+
 \item{teBCUB}{Upper bound for Battese and Coelli (1988) conditional
-efficiency. Only when \code{logDepVar = TRUE}.}
-
-\bold{- For object of class \code{'zisfcross'} the following elements are
-returned:}
-
-\item{Group_c}{Most probable class for each observation. In our case
-\code{class 1} is the inefficient class while \code{class 2} is the
-efficient class.}
-
-\item{PosteriorProb_c}{Highest posterior probability.}
-
-\item{odRatio}{Posterior odds ratio
-\eqn{R_i = \frac{Post. Prob. Class 2}{Post. Prob. Class 1}}.}
-
-\item{u_c}{Conditional inefficiency of the most probable class given the
-posterior probability. In the case of the \code{'uniform'} distribution, two
-conditional inefficiency estimates are returned: \code{u1_c} and
-\code{u2_c}.}
-
-\item{teJLMS_c}{\eqn{\exp{(-E[u_c|\epsilon_c])}}. Only when, in the function
-\link{zisfcross}, \code{logDepVar = TRUE}. In the case of the
-\code{'uniform'} distribution, two conditional efficiency
-estimates are returned: \code{teJLMS1_c} and \code{teJLMS2_c}.}
-
-\item{teBC_c}{\eqn{E\left[\exp{(-u_c)}|\epsilon_c\right]}. Only when,
-in the function \link{zisfcross}, \code{logDepVar = TRUE}. In the case of
-the \code{'uniform'} distribution, two conditional efficiency
-estimates are returned: \code{teBC1_c} and \code{teBC2_c}.}
-
-\item{teBC_reciprocal_c}{\eqn{E\left[\exp{(u_c)}|\epsilon_c\right]}.
-Only when, in the function \link{zisfcross}, \code{logDepVar = TRUE}. In the
-case of the \code{'uniform'} distribution, two conditional reciprocal
-efficiency estimates are returned: \code{teBC1_reciprocal_c} and
-\code{teBC2_reciprocal_c}.}
-
-\item{PosteriorProb_c#}{Posterior probability of class #.}
-
-\item{PriorProb_c#}{Prior probability of class #.}
-
-\item{u_c#}{Conditional inefficiency associated to class #, regardless of
-\code{Group_c}. In the case of the \code{'uniform'} distribution, two
-conditional inefficiency estimates are returned:
-\code{u1_c#} and \code{u2_c#}.}
-
-\item{teBC_c#}{Conditional efficiency
-(\eqn{E\left[\exp{(-u_c)}|\epsilon_c\right]}) associated to class #,
-regardless of \code{Group_c}. Only when, in the function \link{zisfcross},
-\code{logDepVar = TRUE}. In the case of the \code{'uniform'} distribution,
-two conditional efficiency estimates are returned: \code{teBC1_c#} and
-\code{teBC2_c#}.}
-
-\item{teBC_reciprocal_c#}{Reciprocal conditional efficiency
-(\eqn{E\left[\exp{(u_c)}|\epsilon_c\right]}) associated to class #,
-regardless of \code{Group_c}. Only when, in the function \link{zisfcross},
-\code{logDepVar = TRUE}. In the case of the \code{'uniform'} distribution,
-two conditional reciprocal efficiency estimates are returned:
-\code{teBC1_reciprocal_c#} and \code{teBC2_reciprocal_c#}.}
-
-\item{ineff_c#}{Conditional inefficiency (\code{u_c}) for observations in
-class # only. In the case of the \code{'uniform'} distribution, two
-conditional inefficiency estimates are returned: \code{ineff1_c#} and
-\code{ineff2_c#}.}
-
-\item{effBC_c#}{Conditional efficiency (\code{teBC_c}) for observations in
-class # only. In the case of the \code{'uniform'} distribution, two
-conditional efficiency estimates are returned: \code{effBC1_c#} and
-\code{effBC2_c#}.}
-
-\item{ReffBC_c#}{Reciprocal conditional efficiency
-(\code{teBC_reciprocal_c}) for observations in class # only. In the case of
-the \code{'uniform'} distribution, two conditional reciprocal efficiency
-estimates are returned: \code{ReffBC1_c#} and \code{ReffBC2_c#}.}
+efficiency. Only when, in the function \link{sfacross}, or
+\code{'sfaselectioncross'}, \code{logDepVar = TRUE} and
+\code{udist = 'hnormal'}, \code{'exponential'}, \code{'tnormal'},
+or \code{'uniform'}. For object of class \code{'sfaselectioncross'}, only
+the \code{'hnormal'} distribution is available.}
 }
 \description{
 \code{\link{efficiencies}} returns (in-)efficiency estimates of models
-estimated with \code{\link{sfacross}}, \code{\link{lcmcross}}
-\code{\link{sfaselectioncross}}, or \code{\link{zisfcross}}.
+estimated with \code{\link{cnsfcross}}, \code{\link{lcmcross}},
+\code{\link{sfacross}}, \code{\link{sfaselectioncross}}, or
+\code{\link{zisfcross}}.
 }
 \details{
 The conditional inefficiency is obtained following
@@ -373,11 +311,14 @@ Nguyen, N.B. 2010. Estimation of technical efficiency in stochastic frontier
 analysis. PhD Dissertation, Bowling Green State University, August.
 }
 \seealso{
-\code{\link{sfacross}}, for the stochastic frontier analysis model
-fitting function.
+\code{\link{cnsfcross}}, for the contaminated noise stochastic
+frontier analysis model fitting function.
 
 \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 model fitting function.
+
+\code{\link{sfacross}}, for the stochastic frontier analysis model
+fitting function.
 
 \code{\link{sfaselectioncross}} for sample selection in stochastic frontier
 model fitting function.

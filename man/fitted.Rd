@@ -6,6 +6,7 @@
 \alias{fitted.lcmcross}
 \alias{fitted.sfaselectioncross}
 \alias{fitted.zisfcross}
+\alias{fitted.cnsfcross}
 \title{Extract fitted values of stochastic frontier models}
 \usage{
 \method{fitted}{sfacross}(object, ...)
@@ -15,27 +16,29 @@
 \method{fitted}{sfaselectioncross}(object, ...)
 
 \method{fitted}{zisfcross}(object, ...)
+
+\method{fitted}{cnsfcross}(object, ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{sfacross}}, \code{\link{lcmcross}},
+by \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{sfacross}},
 \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.}
 
 \item{...}{Currently ignored.}
 }
 \value{
+In the case of an object of class \code{'lcmcross'}, a data frame
+containing the fitted values for each class is returned where each variable
+terminates with \code{'_c#'}, \code{'#'} being the class number.
+
 In the case of an object of class \code{'sfacross'},
 \code{'sfaselectioncross'} or \code{'zisfcross'}, a vector of
 fitted values is returned.
-
-In the case of an object of class \code{'lcmcross'}, a data frame containing
-the fitted values for each class is returned where each variable terminates
-with \code{'_c#'}, \code{'#'} being the class number.
 }
 \description{
 \code{\link{fitted}} returns the fitted frontier values from classic or
 latent class stochastic frontier models estimated with
-\code{\link{sfacross}}, \code{\link{lcmcross}},
+\code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{sfacross}},
 \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.
 }
 \note{
@@ -53,11 +56,14 @@ head(fit.cb_2c_h)
 
 }
 \seealso{
-\code{\link{sfacross}}, for the stochastic frontier analysis model
-fitting function.
+\code{\link{cnsfcross}}, for the contaminated noise stochastic
+frontier analysis model fitting function.
 
 \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 model fitting function.
+
+\code{\link{sfacross}}, for the stochastic frontier analysis model
+fitting function.
 
 \code{\link{sfaselectioncross}} for sample selection in stochastic frontier
 model fitting function.

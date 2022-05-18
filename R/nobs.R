@@ -10,6 +10,7 @@
 #         -Latent Class Stochastic Frontier Analysis                           #
 #         -Sample selection correction                                         #
 #         -Zero inefficiency stochastic frontier                               #
+#         -Contaminated noise stochastic frontier                              #
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
 
@@ -28,8 +29,9 @@
 #'
 #' @name nobs
 #' 
-#' @param object a `sfacross`, `lcmcross`, `sfaselectioncross` or `zisfcross` 
-#' object for which the number of total observations is to be extracted,
+#' @param object a  `cnsfcross`, `lcmcross`, `sfacross`, `sfaselectioncross` 
+#' or `zisfcross` object for which the number of total observations is to be 
+#' extracted,
 #' @param \dots further arguments.
 #' 
 #' @return A single number, normally an integer.
@@ -77,5 +79,13 @@ nobs.sfaselectioncross <- function(object, ...) {
 #' @aliases nobs.zisfcross
 #' @export
 nobs.zisfcross <- function(object, ...) {
+  return(object$Nobs)
+}
+
+# Extract number of observations for cnsfcros ----------
+#' @rdname nobs
+#' @aliases nobs.cnsfcross
+#' @export
+nobs.cnsfcross <- function(object, ...) {
   return(object$Nobs)
 }

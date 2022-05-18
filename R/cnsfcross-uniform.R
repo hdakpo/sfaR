@@ -4619,9 +4619,12 @@ ccnsfmarguninorm_Eu_logit <- function(object) {
   margEff2 <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
     matrix(sqrt(3)/2 * exp(Wu/2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -4664,9 +4667,12 @@ ccnsfmarguninorm_Vu_logit <- function(object) {
   margEff2 <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
     matrix(exp(Wu), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -4710,9 +4716,12 @@ ccnsfmarguninorm_Eu_cauchit <- function(object) {
   margEff2 <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
     matrix(sqrt(3)/2 * exp(Wu/2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -4755,9 +4764,12 @@ ccnsfmarguninorm_Vu_cauchit <- function(object) {
   margEff2 <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
     matrix(exp(Wu), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -4801,9 +4813,12 @@ ccnsfmarguninorm_Eu_probit <- function(object) {
   margEff2 <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
     matrix(sqrt(3)/2 * exp(Wu/2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -4846,9 +4861,12 @@ ccnsfmarguninorm_Vu_probit <- function(object) {
   margEff2 <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
     matrix(exp(Wu), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -4892,9 +4910,12 @@ ccnsfmarguninorm_Eu_cloglog <- function(object) {
   margEff2 <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
     matrix(sqrt(3)/2 * exp(Wu/2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -4937,9 +4958,12 @@ ccnsfmarguninorm_Vu_cloglog <- function(object) {
   margEff2 <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
     matrix(exp(Wu), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -4989,9 +5013,12 @@ cmcesfmarguninorm_Eu_logit <- function(object) {
   margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar], nrow = 1),
     matrix(sqrt(3)/2 * exp(Wu2/2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -5038,9 +5065,12 @@ cmcesfmarguninorm_Vu_logit <- function(object) {
   margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar], nrow = 1),
     matrix(exp(Wu2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -5088,9 +5118,12 @@ cmcesfmarguninorm_Eu_cauchit <- function(object) {
   margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar], nrow = 1),
     matrix(sqrt(3)/2 * exp(Wu2/2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -5137,9 +5170,12 @@ cmcesfmarguninorm_Vu_cauchit <- function(object) {
   margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar], nrow = 1),
     matrix(exp(Wu2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -5187,9 +5223,12 @@ cmcesfmarguninorm_Eu_probit <- function(object) {
   margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar], nrow = 1),
     matrix(sqrt(3)/2 * exp(Wu2/2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -5236,9 +5275,12 @@ cmcesfmarguninorm_Vu_probit <- function(object) {
   margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar], nrow = 1),
     matrix(exp(Wu2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -5286,9 +5328,12 @@ cmcesfmarguninorm_Eu_cloglog <- function(object) {
   margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar], nrow = 1),
     matrix(sqrt(3)/2 * exp(Wu2/2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -5335,9 +5380,12 @@ cmcesfmarguninorm_Vu_cloglog <- function(object) {
   margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar], nrow = 1),
     matrix(exp(Wu2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 

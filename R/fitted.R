@@ -10,6 +10,7 @@
 #         -Latent Class Stochastic Frontier Analysis                           #
 #         -Sample selection correction                                         #
 #         -Zero inefficiency stochastic frontier                               #
+#         -Contaminated noise stochastic frontier                              #
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
 
@@ -17,34 +18,37 @@
 #'
 #' \code{\link{fitted}} returns the fitted frontier values from classic or
 #' latent class stochastic frontier models estimated with
-#' \code{\link{sfacross}}, \code{\link{lcmcross}}, 
+#' \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{sfacross}},
 #' \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.
 #'
 #' @param object A stochastic frontier model returned
-#' by \code{\link{sfacross}}, \code{\link{lcmcross}}, 
+#' by \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{sfacross}},
 #' \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.
 #' @param ... Currently ignored.
 #'
 #' @name fitted
 #'
-#' @return In the case of an object of class \code{'sfacross'}, 
+#' @return In the case of an object of class \code{'lcmcross'}, a data frame 
+#' containing the fitted values for each class is returned where each variable 
+#' terminates with \code{'_c#'}, \code{'#'} being the class number.
+#' 
+#' In the case of an object of class \code{'sfacross'}, 
 #' \code{'sfaselectioncross'} or \code{'zisfcross'}, a vector of
 #' fitted values is returned.
-#'
-#' In the case of an object of class \code{'lcmcross'}, a data frame containing
-#' the fitted values for each class is returned where each variable terminates
-#' with \code{'_c#'}, \code{'#'} being the class number.
 #'
 #' @note The fitted values are ordered in the same way as the corresponding
 #' observations in the dataset used for the estimation.
 #' 
 # @author K Hervé Dakpo
 #' 
-#' @seealso \code{\link{sfacross}}, for the stochastic frontier analysis model
-#' fitting function.
+#' @seealso \code{\link{cnsfcross}}, for the contaminated noise stochastic 
+#' frontier analysis model fitting function.
 #'
 #' \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 #' model fitting function.
+#' 
+#' \code{\link{sfacross}}, for the stochastic frontier analysis model
+#' fitting function.
 #' 
 #' \code{\link{sfaselectioncross}} for sample selection in stochastic frontier 
 #' model fitting function.
@@ -110,5 +114,13 @@ fitted.sfaselectioncross <- function(object, ...) {
 #' @aliases fitted.zisfcross
 #' @export
 fitted.zisfcross <- function(object, ...) {
+  object$dataTable$mlFitted
+}
+
+# fitted values for cnsfcross ----------
+#' @rdname fitted
+#' @aliases fitted.cnsfcross
+#' @export
+fitted.cnsfcross <- function(object, ...) {
   object$dataTable$mlFitted
 }

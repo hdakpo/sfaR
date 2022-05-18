@@ -6,6 +6,7 @@
 \alias{residuals.lcmcross}
 \alias{residuals.sfaselectioncross}
 \alias{residuals.zisfcross}
+\alias{residuals.cnsfcross}
 \title{Extract residuals of stochastic frontier models}
 \usage{
 \method{residuals}{sfacross}(object, ...)
@@ -15,29 +16,31 @@
 \method{residuals}{sfaselectioncross}(object, ...)
 
 \method{residuals}{zisfcross}(object, ...)
+
+\method{residuals}{cnsfcross}(object, ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{sfacross}}, \code{\link{lcmcross}},
+by \code{\link{cnsfcross}},  \code{\link{lcmcross}}, \code{\link{sfacross}},
 \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.}
 
 \item{...}{Currently ignored.}
 }
 \value{
-When the \code{object} is of class \code{'sfacross'},
-\code{'sfaselectioncross'} or \code{'zisfcross'},
-\code{\link{residuals}} returns a vector of residuals values.
-
 When the \code{object} is of class \code{'lcmcross'},
 \code{\link{residuals}} returns a data frame containing the residuals values
 for each latent class, where each variable terminates with \code{'_c#'},
 \code{'#'} being the class number.
+
+When the \code{object} is of class \code{'sfacross'},
+\code{'sfaselectioncross'} or \code{'zisfcross'},
+\code{\link{residuals}} returns a vector of residuals values.
 }
 \description{
 This function returns the residuals' values from classic or latent class
-stochastic frontier models estimated with \code{\link{sfacross}},
-\code{\link{lcmcross}}, \code{\link{sfaselectioncross}} or
-\code{\link{zisfcross}}.
+stochastic frontier models estimated with \code{\link{cnsfcross}},
+\code{\link{lcmcross}}, \code{\link{sfacross}},
+\code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.
 }
 \note{
 The residuals values are ordered in the same way as the corresponding
@@ -64,11 +67,14 @@ head(resid.cb_2c_h)
 
 }
 \seealso{
-\code{\link{sfacross}}, for the stochastic frontier analysis model
-fitting function.
+\code{\link{cnsfcross}}, for the contaminated noise stochastic
+frontier analysis model fitting function.
 
 \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 model fitting function.
+
+\code{\link{sfacross}}, for the stochastic frontier analysis model
+fitting function.
 
 \code{\link{sfaselectioncross}} for sample selection in stochastic frontier
 model fitting function.

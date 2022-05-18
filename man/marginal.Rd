@@ -6,6 +6,7 @@
 \alias{marginal.lcmcross}
 \alias{marginal.sfaselectioncross}
 \alias{marginal.zisfcross}
+\alias{marginal.cnsfcross}
 \title{Marginal effects of the inefficiency drivers in stochastic frontier models}
 \usage{
 \method{marginal}{sfacross}(object, newData = NULL, ...)
@@ -15,10 +16,12 @@
 \method{marginal}{sfaselectioncross}(object, newData = NULL, ...)
 
 \method{marginal}{zisfcross}(object, newData = NULL, ...)
+
+\method{marginal}{cnsfcross}(object, newData = NULL, ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{sfacross}}, \code{\link{lcmcross}},
+by \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{sfacross}},
 \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.}
 
 \item{newData}{Optional data frame that is used to calculate the marginal
@@ -34,15 +37,15 @@ effects of the \eqn{Z_u} variables on the expected inefficiency (each
 variable has the prefix \code{'Eu_'}) and on the variance of the
 inefficiency (each variable has the prefix \code{'Vu_'}) is returned.
 
-In the case of the latent class frontier model (LCM) or the zero inefficiency
-frontier model, each variable terminates with
-\code{'_c#'} where \code{'#'} is the class number
+In the case of the contaminated noise stochastic frontier (CNSF), or latent
+class frontier model (LCM) or the zero inefficiency frontier model (ZISF),
+each variable terminates with \code{'_c#'} where \code{'#'} is the class number
 .
 }
 \description{
 This function returns marginal effects of the inefficiency drivers from
 classic or latent class stochastic frontier models estimated with
-\code{\link{sfacross}}, \code{\link{lcmcross}},
+\code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{sfacross}},
 \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.
 }
 \details{
@@ -87,11 +90,14 @@ effects of a stochastic frontier model. \emph{Journal of Productivity
 Analysis}, \bold{18}:241--253.
 }
 \seealso{
-\code{\link{sfacross}}, for the stochastic frontier analysis model
-fitting function.
+\code{\link{cnsfcross}}, for the contaminated noise stochastic
+frontier analysis model fitting function.
 
 \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 model fitting function.
+
+\code{\link{sfacross}}, for the stochastic frontier analysis model
+fitting function.
 
 \code{\link{sfaselectioncross}} for sample selection in stochastic frontier
 model fitting function.

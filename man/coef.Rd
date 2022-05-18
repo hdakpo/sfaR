@@ -10,6 +10,8 @@
 \alias{coef.summary.sfaselectioncross}
 \alias{coef.zisfcross}
 \alias{coef.summary.zisfcross}
+\alias{coef.cnsfcross}
+\alias{coef.summary.cnsfcross}
 \title{Extract coefficients of stochastic frontier models}
 \usage{
 \method{coef}{sfacross}(object, extraPar = FALSE, ...)
@@ -27,17 +29,20 @@
 \method{coef}{zisfcross}(object, extraPar = FALSE, ...)
 
 \method{coef}{summary.zisfcross}(object, ...)
+
+\method{coef}{cnsfcross}(object, extraPar = FALSE, ...)
+
+\method{coef}{summary.cnsfcross}(object, ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{sfacross}}, \code{\link{lcmcross}},
+by \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{sfacross}},
 \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}, or an object of
-class \code{'summary.sfacross'}, \code{'summary.lcmcross'},
-\code{'summary.sfaselectioncross'} or \code{'summary.zisfcross'} .}
+class \code{'summary.cnsfcross'}, \code{'summary.lcmcross'},
+\code{'summary.sfacross'}, \code{'summary.sfaselectioncross'} or
+\code{'summary.zisfcross'} .}
 
-\item{extraPar}{Logical (default = \code{FALSE}). Only applies to objects of
-class \code{'sfacross'}, \code{'lcmcross'}, \code{'sfaselectioncross'} or
-\code{'zisfcross'}. If \code{TRUE}, additional
+\item{extraPar}{Logical (default = \code{FALSE}). If \code{TRUE}, additional
 parameters are returned:
 
 \code{sigmaSq} = \code{sigmauSq} + \code{sigmavSq}
@@ -61,14 +66,14 @@ parameters are returned:
 \item{...}{Currently ignored.}
 }
 \value{
-For objects of class \code{'summary.sfacross'},
-\code{'summary.lcmcross'}, \code{'summary.sfaselectioncross'} or
-\code{'summary.zisfcross'}, \code{\link{coef}} returns a matrix with four
-columns. Namely, the estimated coefficients, their standard errors,
-z-values, and (asymptotic) P-values.
+For objects of class \code{'summary.cnsfcross'},
+\code{'summary.lcmcross'},  \code{'summary.sfacross'},
+\code{'summary.sfaselectioncross'} or \code{'summary.zisfcross'},
+\code{\link{coef}} returns a matrix with four columns. Namely, the estimated
+coefficients, their standard errors, z-values, and (asymptotic) P-values.
 
-For objects of class \code{'sfacross'}, \code{'lcmcross'},
-\code{'sfaselectioncross'} or \code{'zisfcross'},
+For objects of class \code{'cnsfcross'}, \code{'lcmcross'},
+\code{'sfacross'}, \code{'sfaselectioncross'} or \code{'zisfcross'},
 \code{\link{coef}} returns a numeric vector of the estimated coefficients.
 If \code{extraPar = TRUE}, additional parameters, detailed in the section
 \sQuote{Arguments}, are also returned. In the case of object of class
@@ -76,14 +81,14 @@ If \code{extraPar = TRUE}, additional parameters, detailed in the section
 represents the class number.
 }
 \description{
-From an object of class \code{'summary.sfacross'}, \code{'summary.lcmcross'},
-\code{'summary.sfaselectioncross'} or \code{'summary.zisfcross'},
-\code{\link{coef}} extracts the coefficients, their standard errors,
-z-values, and (asymptotic) P-values.
+From an object of class \code{'summary.cnsfcross'}, \code{'summary.lcmcross'},
+\code{'summary.sfacross'}, \code{'summary.sfaselectioncross'} or
+\code{'summary.zisfcross'}, \code{\link{coef}} extracts the coefficients,
+their standard errors, z-values, and (asymptotic) P-values.
 
-From on object of class \code{'sfacross'}, \code{'lcmcross'},
-\code{'sfaselectioncross'} or \code{'zisfcross'}, it extracts only the
-estimated coefficients.
+From on object of class \code{'cnsfcross'}, \code{'lcmcross'},
+\code{'sfacross'}, \code{'sfaselectioncross'} or \code{'zisfcross'}, it
+extracts only the estimated coefficients.
 }
 \examples{
 
@@ -99,11 +104,14 @@ coef(summary(tl_u_ts))
 
 }
 \seealso{
-\code{\link{sfacross}}, for the stochastic frontier analysis model
-fitting function.
+\code{\link{cnsfcross}}, for the contaminated noise stochastic
+frontier analysis model fitting function.
 
 \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 model fitting function.
+
+\code{\link{sfacross}}, for the stochastic frontier analysis model
+fitting function.
 
 \code{\link{sfaselectioncross}} for sample selection in stochastic frontier
 model fitting function.

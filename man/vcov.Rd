@@ -6,6 +6,7 @@
 \alias{vcov.lcmcross}
 \alias{vcov.sfaselectioncross}
 \alias{vcov.zisfcross}
+\alias{vcov.cnsfcross}
 \title{Compute variance-covariance matrix of stochastic frontier models}
 \usage{
 \method{vcov}{sfacross}(object, extraPar = FALSE, ...)
@@ -15,10 +16,12 @@
 \method{vcov}{sfaselectioncross}(object, extraPar = FALSE, ...)
 
 \method{vcov}{zisfcross}(object, ...)
+
+\method{vcov}{cnsfcross}(object, ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{sfacross}}, \code{\link{lcmcross}},
+by \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{sfacross}},
 \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.}
 
 \item{extraPar}{Logical. Only available for non heteroscedastic models
@@ -53,8 +56,9 @@ coefficients is returned.
 \description{
 \code{\link{vcov}} computes the variance-covariance matrix of the maximum
 likelihood (ML) coefficients of classic or latent class stochastic frontier
-models estimated by \code{\link{sfacross}}, \code{\link{lcmcross}},
-\code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.
+models estimated by \code{\link{cnsfcross}}, \code{\link{lcmcross}},
+\code{\link{sfacross}}, \code{\link{sfaselectioncross}} or
+\code{\link{zisfcross}}.
 }
 \details{
 The variance-covariance matrix is obtained by the inversion of the
@@ -113,14 +117,17 @@ vcov(cb_2c_h)
 
 }
 \seealso{
-\code{\link{sfacross}}, for the stochastic frontier analysis model
-fitting function.
+\code{\link{cnsfcross}}, for the contaminated noise stochastic
+frontier analysis model fitting function.
 
 \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 model fitting function.
 
-\code{\link{sfaselectioncross}} for sample selection in stochastic frontier model
+\code{\link{sfacross}}, for the stochastic frontier analysis model
 fitting function.
+
+\code{\link{sfaselectioncross}} for sample selection in stochastic frontier
+model fitting function.
 
 \code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
 fitting function.

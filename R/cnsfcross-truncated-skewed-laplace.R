@@ -6475,9 +6475,12 @@ ccnsfmargtslnorm_Eu_logit <- function(object) {
     4 * lambda + 2 * lambda^2)/((1 + lambda) * (1 + 2 * lambda)),
     nrow = 1), matrix(exp(Wu/2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -6536,9 +6539,12 @@ ccnsfmargtslnorm_Vu_logit <- function(object) {
     lambda)^2 * (1 + 2 * lambda)^2), nrow = 1), matrix(exp(Wu),
     ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -6596,9 +6602,12 @@ ccnsfmargtslnorm_Eu_cauchit <- function(object) {
     4 * lambda + 2 * lambda^2)/((1 + lambda) * (1 + 2 * lambda)),
     nrow = 1), matrix(exp(Wu/2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -6657,9 +6666,12 @@ ccnsfmargtslnorm_Vu_cauchit <- function(object) {
     lambda)^2 * (1 + 2 * lambda)^2), nrow = 1), matrix(exp(Wu),
     ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -6717,9 +6729,12 @@ ccnsfmargtslnorm_Eu_probit <- function(object) {
     4 * lambda + 2 * lambda^2)/((1 + lambda) * (1 + 2 * lambda)),
     nrow = 1), matrix(exp(Wu/2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -6778,9 +6793,12 @@ ccnsfmargtslnorm_Vu_probit <- function(object) {
     lambda)^2 * (1 + 2 * lambda)^2), nrow = 1), matrix(exp(Wu),
     ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -6838,9 +6856,12 @@ ccnsfmargtslnorm_Eu_cloglog <- function(object) {
     4 * lambda + 2 * lambda^2)/((1 + lambda) * (1 + 2 * lambda)),
     nrow = 1), matrix(exp(Wu/2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -6899,9 +6920,12 @@ ccnsfmargtslnorm_Vu_cloglog <- function(object) {
     lambda)^2 * (1 + 2 * lambda)^2), nrow = 1), matrix(exp(Wu),
     ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -6969,9 +6993,12 @@ cmcesfmargtslnorm_Eu_logit <- function(object) {
     4 * lambda2 + 2 * lambda2^2)/((1 + lambda2) * (1 + 2 *
     lambda2)), nrow = 1), matrix(exp(Wu2/2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -7038,9 +7065,12 @@ cmcesfmargtslnorm_Vu_logit <- function(object) {
     lambda2)^2 * (1 + 2 * lambda2)^2), nrow = 1), matrix(exp(Wu2),
     ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -7106,9 +7136,12 @@ cmcesfmargtslnorm_Eu_cauchit <- function(object) {
     4 * lambda2 + 2 * lambda2^2)/((1 + lambda2) * (1 + 2 *
     lambda2)), nrow = 1), matrix(exp(Wu2/2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -7175,9 +7208,12 @@ cmcesfmargtslnorm_Vu_cauchit <- function(object) {
     lambda2)^2 * (1 + 2 * lambda2)^2), nrow = 1), matrix(exp(Wu2),
     ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -7243,9 +7279,12 @@ cmcesfmargtslnorm_Eu_probit <- function(object) {
     4 * lambda2 + 2 * lambda2^2)/((1 + lambda2) * (1 + 2 *
     lambda2)), nrow = 1), matrix(exp(Wu2/2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -7312,9 +7351,12 @@ cmcesfmargtslnorm_Vu_probit <- function(object) {
     lambda2)^2 * (1 + 2 * lambda2)^2), nrow = 1), matrix(exp(Wu2),
     ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -7380,9 +7422,12 @@ cmcesfmargtslnorm_Eu_cloglog <- function(object) {
     4 * lambda2 + 2 * lambda2^2)/((1 + lambda2) * (1 + 2 *
     lambda2)), nrow = 1), matrix(exp(Wu2/2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -7449,8 +7494,11 @@ cmcesfmargtslnorm_Vu_cloglog <- function(object) {
     lambda2)^2 * (1 + 2 * lambda2)^2), nrow = 1), matrix(exp(Wu2),
     ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }

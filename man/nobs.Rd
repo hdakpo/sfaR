@@ -6,6 +6,7 @@
 \alias{nobs.lcmcross}
 \alias{nobs.sfaselectioncross}
 \alias{nobs.zisfcross}
+\alias{nobs.cnsfcross}
 \title{Extract Total Number of Observations Used in frontier models}
 \usage{
 \method{nobs}{sfacross}(object, ...)
@@ -15,10 +16,13 @@
 \method{nobs}{sfaselectioncross}(object, ...)
 
 \method{nobs}{zisfcross}(object, ...)
+
+\method{nobs}{cnsfcross}(object, ...)
 }
 \arguments{
-\item{object}{a \code{sfacross}, \code{lcmcross}, \code{sfaselectioncross} or \code{zisfcross}
-object for which the number of total observations is to be extracted,}
+\item{object}{a  \code{cnsfcross}, \code{lcmcross}, \code{sfacross}, \code{sfaselectioncross}
+or \code{zisfcross} object for which the number of total observations is to be
+extracted,}
 
 \item{\dots}{further arguments.}
 }

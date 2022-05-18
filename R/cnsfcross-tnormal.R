@@ -6727,11 +6727,14 @@ ccnsfmargtruncnorm_Eu_logit <- function(object) {
     mu_mat[, !idTRUE_mu], Wu_mat[, !idTRUE_Wu])
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
   colnames(margEff1) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]),
+    "_c1")
   colnames(margEff2) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]),
+    "_c2")
   colnames(margEff_c) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]),
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -6805,11 +6808,14 @@ ccnsfmargtruncnorm_Vu_logit <- function(object) {
     mu_mat[, !idTRUE_mu], Wu_mat[, !idTRUE_Wu])
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
   colnames(margEff1) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]),
+    "_c1")
   colnames(margEff2) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]),
+    "_c2")
   colnames(margEff_c) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]),
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -6879,11 +6885,14 @@ ccnsfmargtruncnorm_Eu_cauchit <- function(object) {
     mu_mat[, !idTRUE_mu], Wu_mat[, !idTRUE_Wu])
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
   colnames(margEff1) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]),
+    "_c1")
   colnames(margEff2) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]),
+    "_c2")
   colnames(margEff_c) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]),
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -6957,11 +6966,14 @@ ccnsfmargtruncnorm_Vu_cauchit <- function(object) {
     mu_mat[, !idTRUE_mu], Wu_mat[, !idTRUE_Wu])
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
   colnames(margEff1) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]),
+    "_c1")
   colnames(margEff2) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]),
+    "_c2")
   colnames(margEff_c) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]),
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -7031,11 +7043,14 @@ ccnsfmargtruncnorm_Eu_probit <- function(object) {
     mu_mat[, !idTRUE_mu], Wu_mat[, !idTRUE_Wu])
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
   colnames(margEff1) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]),
+    "_c1")
   colnames(margEff2) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]),
+    "_c2")
   colnames(margEff_c) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]),
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -7109,11 +7124,14 @@ ccnsfmargtruncnorm_Vu_probit <- function(object) {
     mu_mat[, !idTRUE_mu], Wu_mat[, !idTRUE_Wu])
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
   colnames(margEff1) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]),
+    "_c1")
   colnames(margEff2) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]),
+    "_c2")
   colnames(margEff_c) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]),
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -7183,11 +7201,14 @@ ccnsfmargtruncnorm_Eu_cloglog <- function(object) {
     mu_mat[, !idTRUE_mu], Wu_mat[, !idTRUE_Wu])
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
   colnames(margEff1) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]),
+    "_c1")
   colnames(margEff2) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]),
+    "_c2")
   colnames(margEff_c) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]),
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -7261,11 +7282,14 @@ ccnsfmargtruncnorm_Vu_cloglog <- function(object) {
     mu_mat[, !idTRUE_mu], Wu_mat[, !idTRUE_Wu])
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
   colnames(margEff1) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]),
+    "_c1")
   colnames(margEff2) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]),
+    "_c2")
   colnames(margEff_c) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]),
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -7341,21 +7365,28 @@ cmcesfmargtruncnorm_Eu_logit <- function(object) {
   Wu_mat2 <- kronecker(matrix(delta2[2:object$nuZUvar], nrow = 1),
     matrix(exp(Wu2/2)/2 * ((1 + Lambda2^2) * dnorm(Lambda2)/pnorm(Lambda2) +
       Lambda2 * (dnorm(Lambda2)/pnorm(Lambda2))^2), ncol = 1))
-  idTRUE_mu <- substring(names(omega1)[-1], 5) %in% substring(names(delta1)[-1],
+  idTRUE_mu1 <- substring(names(omega1)[-1], 5) %in% substring(names(delta1)[-1],
     4)
-  idTRUE_Wu <- substring(names(delta1)[-1], 4) %in% substring(names(omega1)[-1],
+  idTRUE_Wu1 <- substring(names(delta1)[-1], 4) %in% substring(names(omega1)[-1],
     5)
-  margEff1 <- cbind(mu_mat1[, idTRUE_mu] + Wu_mat1[, idTRUE_Wu],
-    mu_mat1[, !idTRUE_mu], Wu_mat1[, !idTRUE_Wu])
-  margEff2 <- cbind(mu_mat2[, idTRUE_mu] + Wu_mat2[, idTRUE_Wu],
-    mu_mat2[, !idTRUE_mu], Wu_mat2[, !idTRUE_Wu])
+  idTRUE_mu2 <- substring(names(omega2)[-1], 5) %in% substring(names(delta2)[-1],
+    4)
+  idTRUE_Wu2 <- substring(names(delta2)[-1], 4) %in% substring(names(omega2)[-1],
+    5)
+  margEff1 <- cbind(mu_mat1[, idTRUE_mu1] + Wu_mat1[, idTRUE_Wu1],
+    mu_mat1[, !idTRUE_mu1], Wu_mat1[, !idTRUE_Wu1])
+  margEff2 <- cbind(mu_mat2[, idTRUE_mu2] + Wu_mat2[, idTRUE_Wu2],
+    mu_mat2[, !idTRUE_mu2], Wu_mat2[, !idTRUE_Wu2])
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
-  colnames(margEff2) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
-  colnames(margEff_c) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+  colnames(margEff1) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu1],
+    colnames(muHvar)[-1][!idTRUE_mu1], colnames(uHvar)[-1][!idTRUE_Wu1]),
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu2],
+    colnames(muHvar)[-1][!idTRUE_mu2], colnames(uHvar)[-1][!idTRUE_Wu2]),
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu1],
+    colnames(muHvar)[-1][!idTRUE_mu1], colnames(uHvar)[-1][!idTRUE_Wu1]),
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -7438,21 +7469,25 @@ cmcesfmargtruncnorm_Vu_logit <- function(object) {
       (Lambda2 + Lambda2^3 + (2 + 3 * Lambda2^2) * dnorm(Lambda2)/pnorm(Lambda2) +
         2 * Lambda2 * (dnorm(Lambda2)/pnorm(Lambda2))^2)),
       ncol = 1))
-  idTRUE_mu <- substring(names(omega1)[-1], 5) %in% substring(names(delta1)[-1],
+  idTRUE_mu1 <- substring(names(omega1)[-1], 5) %in% substring(names(delta1)[-1],
     4)
-  idTRUE_Wu <- substring(names(delta1)[-1], 4) %in% substring(names(omega1)[-1],
+  idTRUE_Wu1 <- substring(names(delta1)[-1], 4) %in% substring(names(omega1)[-1],
     5)
-  margEff1 <- cbind(mu_mat1[, idTRUE_mu] + Wu_mat1[, idTRUE_Wu],
-    mu_mat1[, !idTRUE_mu], Wu_mat1[, !idTRUE_Wu])
-  margEff2 <- cbind(mu_mat2[, idTRUE_mu] + Wu_mat2[, idTRUE_Wu],
-    mu_mat2[, !idTRUE_mu], Wu_mat2[, !idTRUE_Wu])
+  idTRUE_mu2 <- substring(names(omega2)[-1], 5) %in% substring(names(delta2)[-1],
+    4)
+  idTRUE_Wu2 <- substring(names(delta2)[-1], 4) %in% substring(names(omega2)[-1],
+    5)
+  margEff1 <- cbind(mu_mat1[, idTRUE_mu1] + Wu_mat1[, idTRUE_Wu1],
+    mu_mat1[, !idTRUE_mu1], Wu_mat1[, !idTRUE_Wu1])
+  margEff2 <- cbind(mu_mat2[, idTRUE_mu2] + Wu_mat2[, idTRUE_Wu2],
+    mu_mat2[, !idTRUE_mu2], Wu_mat2[, !idTRUE_Wu2])
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
-  colnames(margEff2) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
-  colnames(margEff_c) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+  colnames(margEff1) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu1],
+    colnames(muHvar)[-1][!idTRUE_mu1], colnames(uHvar)[-1][!idTRUE_Wu1]))
+  colnames(margEff2) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu2],
+    colnames(muHvar)[-1][!idTRUE_mu2], colnames(uHvar)[-1][!idTRUE_Wu2]))
+  colnames(margEff_c) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu1],
+    colnames(muHvar)[-1][!idTRUE_mu1], colnames(uHvar)[-1][!idTRUE_Wu1]))
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -7526,21 +7561,28 @@ cmcesfmargtruncnorm_Eu_cauchit <- function(object) {
   Wu_mat2 <- kronecker(matrix(delta2[2:object$nuZUvar], nrow = 1),
     matrix(exp(Wu2/2)/2 * ((1 + Lambda2^2) * dnorm(Lambda2)/pnorm(Lambda2) +
       Lambda2 * (dnorm(Lambda2)/pnorm(Lambda2))^2), ncol = 1))
-  idTRUE_mu <- substring(names(omega1)[-1], 5) %in% substring(names(delta1)[-1],
+  idTRUE_mu1 <- substring(names(omega1)[-1], 5) %in% substring(names(delta1)[-1],
     4)
-  idTRUE_Wu <- substring(names(delta1)[-1], 4) %in% substring(names(omega1)[-1],
+  idTRUE_Wu1 <- substring(names(delta1)[-1], 4) %in% substring(names(omega1)[-1],
     5)
-  margEff1 <- cbind(mu_mat1[, idTRUE_mu] + Wu_mat1[, idTRUE_Wu],
-    mu_mat1[, !idTRUE_mu], Wu_mat1[, !idTRUE_Wu])
-  margEff2 <- cbind(mu_mat2[, idTRUE_mu] + Wu_mat2[, idTRUE_Wu],
-    mu_mat2[, !idTRUE_mu], Wu_mat2[, !idTRUE_Wu])
+  idTRUE_mu2 <- substring(names(omega2)[-1], 5) %in% substring(names(delta2)[-1],
+    4)
+  idTRUE_Wu2 <- substring(names(delta2)[-1], 4) %in% substring(names(omega2)[-1],
+    5)
+  margEff1 <- cbind(mu_mat1[, idTRUE_mu1] + Wu_mat1[, idTRUE_Wu1],
+    mu_mat1[, !idTRUE_mu1], Wu_mat1[, !idTRUE_Wu1])
+  margEff2 <- cbind(mu_mat2[, idTRUE_mu2] + Wu_mat2[, idTRUE_Wu2],
+    mu_mat2[, !idTRUE_mu2], Wu_mat2[, !idTRUE_Wu2])
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
-  colnames(margEff2) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
-  colnames(margEff_c) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+  colnames(margEff1) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu1],
+    colnames(muHvar)[-1][!idTRUE_mu1], colnames(uHvar)[-1][!idTRUE_Wu1]),
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu2],
+    colnames(muHvar)[-1][!idTRUE_mu2], colnames(uHvar)[-1][!idTRUE_Wu2]),
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu1],
+    colnames(muHvar)[-1][!idTRUE_mu1], colnames(uHvar)[-1][!idTRUE_Wu1]),
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -7623,21 +7665,25 @@ cmcesfmargtruncnorm_Vu_cauchit <- function(object) {
       (Lambda2 + Lambda2^3 + (2 + 3 * Lambda2^2) * dnorm(Lambda2)/pnorm(Lambda2) +
         2 * Lambda2 * (dnorm(Lambda2)/pnorm(Lambda2))^2)),
       ncol = 1))
-  idTRUE_mu <- substring(names(omega1)[-1], 5) %in% substring(names(delta1)[-1],
+  idTRUE_mu1 <- substring(names(omega1)[-1], 5) %in% substring(names(delta1)[-1],
     4)
-  idTRUE_Wu <- substring(names(delta1)[-1], 4) %in% substring(names(omega1)[-1],
+  idTRUE_Wu1 <- substring(names(delta1)[-1], 4) %in% substring(names(omega1)[-1],
     5)
-  margEff1 <- cbind(mu_mat1[, idTRUE_mu] + Wu_mat1[, idTRUE_Wu],
-    mu_mat1[, !idTRUE_mu], Wu_mat1[, !idTRUE_Wu])
-  margEff2 <- cbind(mu_mat2[, idTRUE_mu] + Wu_mat2[, idTRUE_Wu],
-    mu_mat2[, !idTRUE_mu], Wu_mat2[, !idTRUE_Wu])
+  idTRUE_mu2 <- substring(names(omega2)[-1], 5) %in% substring(names(delta2)[-1],
+    4)
+  idTRUE_Wu2 <- substring(names(delta2)[-1], 4) %in% substring(names(omega2)[-1],
+    5)
+  margEff1 <- cbind(mu_mat1[, idTRUE_mu1] + Wu_mat1[, idTRUE_Wu1],
+    mu_mat1[, !idTRUE_mu1], Wu_mat1[, !idTRUE_Wu1])
+  margEff2 <- cbind(mu_mat2[, idTRUE_mu2] + Wu_mat2[, idTRUE_Wu2],
+    mu_mat2[, !idTRUE_mu2], Wu_mat2[, !idTRUE_Wu2])
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
-  colnames(margEff2) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
-  colnames(margEff_c) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+  colnames(margEff1) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu1],
+    colnames(muHvar)[-1][!idTRUE_mu1], colnames(uHvar)[-1][!idTRUE_Wu1]))
+  colnames(margEff2) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu2],
+    colnames(muHvar)[-1][!idTRUE_mu2], colnames(uHvar)[-1][!idTRUE_Wu2]))
+  colnames(margEff_c) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu1],
+    colnames(muHvar)[-1][!idTRUE_mu1], colnames(uHvar)[-1][!idTRUE_Wu1]))
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -7711,21 +7757,28 @@ cmcesfmargtruncnorm_Eu_probit <- function(object) {
   Wu_mat2 <- kronecker(matrix(delta2[2:object$nuZUvar], nrow = 1),
     matrix(exp(Wu2/2)/2 * ((1 + Lambda2^2) * dnorm(Lambda2)/pnorm(Lambda2) +
       Lambda2 * (dnorm(Lambda2)/pnorm(Lambda2))^2), ncol = 1))
-  idTRUE_mu <- substring(names(omega1)[-1], 5) %in% substring(names(delta1)[-1],
+  idTRUE_mu1 <- substring(names(omega1)[-1], 5) %in% substring(names(delta1)[-1],
     4)
-  idTRUE_Wu <- substring(names(delta1)[-1], 4) %in% substring(names(omega1)[-1],
+  idTRUE_Wu1 <- substring(names(delta1)[-1], 4) %in% substring(names(omega1)[-1],
     5)
-  margEff1 <- cbind(mu_mat1[, idTRUE_mu] + Wu_mat1[, idTRUE_Wu],
-    mu_mat1[, !idTRUE_mu], Wu_mat1[, !idTRUE_Wu])
-  margEff2 <- cbind(mu_mat2[, idTRUE_mu] + Wu_mat2[, idTRUE_Wu],
-    mu_mat2[, !idTRUE_mu], Wu_mat2[, !idTRUE_Wu])
+  idTRUE_mu2 <- substring(names(omega2)[-1], 5) %in% substring(names(delta2)[-1],
+    4)
+  idTRUE_Wu2 <- substring(names(delta2)[-1], 4) %in% substring(names(omega2)[-1],
+    5)
+  margEff1 <- cbind(mu_mat1[, idTRUE_mu1] + Wu_mat1[, idTRUE_Wu1],
+    mu_mat1[, !idTRUE_mu1], Wu_mat1[, !idTRUE_Wu1])
+  margEff2 <- cbind(mu_mat2[, idTRUE_mu2] + Wu_mat2[, idTRUE_Wu2],
+    mu_mat2[, !idTRUE_mu2], Wu_mat2[, !idTRUE_Wu2])
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
-  colnames(margEff2) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
-  colnames(margEff_c) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+  colnames(margEff1) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu1],
+    colnames(muHvar)[-1][!idTRUE_mu1], colnames(uHvar)[-1][!idTRUE_Wu1]),
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu2],
+    colnames(muHvar)[-1][!idTRUE_mu2], colnames(uHvar)[-1][!idTRUE_Wu2]),
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu1],
+    colnames(muHvar)[-1][!idTRUE_mu1], colnames(uHvar)[-1][!idTRUE_Wu1]),
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -7808,21 +7861,25 @@ cmcesfmargtruncnorm_Vu_probit <- function(object) {
       (Lambda2 + Lambda2^3 + (2 + 3 * Lambda2^2) * dnorm(Lambda2)/pnorm(Lambda2) +
         2 * Lambda2 * (dnorm(Lambda2)/pnorm(Lambda2))^2)),
       ncol = 1))
-  idTRUE_mu <- substring(names(omega1)[-1], 5) %in% substring(names(delta1)[-1],
+  idTRUE_mu1 <- substring(names(omega1)[-1], 5) %in% substring(names(delta1)[-1],
     4)
-  idTRUE_Wu <- substring(names(delta1)[-1], 4) %in% substring(names(omega1)[-1],
+  idTRUE_Wu1 <- substring(names(delta1)[-1], 4) %in% substring(names(omega1)[-1],
     5)
-  margEff1 <- cbind(mu_mat1[, idTRUE_mu] + Wu_mat1[, idTRUE_Wu],
-    mu_mat1[, !idTRUE_mu], Wu_mat1[, !idTRUE_Wu])
-  margEff2 <- cbind(mu_mat2[, idTRUE_mu] + Wu_mat2[, idTRUE_Wu],
-    mu_mat2[, !idTRUE_mu], Wu_mat2[, !idTRUE_Wu])
+  idTRUE_mu2 <- substring(names(omega2)[-1], 5) %in% substring(names(delta2)[-1],
+    4)
+  idTRUE_Wu2 <- substring(names(delta2)[-1], 4) %in% substring(names(omega2)[-1],
+    5)
+  margEff1 <- cbind(mu_mat1[, idTRUE_mu1] + Wu_mat1[, idTRUE_Wu1],
+    mu_mat1[, !idTRUE_mu1], Wu_mat1[, !idTRUE_Wu1])
+  margEff2 <- cbind(mu_mat2[, idTRUE_mu2] + Wu_mat2[, idTRUE_Wu2],
+    mu_mat2[, !idTRUE_mu2], Wu_mat2[, !idTRUE_Wu2])
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
-  colnames(margEff2) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
-  colnames(margEff_c) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+  colnames(margEff1) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu1],
+    colnames(muHvar)[-1][!idTRUE_mu1], colnames(uHvar)[-1][!idTRUE_Wu1]))
+  colnames(margEff2) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu2],
+    colnames(muHvar)[-1][!idTRUE_mu2], colnames(uHvar)[-1][!idTRUE_Wu2]))
+  colnames(margEff_c) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu1],
+    colnames(muHvar)[-1][!idTRUE_mu1], colnames(uHvar)[-1][!idTRUE_Wu1]))
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -7896,21 +7953,28 @@ cmcesfmargtruncnorm_Eu_cloglog <- function(object) {
   Wu_mat2 <- kronecker(matrix(delta2[2:object$nuZUvar], nrow = 1),
     matrix(exp(Wu2/2)/2 * ((1 + Lambda2^2) * dnorm(Lambda2)/pnorm(Lambda2) +
       Lambda2 * (dnorm(Lambda2)/pnorm(Lambda2))^2), ncol = 1))
-  idTRUE_mu <- substring(names(omega1)[-1], 5) %in% substring(names(delta1)[-1],
+  idTRUE_mu1 <- substring(names(omega1)[-1], 5) %in% substring(names(delta1)[-1],
     4)
-  idTRUE_Wu <- substring(names(delta1)[-1], 4) %in% substring(names(omega1)[-1],
+  idTRUE_Wu1 <- substring(names(delta1)[-1], 4) %in% substring(names(omega1)[-1],
     5)
-  margEff1 <- cbind(mu_mat1[, idTRUE_mu] + Wu_mat1[, idTRUE_Wu],
-    mu_mat1[, !idTRUE_mu], Wu_mat1[, !idTRUE_Wu])
-  margEff2 <- cbind(mu_mat2[, idTRUE_mu] + Wu_mat2[, idTRUE_Wu],
-    mu_mat2[, !idTRUE_mu], Wu_mat2[, !idTRUE_Wu])
+  idTRUE_mu2 <- substring(names(omega2)[-1], 5) %in% substring(names(delta2)[-1],
+    4)
+  idTRUE_Wu2 <- substring(names(delta2)[-1], 4) %in% substring(names(omega2)[-1],
+    5)
+  margEff1 <- cbind(mu_mat1[, idTRUE_mu1] + Wu_mat1[, idTRUE_Wu1],
+    mu_mat1[, !idTRUE_mu1], Wu_mat1[, !idTRUE_Wu1])
+  margEff2 <- cbind(mu_mat2[, idTRUE_mu2] + Wu_mat2[, idTRUE_Wu2],
+    mu_mat2[, !idTRUE_mu2], Wu_mat2[, !idTRUE_Wu2])
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
-  colnames(margEff2) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
-  colnames(margEff_c) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+  colnames(margEff1) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu1],
+    colnames(muHvar)[-1][!idTRUE_mu1], colnames(uHvar)[-1][!idTRUE_Wu1]),
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu2],
+    colnames(muHvar)[-1][!idTRUE_mu2], colnames(uHvar)[-1][!idTRUE_Wu2]),
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu1],
+    colnames(muHvar)[-1][!idTRUE_mu1], colnames(uHvar)[-1][!idTRUE_Wu1]),
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
@@ -7993,20 +8057,24 @@ cmcesfmargtruncnorm_Vu_cloglog <- function(object) {
       (Lambda2 + Lambda2^3 + (2 + 3 * Lambda2^2) * dnorm(Lambda2)/pnorm(Lambda2) +
         2 * Lambda2 * (dnorm(Lambda2)/pnorm(Lambda2))^2)),
       ncol = 1))
-  idTRUE_mu <- substring(names(omega1)[-1], 5) %in% substring(names(delta1)[-1],
+  idTRUE_mu1 <- substring(names(omega1)[-1], 5) %in% substring(names(delta1)[-1],
     4)
-  idTRUE_Wu <- substring(names(delta1)[-1], 4) %in% substring(names(omega1)[-1],
+  idTRUE_Wu1 <- substring(names(delta1)[-1], 4) %in% substring(names(omega1)[-1],
     5)
-  margEff1 <- cbind(mu_mat1[, idTRUE_mu] + Wu_mat1[, idTRUE_Wu],
-    mu_mat1[, !idTRUE_mu], Wu_mat1[, !idTRUE_Wu])
-  margEff2 <- cbind(mu_mat2[, idTRUE_mu] + Wu_mat2[, idTRUE_Wu],
-    mu_mat2[, !idTRUE_mu], Wu_mat2[, !idTRUE_Wu])
+  idTRUE_mu2 <- substring(names(omega2)[-1], 5) %in% substring(names(delta2)[-1],
+    4)
+  idTRUE_Wu2 <- substring(names(delta2)[-1], 4) %in% substring(names(omega2)[-1],
+    5)
+  margEff1 <- cbind(mu_mat1[, idTRUE_mu1] + Wu_mat1[, idTRUE_Wu1],
+    mu_mat1[, !idTRUE_mu1], Wu_mat1[, !idTRUE_Wu1])
+  margEff2 <- cbind(mu_mat2[, idTRUE_mu2] + Wu_mat2[, idTRUE_Wu2],
+    mu_mat2[, !idTRUE_mu2], Wu_mat2[, !idTRUE_Wu2])
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
-  colnames(margEff2) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
-  colnames(margEff_c) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+  colnames(margEff1) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu1],
+    colnames(muHvar)[-1][!idTRUE_mu1], colnames(uHvar)[-1][!idTRUE_Wu1]))
+  colnames(margEff2) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu2],
+    colnames(muHvar)[-1][!idTRUE_mu2], colnames(uHvar)[-1][!idTRUE_Wu2]))
+  colnames(margEff_c) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu1],
+    colnames(muHvar)[-1][!idTRUE_mu1], colnames(uHvar)[-1][!idTRUE_Wu1]))
   return(bind_cols(margEff1, margEff2, margEff_c))
 }

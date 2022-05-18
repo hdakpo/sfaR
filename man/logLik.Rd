@@ -6,6 +6,7 @@
 \alias{logLik.lcmcross}
 \alias{logLik.sfaselectioncross}
 \alias{logLik.zisfcross}
+\alias{logLik.cnsfcross}
 \title{Extract log-likelihood value of stochastic frontier models}
 \usage{
 \method{logLik}{sfacross}(object, individual = FALSE, ...)
@@ -15,10 +16,12 @@
 \method{logLik}{sfaselectioncross}(object, individual = FALSE, ...)
 
 \method{logLik}{zisfcross}(object, individual = FALSE, ...)
+
+\method{logLik}{cnsfcross}(object, individual = FALSE, ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{sfacross}}, \code{\link{lcmcross}},
+by \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{sfacross}},
 \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.}
 
 \item{individual}{Logical. If \code{FALSE} (default), the sum of all
@@ -39,7 +42,7 @@ when \code{individual = TRUE}.
 \description{
 \code{\link{logLik}} extracts the log-likelihood value(s) from classic or
 latent class stochastic frontier models estimated with
-\code{\link{sfacross}}, \code{\link{lcmcross}},
+\code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{sfacross}},
 \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.
 }
 \examples{
@@ -61,11 +64,14 @@ logLik(cb_2c_h, individual = TRUE)
 
 }
 \seealso{
-\code{\link{sfacross}}, for the stochastic frontier analysis model
-fitting function.
+\code{\link{cnsfcross}}, for the contaminated noise stochastic
+frontier analysis model fitting function.
 
 \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 model fitting function.
+
+\code{\link{sfacross}}, for the stochastic frontier analysis model
+fitting function.
 
 \code{\link{sfaselectioncross}} for sample selection in stochastic frontier
 model fitting function.
