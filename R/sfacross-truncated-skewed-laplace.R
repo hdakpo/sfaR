@@ -467,7 +467,7 @@ ctslnormeff <- function(object, level) {
   vHvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 3)
   lambda <- object$mlParam[object$nXvar + object$nuZUvar +
-                             object$nvZVvar + 1]
+    object$nvZVvar + 1]
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
@@ -508,7 +508,7 @@ cmargtslnorm_Eu <- function(object) {
   uHvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 2)
   lambda <- object$mlParam[object$nXvar + object$nuZUvar +
-                             object$nvZVvar + 1]
+    object$nvZVvar + 1]
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
   margEff <- kronecker(matrix(delta[2:object$nuZUvar] * (1 +
     4 * lambda + 2 * lambda^2)/((1 + lambda) * (1 + 2 * lambda)),
@@ -523,7 +523,7 @@ cmargtslnorm_Vu <- function(object) {
   uHvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 2)
   lambda <- object$mlParam[object$nXvar + object$nuZUvar +
-                                       object$nvZVvar + 1]
+    object$nvZVvar + 1]
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
   margEff <- kronecker(matrix(delta[2:object$nuZUvar] * (1 +
     8 * lambda + 16 * lambda^2 + 12 * lambda^3 + 4 * lambda^4)/((1 +
