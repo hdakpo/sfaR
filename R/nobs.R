@@ -11,6 +11,7 @@
 #         -Sample selection correction                                         #
 #         -Zero inefficiency stochastic frontier                               #
 #         -Contaminated noise stochastic frontier                              #
+#         -Multi-Modal Inefficiency Stochastic Frontier Analysis               #
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
 
@@ -29,15 +30,33 @@
 #'
 #' @name nobs
 #' 
-#' @param object a  `cnsfcross`, `lcmcross`, `sfacross`, `sfaselectioncross` 
-#' or `zisfcross` object for which the number of total observations is to be 
-#' extracted,
+#' @param object a  `cnsfcross`, `lcmcross`, `misfcross`, `sfacross`, 
+#' `sfaselectioncross` or `zisfcross` object for which the number of total 
+#' observations is to be extracted,
 #' @param \dots further arguments.
 #' 
 #' @return A single number, normally an integer.
 #' 
 # @author K Hervé Dakpo
 #' 
+#' @seealso \code{\link{cnsfcross}}, for the contaminated noise stochastic 
+#' frontier analysis model fitting function.
+#'
+#' \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
+#' model fitting function.
+#' 
+#' \code{\link{misfcross}}, for the multi-modal inefficiency stochastic frontier 
+#' analysis model fitting function.
+#' 
+#' \code{\link{sfacross}}, for the stochastic frontier analysis model
+#' fitting function.
+#' 
+#' \code{\link{sfaselectioncross}} for sample selection in stochastic frontier 
+#' model fitting function.
+#' 
+#' \code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
+#' fitting function.
+#'
 #' @keywords attribute
 #' 
 #' @examples
@@ -49,7 +68,7 @@
 #' I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
 #' udist = 'hnormal', uhet = ~ regu, data = utility, S = -1, method = 'bfgs')
 #'     
-#'  nobs(tl_u_h)
+#' nobs(tl_u_h)
 #' 
 #' @aliases nobs.sfacross
 #' @export
@@ -87,5 +106,13 @@ nobs.zisfcross <- function(object, ...) {
 #' @aliases nobs.cnsfcross
 #' @export
 nobs.cnsfcross <- function(object, ...) {
+  return(object$Nobs)
+}
+
+# Extract number of observations for misfcros ----------
+#' @rdname nobs
+#' @aliases nobs.misfcross
+#' @export
+nobs.misfcross <- function(object, ...) {
   return(object$Nobs)
 }

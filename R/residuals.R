@@ -11,6 +11,7 @@
 #         -Sample selection correction                                         #
 #         -Zero inefficiency stochastic frontier                               #
 #         -Contaminated noise stochastic frontier                              #
+#         -Multi-Modal Inefficiency Stochastic Frontier Analysis               #
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
 
@@ -18,13 +19,14 @@
 #'
 #' This function returns the residuals' values from classic or latent class
 #' stochastic frontier models estimated with \code{\link{cnsfcross}},
-#' \code{\link{lcmcross}}, \code{\link{sfacross}}, 
+#' \code{\link{lcmcross}}, \code{\link{misfcross}}, \code{\link{sfacross}}, 
 #' \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.
 #'
 #'
 #' @param object A stochastic frontier model returned
-#' by \code{\link{cnsfcross}},  \code{\link{lcmcross}}, \code{\link{sfacross}}, 
-#' \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.
+#' by \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{cnsfcross}}, 
+#' \code{\link{sfacross}}, \code{\link{sfaselectioncross}} or 
+#' \code{\link{zisfcross}}.
 #' @param ... Currently ignored.
 #'
 #' @name residuals
@@ -34,9 +36,10 @@
 #' for each latent class, where each variable terminates with \code{'_c#'},
 #' \code{'#'} being the class number.
 #' 
-#' When the \code{object} is of class \code{'sfacross'}, 
-#' \code{'sfaselectioncross'} or \code{'zisfcross'},
-#' \code{\link{residuals}} returns a vector of residuals values.
+#' When the \code{object} is of class \code{'cnsfcross'}, 
+#' \code{'misfcross'}, \code{'sfacross'}, \code{'sfaselectioncross'} or 
+#' \code{'zisfcross'}, \code{\link{residuals}} returns a vector of residuals 
+#' values.
 #'
 #' @note The residuals values are ordered in the same way as the corresponding
 #' observations in the dataset used for the estimation.
@@ -48,6 +51,9 @@
 #'
 #' \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 #' model fitting function.
+#' 
+#' \code{\link{misfcross}}, for the multi-modal inefficiency stochastic frontier 
+#' analysis model fitting function.
 #' 
 #' \code{\link{sfacross}}, for the stochastic frontier analysis model
 #' fitting function.
@@ -129,11 +135,18 @@ residuals.zisfcross <- function(object, ...) {
   object$dataTable$mlResiduals
 }
 
-
 # residuals from cnsfcross ----------
 #' @rdname residuals
 #' @aliases residuals.cnsfcross
 #' @export
 residuals.cnsfcross <- function(object, ...) {
+  object$dataTable$mlResiduals
+}
+
+# residuals from misfcross ----------
+#' @rdname residuals
+#' @aliases residuals.misfcross
+#' @export
+residuals.misfcross <- function(object, ...) {
   object$dataTable$mlResiduals
 }

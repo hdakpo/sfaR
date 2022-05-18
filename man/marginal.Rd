@@ -7,6 +7,7 @@
 \alias{marginal.sfaselectioncross}
 \alias{marginal.zisfcross}
 \alias{marginal.cnsfcross}
+\alias{marginal.misfcross}
 \title{Marginal effects of the inefficiency drivers in stochastic frontier models}
 \usage{
 \method{marginal}{sfacross}(object, newData = NULL, ...)
@@ -18,11 +19,14 @@
 \method{marginal}{zisfcross}(object, newData = NULL, ...)
 
 \method{marginal}{cnsfcross}(object, newData = NULL, ...)
+
+\method{marginal}{misfcross}(object, newData = NULL, ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{sfacross}},
-\code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.}
+by \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{misfcross}},
+\code{\link{sfacross}}, \code{\link{sfaselectioncross}} or
+\code{\link{zisfcross}}.}
 
 \item{newData}{Optional data frame that is used to calculate the marginal
 effect of \eqn{Z} variables on inefficiency. If NULL (the default), the
@@ -45,8 +49,9 @@ each variable terminates with \code{'_c#'} where \code{'#'} is the class number
 \description{
 This function returns marginal effects of the inefficiency drivers from
 classic or latent class stochastic frontier models estimated with
-\code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{sfacross}},
-\code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.
+\code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{misfcross}},
+\code{\link{sfacross}}, \code{\link{sfaselectioncross}} or
+\code{\link{zisfcross}}.
 }
 \details{
 \code{\link{marginal}} operates in the presence of exogenous
@@ -95,6 +100,9 @@ frontier analysis model fitting function.
 
 \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 model fitting function.
+
+\code{\link{misfcross}}, for the multi-modal inefficiency stochastic frontier
+analysis model fitting function.
 
 \code{\link{sfacross}}, for the stochastic frontier analysis model
 fitting function.

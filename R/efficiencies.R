@@ -11,6 +11,7 @@
 #         -Sample selection correction                                         #
 #         -Zero inefficiency stochastic frontier                               #
 #         -Contaminated noise stochastic frontier                              #
+#         -Multi-Modal Inefficiency Stochastic Frontier Analysis               #
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
 
@@ -18,8 +19,8 @@
 #'
 #' \code{\link{efficiencies}} returns (in-)efficiency estimates of models 
 #' estimated with \code{\link{cnsfcross}}, \code{\link{lcmcross}}, 
-#' \code{\link{sfacross}}, \code{\link{sfaselectioncross}}, or 
-#' \code{\link{zisfcross}}.
+#' \code{\link{misfcross}}, \code{\link{sfacross}}, 
+#' \code{\link{sfaselectioncross}}, or \code{\link{zisfcross}}.
 #' 
 #' @name efficiencies
 #'
@@ -32,8 +33,7 @@
 #'
 #' In the case of the half normal distribution for the one-sided error term,
 #' the formulae are as follows (for notations, see the \sQuote{Details} section
-#' of \code{\link{sfacross}}, \code{\link{lcmcross}}, 
-#' \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}):
+#' of \code{\link{lcmcross}} or \code{\link{sfacross}}):
 #'
 #' \itemize{ \item The conditional inefficiency is }
 #' 
@@ -133,8 +133,9 @@
 #' }
 #'
 #' @param object A stochastic frontier model returned
-#' by \code{\link{cnsfcross}}, \code{\link{lcmcross}},
-#'  \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.
+#' by \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{misfcross}},
+#' \code{\link{sfacross}}, \code{\link{sfaselectioncross}} or 
+#' \code{\link{zisfcross}}.
 #' @param level A number between between 0 and 0.9999 used for the computation
 #' of (in-)efficiency confidence intervals (defaut = \code{0.95}). Only used
 #' when \code{udist} = \code{'hnormal'}, \code{'exponential'}, \code{'tnormal'}
@@ -150,7 +151,7 @@
 #' dataset used for the estimation.
 #' 
 #' \bold{- For object of class \code{'cnsfcross'}, or \code{'lcmcross'}, or 
-#' \code{'zisfcross'} the following elements are
+#' \code{'misfcross'}, or \code{'zisfcross'} the following elements are
 #' returned:}
 #'
 #' \item{Group_c}{Most probable class for each observation.}
@@ -273,6 +274,9 @@
 #'
 #' \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 #' model fitting function.
+#' 
+#' \code{\link{misfcross}}, for the multi-modal inefficiency stochastic frontier 
+#' analysis model fitting function.
 #' 
 #' \code{\link{sfacross}}, for the stochastic frontier analysis model
 #' fitting function.
@@ -1310,6 +1314,232 @@ efficiencies.cnsfcross <- function(object, level = 0.95, newData = NULL,
                       level = level)
                     }
                     }
+                  }
+                  }
+                }
+                }
+              }
+              }
+            }
+            }
+          }
+          }
+        }
+      }
+    }
+  }
+  return(data.frame(EffRes))
+}
+
+# conditional efficiencies misfcross ----------
+#' @rdname efficiencies
+#' @aliases efficiencies.misfcross
+#' @export
+efficiencies.misfcross <- function(object, level = 0.95, newData = NULL,
+  ...) {
+  if (level < 0 || level > 0.9999) {
+    stop("'level' must be between 0 and 0.9999", call. = FALSE)
+  }
+  if (!is.null(newData)) {
+    if (!is.data.frame(newData)) {
+      stop("argument 'newData' must be of class data.frame")
+    }
+    object$dataTable <- newData
+    object$Nobs <- dim(newData)[1]
+  }
+  if (object$linkF == "logit") {
+    if (object$udist == "hnormal") {
+      EffRes <- cmisfhalfnormeff_logit(object = object,
+        level = level)
+    } else {
+      if (object$udist == "exponential") {
+        EffRes <- cmisfexponormeff_logit(object = object,
+          level = level)
+      } else {
+        if (object$udist == "gamma") {
+          EffRes <- cmisfgammanormeff_logit(object = object,
+          level = level)
+        } else {
+          if (object$udist == "rayleigh") {
+          EffRes <- cmisfraynormeff_logit(object = object,
+            level = level)
+          } else {
+          if (object$udist == "uniform") {
+            EffRes <- cmisfuninormeff_logit(object = object,
+            level = level)
+          } else {
+            if (object$udist == "tnormal") {
+            EffRes <- cmisftruncnormeff_logit(object = object,
+              level = level)
+            } else {
+            if (object$udist == "lognormal") {
+              EffRes <- cmisflognormeff_logit(object = object,
+              level = level)
+            } else {
+              if (object$udist == "genexponential") {
+              EffRes <- cmisfgenexponormeff_logit(object = object,
+                level = level)
+              } else {
+              if (object$udist == "tslaplace") {
+                EffRes <- cmisftslnormeff_logit(object = object, 
+                level = level)
+              } else {
+                if (object$udist == "weibull") {
+                EffRes <- cmisfweibullnormeff_logit(object = object,
+                  level = level)
+                }
+              }
+              }
+            }
+            }
+          }
+          }
+        }
+      }
+    }
+  } else {
+    if (object$linkF == "cauchit") {
+      if (object$udist == "hnormal") {
+        EffRes <- cmisfhalfnormeff_cauchit(object = object,
+          level = level)
+      } else {
+        if (object$udist == "exponential") {
+          EffRes <- cmisfexponormeff_cauchit(object = object,
+          level = level)
+        } else {
+          if (object$udist == "gamma") {
+          EffRes <- cmisfgammanormeff_cauchit(object = object,
+            level = level)
+          } else {
+          if (object$udist == "rayleigh") {
+            EffRes <- cmisfraynormeff_cauchit(object = object,
+            level = level)
+          } else {
+            if (object$udist == "uniform") {
+            EffRes <- cmisfuninormeff_cauchit(object = object,
+              level = level)
+            } else {
+            if (object$udist == "tnormal") {
+              EffRes <- cmisftruncnormeff_cauchit(object = object,
+              level = level)
+            } else {
+              if (object$udist == "lognormal") {
+              EffRes <- cmisflognormeff_cauchit(object = object,
+                level = level)
+              } else {
+              if (object$udist == "genexponential") {
+                EffRes <- cmisfgenexponormeff_cauchit(object = object,
+                level = level)
+              } else {
+                if (object$udist == "tslaplace") {
+                EffRes <- cmisftslnormeff_cauchit(object = object,
+                  level = level)
+                } else {
+                if (object$udist == "weibull") {
+                  EffRes <- cmisfweibullnormeff_cauchit(object = object,
+                  level = level)
+                }
+                }
+              }
+              }
+            }
+            }
+          }
+          }
+        }
+      }
+    } else {
+      if (object$linkF == "probit") {
+        if (object$udist == "hnormal") {
+          EffRes <- cmisfhalfnormeff_probit(object = object,
+          level = level)
+        } else {
+          if (object$udist == "exponential") {
+          EffRes <- cmisfexponormeff_probit(object = object,
+            level = level)
+          } else {
+          if (object$udist == "gamma") {
+            EffRes <- cmisfgammanormeff_probit(object = object,
+            level = level)
+          } else {
+            if (object$udist == "rayleigh") {
+            EffRes <- cmisfraynormeff_probit(object = object,
+              level = level)
+            } else {
+            if (object$udist == "uniform") {
+              EffRes <- cmisfuninormeff_probit(object = object,
+              level = level)
+            } else {
+              if (object$udist == "tnormal") {
+              EffRes <- cmisftruncnormeff_probit(object = object,
+                level = level)
+              } else {
+              if (object$udist == "lognormal") {
+                EffRes <- cmisflognormeff_probit(object = object,
+                level = level)
+              } else {
+                if (object$udist == "genexponential") {
+                EffRes <- cmisfgenexponormeff_probit(object = object,
+                  level = level)
+                } else {
+                if (object$udist == "tslaplace") {
+                  EffRes <- cmisftslnormeff_probit(object = object,
+                  level = level)
+                } else {
+                  if (object$udist == "weibull") {
+                  EffRes <- cmisfweibullnormeff_probit(object = object,
+                    level = level)
+                  }
+                }
+                }
+              }
+              }
+            }
+            }
+          }
+          }
+        }
+      } else {
+        if (object$linkF == "cloglog") {
+          if (object$udist == "hnormal") {
+          EffRes <- cmisfhalfnormeff_cloglog(object = object,
+            level = level)
+          } else {
+          if (object$udist == "exponential") {
+            EffRes <- cmisfexponormeff_cloglog(object = object,
+            level = level)
+          } else {
+            if (object$udist == "gamma") {
+            EffRes <- cmisfgammanormeff_cloglog(object = object,
+              level = level)
+            } else {
+            if (object$udist == "rayleigh") {
+              EffRes <- cmisfraynormeff_cloglog(object = object,
+              level = level)
+            } else {
+              if (object$udist == "uniform") {
+              EffRes <- cmisfuninormeff_cloglog(object = object,
+                level = level)
+              } else {
+              if (object$udist == "tnormal") {
+                EffRes <- cmisftruncnormeff_cloglog(object = object,
+                level = level)
+              } else {
+                if (object$udist == "lognormal") {
+                EffRes <- cmisflognormeff_cloglog(object = object,
+                  level = level)
+                } else {
+                if (object$udist == "genexponential") {
+                  EffRes <- cmisfgenexponormeff_cloglog(object = object,
+                  level = level)
+                } else {
+                  if (object$udist == "tslaplace") {
+                  EffRes <- cmisftslnormeff_cloglog(object = object,
+                    level = level)
+                  } else {
+                  if (object$udist == "weibull") {
+                    EffRes <- cmisfweibullnormeff_cloglog(object = object,
+                    level = level)
                   }
                   }
                 }

@@ -12,6 +12,8 @@
 \alias{print.summary.zisfcross}
 \alias{summary.cnsfcross}
 \alias{print.summary.cnsfcross}
+\alias{summary.misfcross}
+\alias{print.summary.misfcross}
 \title{Summary of results for stochastic frontier models}
 \usage{
 \method{summary}{sfacross}(object, grad = FALSE, ci = FALSE, ...)
@@ -33,11 +35,16 @@
 \method{summary}{cnsfcross}(object, grad = FALSE, ci = FALSE, ...)
 
 \method{print}{summary.cnsfcross}(x, digits = max(3, getOption("digits") - 2), ...)
+
+\method{summary}{misfcross}(object, grad = FALSE, ci = FALSE, ...)
+
+\method{print}{summary.misfcross}(x, digits = max(3, getOption("digits") - 2), ...)
 }
 \arguments{
 \item{object}{An object of either class \code{'cnsfcross'} returned by the
 function \code{\link{cnsfcross}}, or class \code{'lcmcross'} returned by the
-function \code{\link{lcmcross}}, or \code{'sfacross'} returned by the
+function \code{\link{lcmcross}}, or \code{misfcross'} returned by
+\code{\link{cnsfcross}}, or \code{'sfacross'} returned by the
 function \code{\link{sfacross}}, or class \code{'sfaselectioncross'} returned
 by the function \code{\link{sfaselectioncross}}, or class \code{'zisfcross'}
 returned by the function \code{\link{zisfcross}}.}
@@ -53,19 +60,21 @@ returned.}
 \item{...}{Currently ignored.}
 
 \item{x}{An object of either class \code{'summary.cnsfcross'},
-\code{'summary.lcmcross'}, \code{'summary.sfacross'},
-\code{'summary.sfaselectioncross'} or \code{'summary.zisfcross'}.}
+\code{'summary.lcmcross'}, \code{'summary.misfcross'},
+\code{'summary.sfacross'}, \code{'summary.sfaselectioncross'} or
+\code{'summary.zisfcross'}.}
 
 \item{digits}{Numeric. Number of digits displayed in values.}
 }
 \value{
 The \code{\link{summary}} method returns a list of class
 \code{'summary.cnsfcross'}, \code{'summary.lcmcross'},
-\code{'summary.sfacross'}, \code{'summary.sfaselectioncross'},
-\code{'summary.zisfcross'} that contains the same elements as an object
-returned by \code{\link{cnsfcross}}, \code{\link{lcmcross}},
-\code{\link{sfacross}}, \code{\link{sfaselectioncross}} or
-\code{\link{zisfcross}} with the following additional elements:
+\code{'summary.misfcross'}, \code{'summary.sfacross'},
+\code{'summary.sfaselectioncross'}, \code{'summary.zisfcross'} that contains
+the same elements as an object returned by \code{\link{cnsfcross}},
+\code{\link{lcmcross}},  \code{\link{misfcross}}, \code{\link{sfacross}},
+\code{\link{sfaselectioncross}} or \code{\link{zisfcross}} with the
+following additional elements:
 
 \item{AIC}{Akaike information criterion.}
 
@@ -113,8 +122,9 @@ statistics of the difference between the stochastic frontier and the OLS.}
 }
 \description{
 Create and print summary results for stochastic frontier models returned by
-\code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{sfacross}},
-\code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.
+\code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{misfcross}},
+\code{\link{sfacross}}, \code{\link{sfaselectioncross}} or
+\code{\link{zisfcross}}.
 }
 \examples{
 
@@ -134,6 +144,9 @@ frontier analysis model fitting function.
 
 \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 model fitting function.
+
+\code{\link{misfcross}}, for the multi-modal inefficiency stochastic frontier
+analysis model fitting function.
 
 \code{\link{sfacross}}, for the stochastic frontier analysis model
 fitting function.

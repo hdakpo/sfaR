@@ -11,6 +11,7 @@
 #         -Sample selection correction                                         #
 #         -Zero inefficiency stochastic frontier                               #
 #         -Contaminated noise stochastic frontier                              #
+#         -Multi-Modal Inefficiency Stochastic Frontier Analysis               #
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
 
@@ -18,8 +19,9 @@
 #'
 #' This function returns marginal effects of the inefficiency drivers from
 #' classic or latent class stochastic frontier models estimated with
-#' \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{sfacross}},
-#' \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.
+#' \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{misfcross}}, 
+#' \code{\link{sfacross}}, \code{\link{sfaselectioncross}} or 
+#' \code{\link{zisfcross}}.
 #'
 #' @details \code{\link{marginal}} operates in the presence of exogenous 
 #' variables that explain inefficiency, namely the inefficiency drivers
@@ -36,8 +38,9 @@
 #' inefficiency and its drivers.
 #'
 #' @param object A stochastic frontier model returned
-#' by \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{sfacross}}, 
-#' \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.
+#' by \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{misfcross}}, 
+#' \code{\link{sfacross}}, \code{\link{sfaselectioncross}} or 
+#' \code{\link{zisfcross}}.
 #' @param newData Optional data frame that is used to calculate the marginal 
 #' effect of \eqn{Z} variables on inefficiency. If NULL (the default), the 
 #' marginal estimates are calculated for the observations that were used in the 
@@ -62,6 +65,9 @@
 #'
 #' \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 #' model fitting function.
+#' 
+#' \code{\link{misfcross}}, for the multi-modal inefficiency stochastic frontier 
+#' analysis model fitting function.
 #' 
 #' \code{\link{sfacross}}, for the stochastic frontier analysis model
 #' fitting function.
@@ -1809,6 +1815,396 @@ marginal.cnsfcross <- function(object, newData = NULL, ...) {
                       as_tibble(cmcesfmargtslnorm_Vu_cloglog(object = object)))
                     }
                     }
+                  }
+                  }
+                }
+                }
+              }
+              }
+            }
+            }
+          }
+          }
+        }
+      }
+    }
+  }
+  return(data.frame(EffMarg))
+}
+
+# marginal effects computation misfcross ----------
+#' @rdname marginal
+#' @aliases marginal.misfcross
+#' @export
+marginal.misfcross <- function(object, newData = NULL, ...) {
+  if (!is.null(newData)) {
+    if (!is.data.frame(newData)) {
+      stop("argument 'newData' must be of class data.frame")
+    }
+    object$dataTable <- newData
+    object$Nobs <- dim(newData)[1]
+  }
+  if (object$linkF == "logit") {
+    if (object$udist == "hnormal") {
+      if (object$nuZUvar == 1) {
+        stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+          call. = FALSE)
+      } else {
+        EffMarg <- bind_cols(as_tibble(cmisfmarghalfnorm_Eu_logit(object = object)),
+          as_tibble(cmisfmarghalfnorm_Vu_logit(object = object)))
+      }
+    } else {
+      if (object$udist == "exponential") {
+        if (object$nuZUvar == 1) {
+          stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+          call. = FALSE)
+        } else {
+          EffMarg <- bind_cols(as_tibble(cmisfmargexponorm_Eu_logit(object = object)),
+          as_tibble(cmisfmargexponorm_Vu_logit(object = object)))
+        }
+      } else {
+        if (object$udist == "gamma") {
+          if (object$nuZUvar == 1) {
+          stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+            call. = FALSE)
+          } else {
+          EffMarg <- bind_cols(as_tibble(cmisfmarggammanorm_Eu_logit(object = object)),
+            as_tibble(cmisfmarggammanorm_Vu_logit(object = object)))
+          }
+        } else {
+          if (object$udist == "rayleigh") {
+          if (object$nuZUvar == 1) {
+            stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+            call. = FALSE)
+          } else {
+            EffMarg <- bind_cols(as_tibble(cmisfmargraynorm_Eu_logit(object = object)),
+            as_tibble(cmisfmargraynorm_Vu_logit(object = object)))
+          }
+          } else {
+          if (object$udist == "uniform") {
+            if (object$nuZUvar == 1) {
+            stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+              call. = FALSE)
+            } else {
+            EffMarg <- bind_cols(as_tibble(cmisfmarguninorm_Eu_logit(object = object)),
+              as_tibble(cmisfmarguninorm_Vu_logit(object = object)))
+            }
+          } else {
+            if (object$udist == "tnormal") {
+            if (object$nmuZUvar == 1 & object$nuZUvar ==
+              1) {
+              stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+              call. = FALSE)
+            } else {
+              EffMarg <- bind_cols(as_tibble(cmisfmargtruncnorm_Eu_logit(object = object)),
+              as_tibble(cmisfmargtruncnorm_Vu_logit(object = object)))
+            }
+            } else {
+            if (object$udist == "lognormal") {
+              if (object$nmuZUvar == 1 & object$nuZUvar ==
+              1) {
+              stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+                call. = FALSE)
+              } else {
+              EffMarg <- bind_cols(as_tibble(cmisfmarglognorm_Eu_logit(object = object)),
+                as_tibble(cmisfmarglognorm_Vu_logit(object = object)))
+              }
+            } else {
+              if (object$udist == "genexponential") {
+              if (object$nuZUvar == 1) {
+                stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+                call. = FALSE)
+              } else {
+                EffMarg <- bind_cols(as_tibble(cmisfmarggenexponorm_Eu_logit(object = object)),
+                as_tibble(cmisfmarggenexponorm_Vu_logit(object = object)))
+              }
+              } else {
+              if (object$udist == "tslaplace") {
+                if (object$nuZUvar == 1) {
+                stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+                  call. = FALSE)
+                } else {
+                EffMarg <- bind_cols(as_tibble(cmisfmargtslnorm_Eu_logit(object = object)),
+                  as_tibble(cmisfmargtslnorm_Vu_logit(object = object)))
+                }
+              }
+              }
+            }
+            }
+          }
+          }
+        }
+      }
+    }
+  } else {
+    if (object$linkF == "cauchit") {
+      if (object$udist == "hnormal") {
+        if (object$nuZUvar == 1) {
+          stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+          call. = FALSE)
+        } else {
+          EffMarg <- bind_cols(as_tibble(cmisfmarghalfnorm_Eu_cauchit(object = object)),
+          as_tibble(cmisfmarghalfnorm_Vu_cauchit(object = object)))
+        }
+      } else {
+        if (object$udist == "exponential") {
+          if (object$nuZUvar == 1) {
+          stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+            call. = FALSE)
+          } else {
+          EffMarg <- bind_cols(as_tibble(cmisfmargexponorm_Eu_cauchit(object = object)),
+            as_tibble(cmisfmargexponorm_Vu_cauchit(object = object)))
+          }
+        } else {
+          if (object$udist == "gamma") {
+          if (object$nuZUvar == 1) {
+            stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+            call. = FALSE)
+          } else {
+            EffMarg <- bind_cols(as_tibble(cmisfmarggammanorm_Eu_cauchit(object = object)),
+            as_tibble(cmisfmarggammanorm_Vu_cauchit(object = object)))
+          }
+          } else {
+          if (object$udist == "rayleigh") {
+            if (object$nuZUvar == 1) {
+            stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+              call. = FALSE)
+            } else {
+            EffMarg <- bind_cols(as_tibble(cmisfmargraynorm_Eu_cauchit(object = object)),
+              as_tibble(cmisfmargraynorm_Vu_cauchit(object = object)))
+            }
+          } else {
+            if (object$udist == "uniform") {
+            if (object$nuZUvar == 1) {
+              stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+              call. = FALSE)
+            } else {
+              EffMarg <- bind_cols(as_tibble(cmisfmarguninorm_Eu_cauchit(object = object)),
+              as_tibble(cmisfmarguninorm_Vu_cauchit(object = object)))
+            }
+            } else {
+            if (object$udist == "tnormal") {
+              if (object$nmuZUvar == 1 & object$nuZUvar ==
+              1) {
+              stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+                call. = FALSE)
+              } else {
+              EffMarg <- bind_cols(as_tibble(cmisfmargtruncnorm_Eu_cauchit(object = object)),
+                as_tibble(cmisfmargtruncnorm_Vu_cauchit(object = object)))
+              }
+            } else {
+              if (object$udist == "lognormal") {
+              if (object$nmuZUvar == 1 & object$nuZUvar ==
+                1) {
+                stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+                call. = FALSE)
+              } else {
+                EffMarg <- bind_cols(as_tibble(cmisfmarglognorm_Eu_cauchit(object = object)),
+                as_tibble(cmisfmarglognorm_Vu_cauchit(object = object)))
+              }
+              } else {
+              if (object$udist == "genexponential") {
+                if (object$nuZUvar == 1) {
+                stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+                  call. = FALSE)
+                } else {
+                EffMarg <- bind_cols(as_tibble(cmisfmarggenexponorm_Eu_cauchit(object = object)),
+                  as_tibble(cmisfmarggenexponorm_Vu_cauchit(object = object)))
+                }
+              } else {
+                if (object$udist == "tslaplace") {
+                if (object$nuZUvar == 1) {
+                  stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+                  call. = FALSE)
+                } else {
+                  EffMarg <- bind_cols(as_tibble(cmisfmargtslnorm_Eu_cauchit(object = object)),
+                  as_tibble(cmisfmargtslnorm_Vu_cauchit(object = object)))
+                }
+                }
+              }
+              }
+            }
+            }
+          }
+          }
+        }
+      }
+    } else {
+      if (object$linkF == "probit") {
+        if (object$udist == "hnormal") {
+          if (object$nuZUvar == 1) {
+          stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+            call. = FALSE)
+          } else {
+          EffMarg <- bind_cols(as_tibble(cmisfmarghalfnorm_Eu_probit(object = object)),
+            as_tibble(cmisfmarghalfnorm_Vu_probit(object = object)))
+          }
+        } else {
+          if (object$udist == "exponential") {
+          if (object$nuZUvar == 1) {
+            stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+            call. = FALSE)
+          } else {
+            EffMarg <- bind_cols(as_tibble(cmisfmargexponorm_Eu_probit(object = object)),
+            as_tibble(cmisfmargexponorm_Vu_probit(object = object)))
+          }
+          } else {
+          if (object$udist == "gamma") {
+            if (object$nuZUvar == 1) {
+            stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+              call. = FALSE)
+            } else {
+            EffMarg <- bind_cols(as_tibble(cmisfmarggammanorm_Eu_probit(object = object)),
+              as_tibble(cmisfmarggammanorm_Vu_probit(object = object)))
+            }
+          } else {
+            if (object$udist == "rayleigh") {
+            if (object$nuZUvar == 1) {
+              stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+              call. = FALSE)
+            } else {
+              EffMarg <- bind_cols(as_tibble(cmisfmargraynorm_Eu_probit(object = object)),
+              as_tibble(cmisfmargraynorm_Vu_probit(object = object)))
+            }
+            } else {
+            if (object$udist == "uniform") {
+              if (object$nuZUvar == 1) {
+              stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+                call. = FALSE)
+              } else {
+              EffMarg <- bind_cols(as_tibble(cmisfmarguninorm_Eu_probit(object = object)),
+                as_tibble(cmisfmarguninorm_Vu_probit(object = object)))
+              }
+            } else {
+              if (object$udist == "tnormal") {
+              if (object$nmuZUvar == 1 & object$nuZUvar ==
+                1) {
+                stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+                call. = FALSE)
+              } else {
+                EffMarg <- bind_cols(as_tibble(cmisfmargtruncnorm_Eu_probit(object = object)),
+                as_tibble(cmisfmargtruncnorm_Vu_probit(object = object)))
+              }
+              } else {
+              if (object$udist == "lognormal") {
+                if (object$nmuZUvar == 1 & object$nuZUvar ==
+                1) {
+                stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+                  call. = FALSE)
+                } else {
+                EffMarg <- bind_cols(as_tibble(cmisfmarglognorm_Eu_probit(object = object)),
+                  as_tibble(cmisfmarglognorm_Vu_probit(object = object)))
+                }
+              } else {
+                if (object$udist == "genexponential") {
+                if (object$nuZUvar == 1) {
+                  stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+                  call. = FALSE)
+                } else {
+                  EffMarg <- bind_cols(as_tibble(cmisfmarggenexponorm_Eu_probit(object = object)),
+                  as_tibble(cmisfmarggenexponorm_Vu_probit(object = object)))
+                }
+                } else {
+                if (object$udist == "tslaplace") {
+                  if (object$nuZUvar == 1) {
+                  stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+                    call. = FALSE)
+                  } else {
+                  EffMarg <- bind_cols(as_tibble(cmisfmargtslnorm_Eu_probit(object = object)),
+                    as_tibble(cmisfmargtslnorm_Vu_probit(object = object)))
+                  }
+                }
+                }
+              }
+              }
+            }
+            }
+          }
+          }
+        }
+      } else {
+        if (object$linkF == "cloglog") {
+          if (object$udist == "hnormal") {
+          if (object$nuZUvar == 1) {
+            stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+            call. = FALSE)
+          } else {
+            EffMarg <- bind_cols(as_tibble(cmisfmarghalfnorm_Eu_cloglog(object = object)),
+            as_tibble(cmisfmarghalfnorm_Vu_cloglog(object = object)))
+          }
+          } else {
+          if (object$udist == "exponential") {
+            if (object$nuZUvar == 1) {
+            stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+              call. = FALSE)
+            } else {
+            EffMarg <- bind_cols(as_tibble(cmisfmargexponorm_Eu_cloglog(object = object)),
+              as_tibble(cmisfmargexponorm_Vu_cloglog(object = object)))
+            }
+          } else {
+            if (object$udist == "gamma") {
+            if (object$nuZUvar == 1) {
+              stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+              call. = FALSE)
+            } else {
+              EffMarg <- bind_cols(as_tibble(cmisfmarggammanorm_Eu_cloglog(object = object)),
+              as_tibble(cmisfmarggammanorm_Vu_cloglog(object = object)))
+            }
+            } else {
+            if (object$udist == "rayleigh") {
+              if (object$nuZUvar == 1) {
+              stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+                call. = FALSE)
+              } else {
+              EffMarg <- bind_cols(as_tibble(cmisfmargraynorm_Eu_cloglog(object = object)),
+                as_tibble(cmisfmargraynorm_Vu_cloglog(object = object)))
+              }
+            } else {
+              if (object$udist == "uniform") {
+              if (object$nuZUvar == 1) {
+                stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+                call. = FALSE)
+              } else {
+                EffMarg <- bind_cols(as_tibble(cmisfmarguninorm_Eu_cloglog(object = object)),
+                as_tibble(cmisfmarguninorm_Vu_cloglog(object = object)))
+              }
+              } else {
+              if (object$udist == "tnormal") {
+                if (object$nmuZUvar == 1 & object$nuZUvar ==
+                1) {
+                stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+                  call. = FALSE)
+                } else {
+                EffMarg <- bind_cols(as_tibble(cmisfmargtruncnorm_Eu_cloglog(object = object)),
+                  as_tibble(cmisfmargtruncnorm_Vu_cloglog(object = object)))
+                }
+              } else {
+                if (object$udist == "lognormal") {
+                if (object$nmuZUvar == 1 & object$nuZUvar ==
+                  1) {
+                  stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+                  call. = FALSE)
+                } else {
+                  EffMarg <- bind_cols(as_tibble(cmisfmarglognorm_Eu_cloglog(object = object)),
+                  as_tibble(cmisfmarglognorm_Vu_cloglog(object = object)))
+                }
+                } else {
+                if (object$udist == "genexponential") {
+                  if (object$nuZUvar == 1) {
+                  stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+                    call. = FALSE)
+                  } else {
+                  EffMarg <- bind_cols(as_tibble(cmisfmarggenexponorm_Eu_cloglog(object = object)),
+                    as_tibble(cmisfmarggenexponorm_Vu_cloglog(object = object)))
+                  }
+                } else {
+                  if (object$udist == "tslaplace") {
+                  if (object$nuZUvar == 1) {
+                    stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+                    call. = FALSE)
+                  } else {
+                    EffMarg <- bind_cols(as_tibble(cmisfmargtslnorm_Eu_cloglog(object = object)),
+                    as_tibble(cmisfmargtslnorm_Vu_cloglog(object = object)))
                   }
                   }
                 }

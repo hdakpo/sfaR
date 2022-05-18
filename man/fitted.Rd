@@ -7,6 +7,7 @@
 \alias{fitted.sfaselectioncross}
 \alias{fitted.zisfcross}
 \alias{fitted.cnsfcross}
+\alias{fitted.misfcross}
 \title{Extract fitted values of stochastic frontier models}
 \usage{
 \method{fitted}{sfacross}(object, ...)
@@ -18,11 +19,14 @@
 \method{fitted}{zisfcross}(object, ...)
 
 \method{fitted}{cnsfcross}(object, ...)
+
+\method{fitted}{misfcross}(object, ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{sfacross}},
-\code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.}
+by \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{misfcross}},
+\code{\link{sfacross}}, \code{\link{sfaselectioncross}} or
+\code{\link{zisfcross}}.}
 
 \item{...}{Currently ignored.}
 }
@@ -31,15 +35,16 @@ In the case of an object of class \code{'lcmcross'}, a data frame
 containing the fitted values for each class is returned where each variable
 terminates with \code{'_c#'}, \code{'#'} being the class number.
 
-In the case of an object of class \code{'sfacross'},
-\code{'sfaselectioncross'} or \code{'zisfcross'}, a vector of
-fitted values is returned.
+In the case of an object of class \code{'cnsfcross'}, \code{'misfcross'},
+\code{'sfacross'}, \code{'sfaselectioncross'} or \code{'zisfcross'},
+a vector of fitted values is returned.
 }
 \description{
 \code{\link{fitted}} returns the fitted frontier values from classic or
 latent class stochastic frontier models estimated with
-\code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{sfacross}},
-\code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.
+\code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{misfcross}},
+\code{\link{sfacross}}, \code{\link{sfaselectioncross}} or
+\code{\link{zisfcross}}.
 }
 \note{
 The fitted values are ordered in the same way as the corresponding
@@ -61,6 +66,9 @@ frontier analysis model fitting function.
 
 \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 model fitting function.
+
+\code{\link{misfcross}}, for the multi-modal inefficiency stochastic frontier
+analysis model fitting function.
 
 \code{\link{sfacross}}, for the stochastic frontier analysis model
 fitting function.

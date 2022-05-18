@@ -1489,15 +1489,19 @@ misfgammanormAlgOpt_cloglog <- function(start, olsParam, dataTable,
 # logit specification class membership
 cmisfgammanormeff_logit <- function(object, level) {
   beta <- object$mlParam[1:(object$nXvar)]
-  delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+  delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
-  phi <- object$mlParam[(object$nXvar + object$nuZUvar + 1):(object$nXvar +
-    object$nuZUvar + object$nvZVvar)]
-  P <- object$mlParam[object$nXvar + object$nuZUvar + object$nvZVvar +
-    1]
-  theta <- object$mlParam[(object$nXvar + object$nuZUvar +
-    object$nvZVvar + 1):(object$nXvar + object$nuZUvar +
-    object$nvZVvar + object$nZHvar)]
+  delta2 <- object$mlParam[(object$nXvar + object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar)]
+  phi <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar + object$nvZVvar)]
+  P1 <- object$mlParam[object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 1]
+  P2 <- object$mlParam[object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 2]
+  theta <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 3):(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + object$nZHvar + 2)]
   Xvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 1)
   uHvar <- model.matrix(object$formula, data = object$dataTable,
@@ -1506,25 +1510,36 @@ cmisfgammanormeff_logit <- function(object, level) {
     rhs = 3)
   Zvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 4)
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
+  Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
   Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
     as.numeric(crossprod(matrix(beta), t(Xvar)))
-  mui <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu))
-  Hi1 <- numeric(object$Nobs)
-  Hi2 <- numeric(object$Nobs)
+  mui1 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu1))
+  mui2 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu2))
+  Hi1_1 <- numeric(object$Nobs)
+  Hi2_1 <- numeric(object$Nobs)
+  Hi1_2 <- numeric(object$Nobs)
+  Hi2_2 <- numeric(object$Nobs)
   for (i in 1:object$Nobs) {
-    Hi1[i] <- mean((mui[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
-      ] + (1 - object$FiMat[i, ]) * pnorm(-mui[i]/sqrt(exp(Wv[i])))))^(P))
-    Hi2[i] <- mean((mui[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
-      ] + (1 - object$FiMat[i, ]) * pnorm(-mui[i]/sqrt(exp(Wv[i])))))^(P -
+    Hi1_1[i] <- mean((mui1[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui1[i]/sqrt(exp(Wv[i])))))^(P1))
+    Hi2_1[i] <- mean((mui1[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui1[i]/sqrt(exp(Wv[i])))))^(P1 -
+      1))
+    Hi1_2[i] <- mean((mui2[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui2[i]/sqrt(exp(Wv[i])))))^(P2))
+    Hi2_2[i] <- mean((mui2[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui2[i]/sqrt(exp(Wv[i])))))^(P2 -
       1))
   }
-  Pi1 <- exp(object$S * epsilon/exp(Wu/2) + exp(Wv)/(2 * exp(Wu))) *
-    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu/2)) *
-    exp(-P * Wu/2)/gamma(P) * Hi2
-  Pi2 <- 1/exp(Wv/2) * dnorm(object$S * epsilon/exp(Wv/2))
+  Pi1 <- exp(object$S * epsilon/exp(Wu1/2) + exp(Wv)/(2 * exp(Wu1))) *
+    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu1/2)) *
+    exp(-P1 * Wu1/2)/gamma(P1) * Hi2_1
+  Pi2 <- exp(object$S * epsilon/exp(Wu2/2) + exp(Wv)/(2 * exp(Wu2))) *
+    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu2/2)) *
+    exp(-P2 * Wu2/2)/gamma(P2) * Hi2_2
   Probc1 <- exp(Wz)/(1 + exp(Wz))
   Probc2 <- 1 - Probc1
   Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
@@ -1532,8 +1547,8 @@ cmisfgammanormeff_logit <- function(object, level) {
   Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
   P_cond_c <- ifelse(Group_c == 1, Pcond_c1, Pcond_c2)
   odRatio <- Pcond_c2/(1 - Pcond_c2)
-  u_c1 <- Hi1/Hi2
-  u_c2 <- rep(0, object$Nobs)
+  u_c1 <- Hi1_1/Hi2_1
+  u_c2 <- Hi1_2/Hi2_2
   u_c <- ifelse(Group_c == 1, u_c1, u_c2)
   ineff_c1 <- ifelse(Group_c == 1, u_c1, NA)
   ineff_c2 <- ifelse(Group_c == 2, u_c2, NA)
@@ -1541,33 +1556,51 @@ cmisfgammanormeff_logit <- function(object, level) {
     teJLMS_c1 <- exp(-u_c1)
     teJLMS_c2 <- exp(-u_c2)
     teJLMS_c <- ifelse(Group_c == 1, teJLMS_c1, teJLMS_c2)
-    mui_Gi <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu)) -
+    mui_Gi1 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu1)) -
       exp(Wv)
-    mui_Ki <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu)) +
+    mui_Ki1 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu1)) +
       exp(Wv)
-    Gi <- numeric(object$Nobs)
-    Ki <- numeric(object$Nobs)
+    mui_Gi2 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu2)) -
+      exp(Wv)
+    mui_Ki2 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu2)) +
+      exp(Wv)
+    Gi1 <- numeric(object$Nobs)
+    Ki1 <- numeric(object$Nobs)
+    Gi2 <- numeric(object$Nobs)
+    Ki2 <- numeric(object$Nobs)
     for (i in 1:object$Nobs) {
-      Gi[i] <- mean((mui_Gi[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
-        ] + (1 - object$FiMat[i, ]) * pnorm(-mui_Gi[i]/sqrt(exp(Wv[i])))))^(P -
+      Gi1[i] <- mean((mui_Gi1[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+        ] + (1 - object$FiMat[i, ]) * pnorm(-mui_Gi1[i]/sqrt(exp(Wv[i])))))^(P1 -
         1))
-      Ki[i] <- mean((mui_Ki[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
-        ] + (1 - object$FiMat[i, ]) * pnorm(-mui_Ki[i]/sqrt(exp(Wv[i])))))^(P -
+      Ki1[i] <- mean((mui_Ki1[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+        ] + (1 - object$FiMat[i, ]) * pnorm(-mui_Ki1[i]/sqrt(exp(Wv[i])))))^(P1 -
+        1))
+      Gi2[i] <- mean((mui_Gi2[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+        ] + (1 - object$FiMat[i, ]) * pnorm(-mui_Gi2[i]/sqrt(exp(Wv[i])))))^(P2 -
+        1))
+      Ki2[i] <- mean((mui_Ki2[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+        ] + (1 - object$FiMat[i, ]) * pnorm(-mui_Ki2[i]/sqrt(exp(Wv[i])))))^(P2 -
         1))
     }
-    teBC_c1 <- exp(exp(Wv)/exp(Wu/2) + object$S * epsilon +
-      exp(Wv)/2) * pnorm(-exp(Wv/2 - Wu/2) - object$S *
-      epsilon/exp(Wv/2) - exp(Wv/2)) * Gi/(pnorm(-exp(Wv/2 -
-      Wu/2) - object$S * epsilon/exp(Wv/2)) * Hi2)
-    teBC_c2 <- rep(1, object$Nobs)
+    teBC_c1 <- exp(exp(Wv)/exp(Wu1/2) + object$S * epsilon +
+      exp(Wv)/2) * pnorm(-exp(Wv/2 - Wu1/2) - object$S *
+      epsilon/exp(Wv/2) - exp(Wv/2)) * Gi1/(pnorm(-exp(Wv/2 -
+      Wu1/2) - object$S * epsilon/exp(Wv/2)) * Hi2_1)
+    teBC_c2 <- exp(exp(Wv)/exp(Wu2/2) + object$S * epsilon +
+      exp(Wv)/2) * pnorm(-exp(Wv/2 - Wu2/2) - object$S *
+      epsilon/exp(Wv/2) - exp(Wv/2)) * Gi2/(pnorm(-exp(Wv/2 -
+      Wu2/2) - object$S * epsilon/exp(Wv/2)) * Hi2_2)
     teBC_c <- ifelse(Group_c == 1, teBC_c1, teBC_c2)
     effBC_c1 <- ifelse(Group_c == 1, teBC_c1, NA)
     effBC_c2 <- ifelse(Group_c == 2, teBC_c2, NA)
-    teBC_reciprocal_c1 <- exp(-exp(Wv)/exp(Wu/2) - object$S *
-      epsilon + exp(Wv)/2) * pnorm(-exp(Wv/2 - Wu/2) -
-      object$S * epsilon/exp(Wv/2) + exp(Wv/2)) * Ki/(pnorm(-exp(Wv/2 -
-      Wu/2) - object$S * epsilon/exp(Wv/2)) * Hi2)
-    teBC_reciprocal_c2 <- rep(1, object$Nobs)
+    teBC_reciprocal_c1 <- exp(-exp(Wv)/exp(Wu1/2) - object$S *
+      epsilon + exp(Wv)/2) * pnorm(-exp(Wv/2 - Wu1/2) -
+      object$S * epsilon/exp(Wv/2) + exp(Wv/2)) * Ki1/(pnorm(-exp(Wv/2 -
+      Wu1/2) - object$S * epsilon/exp(Wv/2)) * Hi2_1)
+    teBC_reciprocal_c2 <- exp(-exp(Wv)/exp(Wu2/2) - object$S *
+      epsilon + exp(Wv)/2) * pnorm(-exp(Wv/2 - Wu2/2) -
+      object$S * epsilon/exp(Wv/2) + exp(Wv/2)) * Ki2/(pnorm(-exp(Wv/2 -
+      Wu2/2) - object$S * epsilon/exp(Wv/2)) * Hi2_2)
     teBC_reciprocal_c <- ifelse(Group_c == 1, teBC_reciprocal_c1,
       teBC_reciprocal_c2)
     ReffBC_c1 <- ifelse(Group_c == 1, teBC_reciprocal_c1,
@@ -1596,15 +1629,19 @@ cmisfgammanormeff_logit <- function(object, level) {
 # cauchit specification class membership
 cmisfgammanormeff_cauchit <- function(object, level) {
   beta <- object$mlParam[1:(object$nXvar)]
-  delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+  delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
-  phi <- object$mlParam[(object$nXvar + object$nuZUvar + 1):(object$nXvar +
-    object$nuZUvar + object$nvZVvar)]
-  P <- object$mlParam[object$nXvar + object$nuZUvar + object$nvZVvar +
-    1]
-  theta <- object$mlParam[(object$nXvar + object$nuZUvar +
-    object$nvZVvar + 1):(object$nXvar + object$nuZUvar +
-    object$nvZVvar + object$nZHvar)]
+  delta2 <- object$mlParam[(object$nXvar + object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar)]
+  phi <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar + object$nvZVvar)]
+  P1 <- object$mlParam[object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 1]
+  P2 <- object$mlParam[object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 2]
+  theta <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 3):(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + object$nZHvar + 2)]
   Xvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 1)
   uHvar <- model.matrix(object$formula, data = object$dataTable,
@@ -1613,25 +1650,36 @@ cmisfgammanormeff_cauchit <- function(object, level) {
     rhs = 3)
   Zvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 4)
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
+  Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
   Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
     as.numeric(crossprod(matrix(beta), t(Xvar)))
-  mui <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu))
-  Hi1 <- numeric(object$Nobs)
-  Hi2 <- numeric(object$Nobs)
+  mui1 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu1))
+  mui2 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu2))
+  Hi1_1 <- numeric(object$Nobs)
+  Hi2_1 <- numeric(object$Nobs)
+  Hi1_2 <- numeric(object$Nobs)
+  Hi2_2 <- numeric(object$Nobs)
   for (i in 1:object$Nobs) {
-    Hi1[i] <- mean((mui[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
-      ] + (1 - object$FiMat[i, ]) * pnorm(-mui[i]/sqrt(exp(Wv[i])))))^(P))
-    Hi2[i] <- mean((mui[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
-      ] + (1 - object$FiMat[i, ]) * pnorm(-mui[i]/sqrt(exp(Wv[i])))))^(P -
+    Hi1_1[i] <- mean((mui1[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui1[i]/sqrt(exp(Wv[i])))))^(P1))
+    Hi2_1[i] <- mean((mui1[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui1[i]/sqrt(exp(Wv[i])))))^(P1 -
+      1))
+    Hi1_2[i] <- mean((mui2[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui2[i]/sqrt(exp(Wv[i])))))^(P2))
+    Hi2_2[i] <- mean((mui2[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui2[i]/sqrt(exp(Wv[i])))))^(P2 -
       1))
   }
-  Pi1 <- exp(object$S * epsilon/exp(Wu/2) + exp(Wv)/(2 * exp(Wu))) *
-    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu/2)) *
-    exp(-P * Wu/2)/gamma(P) * Hi2
-  Pi2 <- 1/exp(Wv/2) * dnorm(object$S * epsilon/exp(Wv/2))
+  Pi1 <- exp(object$S * epsilon/exp(Wu1/2) + exp(Wv)/(2 * exp(Wu1))) *
+    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu1/2)) *
+    exp(-P1 * Wu1/2)/gamma(P1) * Hi2_1
+  Pi2 <- exp(object$S * epsilon/exp(Wu2/2) + exp(Wv)/(2 * exp(Wu2))) *
+    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu2/2)) *
+    exp(-P2 * Wu2/2)/gamma(P2) * Hi2_2
   Probc1 <- 1/pi * atan(Wz) + 1/2
   Probc2 <- 1 - Probc1
   Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
@@ -1639,8 +1687,8 @@ cmisfgammanormeff_cauchit <- function(object, level) {
   Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
   P_cond_c <- ifelse(Group_c == 1, Pcond_c1, Pcond_c2)
   odRatio <- Pcond_c2/(1 - Pcond_c2)
-  u_c1 <- Hi1/Hi2
-  u_c2 <- rep(0, object$Nobs)
+  u_c1 <- Hi1_1/Hi2_1
+  u_c2 <- Hi1_2/Hi2_2
   u_c <- ifelse(Group_c == 1, u_c1, u_c2)
   ineff_c1 <- ifelse(Group_c == 1, u_c1, NA)
   ineff_c2 <- ifelse(Group_c == 2, u_c2, NA)
@@ -1648,33 +1696,51 @@ cmisfgammanormeff_cauchit <- function(object, level) {
     teJLMS_c1 <- exp(-u_c1)
     teJLMS_c2 <- exp(-u_c2)
     teJLMS_c <- ifelse(Group_c == 1, teJLMS_c1, teJLMS_c2)
-    mui_Gi <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu)) -
+    mui_Gi1 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu1)) -
       exp(Wv)
-    mui_Ki <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu)) +
+    mui_Ki1 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu1)) +
       exp(Wv)
-    Gi <- numeric(object$Nobs)
-    Ki <- numeric(object$Nobs)
+    mui_Gi2 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu2)) -
+      exp(Wv)
+    mui_Ki2 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu2)) +
+      exp(Wv)
+    Gi1 <- numeric(object$Nobs)
+    Ki1 <- numeric(object$Nobs)
+    Gi2 <- numeric(object$Nobs)
+    Ki2 <- numeric(object$Nobs)
     for (i in 1:object$Nobs) {
-      Gi[i] <- mean((mui_Gi[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
-        ] + (1 - object$FiMat[i, ]) * pnorm(-mui_Gi[i]/sqrt(exp(Wv[i])))))^(P -
+      Gi1[i] <- mean((mui_Gi1[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+        ] + (1 - object$FiMat[i, ]) * pnorm(-mui_Gi1[i]/sqrt(exp(Wv[i])))))^(P1 -
         1))
-      Ki[i] <- mean((mui_Ki[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
-        ] + (1 - object$FiMat[i, ]) * pnorm(-mui_Ki[i]/sqrt(exp(Wv[i])))))^(P -
+      Ki1[i] <- mean((mui_Ki1[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+        ] + (1 - object$FiMat[i, ]) * pnorm(-mui_Ki1[i]/sqrt(exp(Wv[i])))))^(P1 -
+        1))
+      Gi2[i] <- mean((mui_Gi2[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+        ] + (1 - object$FiMat[i, ]) * pnorm(-mui_Gi2[i]/sqrt(exp(Wv[i])))))^(P2 -
+        1))
+      Ki2[i] <- mean((mui_Ki2[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+        ] + (1 - object$FiMat[i, ]) * pnorm(-mui_Ki2[i]/sqrt(exp(Wv[i])))))^(P2 -
         1))
     }
-    teBC_c1 <- exp(exp(Wv)/exp(Wu/2) + object$S * epsilon +
-      exp(Wv)/2) * pnorm(-exp(Wv/2 - Wu/2) - object$S *
-      epsilon/exp(Wv/2) - exp(Wv/2)) * Gi/(pnorm(-exp(Wv/2 -
-      Wu/2) - object$S * epsilon/exp(Wv/2)) * Hi2)
-    teBC_c2 <- rep(1, object$Nobs)
+    teBC_c1 <- exp(exp(Wv)/exp(Wu1/2) + object$S * epsilon +
+      exp(Wv)/2) * pnorm(-exp(Wv/2 - Wu1/2) - object$S *
+      epsilon/exp(Wv/2) - exp(Wv/2)) * Gi1/(pnorm(-exp(Wv/2 -
+      Wu1/2) - object$S * epsilon/exp(Wv/2)) * Hi2_1)
+    teBC_c2 <- exp(exp(Wv)/exp(Wu2/2) + object$S * epsilon +
+      exp(Wv)/2) * pnorm(-exp(Wv/2 - Wu2/2) - object$S *
+      epsilon/exp(Wv/2) - exp(Wv/2)) * Gi2/(pnorm(-exp(Wv/2 -
+      Wu2/2) - object$S * epsilon/exp(Wv/2)) * Hi2_2)
     teBC_c <- ifelse(Group_c == 1, teBC_c1, teBC_c2)
     effBC_c1 <- ifelse(Group_c == 1, teBC_c1, NA)
     effBC_c2 <- ifelse(Group_c == 2, teBC_c2, NA)
-    teBC_reciprocal_c1 <- exp(-exp(Wv)/exp(Wu/2) - object$S *
-      epsilon + exp(Wv)/2) * pnorm(-exp(Wv/2 - Wu/2) -
-      object$S * epsilon/exp(Wv/2) + exp(Wv/2)) * Ki/(pnorm(-exp(Wv/2 -
-      Wu/2) - object$S * epsilon/exp(Wv/2)) * Hi2)
-    teBC_reciprocal_c2 <- rep(1, object$Nobs)
+    teBC_reciprocal_c1 <- exp(-exp(Wv)/exp(Wu1/2) - object$S *
+      epsilon + exp(Wv)/2) * pnorm(-exp(Wv/2 - Wu1/2) -
+      object$S * epsilon/exp(Wv/2) + exp(Wv/2)) * Ki1/(pnorm(-exp(Wv/2 -
+      Wu1/2) - object$S * epsilon/exp(Wv/2)) * Hi2_1)
+    teBC_reciprocal_c2 <- exp(-exp(Wv)/exp(Wu2/2) - object$S *
+      epsilon + exp(Wv)/2) * pnorm(-exp(Wv/2 - Wu2/2) -
+      object$S * epsilon/exp(Wv/2) + exp(Wv/2)) * Ki2/(pnorm(-exp(Wv/2 -
+      Wu2/2) - object$S * epsilon/exp(Wv/2)) * Hi2_2)
     teBC_reciprocal_c <- ifelse(Group_c == 1, teBC_reciprocal_c1,
       teBC_reciprocal_c2)
     ReffBC_c1 <- ifelse(Group_c == 1, teBC_reciprocal_c1,
@@ -1703,15 +1769,19 @@ cmisfgammanormeff_cauchit <- function(object, level) {
 # probit specification class membership
 cmisfgammanormeff_probit <- function(object, level) {
   beta <- object$mlParam[1:(object$nXvar)]
-  delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+  delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
-  phi <- object$mlParam[(object$nXvar + object$nuZUvar + 1):(object$nXvar +
-    object$nuZUvar + object$nvZVvar)]
-  P <- object$mlParam[object$nXvar + object$nuZUvar + object$nvZVvar +
-    1]
-  theta <- object$mlParam[(object$nXvar + object$nuZUvar +
-    object$nvZVvar + 1):(object$nXvar + object$nuZUvar +
-    object$nvZVvar + object$nZHvar)]
+  delta2 <- object$mlParam[(object$nXvar + object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar)]
+  phi <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar + object$nvZVvar)]
+  P1 <- object$mlParam[object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 1]
+  P2 <- object$mlParam[object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 2]
+  theta <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 3):(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + object$nZHvar + 2)]
   Xvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 1)
   uHvar <- model.matrix(object$formula, data = object$dataTable,
@@ -1720,25 +1790,36 @@ cmisfgammanormeff_probit <- function(object, level) {
     rhs = 3)
   Zvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 4)
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
+  Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
   Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
     as.numeric(crossprod(matrix(beta), t(Xvar)))
-  mui <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu))
-  Hi1 <- numeric(object$Nobs)
-  Hi2 <- numeric(object$Nobs)
+  mui1 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu1))
+  mui2 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu2))
+  Hi1_1 <- numeric(object$Nobs)
+  Hi2_1 <- numeric(object$Nobs)
+  Hi1_2 <- numeric(object$Nobs)
+  Hi2_2 <- numeric(object$Nobs)
   for (i in 1:object$Nobs) {
-    Hi1[i] <- mean((mui[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
-      ] + (1 - object$FiMat[i, ]) * pnorm(-mui[i]/sqrt(exp(Wv[i])))))^(P))
-    Hi2[i] <- mean((mui[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
-      ] + (1 - object$FiMat[i, ]) * pnorm(-mui[i]/sqrt(exp(Wv[i])))))^(P -
+    Hi1_1[i] <- mean((mui1[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui1[i]/sqrt(exp(Wv[i])))))^(P1))
+    Hi2_1[i] <- mean((mui1[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui1[i]/sqrt(exp(Wv[i])))))^(P1 -
+      1))
+    Hi1_2[i] <- mean((mui2[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui2[i]/sqrt(exp(Wv[i])))))^(P2))
+    Hi2_2[i] <- mean((mui2[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui2[i]/sqrt(exp(Wv[i])))))^(P2 -
       1))
   }
-  Pi1 <- exp(object$S * epsilon/exp(Wu/2) + exp(Wv)/(2 * exp(Wu))) *
-    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu/2)) *
-    exp(-P * Wu/2)/gamma(P) * Hi2
-  Pi2 <- 1/exp(Wv/2) * dnorm(object$S * epsilon/exp(Wv/2))
+  Pi1 <- exp(object$S * epsilon/exp(Wu1/2) + exp(Wv)/(2 * exp(Wu1))) *
+    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu1/2)) *
+    exp(-P1 * Wu1/2)/gamma(P1) * Hi2_1
+  Pi2 <- exp(object$S * epsilon/exp(Wu2/2) + exp(Wv)/(2 * exp(Wu2))) *
+    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu2/2)) *
+    exp(-P2 * Wu2/2)/gamma(P2) * Hi2_2
   Probc1 <- pnorm(Wz)
   Probc2 <- 1 - Probc1
   Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
@@ -1746,8 +1827,8 @@ cmisfgammanormeff_probit <- function(object, level) {
   Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
   P_cond_c <- ifelse(Group_c == 1, Pcond_c1, Pcond_c2)
   odRatio <- Pcond_c2/(1 - Pcond_c2)
-  u_c1 <- Hi1/Hi2
-  u_c2 <- rep(0, object$Nobs)
+  u_c1 <- Hi1_1/Hi2_1
+  u_c2 <- Hi1_2/Hi2_2
   u_c <- ifelse(Group_c == 1, u_c1, u_c2)
   ineff_c1 <- ifelse(Group_c == 1, u_c1, NA)
   ineff_c2 <- ifelse(Group_c == 2, u_c2, NA)
@@ -1755,33 +1836,51 @@ cmisfgammanormeff_probit <- function(object, level) {
     teJLMS_c1 <- exp(-u_c1)
     teJLMS_c2 <- exp(-u_c2)
     teJLMS_c <- ifelse(Group_c == 1, teJLMS_c1, teJLMS_c2)
-    mui_Gi <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu)) -
+    mui_Gi1 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu1)) -
       exp(Wv)
-    mui_Ki <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu)) +
+    mui_Ki1 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu1)) +
       exp(Wv)
-    Gi <- numeric(object$Nobs)
-    Ki <- numeric(object$Nobs)
+    mui_Gi2 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu2)) -
+      exp(Wv)
+    mui_Ki2 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu2)) +
+      exp(Wv)
+    Gi1 <- numeric(object$Nobs)
+    Ki1 <- numeric(object$Nobs)
+    Gi2 <- numeric(object$Nobs)
+    Ki2 <- numeric(object$Nobs)
     for (i in 1:object$Nobs) {
-      Gi[i] <- mean((mui_Gi[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
-        ] + (1 - object$FiMat[i, ]) * pnorm(-mui_Gi[i]/sqrt(exp(Wv[i])))))^(P -
+      Gi1[i] <- mean((mui_Gi1[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+        ] + (1 - object$FiMat[i, ]) * pnorm(-mui_Gi1[i]/sqrt(exp(Wv[i])))))^(P1 -
         1))
-      Ki[i] <- mean((mui_Ki[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
-        ] + (1 - object$FiMat[i, ]) * pnorm(-mui_Ki[i]/sqrt(exp(Wv[i])))))^(P -
+      Ki1[i] <- mean((mui_Ki1[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+        ] + (1 - object$FiMat[i, ]) * pnorm(-mui_Ki1[i]/sqrt(exp(Wv[i])))))^(P1 -
+        1))
+      Gi2[i] <- mean((mui_Gi2[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+        ] + (1 - object$FiMat[i, ]) * pnorm(-mui_Gi2[i]/sqrt(exp(Wv[i])))))^(P2 -
+        1))
+      Ki2[i] <- mean((mui_Ki2[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+        ] + (1 - object$FiMat[i, ]) * pnorm(-mui_Ki2[i]/sqrt(exp(Wv[i])))))^(P2 -
         1))
     }
-    teBC_c1 <- exp(exp(Wv)/exp(Wu/2) + object$S * epsilon +
-      exp(Wv)/2) * pnorm(-exp(Wv/2 - Wu/2) - object$S *
-      epsilon/exp(Wv/2) - exp(Wv/2)) * Gi/(pnorm(-exp(Wv/2 -
-      Wu/2) - object$S * epsilon/exp(Wv/2)) * Hi2)
-    teBC_c2 <- rep(1, object$Nobs)
+    teBC_c1 <- exp(exp(Wv)/exp(Wu1/2) + object$S * epsilon +
+      exp(Wv)/2) * pnorm(-exp(Wv/2 - Wu1/2) - object$S *
+      epsilon/exp(Wv/2) - exp(Wv/2)) * Gi1/(pnorm(-exp(Wv/2 -
+      Wu1/2) - object$S * epsilon/exp(Wv/2)) * Hi2_1)
+    teBC_c2 <- exp(exp(Wv)/exp(Wu2/2) + object$S * epsilon +
+      exp(Wv)/2) * pnorm(-exp(Wv/2 - Wu2/2) - object$S *
+      epsilon/exp(Wv/2) - exp(Wv/2)) * Gi2/(pnorm(-exp(Wv/2 -
+      Wu2/2) - object$S * epsilon/exp(Wv/2)) * Hi2_2)
     teBC_c <- ifelse(Group_c == 1, teBC_c1, teBC_c2)
     effBC_c1 <- ifelse(Group_c == 1, teBC_c1, NA)
     effBC_c2 <- ifelse(Group_c == 2, teBC_c2, NA)
-    teBC_reciprocal_c1 <- exp(-exp(Wv)/exp(Wu/2) - object$S *
-      epsilon + exp(Wv)/2) * pnorm(-exp(Wv/2 - Wu/2) -
-      object$S * epsilon/exp(Wv/2) + exp(Wv/2)) * Ki/(pnorm(-exp(Wv/2 -
-      Wu/2) - object$S * epsilon/exp(Wv/2)) * Hi2)
-    teBC_reciprocal_c2 <- rep(1, object$Nobs)
+    teBC_reciprocal_c1 <- exp(-exp(Wv)/exp(Wu1/2) - object$S *
+      epsilon + exp(Wv)/2) * pnorm(-exp(Wv/2 - Wu1/2) -
+      object$S * epsilon/exp(Wv/2) + exp(Wv/2)) * Ki1/(pnorm(-exp(Wv/2 -
+      Wu1/2) - object$S * epsilon/exp(Wv/2)) * Hi2_1)
+    teBC_reciprocal_c2 <- exp(-exp(Wv)/exp(Wu2/2) - object$S *
+      epsilon + exp(Wv)/2) * pnorm(-exp(Wv/2 - Wu2/2) -
+      object$S * epsilon/exp(Wv/2) + exp(Wv/2)) * Ki2/(pnorm(-exp(Wv/2 -
+      Wu2/2) - object$S * epsilon/exp(Wv/2)) * Hi2_2)
     teBC_reciprocal_c <- ifelse(Group_c == 1, teBC_reciprocal_c1,
       teBC_reciprocal_c2)
     ReffBC_c1 <- ifelse(Group_c == 1, teBC_reciprocal_c1,
@@ -1810,15 +1909,19 @@ cmisfgammanormeff_probit <- function(object, level) {
 # cloglog specification class membership
 cmisfgammanormeff_cloglog <- function(object, level) {
   beta <- object$mlParam[1:(object$nXvar)]
-  delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+  delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
-  phi <- object$mlParam[(object$nXvar + object$nuZUvar + 1):(object$nXvar +
-    object$nuZUvar + object$nvZVvar)]
-  P <- object$mlParam[object$nXvar + object$nuZUvar + object$nvZVvar +
-    1]
-  theta <- object$mlParam[(object$nXvar + object$nuZUvar +
-    object$nvZVvar + 1):(object$nXvar + object$nuZUvar +
-    object$nvZVvar + object$nZHvar)]
+  delta2 <- object$mlParam[(object$nXvar + object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar)]
+  phi <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar + object$nvZVvar)]
+  P1 <- object$mlParam[object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 1]
+  P2 <- object$mlParam[object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 2]
+  theta <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 3):(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + object$nZHvar + 2)]
   Xvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 1)
   uHvar <- model.matrix(object$formula, data = object$dataTable,
@@ -1827,25 +1930,36 @@ cmisfgammanormeff_cloglog <- function(object, level) {
     rhs = 3)
   Zvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 4)
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
+  Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
   Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
     as.numeric(crossprod(matrix(beta), t(Xvar)))
-  mui <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu))
-  Hi1 <- numeric(object$Nobs)
-  Hi2 <- numeric(object$Nobs)
+  mui1 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu1))
+  mui2 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu2))
+  Hi1_1 <- numeric(object$Nobs)
+  Hi2_1 <- numeric(object$Nobs)
+  Hi1_2 <- numeric(object$Nobs)
+  Hi2_2 <- numeric(object$Nobs)
   for (i in 1:object$Nobs) {
-    Hi1[i] <- mean((mui[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
-      ] + (1 - object$FiMat[i, ]) * pnorm(-mui[i]/sqrt(exp(Wv[i])))))^(P))
-    Hi2[i] <- mean((mui[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
-      ] + (1 - object$FiMat[i, ]) * pnorm(-mui[i]/sqrt(exp(Wv[i])))))^(P -
+    Hi1_1[i] <- mean((mui1[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui1[i]/sqrt(exp(Wv[i])))))^(P1))
+    Hi2_1[i] <- mean((mui1[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui1[i]/sqrt(exp(Wv[i])))))^(P1 -
+      1))
+    Hi1_2[i] <- mean((mui2[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui2[i]/sqrt(exp(Wv[i])))))^(P2))
+    Hi2_2[i] <- mean((mui2[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui2[i]/sqrt(exp(Wv[i])))))^(P2 -
       1))
   }
-  Pi1 <- exp(object$S * epsilon/exp(Wu/2) + exp(Wv)/(2 * exp(Wu))) *
-    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu/2)) *
-    exp(-P * Wu/2)/gamma(P) * Hi2
-  Pi2 <- 1/exp(Wv/2) * dnorm(object$S * epsilon/exp(Wv/2))
+  Pi1 <- exp(object$S * epsilon/exp(Wu1/2) + exp(Wv)/(2 * exp(Wu1))) *
+    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu1/2)) *
+    exp(-P1 * Wu1/2)/gamma(P1) * Hi2_1
+  Pi2 <- exp(object$S * epsilon/exp(Wu2/2) + exp(Wv)/(2 * exp(Wu2))) *
+    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu2/2)) *
+    exp(-P2 * Wu2/2)/gamma(P2) * Hi2_2
   Probc1 <- 1 - exp(-exp(Wz))
   Probc2 <- 1 - Probc1
   Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
@@ -1853,8 +1967,8 @@ cmisfgammanormeff_cloglog <- function(object, level) {
   Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
   P_cond_c <- ifelse(Group_c == 1, Pcond_c1, Pcond_c2)
   odRatio <- Pcond_c2/(1 - Pcond_c2)
-  u_c1 <- Hi1/Hi2
-  u_c2 <- rep(0, object$Nobs)
+  u_c1 <- Hi1_1/Hi2_1
+  u_c2 <- Hi1_2/Hi2_2
   u_c <- ifelse(Group_c == 1, u_c1, u_c2)
   ineff_c1 <- ifelse(Group_c == 1, u_c1, NA)
   ineff_c2 <- ifelse(Group_c == 2, u_c2, NA)
@@ -1862,33 +1976,51 @@ cmisfgammanormeff_cloglog <- function(object, level) {
     teJLMS_c1 <- exp(-u_c1)
     teJLMS_c2 <- exp(-u_c2)
     teJLMS_c <- ifelse(Group_c == 1, teJLMS_c1, teJLMS_c2)
-    mui_Gi <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu)) -
+    mui_Gi1 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu1)) -
       exp(Wv)
-    mui_Ki <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu)) +
+    mui_Ki1 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu1)) +
       exp(Wv)
-    Gi <- numeric(object$Nobs)
-    Ki <- numeric(object$Nobs)
+    mui_Gi2 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu2)) -
+      exp(Wv)
+    mui_Ki2 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu2)) +
+      exp(Wv)
+    Gi1 <- numeric(object$Nobs)
+    Ki1 <- numeric(object$Nobs)
+    Gi2 <- numeric(object$Nobs)
+    Ki2 <- numeric(object$Nobs)
     for (i in 1:object$Nobs) {
-      Gi[i] <- mean((mui_Gi[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
-        ] + (1 - object$FiMat[i, ]) * pnorm(-mui_Gi[i]/sqrt(exp(Wv[i])))))^(P -
+      Gi1[i] <- mean((mui_Gi1[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+        ] + (1 - object$FiMat[i, ]) * pnorm(-mui_Gi1[i]/sqrt(exp(Wv[i])))))^(P1 -
         1))
-      Ki[i] <- mean((mui_Ki[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
-        ] + (1 - object$FiMat[i, ]) * pnorm(-mui_Ki[i]/sqrt(exp(Wv[i])))))^(P -
+      Ki1[i] <- mean((mui_Ki1[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+        ] + (1 - object$FiMat[i, ]) * pnorm(-mui_Ki1[i]/sqrt(exp(Wv[i])))))^(P1 -
+        1))
+      Gi2[i] <- mean((mui_Gi2[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+        ] + (1 - object$FiMat[i, ]) * pnorm(-mui_Gi2[i]/sqrt(exp(Wv[i])))))^(P2 -
+        1))
+      Ki2[i] <- mean((mui_Ki2[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+        ] + (1 - object$FiMat[i, ]) * pnorm(-mui_Ki2[i]/sqrt(exp(Wv[i])))))^(P2 -
         1))
     }
-    teBC_c1 <- exp(exp(Wv)/exp(Wu/2) + object$S * epsilon +
-      exp(Wv)/2) * pnorm(-exp(Wv/2 - Wu/2) - object$S *
-      epsilon/exp(Wv/2) - exp(Wv/2)) * Gi/(pnorm(-exp(Wv/2 -
-      Wu/2) - object$S * epsilon/exp(Wv/2)) * Hi2)
-    teBC_c2 <- rep(1, object$Nobs)
+    teBC_c1 <- exp(exp(Wv)/exp(Wu1/2) + object$S * epsilon +
+      exp(Wv)/2) * pnorm(-exp(Wv/2 - Wu1/2) - object$S *
+      epsilon/exp(Wv/2) - exp(Wv/2)) * Gi1/(pnorm(-exp(Wv/2 -
+      Wu1/2) - object$S * epsilon/exp(Wv/2)) * Hi2_1)
+    teBC_c2 <- exp(exp(Wv)/exp(Wu2/2) + object$S * epsilon +
+      exp(Wv)/2) * pnorm(-exp(Wv/2 - Wu2/2) - object$S *
+      epsilon/exp(Wv/2) - exp(Wv/2)) * Gi2/(pnorm(-exp(Wv/2 -
+      Wu2/2) - object$S * epsilon/exp(Wv/2)) * Hi2_2)
     teBC_c <- ifelse(Group_c == 1, teBC_c1, teBC_c2)
     effBC_c1 <- ifelse(Group_c == 1, teBC_c1, NA)
     effBC_c2 <- ifelse(Group_c == 2, teBC_c2, NA)
-    teBC_reciprocal_c1 <- exp(-exp(Wv)/exp(Wu/2) - object$S *
-      epsilon + exp(Wv)/2) * pnorm(-exp(Wv/2 - Wu/2) -
-      object$S * epsilon/exp(Wv/2) + exp(Wv/2)) * Ki/(pnorm(-exp(Wv/2 -
-      Wu/2) - object$S * epsilon/exp(Wv/2)) * Hi2)
-    teBC_reciprocal_c2 <- rep(1, object$Nobs)
+    teBC_reciprocal_c1 <- exp(-exp(Wv)/exp(Wu1/2) - object$S *
+      epsilon + exp(Wv)/2) * pnorm(-exp(Wv/2 - Wu1/2) -
+      object$S * epsilon/exp(Wv/2) + exp(Wv/2)) * Ki1/(pnorm(-exp(Wv/2 -
+      Wu1/2) - object$S * epsilon/exp(Wv/2)) * Hi2_1)
+    teBC_reciprocal_c2 <- exp(-exp(Wv)/exp(Wu2/2) - object$S *
+      epsilon + exp(Wv)/2) * pnorm(-exp(Wv/2 - Wu2/2) -
+      object$S * epsilon/exp(Wv/2) + exp(Wv/2)) * Ki2/(pnorm(-exp(Wv/2 -
+      Wu2/2) - object$S * epsilon/exp(Wv/2)) * Hi2_2)
     teBC_reciprocal_c <- ifelse(Group_c == 1, teBC_reciprocal_c1,
       teBC_reciprocal_c2)
     ReffBC_c1 <- ifelse(Group_c == 1, teBC_reciprocal_c1,
@@ -1921,15 +2053,19 @@ cmisfgammanormeff_cloglog <- function(object, level) {
 # logit specification class membership
 cmisfmarggammanorm_Eu_logit <- function(object) {
   beta <- object$mlParam[1:(object$nXvar)]
-  delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+  delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
-  phi <- object$mlParam[(object$nXvar + object$nuZUvar + 1):(object$nXvar +
-    object$nuZUvar + object$nvZVvar)]
-  P <- object$mlParam[object$nXvar + object$nuZUvar + object$nvZVvar +
-    1]
-  theta <- object$mlParam[(object$nXvar + object$nuZUvar +
-    object$nvZVvar + 1):(object$nXvar + object$nuZUvar +
-    object$nvZVvar + object$nZHvar)]
+  delta2 <- object$mlParam[(object$nXvar + object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar)]
+  phi <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar + object$nvZVvar)]
+  P1 <- object$mlParam[object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 1]
+  P2 <- object$mlParam[object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 2]
+  theta <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 3):(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + object$nZHvar + 2)]
   Xvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 1)
   uHvar <- model.matrix(object$formula, data = object$dataTable,
@@ -1938,49 +2074,70 @@ cmisfmarggammanorm_Eu_logit <- function(object) {
     rhs = 3)
   Zvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 4)
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
+  Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
   Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
     as.numeric(crossprod(matrix(beta), t(Xvar)))
-  mui <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu))
-  Hi <- numeric(object$Nobs)
+  mui1 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu1))
+  mui2 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu2))
+  Hi1_1 <- numeric(object$Nobs)
+  Hi2_1 <- numeric(object$Nobs)
+  Hi1_2 <- numeric(object$Nobs)
+  Hi2_2 <- numeric(object$Nobs)
   for (i in 1:object$Nobs) {
-    Hi[i] <- mean((mui[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
-      ] + (1 - object$FiMat[i, ]) * pnorm(-mui[i]/sqrt(exp(Wv[i])))))^(P -
+    Hi1_1[i] <- mean((mui1[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui1[i]/sqrt(exp(Wv[i])))))^(P1))
+    Hi2_1[i] <- mean((mui1[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui1[i]/sqrt(exp(Wv[i])))))^(P1 -
+      1))
+    Hi1_2[i] <- mean((mui2[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui2[i]/sqrt(exp(Wv[i])))))^(P2))
+    Hi2_2[i] <- mean((mui2[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui2[i]/sqrt(exp(Wv[i])))))^(P2 -
       1))
   }
-  Pi1 <- exp(object$S * epsilon/exp(Wu/2) + exp(Wv)/(2 * exp(Wu))) *
-    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu/2)) *
-    exp(-P * Wu/2)/gamma(P) * Hi
-  Pi2 <- 1/exp(Wv/2) * dnorm(object$S * epsilon/exp(Wv/2))
+  Pi1 <- exp(object$S * epsilon/exp(Wu1/2) + exp(Wv)/(2 * exp(Wu1))) *
+    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu1/2)) *
+    exp(-P1 * Wu1/2)/gamma(P1) * Hi2_1
+  Pi2 <- exp(object$S * epsilon/exp(Wu2/2) + exp(Wv)/(2 * exp(Wu2))) *
+    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu2/2)) *
+    exp(-P2 * Wu2/2)/gamma(P2) * Hi2_2
   Probc1 <- exp(Wz)/(1 + exp(Wz))
   Probc2 <- 1 - Probc1
   Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
   Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
   Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
-  margEff1 <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
-    matrix(P/2 * exp(Wu/2), ncol = 1))
-  margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar -
-    1)
+  margEff1 <- kronecker(matrix(delta1[2:object$nuZUvar], nrow = 1),
+    matrix(P1/2 * exp(Wu1/2), ncol = 1))
+  margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar], nrow = 1),
+    matrix(P2/2 * exp(Wu2/2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
 cmisfmarggammanorm_Vu_logit <- function(object) {
   beta <- object$mlParam[1:(object$nXvar)]
-  delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+  delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
-  phi <- object$mlParam[(object$nXvar + object$nuZUvar + 1):(object$nXvar +
-    object$nuZUvar + object$nvZVvar)]
-  P <- object$mlParam[object$nXvar + object$nuZUvar + object$nvZVvar +
-    1]
-  theta <- object$mlParam[(object$nXvar + object$nuZUvar +
-    object$nvZVvar + 1):(object$nXvar + object$nuZUvar +
-    object$nvZVvar + object$nZHvar)]
+  delta2 <- object$mlParam[(object$nXvar + object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar)]
+  phi <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar + object$nvZVvar)]
+  P1 <- object$mlParam[object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 1]
+  P2 <- object$mlParam[object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 2]
+  theta <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 3):(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + object$nZHvar + 2)]
   Xvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 1)
   uHvar <- model.matrix(object$formula, data = object$dataTable,
@@ -1989,50 +2146,71 @@ cmisfmarggammanorm_Vu_logit <- function(object) {
     rhs = 3)
   Zvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 4)
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
+  Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
   Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
     as.numeric(crossprod(matrix(beta), t(Xvar)))
-  mui <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu))
-  Hi <- numeric(object$Nobs)
+  mui1 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu1))
+  mui2 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu2))
+  Hi1_1 <- numeric(object$Nobs)
+  Hi2_1 <- numeric(object$Nobs)
+  Hi1_2 <- numeric(object$Nobs)
+  Hi2_2 <- numeric(object$Nobs)
   for (i in 1:object$Nobs) {
-    Hi[i] <- mean((mui[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
-      ] + (1 - object$FiMat[i, ]) * pnorm(-mui[i]/sqrt(exp(Wv[i])))))^(P -
+    Hi1_1[i] <- mean((mui1[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui1[i]/sqrt(exp(Wv[i])))))^(P1))
+    Hi2_1[i] <- mean((mui1[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui1[i]/sqrt(exp(Wv[i])))))^(P1 -
+      1))
+    Hi1_2[i] <- mean((mui2[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui2[i]/sqrt(exp(Wv[i])))))^(P2))
+    Hi2_2[i] <- mean((mui2[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui2[i]/sqrt(exp(Wv[i])))))^(P2 -
       1))
   }
-  Pi1 <- exp(object$S * epsilon/exp(Wu/2) + exp(Wv)/(2 * exp(Wu))) *
-    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu/2)) *
-    exp(-P * Wu/2)/gamma(P) * Hi
-  Pi2 <- 1/exp(Wv/2) * dnorm(object$S * epsilon/exp(Wv/2))
+  Pi1 <- exp(object$S * epsilon/exp(Wu1/2) + exp(Wv)/(2 * exp(Wu1))) *
+    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu1/2)) *
+    exp(-P1 * Wu1/2)/gamma(P1) * Hi2_1
+  Pi2 <- exp(object$S * epsilon/exp(Wu2/2) + exp(Wv)/(2 * exp(Wu2))) *
+    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu2/2)) *
+    exp(-P2 * Wu2/2)/gamma(P2) * Hi2_2
   Probc1 <- exp(Wz)/(1 + exp(Wz))
   Probc2 <- 1 - Probc1
   Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
   Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
   Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
-  margEff1 <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
-    matrix(P * exp(Wu), ncol = 1))
-  margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar -
-    1)
+  margEff1 <- kronecker(matrix(delta1[2:object$nuZUvar], nrow = 1),
+    matrix(P1 * exp(Wu1), ncol = 1))
+  margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar], nrow = 1),
+    matrix(P2 * exp(Wu2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
 # cauchit specification class membership
 cmisfmarggammanorm_Eu_cauchit <- function(object) {
   beta <- object$mlParam[1:(object$nXvar)]
-  delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+  delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
-  phi <- object$mlParam[(object$nXvar + object$nuZUvar + 1):(object$nXvar +
-    object$nuZUvar + object$nvZVvar)]
-  P <- object$mlParam[object$nXvar + object$nuZUvar + object$nvZVvar +
-    1]
-  theta <- object$mlParam[(object$nXvar + object$nuZUvar +
-    object$nvZVvar + 1):(object$nXvar + object$nuZUvar +
-    object$nvZVvar + object$nZHvar)]
+  delta2 <- object$mlParam[(object$nXvar + object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar)]
+  phi <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar + object$nvZVvar)]
+  P1 <- object$mlParam[object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 1]
+  P2 <- object$mlParam[object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 2]
+  theta <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 3):(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + object$nZHvar + 2)]
   Xvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 1)
   uHvar <- model.matrix(object$formula, data = object$dataTable,
@@ -2041,49 +2219,70 @@ cmisfmarggammanorm_Eu_cauchit <- function(object) {
     rhs = 3)
   Zvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 4)
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
+  Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
   Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
     as.numeric(crossprod(matrix(beta), t(Xvar)))
-  mui <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu))
-  Hi <- numeric(object$Nobs)
+  mui1 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu1))
+  mui2 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu2))
+  Hi1_1 <- numeric(object$Nobs)
+  Hi2_1 <- numeric(object$Nobs)
+  Hi1_2 <- numeric(object$Nobs)
+  Hi2_2 <- numeric(object$Nobs)
   for (i in 1:object$Nobs) {
-    Hi[i] <- mean((mui[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
-      ] + (1 - object$FiMat[i, ]) * pnorm(-mui[i]/sqrt(exp(Wv[i])))))^(P -
+    Hi1_1[i] <- mean((mui1[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui1[i]/sqrt(exp(Wv[i])))))^(P1))
+    Hi2_1[i] <- mean((mui1[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui1[i]/sqrt(exp(Wv[i])))))^(P1 -
+      1))
+    Hi1_2[i] <- mean((mui2[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui2[i]/sqrt(exp(Wv[i])))))^(P2))
+    Hi2_2[i] <- mean((mui2[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui2[i]/sqrt(exp(Wv[i])))))^(P2 -
       1))
   }
-  Pi1 <- exp(object$S * epsilon/exp(Wu/2) + exp(Wv)/(2 * exp(Wu))) *
-    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu/2)) *
-    exp(-P * Wu/2)/gamma(P) * Hi
-  Pi2 <- 1/exp(Wv/2) * dnorm(object$S * epsilon/exp(Wv/2))
+  Pi1 <- exp(object$S * epsilon/exp(Wu1/2) + exp(Wv)/(2 * exp(Wu1))) *
+    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu1/2)) *
+    exp(-P1 * Wu1/2)/gamma(P1) * Hi2_1
+  Pi2 <- exp(object$S * epsilon/exp(Wu2/2) + exp(Wv)/(2 * exp(Wu2))) *
+    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu2/2)) *
+    exp(-P2 * Wu2/2)/gamma(P2) * Hi2_2
   Probc1 <- 1/pi * atan(Wz) + 1/2
   Probc2 <- 1 - Probc1
   Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
   Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
   Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
-  margEff1 <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
-    matrix(P/2 * exp(Wu/2), ncol = 1))
-  margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar -
-    1)
+  margEff1 <- kronecker(matrix(delta1[2:object$nuZUvar], nrow = 1),
+    matrix(P1/2 * exp(Wu1/2), ncol = 1))
+  margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar], nrow = 1),
+    matrix(P2/2 * exp(Wu2/2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
 cmisfmarggammanorm_Vu_cauchit <- function(object) {
   beta <- object$mlParam[1:(object$nXvar)]
-  delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+  delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
-  phi <- object$mlParam[(object$nXvar + object$nuZUvar + 1):(object$nXvar +
-    object$nuZUvar + object$nvZVvar)]
-  P <- object$mlParam[object$nXvar + object$nuZUvar + object$nvZVvar +
-    1]
-  theta <- object$mlParam[(object$nXvar + object$nuZUvar +
-    object$nvZVvar + 1):(object$nXvar + object$nuZUvar +
-    object$nvZVvar + object$nZHvar)]
+  delta2 <- object$mlParam[(object$nXvar + object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar)]
+  phi <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar + object$nvZVvar)]
+  P1 <- object$mlParam[object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 1]
+  P2 <- object$mlParam[object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 2]
+  theta <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 3):(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + object$nZHvar + 2)]
   Xvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 1)
   uHvar <- model.matrix(object$formula, data = object$dataTable,
@@ -2092,50 +2291,71 @@ cmisfmarggammanorm_Vu_cauchit <- function(object) {
     rhs = 3)
   Zvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 4)
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
+  Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
   Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
     as.numeric(crossprod(matrix(beta), t(Xvar)))
-  mui <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu))
-  Hi <- numeric(object$Nobs)
+  mui1 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu1))
+  mui2 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu2))
+  Hi1_1 <- numeric(object$Nobs)
+  Hi2_1 <- numeric(object$Nobs)
+  Hi1_2 <- numeric(object$Nobs)
+  Hi2_2 <- numeric(object$Nobs)
   for (i in 1:object$Nobs) {
-    Hi[i] <- mean((mui[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
-      ] + (1 - object$FiMat[i, ]) * pnorm(-mui[i]/sqrt(exp(Wv[i])))))^(P -
+    Hi1_1[i] <- mean((mui1[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui1[i]/sqrt(exp(Wv[i])))))^(P1))
+    Hi2_1[i] <- mean((mui1[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui1[i]/sqrt(exp(Wv[i])))))^(P1 -
+      1))
+    Hi1_2[i] <- mean((mui2[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui2[i]/sqrt(exp(Wv[i])))))^(P2))
+    Hi2_2[i] <- mean((mui2[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui2[i]/sqrt(exp(Wv[i])))))^(P2 -
       1))
   }
-  Pi1 <- exp(object$S * epsilon/exp(Wu/2) + exp(Wv)/(2 * exp(Wu))) *
-    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu/2)) *
-    exp(-P * Wu/2)/gamma(P) * Hi
-  Pi2 <- 1/exp(Wv/2) * dnorm(object$S * epsilon/exp(Wv/2))
+  Pi1 <- exp(object$S * epsilon/exp(Wu1/2) + exp(Wv)/(2 * exp(Wu1))) *
+    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu1/2)) *
+    exp(-P1 * Wu1/2)/gamma(P1) * Hi2_1
+  Pi2 <- exp(object$S * epsilon/exp(Wu2/2) + exp(Wv)/(2 * exp(Wu2))) *
+    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu2/2)) *
+    exp(-P2 * Wu2/2)/gamma(P2) * Hi2_2
   Probc1 <- 1/pi * atan(Wz) + 1/2
   Probc2 <- 1 - Probc1
   Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
   Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
   Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
-  margEff1 <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
-    matrix(P * exp(Wu), ncol = 1))
-  margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar -
-    1)
+  margEff1 <- kronecker(matrix(delta1[2:object$nuZUvar], nrow = 1),
+    matrix(P1 * exp(Wu1), ncol = 1))
+  margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar], nrow = 1),
+    matrix(P2 * exp(Wu2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
 # probit specification class membership
 cmisfmarggammanorm_Eu_probit <- function(object) {
   beta <- object$mlParam[1:(object$nXvar)]
-  delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+  delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
-  phi <- object$mlParam[(object$nXvar + object$nuZUvar + 1):(object$nXvar +
-    object$nuZUvar + object$nvZVvar)]
-  P <- object$mlParam[object$nXvar + object$nuZUvar + object$nvZVvar +
-    1]
-  theta <- object$mlParam[(object$nXvar + object$nuZUvar +
-    object$nvZVvar + 1):(object$nXvar + object$nuZUvar +
-    object$nvZVvar + object$nZHvar)]
+  delta2 <- object$mlParam[(object$nXvar + object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar)]
+  phi <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar + object$nvZVvar)]
+  P1 <- object$mlParam[object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 1]
+  P2 <- object$mlParam[object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 2]
+  theta <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 3):(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + object$nZHvar + 2)]
   Xvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 1)
   uHvar <- model.matrix(object$formula, data = object$dataTable,
@@ -2144,49 +2364,70 @@ cmisfmarggammanorm_Eu_probit <- function(object) {
     rhs = 3)
   Zvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 4)
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
+  Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
   Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
     as.numeric(crossprod(matrix(beta), t(Xvar)))
-  mui <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu))
-  Hi <- numeric(object$Nobs)
+  mui1 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu1))
+  mui2 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu2))
+  Hi1_1 <- numeric(object$Nobs)
+  Hi2_1 <- numeric(object$Nobs)
+  Hi1_2 <- numeric(object$Nobs)
+  Hi2_2 <- numeric(object$Nobs)
   for (i in 1:object$Nobs) {
-    Hi[i] <- mean((mui[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
-      ] + (1 - object$FiMat[i, ]) * pnorm(-mui[i]/sqrt(exp(Wv[i])))))^(P -
+    Hi1_1[i] <- mean((mui1[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui1[i]/sqrt(exp(Wv[i])))))^(P1))
+    Hi2_1[i] <- mean((mui1[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui1[i]/sqrt(exp(Wv[i])))))^(P1 -
+      1))
+    Hi1_2[i] <- mean((mui2[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui2[i]/sqrt(exp(Wv[i])))))^(P2))
+    Hi2_2[i] <- mean((mui2[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui2[i]/sqrt(exp(Wv[i])))))^(P2 -
       1))
   }
-  Pi1 <- exp(object$S * epsilon/exp(Wu/2) + exp(Wv)/(2 * exp(Wu))) *
-    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu/2)) *
-    exp(-P * Wu/2)/gamma(P) * Hi
-  Pi2 <- 1/exp(Wv/2) * dnorm(object$S * epsilon/exp(Wv/2))
+  Pi1 <- exp(object$S * epsilon/exp(Wu1/2) + exp(Wv)/(2 * exp(Wu1))) *
+    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu1/2)) *
+    exp(-P1 * Wu1/2)/gamma(P1) * Hi2_1
+  Pi2 <- exp(object$S * epsilon/exp(Wu2/2) + exp(Wv)/(2 * exp(Wu2))) *
+    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu2/2)) *
+    exp(-P2 * Wu2/2)/gamma(P2) * Hi2_2
   Probc1 <- pnorm(Wz)
   Probc2 <- 1 - Probc1
   Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
   Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
   Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
-  margEff1 <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
-    matrix(P/2 * exp(Wu/2), ncol = 1))
-  margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar -
-    1)
+  margEff1 <- kronecker(matrix(delta1[2:object$nuZUvar], nrow = 1),
+    matrix(P1/2 * exp(Wu1/2), ncol = 1))
+  margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar], nrow = 1),
+    matrix(P2/2 * exp(Wu2/2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
 cmisfmarggammanorm_Vu_probit <- function(object) {
   beta <- object$mlParam[1:(object$nXvar)]
-  delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+  delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
-  phi <- object$mlParam[(object$nXvar + object$nuZUvar + 1):(object$nXvar +
-    object$nuZUvar + object$nvZVvar)]
-  P <- object$mlParam[object$nXvar + object$nuZUvar + object$nvZVvar +
-    1]
-  theta <- object$mlParam[(object$nXvar + object$nuZUvar +
-    object$nvZVvar + 1):(object$nXvar + object$nuZUvar +
-    object$nvZVvar + object$nZHvar)]
+  delta2 <- object$mlParam[(object$nXvar + object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar)]
+  phi <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar + object$nvZVvar)]
+  P1 <- object$mlParam[object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 1]
+  P2 <- object$mlParam[object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 2]
+  theta <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 3):(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + object$nZHvar + 2)]
   Xvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 1)
   uHvar <- model.matrix(object$formula, data = object$dataTable,
@@ -2195,50 +2436,71 @@ cmisfmarggammanorm_Vu_probit <- function(object) {
     rhs = 3)
   Zvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 4)
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
+  Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
   Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
     as.numeric(crossprod(matrix(beta), t(Xvar)))
-  mui <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu))
-  Hi <- numeric(object$Nobs)
+  mui1 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu1))
+  mui2 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu2))
+  Hi1_1 <- numeric(object$Nobs)
+  Hi2_1 <- numeric(object$Nobs)
+  Hi1_2 <- numeric(object$Nobs)
+  Hi2_2 <- numeric(object$Nobs)
   for (i in 1:object$Nobs) {
-    Hi[i] <- mean((mui[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
-      ] + (1 - object$FiMat[i, ]) * pnorm(-mui[i]/sqrt(exp(Wv[i])))))^(P -
+    Hi1_1[i] <- mean((mui1[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui1[i]/sqrt(exp(Wv[i])))))^(P1))
+    Hi2_1[i] <- mean((mui1[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui1[i]/sqrt(exp(Wv[i])))))^(P1 -
+      1))
+    Hi1_2[i] <- mean((mui2[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui2[i]/sqrt(exp(Wv[i])))))^(P2))
+    Hi2_2[i] <- mean((mui2[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui2[i]/sqrt(exp(Wv[i])))))^(P2 -
       1))
   }
-  Pi1 <- exp(object$S * epsilon/exp(Wu/2) + exp(Wv)/(2 * exp(Wu))) *
-    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu/2)) *
-    exp(-P * Wu/2)/gamma(P) * Hi
-  Pi2 <- 1/exp(Wv/2) * dnorm(object$S * epsilon/exp(Wv/2))
+  Pi1 <- exp(object$S * epsilon/exp(Wu1/2) + exp(Wv)/(2 * exp(Wu1))) *
+    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu1/2)) *
+    exp(-P1 * Wu1/2)/gamma(P1) * Hi2_1
+  Pi2 <- exp(object$S * epsilon/exp(Wu2/2) + exp(Wv)/(2 * exp(Wu2))) *
+    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu2/2)) *
+    exp(-P2 * Wu2/2)/gamma(P2) * Hi2_2
   Probc1 <- pnorm(Wz)
   Probc2 <- 1 - Probc1
   Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
   Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
   Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
-  margEff1 <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
-    matrix(P * exp(Wu), ncol = 1))
-  margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar -
-    1)
+  margEff1 <- kronecker(matrix(delta1[2:object$nuZUvar], nrow = 1),
+    matrix(P1 * exp(Wu1), ncol = 1))
+  margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar], nrow = 1),
+    matrix(P2 * exp(Wu2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
 # cloglog specification class membership
 cmisfmarggammanorm_Eu_cloglog <- function(object) {
   beta <- object$mlParam[1:(object$nXvar)]
-  delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+  delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
-  phi <- object$mlParam[(object$nXvar + object$nuZUvar + 1):(object$nXvar +
-    object$nuZUvar + object$nvZVvar)]
-  P <- object$mlParam[object$nXvar + object$nuZUvar + object$nvZVvar +
-    1]
-  theta <- object$mlParam[(object$nXvar + object$nuZUvar +
-    object$nvZVvar + 1):(object$nXvar + object$nuZUvar +
-    object$nvZVvar + object$nZHvar)]
+  delta2 <- object$mlParam[(object$nXvar + object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar)]
+  phi <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar + object$nvZVvar)]
+  P1 <- object$mlParam[object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 1]
+  P2 <- object$mlParam[object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 2]
+  theta <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 3):(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + object$nZHvar + 2)]
   Xvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 1)
   uHvar <- model.matrix(object$formula, data = object$dataTable,
@@ -2247,49 +2509,70 @@ cmisfmarggammanorm_Eu_cloglog <- function(object) {
     rhs = 3)
   Zvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 4)
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
+  Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
   Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
     as.numeric(crossprod(matrix(beta), t(Xvar)))
-  mui <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu))
-  Hi <- numeric(object$Nobs)
+  mui1 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu1))
+  mui2 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu2))
+  Hi1_1 <- numeric(object$Nobs)
+  Hi2_1 <- numeric(object$Nobs)
+  Hi1_2 <- numeric(object$Nobs)
+  Hi2_2 <- numeric(object$Nobs)
   for (i in 1:object$Nobs) {
-    Hi[i] <- mean((mui[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
-      ] + (1 - object$FiMat[i, ]) * pnorm(-mui[i]/sqrt(exp(Wv[i])))))^(P -
+    Hi1_1[i] <- mean((mui1[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui1[i]/sqrt(exp(Wv[i])))))^(P1))
+    Hi2_1[i] <- mean((mui1[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui1[i]/sqrt(exp(Wv[i])))))^(P1 -
+      1))
+    Hi1_2[i] <- mean((mui2[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui2[i]/sqrt(exp(Wv[i])))))^(P2))
+    Hi2_2[i] <- mean((mui2[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui2[i]/sqrt(exp(Wv[i])))))^(P2 -
       1))
   }
-  Pi1 <- exp(object$S * epsilon/exp(Wu/2) + exp(Wv)/(2 * exp(Wu))) *
-    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu/2)) *
-    exp(-P * Wu/2)/gamma(P) * Hi
-  Pi2 <- 1/exp(Wv/2) * dnorm(object$S * epsilon/exp(Wv/2))
+  Pi1 <- exp(object$S * epsilon/exp(Wu1/2) + exp(Wv)/(2 * exp(Wu1))) *
+    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu1/2)) *
+    exp(-P1 * Wu1/2)/gamma(P1) * Hi2_1
+  Pi2 <- exp(object$S * epsilon/exp(Wu2/2) + exp(Wv)/(2 * exp(Wu2))) *
+    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu2/2)) *
+    exp(-P2 * Wu2/2)/gamma(P2) * Hi2_2
   Probc1 <- 1 - exp(-exp(Wz))
   Probc2 <- 1 - Probc1
   Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
   Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
   Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
-  margEff1 <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
-    matrix(P/2 * exp(Wu/2), ncol = 1))
-  margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar -
-    1)
+  margEff1 <- kronecker(matrix(delta1[2:object$nuZUvar], nrow = 1),
+    matrix(P1/2 * exp(Wu1/2), ncol = 1))
+  margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar], nrow = 1),
+    matrix(P2/2 * exp(Wu2/2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
 cmisfmarggammanorm_Vu_cloglog <- function(object) {
   beta <- object$mlParam[1:(object$nXvar)]
-  delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
+  delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
-  phi <- object$mlParam[(object$nXvar + object$nuZUvar + 1):(object$nXvar +
-    object$nuZUvar + object$nvZVvar)]
-  P <- object$mlParam[object$nXvar + object$nuZUvar + object$nvZVvar +
-    1]
-  theta <- object$mlParam[(object$nXvar + object$nuZUvar +
-    object$nvZVvar + 1):(object$nXvar + object$nuZUvar +
-    object$nvZVvar + object$nZHvar)]
+  delta2 <- object$mlParam[(object$nXvar + object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar)]
+  phi <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    1):(object$nXvar + 2 * object$nuZUvar + object$nvZVvar)]
+  P1 <- object$mlParam[object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 1]
+  P2 <- object$mlParam[object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 2]
+  theta <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + 3):(object$nXvar + 2 * object$nuZUvar +
+    object$nvZVvar + object$nZHvar + 2)]
   Xvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 1)
   uHvar <- model.matrix(object$formula, data = object$dataTable,
@@ -2298,35 +2581,51 @@ cmisfmarggammanorm_Vu_cloglog <- function(object) {
     rhs = 3)
   Zvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 4)
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
+  Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
   Wz <- as.numeric(crossprod(matrix(theta), t(Zvar)))
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
     as.numeric(crossprod(matrix(beta), t(Xvar)))
-  mui <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu))
-  Hi <- numeric(object$Nobs)
+  mui1 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu1))
+  mui2 <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu2))
+  Hi1_1 <- numeric(object$Nobs)
+  Hi2_1 <- numeric(object$Nobs)
+  Hi1_2 <- numeric(object$Nobs)
+  Hi2_2 <- numeric(object$Nobs)
   for (i in 1:object$Nobs) {
-    Hi[i] <- mean((mui[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
-      ] + (1 - object$FiMat[i, ]) * pnorm(-mui[i]/sqrt(exp(Wv[i])))))^(P -
+    Hi1_1[i] <- mean((mui1[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui1[i]/sqrt(exp(Wv[i])))))^(P1))
+    Hi2_1[i] <- mean((mui1[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui1[i]/sqrt(exp(Wv[i])))))^(P1 -
+      1))
+    Hi1_2[i] <- mean((mui2[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui2[i]/sqrt(exp(Wv[i])))))^(P2))
+    Hi2_2[i] <- mean((mui2[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
+      ] + (1 - object$FiMat[i, ]) * pnorm(-mui2[i]/sqrt(exp(Wv[i])))))^(P2 -
       1))
   }
-  Pi1 <- exp(object$S * epsilon/exp(Wu/2) + exp(Wv)/(2 * exp(Wu))) *
-    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu/2)) *
-    exp(-P * Wu/2)/gamma(P) * Hi
-  Pi2 <- 1/exp(Wv/2) * dnorm(object$S * epsilon/exp(Wv/2))
+  Pi1 <- exp(object$S * epsilon/exp(Wu1/2) + exp(Wv)/(2 * exp(Wu1))) *
+    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu1/2)) *
+    exp(-P1 * Wu1/2)/gamma(P1) * Hi2_1
+  Pi2 <- exp(object$S * epsilon/exp(Wu2/2) + exp(Wv)/(2 * exp(Wu2))) *
+    pnorm(-object$S * epsilon/exp(Wv/2) - exp(Wv/2)/exp(Wu2/2)) *
+    exp(-P2 * Wu2/2)/gamma(P2) * Hi2_2
   Probc1 <- 1 - exp(-exp(Wz))
   Probc2 <- 1 - Probc1
   Pcond_c1 <- Probc1 * Pi1/(Probc1 * Pi1 + Probc2 * Pi2)
   Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
   Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
-  margEff1 <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
-    matrix(P * exp(Wu), ncol = 1))
-  margEff2 <- matrix(0, nrow = object$Nobs, ncol = object$nuZUvar -
-    1)
+  margEff1 <- kronecker(matrix(delta1[2:object$nuZUvar], nrow = 1),
+    matrix(P1 * exp(Wu1), ncol = 1))
+  margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar], nrow = 1),
+    matrix(P2 * exp(Wu2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
-

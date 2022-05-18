@@ -7,6 +7,7 @@
 \alias{ic.sfaselectioncross}
 \alias{ic.zisfcross}
 \alias{ic.cnsfcross}
+\alias{ic.misfcross}
 \title{Extract information criteria of stochastic frontier models}
 \usage{
 \method{ic}{sfacross}(object, IC = "AIC", ...)
@@ -18,11 +19,14 @@
 \method{ic}{zisfcross}(object, IC = "AIC", ...)
 
 \method{ic}{cnsfcross}(object, IC = "AIC", ...)
+
+\method{ic}{misfcross}(object, IC = "AIC", ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{sfacross}},
-\code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.}
+by \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{misfcross}},
+\code{\link{sfacross}}, \code{\link{sfaselectioncross}} or
+\code{\link{zisfcross}}.}
 
 \item{IC}{Character string. Information criterion measure. Three criteria
 are available: \itemize{ \item \code{'AIC'} for Akaike information criterion
@@ -38,7 +42,7 @@ are available: \itemize{ \item \code{'AIC'} for Akaike information criterion
 \description{
 \code{\link{ic}} returns information criterion from classic or latent class
 stochastic frontier models estimated with \code{\link{cnsfcross}},
-\code{\link{lcmcross}}, \code{\link{sfacross}},
+\code{\link{lcmcross}}, \code{\link{misfcross}}, \code{\link{sfacross}},
 \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.
 }
 \details{
@@ -65,6 +69,9 @@ frontier analysis model fitting function.
 
 \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 model fitting function.
+
+\code{\link{misfcross}}, for the multi-modal inefficiency stochastic frontier
+analysis model fitting function.
 
 \code{\link{sfacross}}, for the stochastic frontier analysis model
 fitting function.

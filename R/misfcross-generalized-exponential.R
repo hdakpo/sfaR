@@ -13,7 +13,6 @@
 #                 - cloglog 1 - exp(-exp(theta * Z))                           #
 # Convolution: generalized exponential - normal                                #
 #------------------------------------------------------------------------------#
-
 # Log-likelihood ----------
 #' log-likelihood for misf genexpo-normal distribution
 #' @param parm all parameters to be estimated
@@ -2563,7 +2562,7 @@ cmisfgenexponormeff_cloglog <- function(object, level) {
 #' @param object object of class sfacross
 #' @noRd
 # logit specification class membership
-cmisfmarggenexponorm_Eu_logit <- function(object, level) {
+cmisfmarggenexponorm_Eu_logit <- function(object) {
   beta <- object$mlParam[1:(object$nXvar)]
   delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
@@ -2608,13 +2607,16 @@ cmisfmarggenexponorm_Eu_logit <- function(object, level) {
   margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar] * 3/4,
     nrow = 1), matrix(exp(Wu2/2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
-cmisfmarggenexponorm_Vu_logit <- function(object, level) {
+cmisfmarggenexponorm_Vu_logit <- function(object) {
   beta <- object$mlParam[1:(object$nXvar)]
   delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
@@ -2659,14 +2661,17 @@ cmisfmarggenexponorm_Vu_logit <- function(object, level) {
   margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar] * 5/4,
     nrow = 1), matrix(exp(Wu2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
 # cauchit specification class membership
-cmisfmarggenexponorm_Eu_cauchit <- function(object, level) {
+cmisfmarggenexponorm_Eu_cauchit <- function(object) {
   beta <- object$mlParam[1:(object$nXvar)]
   delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
@@ -2711,13 +2716,16 @@ cmisfmarggenexponorm_Eu_cauchit <- function(object, level) {
   margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar] * 3/4,
     nrow = 1), matrix(exp(Wu2/2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
-cmisfmarggenexponorm_Vu_cauchit <- function(object, level) {
+cmisfmarggenexponorm_Vu_cauchit <- function(object) {
   beta <- object$mlParam[1:(object$nXvar)]
   delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
@@ -2762,14 +2770,17 @@ cmisfmarggenexponorm_Vu_cauchit <- function(object, level) {
   margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar] * 5/4,
     nrow = 1), matrix(exp(Wu2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
 # probit specification class membership
-cmisfmarggenexponorm_Eu_probit <- function(object, level) {
+cmisfmarggenexponorm_Eu_probit <- function(object) {
   beta <- object$mlParam[1:(object$nXvar)]
   delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
@@ -2814,13 +2825,16 @@ cmisfmarggenexponorm_Eu_probit <- function(object, level) {
   margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar] * 3/4,
     nrow = 1), matrix(exp(Wu2/2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
-cmisfmarggenexponorm_Vu_probit <- function(object, level) {
+cmisfmarggenexponorm_Vu_probit <- function(object) {
   beta <- object$mlParam[1:(object$nXvar)]
   delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
@@ -2865,14 +2879,17 @@ cmisfmarggenexponorm_Vu_probit <- function(object, level) {
   margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar] * 5/4,
     nrow = 1), matrix(exp(Wu2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
 # cloglog specification class membership
-cmisfmarggenexponorm_Eu_cloglog <- function(object, level) {
+cmisfmarggenexponorm_Eu_cloglog <- function(object) {
   beta <- object$mlParam[1:(object$nXvar)]
   delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
@@ -2917,13 +2934,16 @@ cmisfmarggenexponorm_Eu_cloglog <- function(object, level) {
   margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar] * 3/4,
     nrow = 1), matrix(exp(Wu2/2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }
 
-cmisfmarggenexponorm_Vu_cloglog <- function(object, level) {
+cmisfmarggenexponorm_Vu_cloglog <- function(object) {
   beta <- object$mlParam[1:(object$nXvar)]
   delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
@@ -2968,8 +2988,11 @@ cmisfmarggenexponorm_Vu_cloglog <- function(object, level) {
   margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar] * 5/4,
     nrow = 1), matrix(exp(Wu2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
-  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1])
-  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1])
+  colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c1")
+  colnames(margEff2) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c2")
+  colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
+    "_c")
   return(bind_cols(margEff1, margEff2, margEff_c))
 }

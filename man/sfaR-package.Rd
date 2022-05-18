@@ -52,6 +52,25 @@ in both error terms is possible. The choice of the number of classes can be
 guided by several information criteria (i.e. AIC, BIC or HQIC).
 }
 
+\section{misfcross}{
+ \code{\link{misfcross}} the multi-modal inefficiency
+stochastic frontier (MISF) allows for mixture distribution in the one-sided
+error term. The model splits the observations into two groups with different
+variance for the one-sided error term. The probability of belonging to one
+of these classes is based on either a logit, probit, cauchit or cloglog
+functional form that can be specified using some covariates. As in the case
+of \code{\link{sfacross}} ten different distributions for the one-sided error
+term are implemented. These distributions include the exponential, the Gamma,
+the generalized exponential, the half normal, the lognormal, the truncated
+normal, the truncated skewed Laplace, the Rayleigh, the uniform and the
+Weibull distributions. In the case of the Gamma, lognormal and Weibull
+distributions, maximum simulated likelihood (MSL) is used with the
+possibility of four specific distributions to construct the draws: Halton,
+Generalized Halton, Sobol and uniform. Heteroscedasticity in both error
+terms can be implemented, in addition to heterogeneity in the truncated mean
+parameter in the case of the truncated normal and lognormal distributions.
+}
+
 \section{sfacross}{
  \code{\link{sfacross}} estimates the basic stochastic
 frontier analysis (SFA) for cross-sectional data and allows for ten

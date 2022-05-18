@@ -12,6 +12,8 @@
 \alias{coef.summary.zisfcross}
 \alias{coef.cnsfcross}
 \alias{coef.summary.cnsfcross}
+\alias{coef.misfcross}
+\alias{coef.summary.misfcross}
 \title{Extract coefficients of stochastic frontier models}
 \usage{
 \method{coef}{sfacross}(object, extraPar = FALSE, ...)
@@ -33,12 +35,17 @@
 \method{coef}{cnsfcross}(object, extraPar = FALSE, ...)
 
 \method{coef}{summary.cnsfcross}(object, ...)
+
+\method{coef}{misfcross}(object, extraPar = FALSE, ...)
+
+\method{coef}{summary.misfcross}(object, ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{sfacross}},
-\code{\link{sfaselectioncross}} or \code{\link{zisfcross}}, or an object of
-class \code{'summary.cnsfcross'}, \code{'summary.lcmcross'},
+by \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{misfcross}},
+\code{\link{sfacross}}, \code{\link{sfaselectioncross}} or
+\code{\link{zisfcross}}, or an object of class \code{'summary.cnsfcross'},
+\code{'summary.lcmcross'}, \code{'summary.misfcross'},
 \code{'summary.sfacross'}, \code{'summary.sfaselectioncross'} or
 \code{'summary.zisfcross'} .}
 
@@ -82,13 +89,14 @@ represents the class number.
 }
 \description{
 From an object of class \code{'summary.cnsfcross'}, \code{'summary.lcmcross'},
-\code{'summary.sfacross'}, \code{'summary.sfaselectioncross'} or
-\code{'summary.zisfcross'}, \code{\link{coef}} extracts the coefficients,
+\code{'summary.misfcross'}, \code{'summary.sfacross'},
+\code{'summary.sfaselectioncross'} or \code{'summary.zisfcross'},
+\code{\link{coef}} extracts the coefficients,
 their standard errors, z-values, and (asymptotic) P-values.
 
 From on object of class \code{'cnsfcross'}, \code{'lcmcross'},
-\code{'sfacross'}, \code{'sfaselectioncross'} or \code{'zisfcross'}, it
-extracts only the estimated coefficients.
+\code{'misfcross'}, \code{'sfacross'}, \code{'sfaselectioncross'} or
+\code{'zisfcross'}, it extracts only the estimated coefficients.
 }
 \examples{
 
@@ -109,6 +117,9 @@ frontier analysis model fitting function.
 
 \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 model fitting function.
+
+\code{\link{misfcross}}, for the multi-modal inefficiency stochastic frontier
+analysis model fitting function.
 
 \code{\link{sfacross}}, for the stochastic frontier analysis model
 fitting function.

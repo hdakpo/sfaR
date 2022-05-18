@@ -7,6 +7,7 @@
 \alias{residuals.sfaselectioncross}
 \alias{residuals.zisfcross}
 \alias{residuals.cnsfcross}
+\alias{residuals.misfcross}
 \title{Extract residuals of stochastic frontier models}
 \usage{
 \method{residuals}{sfacross}(object, ...)
@@ -18,11 +19,14 @@
 \method{residuals}{zisfcross}(object, ...)
 
 \method{residuals}{cnsfcross}(object, ...)
+
+\method{residuals}{misfcross}(object, ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{cnsfcross}},  \code{\link{lcmcross}}, \code{\link{sfacross}},
-\code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.}
+by \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{cnsfcross}},
+\code{\link{sfacross}}, \code{\link{sfaselectioncross}} or
+\code{\link{zisfcross}}.}
 
 \item{...}{Currently ignored.}
 }
@@ -32,14 +36,15 @@ When the \code{object} is of class \code{'lcmcross'},
 for each latent class, where each variable terminates with \code{'_c#'},
 \code{'#'} being the class number.
 
-When the \code{object} is of class \code{'sfacross'},
-\code{'sfaselectioncross'} or \code{'zisfcross'},
-\code{\link{residuals}} returns a vector of residuals values.
+When the \code{object} is of class \code{'cnsfcross'},
+\code{'misfcross'}, \code{'sfacross'}, \code{'sfaselectioncross'} or
+\code{'zisfcross'}, \code{\link{residuals}} returns a vector of residuals
+values.
 }
 \description{
 This function returns the residuals' values from classic or latent class
 stochastic frontier models estimated with \code{\link{cnsfcross}},
-\code{\link{lcmcross}}, \code{\link{sfacross}},
+\code{\link{lcmcross}}, \code{\link{misfcross}}, \code{\link{sfacross}},
 \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.
 }
 \note{
@@ -72,6 +77,9 @@ frontier analysis model fitting function.
 
 \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 model fitting function.
+
+\code{\link{misfcross}}, for the multi-modal inefficiency stochastic frontier
+analysis model fitting function.
 
 \code{\link{sfacross}}, for the stochastic frontier analysis model
 fitting function.

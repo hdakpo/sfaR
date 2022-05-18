@@ -7,6 +7,7 @@
 \alias{efficiencies.sfaselectioncross}
 \alias{efficiencies.zisfcross}
 \alias{efficiencies.cnsfcross}
+\alias{efficiencies.misfcross}
 \title{Compute conditional (in-)efficiency estimates of stochastic frontier models}
 \usage{
 \method{efficiencies}{sfacross}(object, level = 0.95, newData = NULL, ...)
@@ -18,11 +19,14 @@
 \method{efficiencies}{zisfcross}(object, level = 0.95, newData = NULL, ...)
 
 \method{efficiencies}{cnsfcross}(object, level = 0.95, newData = NULL, ...)
+
+\method{efficiencies}{misfcross}(object, level = 0.95, newData = NULL, ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{cnsfcross}}, \code{\link{lcmcross}},
-\code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.}
+by \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{misfcross}},
+\code{\link{sfacross}}, \code{\link{sfaselectioncross}} or
+\code{\link{zisfcross}}.}
 
 \item{level}{A number between between 0 and 0.9999 used for the computation
 of (in-)efficiency confidence intervals (defaut = \code{0.95}). Only used
@@ -42,7 +46,7 @@ These are ordered in the same way as the corresponding observations in the
 dataset used for the estimation.
 
 \bold{- For object of class \code{'cnsfcross'}, or \code{'lcmcross'}, or
-\code{'zisfcross'} the following elements are
+\code{'misfcross'}, or \code{'zisfcross'} the following elements are
 returned:}
 
 \item{Group_c}{Most probable class for each observation.}
@@ -161,8 +165,8 @@ the \code{'hnormal'} distribution is available.}
 \description{
 \code{\link{efficiencies}} returns (in-)efficiency estimates of models
 estimated with \code{\link{cnsfcross}}, \code{\link{lcmcross}},
-\code{\link{sfacross}}, \code{\link{sfaselectioncross}}, or
-\code{\link{zisfcross}}.
+\code{\link{misfcross}}, \code{\link{sfacross}},
+\code{\link{sfaselectioncross}}, or \code{\link{zisfcross}}.
 }
 \details{
 The conditional inefficiency is obtained following
@@ -174,8 +178,7 @@ computed following Horrace and Schmidt (1996), Hjalmarsson \emph{et al.}
 
 In the case of the half normal distribution for the one-sided error term,
 the formulae are as follows (for notations, see the \sQuote{Details} section
-of \code{\link{sfacross}}, \code{\link{lcmcross}},
-\code{\link{sfaselectioncross}} or \code{\link{zisfcross}}):
+of \code{\link{lcmcross}} or \code{\link{sfacross}}):
 
 \itemize{ \item The conditional inefficiency is }
 
@@ -316,6 +319,9 @@ frontier analysis model fitting function.
 
 \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 model fitting function.
+
+\code{\link{misfcross}}, for the multi-modal inefficiency stochastic frontier
+analysis model fitting function.
 
 \code{\link{sfacross}}, for the stochastic frontier analysis model
 fitting function.

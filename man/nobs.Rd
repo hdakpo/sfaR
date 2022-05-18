@@ -7,6 +7,7 @@
 \alias{nobs.sfaselectioncross}
 \alias{nobs.zisfcross}
 \alias{nobs.cnsfcross}
+\alias{nobs.misfcross}
 \title{Extract Total Number of Observations Used in frontier models}
 \usage{
 \method{nobs}{sfacross}(object, ...)
@@ -18,11 +19,13 @@
 \method{nobs}{zisfcross}(object, ...)
 
 \method{nobs}{cnsfcross}(object, ...)
+
+\method{nobs}{misfcross}(object, ...)
 }
 \arguments{
-\item{object}{a  \code{cnsfcross}, \code{lcmcross}, \code{sfacross}, \code{sfaselectioncross}
-or \code{zisfcross} object for which the number of total observations is to be
-extracted,}
+\item{object}{a  \code{cnsfcross}, \code{lcmcross}, \code{misfcross}, \code{sfacross},
+\code{sfaselectioncross} or \code{zisfcross} object for which the number of total
+observations is to be extracted,}
 
 \item{\dots}{further arguments.}
 }
@@ -51,7 +54,26 @@ log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
 I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
 udist = 'hnormal', uhet = ~ regu, data = utility, S = -1, method = 'bfgs')
     
- nobs(tl_u_h)
+nobs(tl_u_h)
 
+}
+\seealso{
+\code{\link{cnsfcross}}, for the contaminated noise stochastic
+frontier analysis model fitting function.
+
+\code{\link{lcmcross}}, for the latent class stochastic frontier analysis
+model fitting function.
+
+\code{\link{misfcross}}, for the multi-modal inefficiency stochastic frontier
+analysis model fitting function.
+
+\code{\link{sfacross}}, for the stochastic frontier analysis model
+fitting function.
+
+\code{\link{sfaselectioncross}} for sample selection in stochastic frontier
+model fitting function.
+
+\code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
+fitting function.
 }
 \keyword{attribute}

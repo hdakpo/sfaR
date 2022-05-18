@@ -11,6 +11,7 @@
 #         -Sample selection correction                                         #
 #         -Zero inefficiency stochastic frontier                               #
 #         -Contaminated noise stochastic frontier                              #
+#         -Multi-Modal Inefficiency Stochastic Frontier Analysis               #
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
 
@@ -19,8 +20,8 @@
 #' \code{\link{vcov}} computes the variance-covariance matrix of the maximum
 #' likelihood (ML) coefficients of classic or latent class stochastic frontier
 #' models estimated by \code{\link{cnsfcross}}, \code{\link{lcmcross}}, 
-#' \code{\link{sfacross}}, \code{\link{sfaselectioncross}} or 
-#' \code{\link{zisfcross}}.
+#'  \code{\link{misfcross}}, \code{\link{sfacross}}, 
+#'  \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.
 #'
 #' @details The variance-covariance matrix is obtained by the inversion of the 
 #' negative Hessian matrix. Depending on the distribution and the
@@ -32,8 +33,9 @@
 #' of the additional parameters is obtained using the delta method.
 #'
 #' @param object A stochastic frontier model returned
-#' by \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{sfacross}}, 
-#' \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.
+#' by \code{\link{cnsfcross}}, \code{\link{lcmcross}},  \code{\link{misfcross}}, 
+#' \code{\link{sfacross}}, \code{\link{sfaselectioncross}} or 
+#' \code{\link{zisfcross}}.
 #' @param extraPar Logical. Only available for non heteroscedastic models
 #' returned by \code{\link{sfacross}} or \code{\link{selectioncross}}. 
 #' Default = \code{FALSE}. If \code{TRUE}, variances and covariances of 
@@ -70,6 +72,9 @@
 #'
 #' \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
 #' model fitting function.
+#' 
+#' \code{\link{misfcross}}, for the multi-modal inefficiency stochastic frontier 
+#' analysis model fitting function.
 #' 
 #' \code{\link{sfacross}}, for the stochastic frontier analysis model
 #' fitting function.
@@ -283,6 +288,15 @@ vcov.zisfcross <- function(object, ...) {
 #' @aliases vcov.cnsfcross
 #' @export
 vcov.cnsfcross <- function(object, ...) {
+  resCov <- object$invHessian
+  return(resCov)
+}
+
+# variance covariance matrix for misfcross ----------
+#' @rdname vcov
+#' @aliases vcov.misfcross
+#' @export
+vcov.misfcross <- function(object, ...) {
   resCov <- object$invHessian
   return(resCov)
 }
