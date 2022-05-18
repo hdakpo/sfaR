@@ -217,7 +217,8 @@ vcov.lcmcross <- function(object, ...) {
   return(resCov)
 }
 
-# variance covariance matrix for sfaselectioncross ----------
+# variance covariance matrix for sfaselectioncross
+# ----------
 #' @rdname vcov
 #' @aliases vcov.sfaselectioncross
 #' @export

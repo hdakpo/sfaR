@@ -28,12 +28,7 @@ lcmcross(
   tol = 1e-12,
   gradtol = 1e-06,
   stepmax = 0.1,
-  qac = "marquardt",
-  initStart = FALSE,
-  initAlg = "nlminb",
-  initIter = 100,
-  initFactorLB = 0.5,
-  initFactorUB = 1.5
+  qac = "marquardt"
 )
 
 \method{print}{lcmcross}(x, ...)
@@ -129,24 +124,6 @@ is decreased but the direction is kept. If \code{'qac = marquardt'}
 (default), the step length is decreased while also moving closer to the pure
 gradient direction. See \code{\link[maxLik:maxBHHH]{maxBHHH}} and
 \code{\link[maxLik:maxNR]{maxNR}}.}
-
-\item{initStart}{Logical. If \code{TRUE}, the model is jump-started using an
-alternative algorithm (\code{'nlminb'}) within certain bounds. Default =
-\code{FALSE}.}
-
-\item{initAlg}{Character. Algorithm used to jump-start the latent class
-model. Only \code{'nlminb'} is currently available.}
-
-\item{initIter}{Maximum number of iterations for the algorihtm when
-\code{initStart = TRUE}. Default = \code{100}.}
-
-\item{initFactorLB}{A numeric value indicating by which factor the starting
-value should be multiplied to define the lower bounds for the jump-start
-algorithm. Default = \code{0.5}.}
-
-\item{initFactorUB}{A numeric value indicating by which factor the starting
-value should be multiplied to define the upper bounds for the jump-start
-algorithm. Default = \code{1.5}.}
 
 \item{x}{an object of class lcmcross (returned by the function \code{\link{lcmcross}}).}
 
@@ -255,11 +232,11 @@ The model can estimate up to five classes.
 LCM is an estimation of a finite mixture of production functions:
 
 \Sexpr[results=rd, stage=build]{
-katex::math_to_rd("y_i = \\\alpha_j + \\\mathbf{x_i^{\\\prime}} \\\bm{\\\beta_j} + v_{i|j} - Su_{i|j}")
+katex::math_to_rd('y_i = \\\alpha_j + \\\mathbf{x_i^{\\\prime}} \\\bm{\\\beta_j} + v_{i|j} - Su_{i|j}')
 }
 
 \Sexpr[results=rd, stage=build]{
-katex::math_to_rd("\\\epsilon_{i|j} = v_{i|j} - Su_{i|j}")
+katex::math_to_rd('\\\epsilon_{i|j} = v_{i|j} - Su_{i|j}')
 }
 
 where \eqn{i} is the observation, \eqn{j} is the class, \eqn{y} is the
@@ -275,19 +252,19 @@ The contribution of observation \eqn{i} to the likelihood conditional on
 class \eqn{j} is defined as:
 
 \Sexpr[results=rd, stage=build]{
-katex::math_to_rd("P(i|j) = \\\frac{2}{\\\sqrt{\\\sigma_{u|j}^2 + \\\sigma_{v|j}^2}}\\\phi\\\\left(\\\frac{S\\\epsilon_{i|j}}{\\\sqrt{\\\sigma_{u|j}^2 +\\\sigma_{v|j}^2}}\\\\right)\\\Phi\\\\left(\\\frac{\\\mu_{i*|j}}{\\\sigma_{*|j}}\\\\right)")
+katex::math_to_rd('P(i|j) = \\\frac{2}{\\\sqrt{\\\sigma_{u|j}^2 + \\\sigma_{v|j}^2}}\\\phi\\\\left(\\\frac{S\\\epsilon_{i|j}}{\\\sqrt{\\\sigma_{u|j}^2 +\\\sigma_{v|j}^2}}\\\\right)\\\Phi\\\\left(\\\frac{\\\mu_{i*|j}}{\\\sigma_{*|j}}\\\\right)')
 }
 
 where
 
 \Sexpr[results=rd, stage=build]{
-katex::math_to_rd("\\\mu_{i*|j}=\\\frac{- S\\\epsilon_{i|j}\\\sigma_{u|j}^2}{\\\sigma_{u|j}^2 + \\\sigma_{v|j}^2}")
+katex::math_to_rd('\\\mu_{i*|j}=\\\frac{- S\\\epsilon_{i|j}\\\sigma_{u|j}^2}{\\\sigma_{u|j}^2 + \\\sigma_{v|j}^2}')
 }
 
 and
 
 \Sexpr[results=rd, stage=build]{
-katex::math_to_rd("\\\sigma_*^2 = \\\frac{\\\sigma_{u|j}^2 \\\sigma_{v|j}^2}{\\\sigma_{u|j}^2 + \\\sigma_{v|j}^2}")
+katex::math_to_rd('\\\sigma_*^2 = \\\frac{\\\sigma_{u|j}^2 \\\sigma_{v|j}^2}{\\\sigma_{u|j}^2 + \\\sigma_{v|j}^2}')
 }
 
 The prior probability of using a particular technology can depend on some
@@ -295,7 +272,7 @@ covariates (namely the variables separating the observations into classes)
 using a logit specification:
 
 \Sexpr[results=rd, stage=build]{
-katex::math_to_rd("\\\pi(i,j) = \\\frac{\\\exp{(\\\theta_j'Z_{hi})}}{\\\sum_{m=1}^{J}\\\exp{(\\\theta_m'Z_{hi})}}")
+katex::math_to_rd('\\\pi(i,j) = \\\frac{\\\exp{(\\\theta_j'Z_{hi})}}{\\\sum_{m=1}^{J}\\\exp{(\\\theta_m'Z_{hi})}}')
 }
 
 with \eqn{Z_h} the covariates, \eqn{\theta} the coefficients estimated for
@@ -313,7 +290,7 @@ Class assignment is based on the largest posterior probability. This
 probability is obtained using Bayes' rule, as follows for class \eqn{j}:
 
 \Sexpr[results=rd, stage=build]{
-katex::math_to_rd("w\\\\left(j|i\\\\right)=\\\frac{P\\\\left(i|j\\\\right)\\\pi\\\\left(i,j\\\\right)}{\\\sum_{m=1}^JP\\\\left(i|m\\\\right)\\\pi\\\\left(i, m\\\\right)}")
+katex::math_to_rd('w\\\\left(j|i\\\\right)=\\\frac{P\\\\left(i|j\\\\right)\\\pi\\\\left(i,j\\\\right)}{\\\sum_{m=1}^JP\\\\left(i|m\\\\right)\\\pi\\\\left(i, m\\\\right)}')
 }
 
 To accommodate heteroscedasticity in the variance parameters of the error

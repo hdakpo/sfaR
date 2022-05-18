@@ -182,7 +182,7 @@ logLik.zisfcross <- function(object, individual = FALSE, ...) {
 logLik.cnsfcross <- function(object, individual = FALSE, ...) {
   if (length(individual) != 1 || !is.logical(individual[1]))
     stop("argument 'individual' must be a single logical value",
-         call. = FALSE)
+      call. = FALSE)
   if (individual) {
     LL <- list()
     LL[["logLik"]] <- object$dataTable$logL_OBS
@@ -205,7 +205,7 @@ logLik.cnsfcross <- function(object, individual = FALSE, ...) {
 logLik.misfcross <- function(object, individual = FALSE, ...) {
   if (length(individual) != 1 || !is.logical(individual[1]))
     stop("argument 'individual' must be a single logical value",
-         call. = FALSE)
+      call. = FALSE)
   if (individual) {
     LL <- list()
     LL[["logLik"]] <- object$dataTable$logL_OBS
