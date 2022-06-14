@@ -58,13 +58,13 @@ the construction of the classes.}
 \item{subset}{An optional vector specifying a subset of observations to be
 used in the optimization process.}
 
-\item{weights}{An optional vector of weights to be used for weighted log-likelihood.
-Should be \code{NULL} or numeric vector with positive values. When \code{NULL},
-a numeric vector of 1 is used.}
+\item{weights}{An optional vector of weights to be used for weighted
+log-likelihood. Should be \code{NULL} or numeric vector with positive values.
+When \code{NULL}, a numeric vector of 1 is used.}
 
-\item{wscale}{Logical. When \code{weights} is not \code{NULL}, a scaling transformation
-is used such that the the \code{weights} sums to the sample size. Default \code{TRUE}.
-When \code{FALSE} no scaling is used.}
+\item{wscale}{Logical. When \code{weights} is not \code{NULL}, a scaling
+transformation is used such that the the \code{weights} sums to the sample
+size. Default \code{TRUE}. When \code{FALSE} no scaling is used.}
 
 \item{S}{If \code{S = 1} (default), a production (profit) frontier is
 estimated: \eqn{\epsilon_i = v_i-u_i}. If \code{S = -1}, a cost frontier is
@@ -78,7 +78,7 @@ implemented.}
 \item{start}{Numeric vector. Optional starting values for the maximum
 likelihood (ML) estimation.}
 
-\item{lcmClasses}{Number of classes to be estimated (default = \code{2}).  A
+\item{lcmClasses}{Number of classes to be estimated (default = \code{2}). A
 maximum of five classes can be estimated.}
 
 \item{method}{Optimization algorithm used for the estimation.  Default =
@@ -88,16 +88,19 @@ for Broyden-Fletcher-Goldfarb-Shanno (see
 Berndt-Hall-Hall-Hausman (see \code{\link[maxLik:maxBHHH]{maxBHHH}}) \item
 \code{'nr'}, for Newton-Raphson (see \code{\link[maxLik:maxNR]{maxNR}})
 \item \code{'nm'}, for Nelder-Mead (see \code{\link[maxLik:maxNM]{maxNM}})
-\item \code{'cg'}, for Conjugate Gradient (see \code{\link[maxLik:maxCG]{maxCG}})
-\item \code{'sann'}, for Simulated Annealing (see \code{\link[maxLik:maxSANN]{maxSANN}})
-\item \code{'ucminf'}, implements a quasi-Newton type with BFGS updating of the
-inverse Hessian and soft line search with a trust region type monitoring of
-the input to the line search algorithm (see \code{\link[ucminf:ucminf]{ucminf}})
+\item \code{'cg'}, for Conjugate Gradient
+(see \code{\link[maxLik:maxCG]{maxCG}}) \item \code{'sann'}, for Simulated
+Annealing (see \code{\link[maxLik:maxSANN]{maxSANN}})
+\item \code{'ucminf'}, implements a quasi-Newton type with BFGS updating of
+the inverse Hessian and soft line search with a trust region type monitoring
+of the input to the line search algorithm
+(see \code{\link[ucminf:ucminf]{ucminf}})
 \item \code{'mla'}, for general-purpose optimization based on
 Marquardt-Levenberg algorithm (see \code{\link[marqLevAlg:mla]{mla}})
 \item \code{'sr1'}, for Symmetric Rank 1 (see
-\code{\link[trustOptim:trust.optim]{trust.optim}}) \item \code{'sparse'}, for trust
-regions and sparse Hessian (see \code{\link[trustOptim:trust.optim]{trust.optim}}) \item
+\code{\link[trustOptim:trust.optim]{trust.optim}}) \item \code{'sparse'},
+for trust regions and sparse Hessian
+(see \code{\link[trustOptim:trust.optim]{trust.optim}}) \item
 \code{'nlminb'}, for optimization using PORT routines (see
 \code{\link[stats:nlminb]{nlminb}})}}
 
@@ -125,10 +128,12 @@ is decreased but the direction is kept. If \code{'qac = marquardt'}
 gradient direction. See \code{\link[maxLik:maxBHHH]{maxBHHH}} and
 \code{\link[maxLik:maxNR]{maxNR}}.}
 
-\item{x}{an object of class lcmcross (returned by the function \code{\link{lcmcross}}).}
+\item{x}{an object of class lcmcross (returned by the function
+\code{\link{lcmcross}}).}
 
 \item{...}{additional arguments of frontier are passed to lcmcross;
-additional arguments of the print, bread, estfun, nobs methods are currently ignored.}
+additional arguments of the print, bread, estfun, nobs methods are currently
+ignored.}
 }
 \value{
 \code{\link{lcmcross}} returns a list of class \code{'lcmcross'}
@@ -169,8 +174,9 @@ two-sided error term.}
 
 \item{dataTable}{A data frame (tibble format) containing information on data
 used for optimization along with residuals and fitted values of the OLS and
-ML estimations, and the individual observation log-likelihood. When \code{weights}
-is specified an additional variable is also provided in \code{dataTable}.}
+ML estimations, and the individual observation log-likelihood. When
+\code{weights} is specified an additional variable is also provided in
+\code{dataTable}.}
 
 \item{initHalf}{When \code{start = NULL}. Initial ML estimation with half
 normal distribution for the one-sided error term. Model to construct the
@@ -232,7 +238,8 @@ The model can estimate up to five classes.
 LCM is an estimation of a finite mixture of production functions:
 
 \Sexpr[results=rd, stage=build]{
-katex::math_to_rd('y_i = \\\alpha_j + \\\mathbf{x_i^{\\\prime}} \\\bm{\\\beta_j} + v_{i|j} - Su_{i|j}')
+katex::math_to_rd('y_i = \\\alpha_j + \\\mathbf{x_i^{\\\prime}}
+\\\bm{\\\beta_j} + v_{i|j} - Su_{i|j}')
 }
 
 \Sexpr[results=rd, stage=build]{
@@ -252,19 +259,24 @@ The contribution of observation \eqn{i} to the likelihood conditional on
 class \eqn{j} is defined as:
 
 \Sexpr[results=rd, stage=build]{
-katex::math_to_rd('P(i|j) = \\\frac{2}{\\\sqrt{\\\sigma_{u|j}^2 + \\\sigma_{v|j}^2}}\\\phi\\\\left(\\\frac{S\\\epsilon_{i|j}}{\\\sqrt{\\\sigma_{u|j}^2 +\\\sigma_{v|j}^2}}\\\\right)\\\Phi\\\\left(\\\frac{\\\mu_{i*|j}}{\\\sigma_{*|j}}\\\\right)')
+katex::math_to_rd('P(i|j) = \\\frac{2}{\\\sqrt{\\\sigma_{u|j}^2 +
+\\\sigma_{v|j}^2}}\\\phi\\\\left(\\\frac{S\\\epsilon_{i|j}}{\\\sqrt{
+\\\sigma_{u|j}^2 +\\\sigma_{v|j}^2}}\\\\right)\\\Phi\\\\left(\\\frac{
+\\\mu_{i*|j}}{\\\sigma_{*|j}}\\\\right)')
 }
 
 where
 
 \Sexpr[results=rd, stage=build]{
-katex::math_to_rd('\\\mu_{i*|j}=\\\frac{- S\\\epsilon_{i|j}\\\sigma_{u|j}^2}{\\\sigma_{u|j}^2 + \\\sigma_{v|j}^2}')
+katex::math_to_rd('\\\mu_{i*|j}=\\\frac{- S\\\epsilon_{i|j}
+\\\sigma_{u|j}^2}{\\\sigma_{u|j}^2 + \\\sigma_{v|j}^2}')
 }
 
 and
 
 \Sexpr[results=rd, stage=build]{
-katex::math_to_rd('\\\sigma_*^2 = \\\frac{\\\sigma_{u|j}^2 \\\sigma_{v|j}^2}{\\\sigma_{u|j}^2 + \\\sigma_{v|j}^2}')
+katex::math_to_rd('\\\sigma_*^2 = \\\frac{\\\sigma_{u|j}^2
+\\\sigma_{v|j}^2}{\\\sigma_{u|j}^2 + \\\sigma_{v|j}^2}')
 }
 
 The prior probability of using a particular technology can depend on some
@@ -272,7 +284,8 @@ covariates (namely the variables separating the observations into classes)
 using a logit specification:
 
 \Sexpr[results=rd, stage=build]{
-katex::math_to_rd('\\\pi(i,j) = \\\frac{\\\exp{(\\\theta_j'Z_{hi})}}{\\\sum_{m=1}^{J}\\\exp{(\\\theta_m'Z_{hi})}}')
+katex::math_to_rd('\\\pi(i,j) = \\\frac{\\\exp{(\\\theta_j'Z_{hi})}}{
+\\\sum_{m=1}^{J}\\\exp{(\\\theta_m'Z_{hi})}}')
 }
 
 with \eqn{Z_h} the covariates, \eqn{\theta} the coefficients estimated for
@@ -290,7 +303,9 @@ Class assignment is based on the largest posterior probability. This
 probability is obtained using Bayes' rule, as follows for class \eqn{j}:
 
 \Sexpr[results=rd, stage=build]{
-katex::math_to_rd('w\\\\left(j|i\\\\right)=\\\frac{P\\\\left(i|j\\\\right)\\\pi\\\\left(i,j\\\\right)}{\\\sum_{m=1}^JP\\\\left(i|m\\\\right)\\\pi\\\\left(i, m\\\\right)}')
+katex::math_to_rd('w\\\\left(j|i\\\\right)=\\\frac{P\\\\left(i|j\\\\right)
+\\\pi\\\\left(i,j\\\\right)}{\\\sum_{m=1}^JP\\\\left(i|m\\\\right)
+\\\pi\\\\left(i, m\\\\right)}')
 }
 
 To accommodate heteroscedasticity in the variance parameters of the error
@@ -308,23 +323,30 @@ When option \code{weights} is specified and \code{wscale = TRUE}, the weights
 is scaled as
 
 \Sexpr[results=rd, stage=build]{
-katex::math_to_rd('new_{weights} = sample_{size} \\\times \\\frac{old_{weights}}{\\\sum(old_{weights})}')
+katex::math_to_rd('new_{weights} = sample_{size} \\\times
+\\\frac{old_{weights}}{\\\sum(old_{weights})}')
 }
 
-For difficult problems, non-gradient methods (e.g. \code{nm} or \code{sann}) can be
-used to warm start the optimization and zoom in the neighborhood of the
-solution. Then a gradient-based methods is recommanded in the second step. In the case
-of \code{sann}, we recommand to significantly increase the iteration limit
-(e.g. \code{itermax = 20000}). The Conjugate Gradient (\code{cg}) can also be used
-in the first stage.
+For difficult problems, non-gradient methods (e.g. \code{nm} or
+\code{sann}) can be used to warm start the optimization and zoom in the
+neighborhood of the solution. Then a gradient-based methods is recommanded
+in the second step. In the case of \code{sann}, we recommand to significantly
+increase the iteration limit (e.g. \code{itermax = 20000}). The Conjugate
+Gradient (\code{cg}) can also be used in the first stage.
 
-A set of extractor functions for fitted model objects is available for objects of class
-\code{'lcmcross'} including methods to the generic functions \code{\link[=print.lcmcross]{print}},
-\code{\link[=summary.lcmcross]{summary}}, \code{\link[=coef.lcmcross]{coef}},
-\code{\link[=fitted.lcmcross]{fitted}}, \code{\link[=logLik.lcmcross]{logLik}},
-\code{\link[=residuals.lcmcross]{residuals}}, \code{\link[=vcov.lcmcross]{vcov}},
-\code{\link[=efficiencies.lcmcross]{efficiencies}}, \code{\link[=ic.lcmcross]{ic}},
-\code{\link[=marginal.lcmcross]{marginal}}, \code{\link[=estfun.lcmcross]{estfun}} and
+A set of extractor functions for fitted model objects is available for
+objects of class \code{'lcmcross'} including methods to the generic functions
+\code{\link[=print.lcmcross]{print}},
+\code{\link[=summary.lcmcross]{summary}},
+\code{\link[=coef.lcmcross]{coef}},
+\code{\link[=fitted.lcmcross]{fitted}},
+\code{\link[=logLik.lcmcross]{logLik}},
+\code{\link[=residuals.lcmcross]{residuals}},
+\code{\link[=vcov.lcmcross]{vcov}},
+\code{\link[=efficiencies.lcmcross]{efficiencies}},
+\code{\link[=ic.lcmcross]{ic}},
+\code{\link[=marginal.lcmcross]{marginal}},
+\code{\link[=estfun.lcmcross]{estfun}} and
 \code{\link[=bread.lcmcross]{bread}} (from the \CRANpkg{sandwich} package),
 \code{\link[lmtest:coeftest]{lmtest::coeftest()}} (from the \CRANpkg{lmtest} package).
 }
@@ -338,20 +360,17 @@ permanent (not fixed over time).
 ## Using data on eighty-two countries production (DGP)
 # LCM Cobb Douglas (production function) half normal distribution
 # Intercept and initStat used as separating variables
-cb_2c_h1 <- lcmcross(formula = ly ~ lk + ll + yr, thet = ~initStat, data = worldprod)
-  summary(cb_2c_h1)
+cb_2c_h1 <- lcmcross(formula = ly ~ lk + ll + yr, thet = ~initStat, 
+data = worldprod)
+summary(cb_2c_h1)
 
 # summary of the initial ML model
-  summary(cb_2c_h1$InitHalf)
-
-# same result by jump-starting the estimation
-cb_2c_h2 <- lcmcross(formula = ly ~ lk + ll + yr, data = worldprod, initStart = TRUE)
-  summary(cb_2c_h2)
+summary(cb_2c_h1$InitHalf)
 
 # Only the intercept is used as the separating variable and only variable
 # initStat is used as inefficiency driver
 cb_2c_h3 <- lcmcross(formula = ly ~ lk + ll + yr, uhet = ~initStat, data = worldprod)
-  summary(cb_2c_h3)
+summary(cb_2c_h3)
 
 }
 \references{
@@ -388,7 +407,8 @@ frontier: A framework for the analysis of firm inefficiency.
 \emph{International Economic Review}, \bold{32}(3), 715--723.
 }
 \seealso{
-\code{\link[=print.lcmcross]{print}} for printing \code{lcmcross} object.
+\code{\link[=print.lcmcross]{print}} for printing \code{lcmcross}
+object.
 
 \code{\link[=summary.lcmcross]{summary}} for creating and printing
 summary results.
