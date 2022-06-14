@@ -124,7 +124,7 @@ for trust regions and sparse Hessian (see
 
 \item{hessianType}{Integer. If \code{1} (Default), analytic/numeric Hessian
 is returned for all the distributions. If \code{2},  bhhh Hessian is
-estimated (\eqn{g'g}).}
+estimated (\eqn{g\prime g}).}
 
 \item{simType}{Character string. If \code{simType = 'halton'} (Default),
 Halton draws are used for maximum simulated likelihood (MSL). If
@@ -357,16 +357,16 @@ In the case of the truncated normal distribution, the convolution of
 \eqn{u_i} and \eqn{v_i} is:
 
 \Sexpr[results=rd, stage=build]{
-katex::math_to_rd('f(\\\epsilon_i)=\\\frac{p_i}{\\\sqrt{\\\\sigma_{u_1}^2 +
+katex::math_to_rd('f(\\\epsilon_i)=\\\frac{p_i}{\\\sqrt{\\\sigma_{u_1}^2 +
 \\\sigma_v^2}}\\\phi\\\\left(\\\frac{S\\\epsilon_i + \\\mu_1}{\\\sqrt{
 \\\sigma_{u_1}^2 + \\\sigma_v^2}}\\\\right)\\\Phi\\\\left(\\\frac{
 \\\mu_{1i\\\ast}}{\\\sigma_{1\\\ast}}\\\\right)\\\Big/\\\Phi\\\\left(
 \\\frac{\\\mu_1}{\\\sigma_{u_1}}\\\\right) +
-\\\frac{1-p_i}{\\\sqrt{\\\\sigma_{u_2}^2 +
+\\\frac{1-p_i}{\\\sqrt{\\\sigma_{u_2}^2 +
 \\\sigma_v^2}}\\\phi\\\\left(\\\frac{S\\\epsilon_i + \\\mu_2}{\\\sqrt{
 \\\sigma_{u_2}^2 + \\\sigma_v^2}}\\\\right)\\\Phi\\\\left(\\\frac{
 \\\mu_{2i\\\ast}}{\\\sigma_{2\\\ast}}\\\\right)\\\Big/\\\Phi\\\\left(
-\\\frac{\\\mu_2}{\\\sigma_{u_2}}\\\\right)
+\\\frac{\\\mu_2}{\\\sigma_{u_2}}\\\\right)')
 }
 
 where
@@ -400,7 +400,7 @@ katex::math_to_rd('p_i^\\\ast = \\\frac{p_i \\\times
 where
 
 \Sexpr[results=rd, stage=build]{
-katex::math_to_rd('\\\pi(i, 1)=\\\frac{1}{\\\sqrt{\\\\sigma_u^2 +
+katex::math_to_rd('\\\pi(i, 1)=\\\frac{1}{\\\sqrt{\\\sigma_u^2 +
 \\\sigma_v^2}}\\\phi\\\\left(\\\frac{S\\\epsilon_i + \\\mu}{
 \\\sqrt{\\\sigma_u^2 + \\\sigma_v^2}}\\\\right)\\\Phi\\\\left(
 \\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)\\\Big/

@@ -274,7 +274,7 @@ covariates (namely the variables separating the observations into classes)
 using a logit specification:
 
 \Sexpr[results=rd, stage=build]{
-katex::math_to_rd('\\\pi(i,j) = \\\frac{\\\exp{(\\\theta_j'Z_{hi})}}{\\\sum_{m=1}^{J}\\\exp{(\\\theta_m'Z_{hi})}}')
+katex::math_to_rd('\\\pi(i,j) = \\\frac{\\\exp{(\\\theta_j \\\prime Z_{hi})}}{\\\sum_{m=1}^{J}\\\exp{(\\\theta_m \\\prime Z_{hi})}}')
 }
 
 with \eqn{Z_h} the covariates, \eqn{\theta} the coefficients estimated for

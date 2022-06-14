@@ -24,7 +24,7 @@
 #'
 #' @param object An object of either class \code{'cnsfcross'} returned by the
 #' function \code{\link{cnsfcross}}, or class \code{'lcmcross'} returned by the
-#' function \code{\link{lcmcross}}, or \code{misfcross'} returned by 
+#' function \code{\link{lcmcross}}, or \code{'misfcross'} returned by 
 #' \code{\link{cnsfcross}}, or \code{'sfacross'} returned by the
 #' function \code{\link{sfacross}}, or class \code{'sfaselectioncross'} returned 
 #' by the function \code{\link{sfaselectioncross}}, or class \code{'zisfcross'} 
