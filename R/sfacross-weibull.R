@@ -36,13 +36,13 @@ cweibullnormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
   epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
   if (k < 0)
     return(NA)
-  ll <- numeric(N)
-  ur <- list()
-  for (i in seq_along(1:N)) {
-    ur[[i]] <- exp(Wu[i]/2) * (-log(1 - FiMat[i, ]))^(1/k)
-    ll[i] <- log(mean(1/exp(Wv[i]/2) * dnorm((epsilon[i] +
-      S * ur[[i]])/exp(Wv[i]/2))))
-  }
+  urMat <- sweep((-log(1 - FiMat))^(1/k), MARGIN = 1, STATS = exp(Wu/2),
+    FUN = "*")
+  uepsi <- sweep(S * urMat, MARGIN = 1, STATS = epsilon, FUN = "+")
+  duepsi <- dnorm(sweep(uepsi, MARGIN = 1, STATS = exp(Wv/2),
+    FUN = "/"))
+  ll <- log(apply(sweep(duepsi, MARGIN = 1, STATS = exp(Wv/2),
+    FUN = "/"), 1, mean))
   return(ll * wHvar)
 }
 
@@ -388,13 +388,13 @@ weibullnormAlgOpt <- function(start, olsParam, dataTable, S,
     vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
     FiMat = FiMat, wHvar = wHvar))
   if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
-    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
-      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
-      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
-      sann = function(...) maxSANN(...))
+    maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...),
+      bhhh = function(...) maxLik::maxBHHH(...), nr = function(...) maxLik::maxNR(...),
+      nm = function(...) maxLik::maxNM(...), cg = function(...) maxLik::maxCG(...),
+      sann = function(...) maxLik::maxSANN(...))
     method <- "maxLikAlgo"
   }
-  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+  mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
     fn = function(parm) -sum(cweibullnormlike(parm, nXvar = nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
       vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
@@ -410,7 +410,7 @@ weibullnormAlgOpt <- function(start, olsParam, dataTable, S,
         iterlim = itermax, reltol = tol, tol = tol, qac = qac),
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S, N = N, FiMat = FiMat, wHvar = wHvar), sr1 = trust.optim(x = startVal,
+      S = S, N = N, FiMat = FiMat, wHvar = wHvar), sr1 = trutOptim::trust.optim(x = startVal,
       fn = function(parm) -sum(cweibullnormlike(parm, nXvar = nXvar,
         nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
         vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
@@ -420,7 +420,7 @@ weibullnormAlgOpt <- function(start, olsParam, dataTable, S,
         S = S, N = N, FiMat = FiMat, wHvar = wHvar)),
       method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
         stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
-        report.precision = 1L)), sparse = trust.optim(x = startVal,
+        report.precision = 1L)), sparse = trutOptim::trust.optim(x = startVal,
       fn = function(parm) -sum(cweibullnormlike(parm, nXvar = nXvar,
         nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
         vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
@@ -435,7 +435,7 @@ weibullnormAlgOpt <- function(start, olsParam, dataTable, S,
         "dgCMatrix"), method = "Sparse", control = list(maxit = itermax,
         cgtol = gradtol, stop.trust.radius = tol, prec = tol,
         report.level = if (printInfo) 2 else 0, report.precision = 1L,
-        preconditioner = 1L)), mla = mla(b = startVal,
+        preconditioner = 1L)), mla = marqLevAlg::mla(b = startVal,
       fn = function(parm) -sum(cweibullnormlike(parm, nXvar = nXvar,
         nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
         vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
