@@ -598,7 +598,7 @@ cmargtruncnormscal_Eu <- function(object) {
   margEff <- kronecker(matrix(delta, nrow = 1), matrix(m1 *
     hi, ncol = 1))
   colnames(margEff) <- paste0("Eu_", colnames(uHvar)[-1])
-  return(margEff)
+  return(as_tibble(margEff))
 }
 
 cmargtruncnormscal_Vu <- function(object) {
@@ -618,5 +618,5 @@ cmargtruncnormscal_Vu <- function(object) {
   margEff <- kronecker(matrix(2 * delta, nrow = 1), matrix(m2 *
     hi2))
   colnames(margEff) <- paste0("Vu_", colnames(uHvar)[-1])
-  return(margEff)
+  return(as_tibble(margEff))
 }

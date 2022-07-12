@@ -514,7 +514,7 @@ cmargtslnorm_Eu <- function(object) {
     4 * lambda + 2 * lambda^2)/((1 + lambda) * (1 + 2 * lambda)),
     nrow = 1), matrix(exp(Wu/2), ncol = 1))
   colnames(margEff) <- paste0("Eu_", colnames(uHvar)[-1])
-  return(margEff)
+  return(as_tibble(margEff))
 }
 
 cmargtslnorm_Vu <- function(object) {
@@ -530,5 +530,5 @@ cmargtslnorm_Vu <- function(object) {
     lambda)^2 * (1 + 2 * lambda)^2), nrow = 1), matrix(exp(Wu),
     ncol = 1))
   colnames(margEff) <- paste0("Vu_", colnames(uHvar)[-1])
-  return(margEff)
+  return(as_tibble(margEff))
 }

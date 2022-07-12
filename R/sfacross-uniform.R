@@ -439,7 +439,7 @@ cmarguninorm_Eu <- function(object) {
   margEff <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
     matrix(exp(Wu)/2, ncol = 1))
   colnames(margEff) <- paste0("Eu_", colnames(uHvar)[-1])
-  return(margEff)
+  return(as_tibble(margEff))
 }
 
 cmarguninorm_Vu <- function(object) {
@@ -451,5 +451,5 @@ cmarguninorm_Vu <- function(object) {
   margEff <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
     matrix(1/6 * exp(2 * Wu), ncol = 1))
   colnames(margEff) <- paste0("Vu_", colnames(uHvar)[-1])
-  return(margEff)
+  return(as_tibble(margEff))
 }

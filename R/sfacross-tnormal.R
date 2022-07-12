@@ -583,7 +583,7 @@ cmargtruncnorm_Eu <- function(object) {
     mu_mat[, !idTRUE_mu], Wu_mat[, !idTRUE_Wu])
   colnames(margEff) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
     colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
-  return(margEff)
+  return(as_tibble(margEff))
 }
 
 cmargtruncnorm_Vu <- function(object) {
@@ -617,5 +617,5 @@ cmargtruncnorm_Vu <- function(object) {
     mu_mat[, !idTRUE_mu], Wu_mat[, !idTRUE_Wu])
   colnames(margEff) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
     colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
-  return(margEff)
+  return(as_tibble(margEff))
 }
