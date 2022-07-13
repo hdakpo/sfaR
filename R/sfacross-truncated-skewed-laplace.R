@@ -103,7 +103,7 @@ csttslnorm <- function(olsObj, epsiRes, S, nuZUvar, uHvar, nvZVvar,
   } else {
     beta <- olsObj
   }
-  return(c(beta, delta, phi, lambda = 0.03))
+  return(c(beta, delta, phi, lambda = 1))
 }
 
 # Gradient of the likelihood function ----------
