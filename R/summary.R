@@ -12,20 +12,22 @@
 #         -Zero inefficiency stochastic frontier                               #
 #         -Contaminated noise stochastic frontier                              #
 #         -Multi-Modal Inefficiency Stochastic Frontier Analysis               #
+#         -Generalized Zero Inefficiency Stochastic Frontier Analysis          #
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
 
 #' Summary of results for stochastic frontier models
 #'
 #' Create and print summary results for stochastic frontier models returned by 
-#' \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{misfcross}}, 
-#' \code{\link{sfacross}}, \code{\link{sfaselectioncross}} or 
-#' \code{\link{zisfcross}}.
+#' \code{\link{cnsfcross}}, \code{\link{gzisfcross}}, \code{\link{lcmcross}}, 
+#' \code{\link{misfcross}}, \code{\link{sfacross}}, 
+#' \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.
 #'
 #' @param object An object of either class \code{'cnsfcross'} returned by the
-#' function \code{\link{cnsfcross}}, or class \code{'lcmcross'} returned by the
+#' function \code{\link{cnsfcross}}, or \code{'gzisfcross'} returned by the
+#' function \code{\link{gzisfcross}}, or class \code{'lcmcross'} returned by the
 #' function \code{\link{lcmcross}}, or \code{misfcross'} returned by 
-#' \code{\link{cnsfcross}}, or \code{'sfacross'} returned by the
+#' \code{\link{misfcross}}, or \code{'sfacross'} returned by the
 #' function \code{\link{sfacross}}, or class \code{'sfaselectioncross'} returned 
 #' by the function \code{\link{sfaselectioncross}}, or class \code{'zisfcross'} 
 #' returned by the function \code{\link{zisfcross}}.
@@ -37,18 +39,19 @@
 #' returned.
 #' @param ... Currently ignored.
 #' @param x An object of either class \code{'summary.cnsfcross'},
-#' \code{'summary.lcmcross'}, \code{'summary.misfcross'}, 
-#' \code{'summary.sfacross'}, \code{'summary.sfaselectioncross'} or 
-#' \code{'summary.zisfcross'}.
+#' \code{'summary.gzisfcross'}, \code{'summary.lcmcross'}, 
+#' \code{'summary.misfcross'}, \code{'summary.sfacross'}, 
+#' \code{'summary.sfaselectioncross'} or \code{'summary.zisfcross'}.
 #' @param digits Numeric. Number of digits displayed in values.
 #'
 #' @name summary
 #'
 #' @return The \code{\link{summary}} method returns a list of class
-#' \code{'summary.cnsfcross'}, \code{'summary.lcmcross'}, 
-#' \code{'summary.misfcross'}, \code{'summary.sfacross'}, 
-#' \code{'summary.sfaselectioncross'}, \code{'summary.zisfcross'} that contains
-#' the same elements as an object returned by \code{\link{cnsfcross}}, 
+#' \code{'summary.cnsfcross'}, \code{'summary.gzisfcross'}, 
+#' \code{'summary.lcmcross'}, \code{'summary.misfcross'}, 
+#' \code{'summary.sfacross'}, \code{'summary.sfaselectioncross'},
+#' \code{'summary.zisfcross'} that contains the same elements as an object 
+#' returned by \code{\link{cnsfcross}}, \code{\link{gzisfcross}}, 
 #' \code{\link{lcmcross}},  \code{\link{misfcross}}, \code{\link{sfacross}}, 
 #' \code{\link{sfaselectioncross}} or \code{\link{zisfcross}} with the 
 #' following additional elements:
@@ -70,7 +73,7 @@
 #' \item{Varu}{For \code{object} of class \code{'sfacross'} or 
 #' \code{'sfaselectioncross'}. Variance of the one-sided error term.}
 #'
-#' \item{THETA}{For \code{object} of class \code{'sfacross'} with \code{'udist
+#' \item{theta}{For \code{object} of class \code{'sfacross'} with \code{'udist
 #' = uniform'}.  \eqn{\Theta} value in the case the uniform distribution is
 #' defined as: \eqn{u_i \in [0, \Theta]}.}
 #'
@@ -100,6 +103,9 @@
 # @author K Hervé Dakpo
 #' 
 #' @seealso \code{\link{cnsfcross}}, for the contaminated noise stochastic 
+#' frontier analysis model fitting function.
+#' 
+#' \code{\link{gzisfcross}}, for the generalized zero inefficiency stochastic 
 #' frontier analysis model fitting function.
 #'
 #' \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
@@ -278,11 +284,11 @@ summary.sfacross <- function(object, grad = FALSE, ci = FALSE,
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
   object$sigmavSq <- mean(exp(Wv))
   object$sigmauSq <- mean(exp(Wu))
+  if (object$udist == "uniform") {
+    object$theta <- sqrt(12 * object$sigmauSq)
+  }
   object$Varu <- varuFun(object = object, mu = mu, P = P, k = k,
     lambda = lambda)
-  if (object$udist == "uniform") {
-    object$THETA <- sqrt(12 * object$sigmauSq)
-  }
   object$Eu <- euFun(object = object, mu = mu, P = P, k = k,
     lambda = lambda)
   object$Expu <- eExpuFun(object = object, mu = mu, P = P,
@@ -558,8 +564,11 @@ print.summary.sfacross <- function(x, digits = max(3, getOption("digits") -
     formatC(x$Varu + x$sigmavSq, digits = digits, format = "f"),
     "\n")
   if (x$udist == "uniform") {
-    cat("THETA                         = ", paste0(rep(" ",
-      lengthSum - nchar("THETA                         = ") -
+    if (x$nuZUvar > 1) {
+      cat("theta averaged over observations \n")
+    }
+    cat("theta                         = ", paste0(rep(" ",
+      lengthSum - nchar("theta                         = ") -
         nchar(formatC(x$theta, digits = digits, format = "f"))),
       collapse = ""), formatC(x$theta, digits = digits,
       format = "f"), "\n")
@@ -1582,10 +1591,9 @@ summary.sfaselectioncross <- function(object, grad = FALSE, ci = FALSE,
   }
   row.names(mlRes) <- names(object$startVal)
   object$mlRes <- mlRes
-  object$df <- object$nParm - object$nClasses * object$nXvar -
-    object$nClasses * object$nvZVvar - object$nZHvar * (object$nClasses -
-    1)
-  class(object) <- "summary.selectioncross"
+  object$df <- object$nParm - object$nXvar - object$nvZVvar -
+    1
+  class(object) <- "summary.sfaselectioncross"
   return(object)
 }
 
@@ -1881,7 +1889,13 @@ summary.zisfcross <- function(object, grad = FALSE, ci = FALSE,
   row.names(mlRes) <- names(object$startVal)
   object$mlRes <- mlRes
   object$chisq <- 2 * (object$mlLoglik - object$olsLoglik)
-  object$df <- object$nParm - object$nXvar - object$nvZVvar
+  if (object$sigmavType == "common") {
+    object$df <- object$nParm - object$nXvar - object$nvZVvar
+  } else {
+    if (object$sigmavType == "different") {
+      object$df <- object$nParm - object$nXvar - 2 * object$nvZVvar
+    }
+  }
   class(object) <- "summary.zisfcross"
   return(object)
 }
@@ -2612,7 +2626,8 @@ summary.cnsfcross <- function(object, grad = FALSE, ci = FALSE,
   row.names(mlRes) <- names(object$startVal)
   object$mlRes <- mlRes
   object$chisq <- 2 * (object$mlLoglik - object$olsLoglik)
-  object$df <- object$nParm - object$nXvar - object$nvZVvar
+  object$df <- object$df <- object$nParm - object$nXvar - 2 *
+    object$nvZVvar
   class(object) <- "summary.cnsfcross"
   return(object)
 }
@@ -3695,8 +3710,8 @@ print.summary.misfcross <- function(x, digits = max(3, getOption("digits") -
         2), , drop = FALSE]
     } else {
       mlRes5 <- mlRes[(x$nXvar + 2 * x$nuZUvar + x$nvZVvar +
-        1):(x$nXvar + 2 * x$nuZUvar + x$nvZVvar +
-        x$nZHvar), , drop = FALSE]
+        1):(x$nXvar + 2 * x$nuZUvar + x$nvZVvar + x$nZHvar),
+        , drop = FALSE]
     }
   }
   lengthSum <- nchar(misfdist(x$udist)) + 27
@@ -4083,6 +4098,605 @@ print.summary.misfcross <- function(x, digits = max(3, getOption("digits") -
           collapse = ""), "\n")
           printCoefmat(mlRes5, P.values = TRUE, digits = digits,
           signif.legend = TRUE)
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          collapse = ""), "\n")
+        }
+      }
+    }
+  }
+  cat(x$mlDate, "\n")
+  cat("Log likelihood status:", x$optStatus, "\n")
+  cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+    `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+    "\n")
+  invisible(x)
+}
+
+# summary for gzisfcross ----------
+#' @rdname summary
+#' @aliases summary.gzisfcross
+#' @export
+summary.gzisfcross <- function(object, grad = FALSE, ci = FALSE,
+  ...) {
+  if (length(grad) != 1 || !is.logical(grad[1])) {
+    stop("argument 'grad' must be a single logical value",
+      call. = FALSE)
+  }
+  if (length(ci) != 1 || !is.logical(ci[1])) {
+    stop("argument 'ci' must be a single logical value",
+      call. = FALSE)
+  }
+  object$AIC <- -2 * object$mlLoglik + 2 * object$nParm
+  object$BIC <- -2 * object$mlLoglik + log(object$Nobs) * object$nParm
+  object$HQIC <- -2 * object$mlLoglik + 2 * log(log(object$Nobs)) *
+    object$nParm
+  # MLE estimates and stder, p-values, CI, Gradient
+  if (grad && ci) {
+    mlRes <- matrix(nrow = object$nParm, ncol = 7)
+    colnames(mlRes) <- c("Coefficient", "Std. Error", "binf",
+      "bsup", "gradient", "z-value", "Pr(>|z|)")
+    mlRes[, 1] <- object$mlParam
+    mlRes[, 2] <- sqrt(diag(object$invHessian))
+    mlRes[, 3] <- mlRes[, 1] - qnorm(0.975) * mlRes[, 2]
+    mlRes[, 4] <- mlRes[, 1] + qnorm(0.975) * mlRes[, 2]
+    mlRes[, 5] <- object$gradient
+    mlRes[, 6] <- mlRes[, 1]/mlRes[, 2]
+    mlRes[, 7] <- 2 * pnorm(-abs(mlRes[, 6]))
+  } else {
+    if (grad == TRUE && ci == FALSE) {
+      mlRes <- matrix(nrow = object$nParm, ncol = 5)
+      colnames(mlRes) <- c("Coefficient", "Std. Error",
+        "gradient", "z-value", "Pr(>|z|)")
+      mlRes[, 1] <- object$mlParam
+      mlRes[, 2] <- sqrt(diag(object$invHessian))
+      mlRes[, 3] <- object$gradient
+      mlRes[, 4] <- mlRes[, 1]/mlRes[, 2]
+      mlRes[, 5] <- 2 * pnorm(-abs(mlRes[, 4]))
+    } else {
+      if (grad == FALSE && ci == TRUE) {
+        mlRes <- matrix(nrow = object$nParm, ncol = 6)
+        colnames(mlRes) <- c("Coefficient", "Std. Error",
+          "binf", "bsup", "z-value", "Pr(>|z|)")
+        mlRes[, 1] <- object$mlParam
+        mlRes[, 2] <- sqrt(diag(object$invHessian))
+        mlRes[, 3] <- mlRes[, 1] - qnorm(0.975) * mlRes[,
+          2]
+        mlRes[, 4] <- mlRes[, 1] + qnorm(0.975) * mlRes[,
+          2]
+        mlRes[, 5] <- mlRes[, 1]/mlRes[, 2]
+        mlRes[, 6] <- 2 * pnorm(-abs(mlRes[, 5]))
+      } else {
+        mlRes <- matrix(nrow = object$nParm, ncol = 4)
+        colnames(mlRes) <- c("Coefficient", "Std. Error",
+          "z value", "Pr(>|z|)")
+        mlRes[, 1] <- object$mlParam
+        mlRes[, 2] <- sqrt(diag(object$invHessian))
+        mlRes[, 3] <- mlRes[, 1]/mlRes[, 2]
+        mlRes[, 4] <- 2 * pnorm(-abs(mlRes[, 3]))
+      }
+    }
+  }
+  row.names(mlRes) <- names(object$startVal)
+  object$mlRes <- mlRes
+  # object$chisq <- 2 * (object$mlLoglik -
+  # object$olsLoglik)
+  object$df <- object$nParm - object$nClasses * object$nXvar -
+    object$nClasses * object$nvZVvar - object$nZHvar * (object$nClasses -
+    1)
+  class(object) <- "summary.gzisfcross"
+  return(object)
+}
+
+# print summary for gzisfcross ----------
+#' @rdname summary
+#' @aliases print.summary.gzisfcross
+#' @export
+print.summary.gzisfcross <- function(x, digits = max(3, getOption("digits") -
+  2), ...) {
+  mlRes <- x$mlRes
+  if (dim(mlRes)[2] == 4) {
+    mlRes[, 1] <- as.numeric(formatC(x$mlRes[, 1], digits = digits,
+      format = "f"))
+    mlRes[, 2] <- as.numeric(formatC(x$mlRes[, 2], digits = digits,
+      format = "f"))
+    mlRes[, 3] <- as.numeric(formatC(x$mlRes[, 3], digits = digits,
+      format = "f"))
+    mlRes[, 4] <- as.numeric(formatC(x$mlRes[, 4], digits = digits,
+      format = "e"))
+  } else {
+    if (dim(mlRes)[2] == 5) {
+      mlRes[, 1] <- as.numeric(formatC(x$mlRes[, 1], digits = digits,
+        format = "f"))
+      mlRes[, 2] <- as.numeric(formatC(x$mlRes[, 2], digits = digits,
+        format = "f"))
+      mlRes[, 3] <- as.numeric(formatC(x$mlRes[, 3], digits = digits,
+        format = "e"))
+      mlRes[, 4] <- as.numeric(formatC(x$mlRes[, 4], digits = digits,
+        format = "f"))
+      mlRes[, 5] <- as.numeric(formatC(x$mlRes[, 5], digits = digits,
+        format = "e"))
+    } else {
+      if (dim(mlRes)[2] == 6) {
+        mlRes[, 1] <- as.numeric(formatC(x$mlRes[, 1],
+          digits = digits, format = "f"))
+        mlRes[, 2] <- as.numeric(formatC(x$mlRes[, 2],
+          digits = digits, format = "f"))
+        mlRes[, 3] <- as.numeric(formatC(x$mlRes[, 3],
+          digits = digits, format = "f"))
+        mlRes[, 4] <- as.numeric(formatC(x$mlRes[, 4],
+          digits = digits, format = "f"))
+        mlRes[, 5] <- as.numeric(formatC(x$mlRes[, 5],
+          digits = digits, format = "f"))
+        mlRes[, 6] <- as.numeric(formatC(x$mlRes[, 6],
+          digits = digits, format = "e"))
+      } else {
+        if (dim(mlRes)[2] == 7) {
+          mlRes[, 1] <- as.numeric(formatC(x$mlRes[,
+          1], digits = digits, format = "f"))
+          mlRes[, 2] <- as.numeric(formatC(x$mlRes[,
+          2], digits = digits, format = "f"))
+          mlRes[, 3] <- as.numeric(formatC(x$mlRes[,
+          3], digits = digits, format = "f"))
+          mlRes[, 4] <- as.numeric(formatC(x$mlRes[,
+          4], digits = digits, format = "f"))
+          mlRes[, 5] <- as.numeric(formatC(x$mlRes[,
+          5], digits = digits, format = "e"))
+          mlRes[, 6] <- as.numeric(formatC(x$mlRes[,
+          6], digits = digits, format = "f"))
+          mlRes[, 7] <- as.numeric(formatC(x$mlRes[,
+          7], digits = digits, format = "e"))
+        }
+      }
+    }
+  }
+  row.names(mlRes) <- formatC(row.names(mlRes), width = max(nchar(row.names(mlRes))),
+    flag = "-")
+  sfaModel <- "Normal-Half Normal Generalized Zero Ineff. Stoch. Front. Model"
+  lengthSum <- nchar(sfaModel)  # + 10
+  dimCoefTable <- as.character(dim(x$mlRes)[2])
+  cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+    `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+    "\n")
+  cat(sfaModel, "\n")
+  cat("Dependent Variable:", paste0(rep(" ", lengthSum - nchar("Dependent Variable:") -
+    nchar(paste0(attr(x$formula, "lhs")))), collapse = ""),
+    paste0(attr(x$formula, "lhs")), "\n")
+  cat("Log likelihood solver:", paste0(rep(" ", lengthSum -
+    nchar("Log likelihood solver:") - nchar(x$optType)),
+    collapse = ""), x$optType, "\n")
+  cat("Log likelihood iter:", paste0(rep(" ", lengthSum - nchar("Log likelihood iter:") -
+    nchar(x$nIter)), collapse = ""), x$nIter, "\n")
+  cat("Log likelihood value:", paste0(rep(" ", lengthSum -
+    nchar("Log likelihood value:") - nchar(formatC(x$mlLoglik,
+    digits = digits, format = "f"))), collapse = ""), formatC(x$mlLoglik,
+    digits = digits, format = "f"), "\n")
+  cat("Log likelihood gradient norm:", paste0(rep(" ", lengthSum -
+    nchar("Log likelihood gradient norm:") - nchar(formatC(x$gradientNorm,
+    digits = digits, format = "e"))), collapse = ""), formatC(x$gradientNorm,
+    digits = digits, format = "e"), "\n")
+  cat("Estimation based on:", if (lengthSum - nchar("Estimation based on:") -
+    nchar(x$Nobs) - nchar(x$nParm) - nchar("N = ") - nchar("and K = ") -
+    3 > 0)
+    paste0(rep(" ", lengthSum - nchar("Estimation based on:") -
+      nchar(x$Nobs) - nchar(x$nParm) - nchar("N = ") -
+      nchar("and K = ") - 3), collapse = ""), "N = ", x$Nobs,
+    "and K = ", x$nParm, "\n")
+  cat("Inf. Cr:", paste0(rep(" ", lengthSum - nchar("Inf. Cr:") -
+    nchar("AIC  = ") - nchar(formatC(x$AIC, digits = 1, format = "f")) -
+    nchar("AIC/N  = ") - nchar(formatC(x$AIC/x$Nobs, digits = 3,
+    format = "f")) - 3), collapse = ""), "AIC  = ", formatC(x$AIC,
+    digits = 1, format = "f"), "AIC/N  = ", formatC(x$AIC/x$Nobs,
+    digits = 3, format = "f"), "\n")
+  cat(paste0(rep(" ", lengthSum - nchar("BIC  = ") - nchar(formatC(x$BIC,
+    digits = 1, format = "f")) - nchar("BIC/N  = ") - nchar(formatC(x$BIC/x$Nobs,
+    digits = 3, format = "f")) - 2), collapse = ""), "BIC  = ",
+    formatC(x$BIC, digits = 1, format = "f"), "BIC/N  = ",
+    formatC(x$BIC/x$Nobs, digits = 3, format = "f"), "\n")
+  cat(paste0(rep(" ", lengthSum - nchar("HQIC = ") - nchar(formatC(x$HQIC,
+    digits = 1, format = "f")) - nchar("HQIC/N = ") - nchar(formatC(x$HQIC/x$Nobs,
+    digits = 3, format = "f")) - 2), collapse = ""), "HQIC = ",
+    formatC(x$HQIC, digits = 1, format = "f"), "HQIC/N = ",
+    formatC(x$HQIC/x$Nobs, digits = 3, format = "f"), "\n")
+  cat(paste0(rep("-", lengthSum + 2), collapse = ""), "\n")
+  cat(x$typeSfa, "\n")
+  cat("GZISF model with", x$nClasses, "latent classes \n")
+  cat("final maximum likelihood estimates \n")
+  cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+    `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+    "\n")
+  cat(centerText("Deterministic Component of SFA for latent class 1",
+    width = lengthSum + 2 + switch(dimCoefTable, `4` = 18,
+      `5` = 31, `6` = 43, `7` = 57)), "\n")
+  cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+    `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+    "\n")
+  printCoefmat(mlRes[1:x$nXvar, , drop = FALSE], P.values = TRUE,
+    digits = digits, signif.legend = FALSE)
+  cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+    `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+    "\n")
+  cat(centerText("Parameter in variance of u (one-sided error) for latent class 1",
+    width = lengthSum + 2 + switch(dimCoefTable, `4` = 18,
+      `5` = 31, `6` = 43, `7` = 57)), "\n")
+  cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+    `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+    "\n")
+  printCoefmat(mlRes[(x$nXvar + 1):(x$nXvar + x$nuZUvar), ,
+    drop = FALSE], P.values = TRUE, digits = digits, signif.legend = FALSE)
+  cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+    `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+    "\n")
+  cat(centerText("Parameters in variance of v (two-sided error) for latent class 1",
+    width = lengthSum + 2 + switch(dimCoefTable, `4` = 18,
+      `5` = 31, `6` = 43, `7` = 57)), "\n")
+  cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+    `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+    "\n")
+  printCoefmat(mlRes[(x$nXvar + x$nuZUvar + 1):(x$nXvar + x$nuZUvar +
+    x$nvZVvar), , drop = FALSE], P.values = TRUE, digits = digits,
+    signif.legend = FALSE)
+  cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+    `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+    "\n")
+  cat(centerText("Deterministic Component of SFA for latent class 2",
+    width = lengthSum + 2 + switch(dimCoefTable, `4` = 18,
+      `5` = 31, `6` = 43, `7` = 57)), "\n")
+  cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+    `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+    "\n")
+  printCoefmat(mlRes[(x$nXvar + x$nuZUvar + x$nvZVvar + 1):(2 *
+    x$nXvar + x$nuZUvar + x$nvZVvar), , drop = FALSE], P.values = TRUE,
+    digits = digits, signif.legend = FALSE)
+  cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+    `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+    "\n")
+  if (x$nClasses == 2) {
+    cat(centerText("Parameters in variance of v (two-sided error) for latent class 2",
+      width = lengthSum + 2 + switch(dimCoefTable, `4` = 18,
+        `5` = 31, `6` = 43, `7` = 57)), "\n")
+    cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+      `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+      "\n")
+    printCoefmat(mlRes[(2 * x$nXvar + x$nuZUvar + x$nvZVvar +
+      1):(2 * x$nXvar + x$nuZUvar + 2 * x$nvZVvar), , drop = FALSE],
+      P.values = TRUE, digits = digits, signif.legend = FALSE)
+    cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+      `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+      "\n")
+    cat(centerText("Estimated prior probabilities for class membership",
+      width = lengthSum + 2 + switch(dimCoefTable, `4` = 18,
+        `5` = 31, `6` = 43, `7` = 57)), "\n")
+    cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+      `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+      "\n")
+    printCoefmat(mlRes[(2 * x$nXvar + x$nuZUvar + 2 * x$nvZVvar +
+      1):(2 * x$nXvar + x$nuZUvar + 2 * x$nvZVvar + x$nZHvar),
+      , drop = FALSE], P.values = TRUE, digits = digits,
+      signif.legend = TRUE)
+    cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+      `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+      "\n")
+  } else {
+    if (x$nClasses == 3) {
+      cat(centerText("Parameter in variance of u (one-sided error) for latent class 2",
+        width = lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), "\n")
+      cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+        `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+        "\n")
+      printCoefmat(mlRes[(2 * x$nXvar + x$nuZUvar + x$nvZVvar +
+        1):(2 * x$nXvar + 2 * x$nuZUvar + x$nvZVvar),
+        , drop = FALSE], P.values = TRUE, digits = digits,
+        signif.legend = FALSE)
+      cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+        `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+        "\n")
+      cat(centerText("Parameters in variance of v (two-sided error) for latent class 2",
+        width = lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), "\n")
+      cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+        `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+        "\n")
+      printCoefmat(mlRes[(2 * x$nXvar + 2 * x$nuZUvar +
+        x$nvZVvar + 1):(2 * x$nXvar + 2 * x$nuZUvar +
+        2 * x$nvZVvar), , drop = FALSE], P.values = TRUE,
+        digits = digits, signif.legend = FALSE)
+      cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+        `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+        "\n")
+      cat(centerText("Deterministic Component of SFA for latent class 3",
+        width = lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), "\n")
+      cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+        `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+        "\n")
+      printCoefmat(mlRes[(2 * x$nXvar + 2 * x$nuZUvar +
+        2 * x$nvZVvar + 1):(3 * x$nXvar + 2 * x$nuZUvar +
+        2 * x$nvZVvar), , drop = FALSE], P.values = TRUE,
+        digits = digits, signif.legend = FALSE)
+      cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+        `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+        "\n")
+      cat(centerText("Parameters in variance of v (two-sided error) for latent class 3",
+        width = lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), "\n")
+      cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+        `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+        "\n")
+      printCoefmat(mlRes[(3 * x$nXvar + 2 * x$nuZUvar +
+        2 * x$nvZVvar + 1):(3 * x$nXvar + 2 * x$nuZUvar +
+        3 * x$nvZVvar), , drop = FALSE], P.values = TRUE,
+        digits = digits, signif.legend = FALSE)
+      cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+        `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+        "\n")
+      cat(centerText("Estimated prior probabilities for class membership",
+        width = lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), "\n")
+      cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+        `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+        "\n")
+      printCoefmat(mlRes[(3 * x$nXvar + 2 * x$nuZUvar +
+        3 * x$nvZVvar + 1):(3 * x$nXvar + 2 * x$nuZUvar +
+        3 * x$nvZVvar + 2 * x$nZHvar), , drop = FALSE],
+        P.values = TRUE, digits = digits, signif.legend = TRUE)
+      cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+        `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+        "\n")
+    } else {
+      if (x$nClasses == 4) {
+        cat(centerText("Parameter in variance of u (one-sided error) for latent class 2",
+          width = lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          "\n")
+        cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+          "\n")
+        printCoefmat(mlRes[(2 * x$nXvar + x$nuZUvar +
+          x$nvZVvar + 1):(2 * x$nXvar + 2 * x$nuZUvar +
+          x$nvZVvar), , drop = FALSE], P.values = TRUE,
+          digits = digits, signif.legend = FALSE)
+        cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+          "\n")
+        cat(centerText("Parameters in variance of v (two-sided error) for latent class 2",
+          width = lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          "\n")
+        cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+          "\n")
+        printCoefmat(mlRes[(2 * x$nXvar + 2 * x$nuZUvar +
+          x$nvZVvar + 1):(2 * x$nXvar + 2 * x$nuZUvar +
+          2 * x$nvZVvar), , drop = FALSE], P.values = TRUE,
+          digits = digits, signif.legend = FALSE)
+        cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+          "\n")
+        cat(centerText("Deterministic Component of SFA for latent class 3",
+          width = lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          "\n")
+        cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+          "\n")
+        printCoefmat(mlRes[(2 * x$nXvar + 2 * x$nuZUvar +
+          2 * x$nvZVvar + 1):(3 * x$nXvar + 2 * x$nuZUvar +
+          2 * x$nvZVvar), , drop = FALSE], P.values = TRUE,
+          digits = digits, signif.legend = FALSE)
+        cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+          "\n")
+        cat(centerText("Parameter in variance of u (one-sided error) for latent class 3",
+          width = lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          "\n")
+        cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+          "\n")
+        printCoefmat(mlRes[(3 * x$nXvar + 2 * x$nuZUvar +
+          2 * x$nvZVvar + 1):(3 * x$nXvar + 3 * x$nuZUvar +
+          2 * x$nvZVvar), , drop = FALSE], P.values = TRUE,
+          digits = digits, signif.legend = FALSE)
+        cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+          "\n")
+        cat(centerText("Parameters in variance of v (two-sided error) for latent class 3",
+          width = lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          "\n")
+        cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+          "\n")
+        printCoefmat(mlRes[(3 * x$nXvar + 3 * x$nuZUvar +
+          2 * x$nvZVvar + 1):(3 * x$nXvar + 3 * x$nuZUvar +
+          3 * x$nvZVvar), , drop = FALSE], P.values = TRUE,
+          digits = digits, signif.legend = FALSE)
+        cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+          "\n")
+        cat(centerText("Deterministic Component of SFA for latent class 4",
+          width = lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          "\n")
+        cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+          "\n")
+        printCoefmat(mlRes[(3 * x$nXvar + 3 * x$nuZUvar +
+          3 * x$nvZVvar + 1):(4 * x$nXvar + 3 * x$nuZUvar +
+          3 * x$nvZVvar), , drop = FALSE], P.values = TRUE,
+          digits = digits, signif.legend = FALSE)
+        cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+          "\n")
+        cat(centerText("Parameters in variance of v (two-sided error) for latent class 4",
+          width = lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          "\n")
+        cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+          "\n")
+        printCoefmat(mlRes[(4 * x$nXvar + 3 * x$nuZUvar +
+          3 * x$nvZVvar + 1):(4 * x$nXvar + 3 * x$nuZUvar +
+          4 * x$nvZVvar), , drop = FALSE], P.values = TRUE,
+          digits = digits, signif.legend = FALSE)
+        cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+          "\n")
+        cat(centerText("Estimated prior probabilities for class membership",
+          width = lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          "\n")
+        cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+          "\n")
+        printCoefmat(mlRes[(4 * x$nXvar + 3 * x$nuZUvar +
+          4 * x$nvZVvar + 1):(4 * x$nXvar + 3 * x$nuZUvar +
+          4 * x$nvZVvar + 3 * x$nZHvar), , drop = FALSE],
+          P.values = TRUE, digits = digits, signif.legend = TRUE)
+        cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)), collapse = ""),
+          "\n")
+      } else {
+        if (x$nClasses == 5) {
+          cat(centerText("Parameter in variance of u (one-sided error) for latent class 2",
+          width = lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          "\n")
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          collapse = ""), "\n")
+          printCoefmat(mlRes[(2 * x$nXvar + x$nuZUvar +
+          x$nvZVvar + 1):(2 * x$nXvar + 2 * x$nuZUvar +
+          x$nvZVvar), , drop = FALSE], P.values = TRUE,
+          digits = digits, signif.legend = FALSE)
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          collapse = ""), "\n")
+          cat(centerText("Parameters in variance of v (two-sided error) for latent class 2",
+          width = lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          "\n")
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          collapse = ""), "\n")
+          printCoefmat(mlRes[(2 * x$nXvar + 2 * x$nuZUvar +
+          x$nvZVvar + 1):(2 * x$nXvar + 2 * x$nuZUvar +
+          2 * x$nvZVvar), , drop = FALSE], P.values = TRUE,
+          digits = digits, signif.legend = FALSE)
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          collapse = ""), "\n")
+          cat(centerText("Deterministic Component of SFA for latent class 3",
+          width = lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          "\n")
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          collapse = ""), "\n")
+          printCoefmat(mlRes[(2 * x$nXvar + 2 * x$nuZUvar +
+          2 * x$nvZVvar + 1):(3 * x$nXvar + 2 * x$nuZUvar +
+          2 * x$nvZVvar), , drop = FALSE], P.values = TRUE,
+          digits = digits, signif.legend = FALSE)
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          collapse = ""), "\n")
+          cat(centerText("Parameter in variance of u (one-sided error) for latent class 3",
+          width = lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          "\n")
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          collapse = ""), "\n")
+          printCoefmat(mlRes[(3 * x$nXvar + 2 * x$nuZUvar +
+          2 * x$nvZVvar + 1):(3 * x$nXvar + 3 * x$nuZUvar +
+          2 * x$nvZVvar), , drop = FALSE], P.values = TRUE,
+          digits = digits, signif.legend = FALSE)
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          collapse = ""), "\n")
+          cat(centerText("Parameters in variance of v (two-sided error) for latent class 3",
+          width = lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          "\n")
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          collapse = ""), "\n")
+          printCoefmat(mlRes[(3 * x$nXvar + 3 * x$nuZUvar +
+          2 * x$nvZVvar + 1):(3 * x$nXvar + 3 * x$nuZUvar +
+          3 * x$nvZVvar), , drop = FALSE], P.values = TRUE,
+          digits = digits, signif.legend = FALSE)
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          collapse = ""), "\n")
+          cat(centerText("Deterministic Component of SFA for latent class 4",
+          width = lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          "\n")
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          collapse = ""), "\n")
+          printCoefmat(mlRes[(3 * x$nXvar + 3 * x$nuZUvar +
+          3 * x$nvZVvar + 1):(4 * x$nXvar + 3 * x$nuZUvar +
+          3 * x$nvZVvar), , drop = FALSE], P.values = TRUE,
+          digits = digits, signif.legend = FALSE)
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          collapse = ""), "\n")
+          cat(centerText("Parameter in variance of u (one-sided error) for latent class 4",
+          width = lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          "\n")
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          collapse = ""), "\n")
+          printCoefmat(mlRes[(4 * x$nXvar + 3 * x$nuZUvar +
+          3 * x$nvZVvar + 1):(4 * x$nXvar + 4 * x$nuZUvar +
+          3 * x$nvZVvar), , drop = FALSE], P.values = TRUE,
+          digits = digits, signif.legend = FALSE)
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          collapse = ""), "\n")
+          cat(centerText("Deterministic Component of SFA for latent class 5",
+          width = lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          "\n")
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          collapse = ""), "\n")
+          printCoefmat(mlRes[(4 * x$nXvar + 4 * x$nuZUvar +
+          4 * x$nvZVvar + 1):(5 * x$nXvar + 4 * x$nuZUvar +
+          4 * x$nvZVvar), , drop = FALSE], P.values = TRUE,
+          digits = digits, signif.legend = FALSE)
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          collapse = ""), "\n")
+          cat(centerText("Parameters in variance of v (two-sided error) for latent class 5",
+          width = lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          "\n")
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          collapse = ""), "\n")
+          printCoefmat(mlRes[(5 * x$nXvar + 4 * x$nuZUvar +
+          4 * x$nvZVvar + 1):(5 * x$nXvar + 4 * x$nuZUvar +
+          5 * x$nvZVvar), , drop = FALSE], P.values = TRUE,
+          digits = digits, signif.legend = FALSE)
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          collapse = ""), "\n")
+          cat(centerText("Estimated prior probabilities for class membership",
+          width = lengthSum + 2 + switch(dimCoefTable,
+            `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          "\n")
+          cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
+          `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
+          collapse = ""), "\n")
+          printCoefmat(mlRes[(5 * x$nXvar + 4 * x$nuZUvar +
+          5 * x$nvZVvar + 1):(5 * x$nXvar + 4 * x$nuZUvar +
+          5 * x$nvZVvar + 4 * x$nZHvar), , drop = FALSE],
+          P.values = TRUE, digits = digits, signif.legend = TRUE)
           cat(paste0(rep("-", lengthSum + 2 + switch(dimCoefTable,
           `4` = 18, `5` = 31, `6` = 43, `7` = 57)),
           collapse = ""), "\n")

@@ -31,8 +31,8 @@ cuninormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
   epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
-  ll <- -Wu + log(pnorm((exp(Wu) + S * epsilon)/exp(Wv/2)) -
-    pnorm(S * epsilon/exp(Wv/2)))
+  ll <- (-Wu/2 - 1/2 * log(12) + log(pnorm((exp(Wu/2) * sqrt(12) +
+    S * epsilon)/exp(Wv/2)) - pnorm(S * epsilon/exp(Wv/2))))
   return(ll * wHvar)
 }
 
@@ -119,23 +119,25 @@ cgraduninormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
   epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
-  epsiv <- S * (epsilon)/exp(Wv/2)
-  epsiu <- exp(Wu) + S * (epsilon)
-  epsiuv <- (epsiu)/exp(Wv/2)
+  ewv_h <- exp(Wv/2)
+  ewu_h <- exp(Wu/2)
+  epsiv <- S * (epsilon)/ewv_h
+  epsiu <- (sqrt(12) * ewu_h + S * (epsilon))
+  epsiuv <- epsiu/ewv_h
   depsiv <- dnorm(epsiv)
   depsiuv <- dnorm(epsiuv)
   pepsiv <- pnorm(epsiv)
   pepsiuv <- pnorm(epsiuv)
-  sigx1 <- 0.5 * (S * depsiv * (epsilon)) - 0.5 * (depsiuv *
-    (epsiu))
-  sigx2 <- depsiv - depsiuv
-  sigx3 <- pepsiuv - pepsiv
-  sigx4 <- exp(Wv/2) * (sigx3)
-  depsiuvx2 <- depsiuv * exp(Wu)
-  gradll <- (cbind(sweep(Xvar, MARGIN = 1, STATS = S * (sigx2)/(sigx4),
-    FUN = "*"), sweep(uHvar, MARGIN = 1, STATS = (depsiuvx2/(sigx4) -
-    1), FUN = "*"), sweep(vHvar, MARGIN = 1, STATS = (sigx1)/(sigx4),
-    FUN = "*")))
+  sigx1 <- (0.5 * (S * depsiv * (epsilon)) - 0.5 * (epsiu *
+    depsiuv))
+  sigx2 <- (depsiv - depsiuv)
+  sigx3 <- (pepsiuv - pepsiv)
+  sigx4 <- (ewv_h * sigx3)
+  depsiuvx2 <- depsiuv * ewu_h
+  gradll <- (cbind(sweep(Xvar, MARGIN = 1, STATS = S * sigx2/sigx4,
+    FUN = "*"), sweep(uHvar, MARGIN = 1, STATS = (sqrt(12)/2 *
+    (depsiuvx2/sigx4) - 0.5), FUN = "*"), sweep(vHvar, MARGIN = 1,
+    STATS = sigx1/sigx4, FUN = "*")))
   return(sweep(gradll, MARGIN = 1, STATS = wHvar, FUN = "*"))
 }
 
@@ -160,49 +162,53 @@ chessuninormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
   epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
-  epsiv <- S * (epsilon)/exp(Wv/2)
-  epsiu <- exp(Wu) + S * (epsilon)
-  epsiuv <- (epsiu)/exp(Wv/2)
+  ewv_h <- exp(Wv/2)
+  ewu_h <- exp(Wu/2)
+  epsiv <- S * (epsilon)/ewv_h
+  epsiu <- (sqrt(12) * ewu_h + S * (epsilon))
+  epsiuv <- epsiu/ewv_h
   depsiv <- dnorm(epsiv)
   depsiuv <- dnorm(epsiuv)
   pepsiv <- pnorm(epsiv)
   pepsiuv <- pnorm(epsiuv)
-  sigx1 <- 0.5 * (S * depsiv * (epsilon)) - 0.5 * (depsiuv *
-    (epsiu))
-  sigx2 <- depsiv - depsiuv
-  sigx3 <- pepsiuv - pepsiv
-  sigx4 <- exp(Wv/2) * (sigx3)
-  depsiuvx2 <- depsiuv * exp(Wu)
-  sigx5 <- exp(Wv/2)^3 * (sigx3)
+  sigx1 <- (0.5 * (S * depsiv * (epsilon)) - 0.5 * (epsiu *
+    depsiuv))
+  sigx2 <- (depsiv - depsiuv)
+  sigx3 <- (pepsiuv - pepsiv)
+  sigx4 <- (ewv_h * sigx3)
+  depsiuvx2 <- depsiuv * ewu_h
+  sigx5 <- (ewv_h^3 * sigx3)
+  sigx6 <- S * depsiv * (epsilon)
+  sigx7 <- epsiu * depsiuv
+  sigx8 <- (0.5 * sigx4 + 0.5 * (sigx6) - 0.5 * (sigx7))
   hessll <- matrix(nrow = nXvar + nuZUvar + nvZVvar, ncol = nXvar +
     nuZUvar + nvZVvar)
   hessll[1:nXvar, 1:nXvar] <- crossprod(sweep(Xvar, MARGIN = 1,
-    STATS = S^2 * wHvar * ((S * depsiv * (epsilon) - depsiuv *
-      (epsiu))/(sigx5) - (sigx2)^2/(sigx4)^2), FUN = "*"),
-    Xvar)
+    STATS = wHvar * ((sigx6 - sigx7)/sigx5 - sigx2^2/sigx4^2),
+    FUN = "*"), Xvar)
   hessll[1:nXvar, (nXvar + 1):(nXvar + nuZUvar)] <- crossprod(sweep(Xvar,
-    MARGIN = 1, STATS = wHvar * S * ((epsiu)/(sigx5) - (sigx2)/(sigx4)^2) *
-      depsiuvx2, FUN = "*"), uHvar)
+    MARGIN = 1, STATS = sqrt(12)/2 * wHvar * (S * (epsiu/sigx5 -
+      sigx2/sigx4^2) * depsiuvx2), FUN = "*"), uHvar)
   hessll[1:nXvar, (nXvar + nuZUvar + 1):(nXvar + nuZUvar +
-    nvZVvar)] <- crossprod(sweep(Xvar, MARGIN = 1, STATS = wHvar *
-    S * ((0.5 * (depsiv * (S^2 * (epsilon)^2/exp(Wv/2)^2 -
-    1)) - 0.5 * (((epsiu)^2/exp(Wv/2)^2 - 1) * depsiuv))/(sigx4) -
-    (sigx1) * (sigx2)/(sigx4)^2), FUN = "*"), vHvar)
+    nvZVvar)] <- crossprod(sweep(Xvar, MARGIN = 1, STATS = S *
+    wHvar * ((0.5 * (depsiv * (S^2 * (epsilon)^2/ewv_h^2 -
+    1)) - 0.5 * ((epsiu^2/ewv_h^2 - 1) * depsiuv))/sigx4 -
+    sigx1 * sigx2/sigx4^2), FUN = "*"), vHvar)
   hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + 1):(nXvar +
-    nuZUvar)] <- crossprod(sweep(uHvar, MARGIN = 1, STATS = wHvar *
-    ((1 - exp(Wu) * epsiuv/exp(Wv/2))/(sigx4) - depsiuvx2/(sigx4)^2) *
-    depsiuvx2, FUN = "*"), uHvar)
+    nuZUvar)] <- crossprod(sweep(uHvar, MARGIN = 1, STATS = sqrt(12)/2 *
+    wHvar * (((0.5 - sqrt(12)/2 * (epsiu * ewu_h/ewv_h^2))/sigx4 -
+    sqrt(12)/2 * (depsiuvx2/sigx4^2)) * depsiuvx2), FUN = "*"),
+    uHvar)
   hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + nuZUvar +
     1):(nXvar + nuZUvar + nvZVvar)] <- crossprod(sweep(uHvar,
-    MARGIN = 1, STATS = -wHvar * (((sigx1)/(sigx4)^2 + 0.5 *
-      ((1 - epsiuv^2)/(sigx4))) * depsiuvx2), FUN = "*"),
-    vHvar)
+    MARGIN = 1, STATS = -wHvar * ((0.5 * ((sqrt(12)/2 - sqrt(12)/2 *
+      (epsiu^2/ewv_h^2))/sigx4) + sqrt(12)/2 * (sigx1/sigx4^2)) *
+      depsiuvx2), FUN = "*"), vHvar)
   hessll[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar),
     (nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)] <- crossprod(sweep(vHvar,
     MARGIN = 1, STATS = wHvar * ((0.25 * (S^3 * depsiv *
-      (epsilon)^3) - 0.25 * (depsiuv * (epsiu)^3))/(sigx5) -
-      (0.5 * (sigx4) + sigx1) * (sigx1)/(sigx4)^2), FUN = "*"),
-    vHvar)
+      (epsilon)^3) - 0.25 * (epsiu^3 * depsiuv))/sigx5 -
+      sigx8 * sigx1/sigx4^2), FUN = "*"), vHvar)
   hessll[lower.tri(hessll)] <- t(hessll)[lower.tri(hessll)]
   # hessll <- (hessll + (hessll))/2
   return(hessll)
@@ -243,13 +249,13 @@ uninormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
     vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar,
     S = S))
   if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
-    maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...),
-      bhhh = function(...) maxLik::maxBHHH(...), nr = function(...) maxLik::maxNR(...),
-      nm = function(...) maxLik::maxNM(...), cg = function(...) maxLik::maxCG(...),
-      sann = function(...) maxLik::maxSANN(...))
+    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
+      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
+      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
+      sann = function(...) maxSANN(...))
     method <- "maxLikAlgo"
   }
-  mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
+  mleObj <- switch(method, ucminf = ucminf(par = startVal,
     fn = function(parm) -sum(cuninormlike(parm, nXvar = nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
       vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar,
@@ -265,7 +271,7 @@ uninormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       iterlim = itermax, reltol = tol, tol = tol, qac = qac),
     nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
     uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-    wHvar = wHvar, S = S), sr1 = trutOptim::trust.optim(x = startVal,
+    wHvar = wHvar, S = S), sr1 = trust.optim(x = startVal,
     fn = function(parm) -sum(cuninormlike(parm, nXvar = nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
       vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar,
@@ -275,7 +281,7 @@ uninormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       wHvar = wHvar, S = S)), method = "SR1", control = list(maxit = itermax,
       cgtol = gradtol, stop.trust.radius = tol, prec = tol,
       report.level = if (printInfo) 2 else 0, report.precision = 1L)),
-    sparse = trutOptim::trust.optim(x = startVal, fn = function(parm) -sum(cuninormlike(parm,
+    sparse = trust.optim(x = startVal, fn = function(parm) -sum(cuninormlike(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       wHvar = wHvar, S = S)), gr = function(parm) -colSums(cgraduninormlike(parm,
@@ -288,7 +294,7 @@ uninormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       control = list(maxit = itermax, cgtol = gradtol,
         stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
         report.precision = 1L, preconditioner = 1L)),
-    mla = marqLevAlg::mla(b = startVal, fn = function(parm) -sum(cuninormlike(parm,
+    mla = mla(b = startVal, fn = function(parm) -sum(cuninormlike(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       wHvar = wHvar, S = S)), gr = function(parm) -colSums(cgraduninormlike(parm,
@@ -378,7 +384,7 @@ cuninormeff <- function(object, level) {
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
     as.numeric(crossprod(matrix(beta), t(Xvar)))
-  theta <- exp(Wu)
+  theta <- sqrt(12) * exp(Wu/2)
   u1 <- -exp(Wv/2) * ((dnorm((theta + object$S * epsilon)/exp(Wv/2)) -
     dnorm(object$S * epsilon/exp(Wv/2)))/(pnorm((theta +
     object$S * epsilon)/exp(Wv/2)) - pnorm(object$S * epsilon/exp(Wv/2)))) -
@@ -418,10 +424,11 @@ cuninormeff <- function(object, level) {
     res <- bind_cols(u1 = u1, u2 = u2, uLB = uLB, uUB = uUB,
       teJLMS1 = teJLMS1, teJLMS2 = teJLMS2, m = m, teMO = teMO,
       teBC1 = teBC1, teBC2 = teBC2, teBCLB = teBCLB, teBCUB = teBCUB,
-      teBC1_reciprocal = teBC1_reciprocal, teBC2_reciprocal = teBC2_reciprocal)
+      teBC1_reciprocal = teBC1_reciprocal, teBC2_reciprocal = teBC2_reciprocal, 
+      theta = theta)
   } else {
     res <- bind_cols(u1 = u1, u2 = u2, uLB = uLB, uUB = uUB,
-      m = m)
+      m = m, theta = theta)
   }
   return(res)
 }
@@ -437,9 +444,9 @@ cmarguninorm_Eu <- function(object) {
     rhs = 2)
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
   margEff <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
-    matrix(exp(Wu)/2, ncol = 1))
+    matrix(sqrt(3)/2 * exp(Wu/2), ncol = 1))
   colnames(margEff) <- paste0("Eu_", colnames(uHvar)[-1])
-  return(as_tibble(margEff))
+  return(margEff)
 }
 
 cmarguninorm_Vu <- function(object) {
@@ -449,7 +456,7 @@ cmarguninorm_Vu <- function(object) {
     rhs = 2)
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
   margEff <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
-    matrix(1/6 * exp(2 * Wu), ncol = 1))
+    matrix(exp(Wu), ncol = 1))
   colnames(margEff) <- paste0("Vu_", colnames(uHvar)[-1])
-  return(as_tibble(margEff))
+  return(margEff)
 }
