@@ -215,6 +215,16 @@ marginal.sfacross <- function(object, newData = NULL, ...) {
                 EffMarg <- data.frame(cbind(cmargtslnorm_Eu(object = object),
                 cmargtslnorm_Vu(object = object)))
               }
+              } else {
+              if (object$udist == "weibull") {
+                if (object$nuZUvar == 1) {
+                stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+                  call. = FALSE)
+                } else {
+                EffMarg <- data.frame(cbind(cmargweibullnorm_Eu(object = object),
+                  cmargweibullnorm_Vu(object = object)))
+                }
+              }
               }
             }
             }
@@ -393,6 +403,17 @@ marginal.zisfcross <- function(object, newData = NULL, ...) {
                   object$linkF, "(object = object), czisfmargtslnorm_Vu_",
                   object$linkF, "(object = object)))")))
                 }
+              } else {
+                if (object$udist == "weibull") {
+                if (object$nuZUvar == 1) {
+                  stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+                  call. = FALSE)
+                } else {
+                  EffMarg <- eval(parse(text = paste0("data.frame(cbind(czisfmargweibullnorm_Eu_",
+                  object$linkF, "(object = object), czisfmargweibullnorm_Vu_",
+                  object$linkF, "(object = object)))")))
+                }
+                }
               }
               }
             }
@@ -494,6 +515,17 @@ marginal.zisfcross <- function(object, newData = NULL, ...) {
                   EffMarg <- eval(parse(text = paste0("data.frame(cbind(cmnsfmargtslnorm_Eu_",
                   object$linkF, "(object = object), cmnsfmargtslnorm_Vu_",
                   object$linkF, "(object = object)))")))
+                }
+                } else {
+                if (object$udist == "weibull") {
+                  if (object$nuZUvar == 1) {
+                  stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+                    call. = FALSE)
+                  } else {
+                  EffMarg <- eval(parse(text = paste0("data.frame(cbind(cmnsfmargweibullnorm_Eu_",
+                    object$linkF, "(object = object), cmnsfmargweibullnorm_Vu_",
+                    object$linkF, "(object = object)))")))
+                  }
                 }
                 }
               }
@@ -613,6 +645,17 @@ marginal.cnsfcross <- function(object, newData = NULL, ...) {
                   object$linkF, "(object = object), ccnsfmargtslnorm_Vu_",
                   object$linkF, "(object = object)))")))
                 }
+              } else {
+                if (object$udist == "weibull") {
+                if (object$nuZUvar == 1) {
+                  stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+                  call. = FALSE)
+                } else {
+                  EffMarg <- eval(parse(text = paste0("data.frame(cbind(ccnsfmargweibullnorm_Eu_",
+                  object$linkF, "(object = object), ccnsfmargweibullnorm_Vu_",
+                  object$linkF, "(object = object)))")))
+                }
+                }
               }
               }
             }
@@ -714,6 +757,17 @@ marginal.cnsfcross <- function(object, newData = NULL, ...) {
                   EffMarg <- eval(parse(text = paste0("data.frame(cbind(cmcesfmargtslnorm_Eu_",
                   object$linkF, "(object = object), cmcesfmargtslnorm_Vu_",
                   object$linkF, "(object = object)))")))
+                }
+                } else {
+                if (object$udist == "weibull") {
+                  if (object$nuZUvar == 1) {
+                  stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+                    call. = FALSE)
+                  } else {
+                  EffMarg <- eval(parse(text = paste0("data.frame(cbind(cmcesfmargweibullnorm_Eu_",
+                    object$linkF, "(object = object), cmcesfmargweibullnorm_Vu_",
+                    object$linkF, "(object = object)))")))
+                  }
                 }
                 }
               }
@@ -831,6 +885,17 @@ marginal.misfcross <- function(object, newData = NULL, ...) {
                 EffMarg <- eval(parse(text = paste0("data.frame(cbind(cmisfmargtslnorm_Eu_",
                 object$linkF, "(object = object), cmisfmargtslnorm_Vu_",
                 object$linkF, "(object = object)))")))
+              }
+              } else {
+              if (object$udist == "weibull") {
+                if (object$nuZUvar == 1) {
+                stop("Marginal effects can only be computed from models with exogenous variables that explain inefficiency",
+                  call. = FALSE)
+                } else {
+                EffMarg <- eval(parse(text = paste0("data.frame(cbind(cmisfmargweibullnorm_Eu_",
+                  object$linkF, "(object = object), cmisfmargweibullnorm_Vu_",
+                  object$linkF, "(object = object)))")))
+                }
               }
               }
             }
