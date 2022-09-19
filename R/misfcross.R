@@ -72,6 +72,26 @@
 #' \code{probit}, \code{cauchit}, \code{cloglog}. 
 #' @param start Numeric vector. Optional starting values for the maximum
 #' likelihood (ML) estimation.
+#' @param whichStart Integer. If \code{'whichStart = 1'}, the starting values 
+#' are obtained from the method of moments. When \code{'whichStart = 2'}
+#' (Default), the model is initialized by solving the homoscedastic pooled 
+#' cross section. \code{'whichStart = 1'} can be fast especially in the case of
+#' maximum simulated likelihood.
+#' @param initAlg Character string specifying the algorithm used for 
+#' initialization and obtain the starting values (when \code{'whichStart = 2'}).
+#' Only \pkg{maxLik} package algorithms are available: 
+#' \itemize{ \item \code{'bfgs'}, for Broyden-Fletcher-Goldfarb-Shanno - Default - 
+#' (see \code{\link[maxLik:maxBFGS]{maxBFGS}})
+#'  \item \code{'bhhh'}, for Berndt-Hall-Hall-Hausman 
+#'  (see \code{\link[maxLik:maxBHHH]{maxBHHH}}) 
+#'  \item \code{'nr'}, for Newton-Raphson (see \code{\link[maxLik:maxNR]{maxNR}})
+#' \item \code{'nm'}, for Nelder-Mead (see \code{\link[maxLik:maxNM]{maxNM}})
+#' \item \code{'cg'}, for Conjugate Gradient 
+#' (see \code{\link[maxLik:maxCG]{maxCG}}) \item \code{'sann'}, for Simulated 
+#' Annealing (see \code{\link[maxLik:maxSANN]{maxSANN}})
+#' }
+#' @param initIter Maximum number of iterations for initialization algorithm.
+#' Default \code{100}.
 #' @param method Optimization algorithm used for the estimation.  Default =
 #' \code{'bfgs'}. 11 algorithms are available: \itemize{ \item \code{'bfgs'},
 #' for Broyden-Fletcher-Goldfarb-Shanno (see
@@ -135,15 +155,11 @@
 #' @details
 #' The model can be defined as: 
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('y_i = \\\alpha + \\\mathbf{x_i^{\\\prime}}\\\bm{\\\beta} + 
-#' v_i - Su_{1i} \\\quad \\\hbox{with probability} \\\quad p,')
-#' }
+#' \deqn{y_i = \alpha + \mathbf{x_i^{\prime}}\bm{\beta} + 
+#' v_i - Su_{1i} \quad \hbox{with probability} \quad p}
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('y_i = \\\alpha + \\\mathbf{x_i^{\\\prime}}\\\bm{\\\beta} +
-#'  v_i - Su_{2i} \\\quad \\\hbox{with probability} \\\quad 1-p')
-#' }
+#' \deqn{y_i = \alpha + \mathbf{x_i^{\prime}}\bm{\beta} +
+#'  v_i - Su_{2i} \quad \hbox{with probability} \quad 1-p}
 #' 
 #' where \eqn{i} is the observation, \eqn{y} is the
 #' output (cost, revenue, profit), \eqn{x} is the vector of main explanatory
@@ -158,68 +174,52 @@
 #' The prior probability of belonging to class \eqn{1} can depend on 
 #' some covariates using a logit specification: 
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('p_i = \\\frac{\\\exp{(Z_{hi}^{\\\prime}\\\theta)}}{1-
-#' \\\exp{(Z_{hi}^{\\\prime}\\\theta)}}')
-#' }
+#' \deqn{p_i = \frac{\exp{(\mathbf{Z}_{hi}^{\prime}\bm{\theta})}}{1-
+#' \exp{(\mathbf{Z}_{hi}^{\prime}\bm{\theta})}}}
 #' 
-#' with \eqn{Z_h} the covariates, \eqn{\bm{\theta}} the vector of coefficients 
+#' with \eqn{\mathbf{Z}_h} the covariates, \eqn{\bm{\theta}} the vector of coefficients 
 #' estimated for the covariates. 
 #' 
 #' Other link functions are also available. In the case of the probit we have:
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('p_i = \\\Phi\\\\left(Z_{hi}^{\\\prime}\\\theta\\\\right)')
-#' }
+#' \deqn{p_i = \Phi\left(\mathbf{Z}_{hi}^{\prime}\bm{\theta}\right)}
 #' 
 #' when the cauchit link is retained we have:
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('p_i = 1/\\\pi\\\arctan(Z_{hi}^{\\\prime}\\\theta)+1/2')
-#' }
+#' \deqn{p_i = 1/\pi\arctan(\mathbf{Z}_{hi}^{\prime}\bm{\theta})+1/2}
 #' 
 #' and finally in the case of the cloglog link we have:
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('p_i = 1-\\\exp\\\\left(-\\\exp(Z_{hi}^{\\\prime}
-#' \\\theta)\\\\right)')
-#' }
+#' \deqn{p_i = 1-\exp\left(-\exp(\mathbf{Z}_{hi}^{\prime}
+#' \bm{\theta})\right)}
 #' 
 #' Let 
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('\\\epsilon_i = v_i -Su_i')
-#' }
+#' \deqn{\epsilon_i = v_i -Su_i}
 #' 
 #' In the case of the truncated normal distribution, the convolution of
 #' \eqn{u_i} and \eqn{v_i} is:
 #'
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('f(\\\epsilon_i)=\\\frac{p_i}{\\\sqrt{\\\\sigma_{u_1}^2 + 
-#' \\\sigma_v^2}}\\\phi\\\\left(\\\frac{S\\\epsilon_i + \\\mu_1}{\\\sqrt{
-#' \\\sigma_{u_1}^2 + \\\sigma_v^2}}\\\\right)\\\Phi\\\\left(\\\frac{
-#' \\\mu_{1i\\\ast}}{\\\sigma_{1\\\ast}}\\\\right)\\\Big/\\\Phi\\\\left(
-#' \\\frac{\\\mu_1}{\\\sigma_{u_1}}\\\\right) + 
-#' \\\frac{1-p_i}{\\\sqrt{\\\\sigma_{u_2}^2 + 
-#' \\\sigma_v^2}}\\\phi\\\\left(\\\frac{S\\\epsilon_i + \\\mu_2}{\\\sqrt{
-#' \\\sigma_{u_2}^2 + \\\sigma_v^2}}\\\\right)\\\Phi\\\\left(\\\frac{
-#' \\\mu_{2i\\\ast}}{\\\sigma_{2\\\ast}}\\\\right)\\\Big/\\\Phi\\\\left(
-#' \\\frac{\\\mu_2}{\\\sigma_{u_2}}\\\\right)
-#' }
+#' \deqn{f(\epsilon_i)=\frac{p_i}{\sqrt{\sigma_{u_1}^2 + 
+#' \sigma_v^2}}\phi\left(\frac{S\epsilon_i + \mu_1}{\sqrt{
+#' \sigma_{u_1}^2 + \sigma_v^2}}\right)\Phi\left(\frac{
+#' \mu_{1i\ast}}{\sigma_{1\ast}}\right)\Big/\Phi\left(
+#' \frac{\mu_1}{\sigma_{u_1}}\right) + 
+#' \frac{1-p_i}{\sqrt{\sigma_{u_2}^2 + 
+#' \sigma_v^2}}\phi\left(\frac{S\epsilon_i + \mu_2}{\sqrt{
+#' \sigma_{u_2}^2 + \sigma_v^2}}\right)\Phi\left(\frac{
+#' \mu_{2i\ast}}{\sigma_{2\ast}}\right)\Big/\Phi\left(
+#' \frac{\mu_2}{\sigma_{u_2}}\right)}
 #'
 #' where
 #'
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('\\\mu_{1i*}=\\\frac{\\\mu_1\\\sigma_v^2 - 
-#' S\\\epsilon_i\\\sigma_{u_1}^2}{\\\sigma_{u_1}^2 + \\\sigma_v^2}')
-#' }
+#' \deqn{\mu_{1i*}=\frac{\mu_1\sigma_v^2 - 
+#' S\epsilon_i\sigma_{u_1}^2}{\sigma_{u_1}^2 + \sigma_v^2}}
 #'
 #' and
 #'
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('\\\sigma_{1*}^2 = \\\frac{\\\sigma_{u_1}^2 
-#' \\\sigma_v^2}{\\\sigma_{u_1}^2 + \\\sigma_v^2}')
-#' }
+#' \deqn{\sigma_{1*}^2 = \frac{\sigma_{u_1}^2 
+#' \sigma_v^2}{\sigma_{u_1}^2 + \sigma_v^2}}
 #' 
 #' \eqn{\mu_{2i*}} and \eqn{\sigma_{2*}} can be similarly obtained.
 #'
@@ -230,29 +230,23 @@
 #' probability is obtained using Bayes' rule, as follows for the inefficient 
 #' class
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('p_i^\\\ast = \\\frac{p_i \\\times 
-#' \\\pi(i, 1) }{f(\\\epsilon_i)}')
-#' }
+#' \deqn{p_i^\ast = \frac{p_i \times 
+#' \pi(i, 1) }{f(\epsilon_i)}}
 #' 
 #' where
 #' 
-#'  \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('\\\pi(i, 1)=\\\frac{1}{\\\sqrt{\\\\sigma_u^2 + 
-#' \\\sigma_v^2}}\\\phi\\\\left(\\\frac{S\\\epsilon_i + \\\mu}{
-#' \\\sqrt{\\\sigma_u^2 + \\\sigma_v^2}}\\\\right)\\\Phi\\\\left(
-#' \\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)\\\Big/
-#' \\\Phi\\\\left(\\\frac{\\\mu}{\\\sigma_u}\\\\right)')
-#' }
+#' \deqn{\pi(i, 1)=\frac{1}{\sqrt{\sigma_u^2 + 
+#' \sigma_v^2}}\phi\left(\frac{S\epsilon_i + \mu}{
+#' \sqrt{\sigma_u^2 + \sigma_v^2}}\right)\Phi\left(
+#' \frac{\mu_{i\ast}}{\sigma_\ast}\right)\Big/
+#' \Phi\left(\frac{\mu}{\sigma_u}\right)}
 #' 
 #' \code{misfcross} allows for the maximization of weighted log-likelihood.
 #' When option \code{weights} is specified and \code{wscale = TRUE}, the weights
 #' is scaled as 
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('new_{weights} = sample_{size} \\\times 
-#' \\\frac{old_{weights}}{\\\sum(old_{weights})}')
-#' }
+#' \deqn{new_{weights} = sample_{size} \times 
+#' \frac{old_{weights}}{\sum(old_{weights})}}
 #' 
 #' For difficult problems, non-gradient methods (e.g. \code{nm} or \code{sann}) 
 #' can be used to warm start the optimization and zoom in the neighborhood of 
@@ -323,9 +317,10 @@
 #' \item{linkF}{Character string. Link function retained to define
 #' class membership probability. See **Arguments** section.}
 #' 
-#' \item{initHalf}{When \code{start = NULL} and \code{udist = 'hnormal'}. 
-#' Initial ML estimation with half normal distribution for the one-sided error 
-#' term. Model to construct the starting values for the misf estimation. 
+#' \item{initHalf}{When \code{start = NULL}, \code{whichStart == 2L}, and 
+#' \code{udist = 'hnormal'}. Initial ML estimation with half normal distribution 
+#' for the one-sided error term. Model to construct the starting values for 
+#' the misf estimation.. 
 #' Object of class \code{'maxLik'} and \code{'maxim'} returned. 
 #' For \code{udist = 'exponential'} it returns \code{initExpo}, 
 #' for \code{udist = 'tnormal'} it returns \code{initTrunc}, 
@@ -501,10 +496,11 @@
 #' @export 
 misfcross <- function(formula, muhet, uhet, vhet, thet, logDepVar = TRUE,
   data, subset, weights, wscale = TRUE, S = 1L, udist = "hnormal",
-  linkF = "logit", start = NULL, method = "bfgs", hessianType = 1,
-  simType = "halton", Nsim = 300, prime = 2L, burn = 10, antithetics = FALSE,
-  seed = 12345, itermax = 2000L, printInfo = FALSE, tol = 1e-12,
-  gradtol = 1e-06, stepmax = 0.1, qac = "marquardt") {
+  linkF = "logit", start = NULL, whichStart = 2L, initAlg = "bfgs",
+  initIter = 100, method = "bfgs", hessianType = 1, simType = "halton",
+  Nsim = 300, prime = 2L, burn = 10, antithetics = FALSE, seed = 12345,
+  itermax = 2000L, printInfo = FALSE, tol = 1e-12, gradtol = 1e-06,
+  stepmax = 0.1, qac = "marquardt") {
   # link functions check -------
   linkF <- tolower(linkF)
   if (!(linkF %in% c("logit", "probit", "cauchit", "cloglog"))) {
@@ -664,6 +660,11 @@ misfcross <- function(formula, muhet, uhet, vhet, thet, logDepVar = TRUE,
   if (nParm > N) {
     stop("Model has more parameters than observations", call. = FALSE)
   }
+  # check whichStart
+  if (length(whichStart) != 1 || !(whichStart %in% c(1L, 2L))) {
+    stop("argument 'whichStart' must equal either 1 or 2",
+      call. = FALSE)
+  }
   # Check algorithms -------
   method <- tolower(method)
   if (!(method %in% c("ucminf", "bfgs", "bhhh", "nr", "nm",
@@ -723,6 +724,26 @@ misfcross <- function(formula, muhet, uhet, vhet, thet, logDepVar = TRUE,
       seed = seed)
   }
   # Other optimization options -------
+  if (!is.numeric(initIter) || length(initIter) != 1) {
+    stop("argument 'initIter' must be a single numeric scalar",
+      call. = FALSE)
+  }
+  if (initIter != round(initIter)) {
+    stop("argument 'initIter' must be an integer", call. = FALSE)
+  }
+  if (initIter <= 0) {
+    stop("argument 'initIter' must be positive", call. = FALSE)
+  }
+  initIter <- as.integer(initIter)
+  if (!is.numeric(itermax) || length(itermax) != 1) {
+    stop("argument 'itermax' must be a single numeric scalar",
+      call. = FALSE)
+  }
+  initAlg <- tolower(initAlg)
+  if (!(initAlg %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann"))) {
+    stop("Unknown or non-available optimization algorithm: ",
+      paste(initAlg), call. = FALSE)
+  }
   if (!is.numeric(itermax) || length(itermax) != 1) {
     stop("argument 'itermax' must be a single numeric scalar",
       call. = FALSE)
@@ -778,14 +799,16 @@ misfcross <- function(formula, muhet, uhet, vhet, thet, logDepVar = TRUE,
       call. = FALSE)
   }
   olsParam <- c(olsRes$coefficients)
-  if (inherits(data, "plm.dim")) {
-    dataTable <- data[validObs, 1:2]
+  obs_subset <- row.names(data) %in% attributes(mc)[["row.names"]]
+  if (inherits(data, "pdata.frame")) {
+    dataTable <- data[obs_subset, names(index(data))][validObs,
+      ]
   } else {
     dataTable <- data.frame(IdObs = c(1:sum(validObs)))
   }
-  dataTable <- as_tibble(cbind(dataTable, data[, all.vars(terms(formula))],
-    weights = wHvar))
-  dataTable <- mutate(dataTable, olsResiduals = residuals(olsRes),
+  dataTable <- cbind(dataTable, data[obs_subset, all.vars(terms(formula))][validObs,
+    ], weights = wHvar)
+  dataTable <- cbind(dataTable, olsResiduals = residuals(olsRes),
     olsFitted = fitted(olsRes))
   olsSkew <- skewness(dataTable[["olsResiduals"]])
   if (S * olsSkew > 0) {
@@ -804,6 +827,7 @@ misfcross <- function(formula, muhet, uhet, vhet, thet, logDepVar = TRUE,
       nvZVvar = nvZVvar, muHvar = muHvar, uHvar = uHvar,
       vHvar = vHvar, Yvar = Yvar, Zvar = Zvar, nZHvar = nZHvar,
       Xvar = Xvar, S = S, wHvar = wHvar, method = method,
+      initAlg = initAlg, initIter = initIter, whichStart = whichStart,
       printInfo = printInfo, itermax = itermax, stepmax = stepmax,
       tol = tol, gradtol = gradtol, hessianType = hessianType,
       qac = qac)
@@ -815,6 +839,7 @@ misfcross <- function(formula, muhet, uhet, vhet, thet, logDepVar = TRUE,
         vHvar = vHvar, Yvar = Yvar, Zvar = Zvar, nZHvar = nZHvar,
         Xvar = Xvar, S = S, wHvar = wHvar, N = N, FiMat = FiMat,
         method = method, printInfo = printInfo, itermax = itermax,
+        initAlg = initAlg, initIter = initIter, whichStart = whichStart,
         stepmax = stepmax, tol = tol, gradtol = gradtol,
         hessianType = hessianType, qac = qac)
     } else {
@@ -825,6 +850,7 @@ misfcross <- function(formula, muhet, uhet, vhet, thet, logDepVar = TRUE,
           Zvar = Zvar, nZHvar = nZHvar, Xvar = Xvar,
           S = S, wHvar = wHvar, N = N, FiMat = FiMat,
           method = method, printInfo = printInfo, itermax = itermax,
+          initAlg = initAlg, initIter = initIter, whichStart = whichStart,
           stepmax = stepmax, tol = tol, gradtol = gradtol,
           hessianType = hessianType, qac = qac)
       } else {
@@ -833,6 +859,7 @@ misfcross <- function(formula, muhet, uhet, vhet, thet, logDepVar = TRUE,
           uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
           Zvar = Zvar, nZHvar = nZHvar, Xvar = Xvar,
           S = S, wHvar = wHvar, method = method, printInfo = printInfo,
+          initAlg = initAlg, initIter = initIter, whichStart = whichStart,
           itermax = itermax, stepmax = stepmax, tol = tol,
           gradtol = gradtol, hessianType = hessianType,
           qac = qac)
@@ -915,7 +942,7 @@ misfcross <- function(formula, muhet, uhet, vhet, thet, logDepVar = TRUE,
       if (method == "sr1") {
         list(type = "SR1 maximization", nIter = mleList$mleObj$iterations,
           status = mleList$mleObj$status, mleLoglik = -mleList$mleObj$fval,
-          gradient = mleList$mleObj$gradient)
+          gradient = -mleList$mleObj$gradient)
       } else {
         if (method == "mla") {
           list(type = "Levenberg-Marquardt maximization",
@@ -923,12 +950,12 @@ misfcross <- function(formula, muhet, uhet, vhet, thet, logDepVar = TRUE,
             `1` = "convergence criteria were satisfied",
             `2` = "maximum number of iterations was reached",
             `4` = "algorithm encountered a problem in the function computation"),
-          mleLoglik = -mleList$mleObj$fn.value, gradient = mleList$mleObj$grad)
+          mleLoglik = -mleList$mleObj$fn.value, gradient = -mleList$mleObj$grad)
         } else {
           if (method == "sparse") {
           list(type = "Sparse Hessian maximization",
             nIter = mleList$mleObj$iterations, status = mleList$mleObj$status,
-            mleLoglik = -mleList$mleObj$fval, gradient = mleList$mleObj$gradient)
+            mleLoglik = -mleList$mleObj$fval, gradient = -mleList$mleObj$gradient)
           } else {
           if (method == "nlminb") {
             list(type = "nlminb maximization", nIter = mleList$mleObj$iterations,
@@ -979,35 +1006,37 @@ misfcross <- function(formula, muhet, uhet, vhet, thet, logDepVar = TRUE,
   returnObj$dataTable <- dataTable
   returnObj$linkF <- linkF
   if (is.null(start)) {
-    if (udist == "hnormal") {
-      returnObj$initHalf <- mleList$initHalf
-    } else {
-      if (udist == "exponential") {
-        returnObj$initExpo <- mleList$initExpo
+    if (whichStart == 2L) {
+      if (udist == "hnormal") {
+        returnObj$initHalf <- mleList$initHalf
       } else {
-        if (udist == "tnormal") {
-          returnObj$initTrunc <- mleList$initTrunc
+        if (udist == "exponential") {
+          returnObj$initExpo <- mleList$initExpo
         } else {
+          if (udist == "tnormal") {
+          returnObj$initTrunc <- mleList$initTrunc
+          } else {
           if (udist == "rayleigh") {
-          returnObj$initRay <- mleList$initRay
+            returnObj$initRay <- mleList$initRay
           } else {
-          if (udist == "uniform") {
+            if (udist == "uniform") {
             returnObj$initUni <- mleList$initUni
-          } else {
+            } else {
             if (udist == "gamma") {
-            returnObj$initGamma <- mleList$initGamma
+              returnObj$initGamma <- mleList$initGamma
             } else {
-            if (udist == "lognormal") {
+              if (udist == "lognormal") {
               returnObj$initLog <- mleList$initLog
-            } else {
+              } else {
               if (udist == "weibull") {
-              returnObj$initWeibull <- mleList$initWeibull
+                returnObj$initWeibull <- mleList$initWeibull
               } else {
-              if (udist == "genexponential") {
+                if (udist == "genexponential") {
                 returnObj$initGenExpo <- mleList$initGenExpo
-              } else {
+                } else {
                 if (udist == "tslaplace") {
-                returnObj$initTSL <- mleList$initTSL
+                  returnObj$initTSL <- mleList$initTSL
+                }
                 }
               }
               }
@@ -1083,84 +1112,92 @@ bread.misfcross <- function(x, ...) {
       vHvar <- model.matrix(x$formula, rhs = 3, data = x$dataTable)
       Zvar <- model.matrix(x$formula, rhs = 4, data = x$dataTable)
     }
-    if (x$linkF == "logit") {
-      if (x$udist == "hnormal") {
-        hessAnalytical <- chessmisfhalfnormlike_logit(parm = x$mlParam,
+    if (x$udist == "hnormal") {
+      hessAnalytical <- eval(parse(text = paste0("chessmisfhalfnormlike_",
+        x$linkF, "(parm = x$mlParam,
           nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
           nvZVvar = ncol(vHvar), uHvar = uHvar, vHvar = vHvar,
           Yvar = Yvar, Xvar = Xvar, Zvar = Zvar, nZHvar = ncol(Zvar),
-          wHvar = x$dataTable$weights, S = x$S)
+          wHvar = x$dataTable$weights, S = x$S)")))
+    } else {
+      if (x$udist == "exponential") {
+        hessAnalytical <- eval(parse(text = paste0("chessmisfexponormlike_",
+          x$linkF, "(parm = x$mlParam,
+          nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
+          nvZVvar = ncol(vHvar), uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, Zvar = Zvar, nZHvar = ncol(Zvar),
+          wHvar = x$dataTable$weights, S = x$S)")))
       } else {
-        if (x$udist == "exponential") {
-          hessAnalytical <- chessmisfexponormlike_logit(parm = x$mlParam,
-          nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-          nvZVvar = ncol(vHvar), uHvar = uHvar, vHvar = vHvar,
-          Yvar = Yvar, Xvar = Xvar, Zvar = Zvar, nZHvar = ncol(Zvar),
-          wHvar = x$dataTable$weights, S = x$S)
-        } else {
-          if (x$udist == "tnormal") {
-          hessAnalytical <- chessmisftruncnormlike_logit(parm = x$mlParam,
+        if (x$udist == "tnormal") {
+          hessAnalytical <- eval(parse(text = paste0("chessmisftruncnormlike_",
+          x$linkF, "(parm = x$mlParam,
             nXvar = ncol(Xvar), nmuZUvar = ncol(muHvar),
             nuZUvar = ncol(uHvar), nvZVvar = ncol(vHvar),
             muHvar = muHvar, uHvar = uHvar, vHvar = vHvar,
             Yvar = Yvar, Xvar = Xvar, Zvar = Zvar,
             nZHvar = ncol(Zvar), wHvar = x$dataTable$weights,
-            S = x$S)
-          } else {
+            S = x$S)")))
+        } else {
           if (x$udist == "rayleigh") {
-            hessAnalytical <- chessmisfraynormlike_logit(parm = x$mlParam,
-            nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-            nvZVvar = ncol(vHvar), uHvar = uHvar,
-            vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-            Zvar = Zvar, nZHvar = ncol(Zvar), wHvar = x$dataTable$weights,
-            S = x$S)
+          hessAnalytical <- eval(parse(text = paste0("chessmisfraynormlike_",
+            x$linkF, "(parm = x$mlParam,
+          nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
+          nvZVvar = ncol(vHvar), uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, Zvar = Zvar, nZHvar = ncol(Zvar),
+          wHvar = x$dataTable$weights, S = x$S)")))
           } else {
-            if (x$udist == "uniform") {
-            hessAnalytical <- chessmisfuninormlike_logit(parm = x$mlParam,
-              nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-              nvZVvar = ncol(vHvar), uHvar = uHvar,
-              vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-              Zvar = Zvar, nZHvar = ncol(Zvar), wHvar = x$dataTable$weights,
-              S = x$S)
-            } else {
+          if (x$udist == "uniform") {
+            hessAnalytical <- eval(parse(text = paste0("chessmisfuninormlike_",
+            x$linkF, "(parm = x$mlParam,
+          nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
+          nvZVvar = ncol(vHvar), uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, Zvar = Zvar, nZHvar = ncol(Zvar),
+          wHvar = x$dataTable$weights, S = x$S)")))
+          } else {
             if (x$udist == "genexponential") {
-              hessAnalytical <- chessmisfgenexponormlike_logit(parm = x$mlParam,
-              nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-              nvZVvar = ncol(vHvar), uHvar = uHvar,
-              vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-              Zvar = Zvar, nZHvar = ncol(Zvar),
-              wHvar = x$dataTable$weights, S = x$S)
+            hessAnalytical <- eval(parse(text = paste0("chessmisfgenexponormlike_",
+              x$linkF, "(parm = x$mlParam,
+          nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
+          nvZVvar = ncol(vHvar), uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, Zvar = Zvar, nZHvar = ncol(Zvar),
+          wHvar = x$dataTable$weights, S = x$S)")))
             } else {
-              if (x$udist == "tslaplace") {
-              hessAnalytical <- chessmisftslnormlike_logit(parm = x$mlParam,
-                nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-                nvZVvar = ncol(vHvar), uHvar = uHvar,
-                vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-                Zvar = Zvar, nZHvar = ncol(Zvar),
-                wHvar = x$dataTable$weights, S = x$S)
-              } else {
+            if (x$udist == "tslaplace") {
+              hessAnalytical <- eval(parse(text = paste0("chessmisftslnormlike_",
+              x$linkF, "(parm = x$mlParam,
+          nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
+          nvZVvar = ncol(vHvar), uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, Zvar = Zvar, nZHvar = ncol(Zvar),
+          wHvar = x$dataTable$weights, S = x$S)")))
+            } else {
               if (x$udist == "gamma") {
-                hessAnalytical <- jacobian(function(parm) colSums(cgradmisfgammanormlike_logit(parm,
+              hessAnalytical <- eval(parse(text = paste0("calculus::jacobian(function(parm) 
+                      colSums(cgradmisfgammanormlike_",
+                x$linkF, "(parm,
                 nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
                 nvZVvar = ncol(vHvar), uHvar = uHvar,
                 vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
                 Zvar = Zvar, nZHvar = ncol(Zvar),
                 wHvar = x$dataTable$weights,
                 S = x$S, N = x$Nobs, FiMat = x$FiMat)),
-                unname(x$mlParam))
+                unname(x$mlParam))")))
               } else {
-                if (x$udist == "weibull") {
-                hessAnalytical <- jacobian(function(parm) colSums(cgradmisfweibullnormlike_logit(parm,
-                  nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-                  nvZVvar = ncol(vHvar), uHvar = uHvar,
-                  vHvar = vHvar, Yvar = Yvar,
-                  Xvar = Xvar, Zvar = Zvar, nZHvar = ncol(Zvar),
-                  wHvar = x$dataTable$weights,
-                  S = x$S, N = x$Nobs, FiMat = x$FiMat)),
-                  unname(x$mlParam))
-                } else {
+              if (x$udist == "weibull") {
+                hessAnalytical <- eval(parse(text = paste0("calculus::jacobian(function(parm) 
+                      colSums(cgradmisfweibullnormlike_",
+                x$linkF, "(parm,
+                nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
+                nvZVvar = ncol(vHvar), uHvar = uHvar,
+                vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+                Zvar = Zvar, nZHvar = ncol(Zvar),
+                wHvar = x$dataTable$weights,
+                S = x$S, N = x$Nobs, FiMat = x$FiMat)),
+                unname(x$mlParam))")))
+              } else {
                 if (x$udist == "lognormal") {
-                  hessAnalytical <- jacobian(function(parm) colSums(cgradmisflognormlike_logit(parm,
+                hessAnalytical <- eval(parse(text = paste0("calculus::jacobian(function(parm) 
+                      colSums(cgradmisflognormlike_",
+                  x$linkF, "(parm,
                   nXvar = ncol(Xvar), nmuZUvar = ncol(muHvar),
                   nuZUvar = ncol(uHvar), nvZVvar = ncol(vHvar),
                   muHvar = muHvar, uHvar = uHvar,
@@ -1168,323 +1205,7 @@ bread.misfcross <- function(x, ...) {
                   Xvar = Xvar, Zvar = Zvar,
                   nZHvar = ncol(Zvar), wHvar = x$dataTable$weights,
                   S = x$S, N = x$Nobs, FiMat = x$FiMat)),
-                  unname(x$mlParam))
-                }
-                }
-              }
-              }
-            }
-            }
-          }
-          }
-        }
-      }
-    } else {
-      if (x$linkF == "probit") {
-        if (x$udist == "hnormal") {
-          hessAnalytical <- chessmisfhalfnormlike_probit(parm = x$mlParam,
-          nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-          nvZVvar = ncol(vHvar), uHvar = uHvar, vHvar = vHvar,
-          Yvar = Yvar, Xvar = Xvar, Zvar = Zvar, nZHvar = ncol(Zvar),
-          wHvar = x$dataTable$weights, S = x$S)
-        } else {
-          if (x$udist == "exponential") {
-          hessAnalytical <- chessmisfexponormlike_probit(parm = x$mlParam,
-            nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-            nvZVvar = ncol(vHvar), uHvar = uHvar, vHvar = vHvar,
-            Yvar = Yvar, Xvar = Xvar, Zvar = Zvar,
-            nZHvar = ncol(Zvar), wHvar = x$dataTable$weights,
-            S = x$S)
-          } else {
-          if (x$udist == "tnormal") {
-            hessAnalytical <- chessmisftruncnormlike_probit(parm = x$mlParam,
-            nXvar = ncol(Xvar), nmuZUvar = ncol(muHvar),
-            nuZUvar = ncol(uHvar), nvZVvar = ncol(vHvar),
-            muHvar = muHvar, uHvar = uHvar, vHvar = vHvar,
-            Yvar = Yvar, Xvar = Xvar, Zvar = Zvar,
-            nZHvar = ncol(Zvar), wHvar = x$dataTable$weights,
-            S = x$S)
-          } else {
-            if (x$udist == "rayleigh") {
-            hessAnalytical <- chessmisfraynormlike_probit(parm = x$mlParam,
-              nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-              nvZVvar = ncol(vHvar), uHvar = uHvar,
-              vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-              Zvar = Zvar, nZHvar = ncol(Zvar), wHvar = x$dataTable$weights,
-              S = x$S)
-            } else {
-            if (x$udist == "uniform") {
-              hessAnalytical <- chessmisfuninormlike_probit(parm = x$mlParam,
-              nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-              nvZVvar = ncol(vHvar), uHvar = uHvar,
-              vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-              Zvar = Zvar, nZHvar = ncol(Zvar),
-              wHvar = x$dataTable$weights, S = x$S)
-            } else {
-              if (x$udist == "genexponential") {
-              hessAnalytical <- chessmisfgenexponormlike_probit(parm = x$mlParam,
-                nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-                nvZVvar = ncol(vHvar), uHvar = uHvar,
-                vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-                Zvar = Zvar, nZHvar = ncol(Zvar),
-                wHvar = x$dataTable$weights, S = x$S)
-              } else {
-              if (x$udist == "tslaplace") {
-                hessAnalytical <- chessmisftslnormlike_probit(parm = x$mlParam,
-                nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-                nvZVvar = ncol(vHvar), uHvar = uHvar,
-                vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-                Zvar = Zvar, nZHvar = ncol(Zvar),
-                wHvar = x$dataTable$weights,
-                S = x$S)
-              } else {
-                if (x$udist == "gamma") {
-                hessAnalytical <- jacobian(function(parm) colSums(cgradmisfgammanormlike_probit(parm,
-                  nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-                  nvZVvar = ncol(vHvar), uHvar = uHvar,
-                  vHvar = vHvar, Yvar = Yvar,
-                  Xvar = Xvar, Zvar = Zvar, nZHvar = ncol(Zvar),
-                  wHvar = x$dataTable$weights,
-                  S = x$S, N = x$Nobs, FiMat = x$FiMat)),
-                  unname(x$mlParam))
-                } else {
-                if (x$udist == "weibull") {
-                  hessAnalytical <- jacobian(function(parm) colSums(cgradmisfweibullnormlike_probit(parm,
-                  nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-                  nvZVvar = ncol(vHvar), uHvar = uHvar,
-                  vHvar = vHvar, Yvar = Yvar,
-                  Xvar = Xvar, Zvar = Zvar,
-                  nZHvar = ncol(Zvar), wHvar = x$dataTable$weights,
-                  S = x$S, N = x$Nobs, FiMat = x$FiMat)),
-                  unname(x$mlParam))
-                } else {
-                  if (x$udist == "lognormal") {
-                  hessAnalytical <- jacobian(function(parm) colSums(cgradmisflognormlike_probit(parm,
-                    nXvar = ncol(Xvar), nmuZUvar = ncol(muHvar),
-                    nuZUvar = ncol(uHvar),
-                    nvZVvar = ncol(vHvar),
-                    muHvar = muHvar, uHvar = uHvar,
-                    vHvar = vHvar, Yvar = Yvar,
-                    Xvar = Xvar, Zvar = Zvar,
-                    nZHvar = ncol(Zvar), wHvar = x$dataTable$weights,
-                    S = x$S, N = x$Nobs, FiMat = x$FiMat)),
-                    unname(x$mlParam))
-                  }
-                }
-                }
-              }
-              }
-            }
-            }
-          }
-          }
-        }
-      } else {
-        if (x$linkF == "cauchit") {
-          if (x$udist == "hnormal") {
-          hessAnalytical <- chessmisfhalfnormlike_cauchit(parm = x$mlParam,
-            nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-            nvZVvar = ncol(vHvar), uHvar = uHvar, vHvar = vHvar,
-            Yvar = Yvar, Xvar = Xvar, Zvar = Zvar,
-            nZHvar = ncol(Zvar), wHvar = x$dataTable$weights,
-            S = x$S)
-          } else {
-          if (x$udist == "exponential") {
-            hessAnalytical <- chessmisfexponormlike_cauchit(parm = x$mlParam,
-            nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-            nvZVvar = ncol(vHvar), uHvar = uHvar,
-            vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-            Zvar = Zvar, nZHvar = ncol(Zvar), wHvar = x$dataTable$weights,
-            S = x$S)
-          } else {
-            if (x$udist == "tnormal") {
-            hessAnalytical <- chessmisftruncnormlike_cauchit(parm = x$mlParam,
-              nXvar = ncol(Xvar), nmuZUvar = ncol(muHvar),
-              nuZUvar = ncol(uHvar), nvZVvar = ncol(vHvar),
-              muHvar = muHvar, uHvar = uHvar, vHvar = vHvar,
-              Yvar = Yvar, Xvar = Xvar, Zvar = Zvar,
-              nZHvar = ncol(Zvar), wHvar = x$dataTable$weights,
-              S = x$S)
-            } else {
-            if (x$udist == "rayleigh") {
-              hessAnalytical <- chessmisfraynormlike_cauchit(parm = x$mlParam,
-              nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-              nvZVvar = ncol(vHvar), uHvar = uHvar,
-              vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-              Zvar = Zvar, nZHvar = ncol(Zvar),
-              wHvar = x$dataTable$weights, S = x$S)
-            } else {
-              if (x$udist == "uniform") {
-              hessAnalytical <- chessmisfuninormlike_cauchit(parm = x$mlParam,
-                nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-                nvZVvar = ncol(vHvar), uHvar = uHvar,
-                vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-                Zvar = Zvar, nZHvar = ncol(Zvar),
-                wHvar = x$dataTable$weights, S = x$S)
-              } else {
-              if (x$udist == "genexponential") {
-                hessAnalytical <- chessmisfgenexponormlike_cauchit(parm = x$mlParam,
-                nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-                nvZVvar = ncol(vHvar), uHvar = uHvar,
-                vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-                Zvar = Zvar, nZHvar = ncol(Zvar),
-                wHvar = x$dataTable$weights,
-                S = x$S)
-              } else {
-                if (x$udist == "tslaplace") {
-                hessAnalytical <- chessmisftslnormlike_cauchit(parm = x$mlParam,
-                  nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-                  nvZVvar = ncol(vHvar), uHvar = uHvar,
-                  vHvar = vHvar, Yvar = Yvar,
-                  Xvar = Xvar, Zvar = Zvar, nZHvar = ncol(Zvar),
-                  wHvar = x$dataTable$weights,
-                  S = x$S)
-                } else {
-                if (x$udist == "gamma") {
-                  hessAnalytical <- jacobian(function(parm) colSums(cgradmisfgammanormlike_cauchit(parm,
-                  nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-                  nvZVvar = ncol(vHvar), uHvar = uHvar,
-                  vHvar = vHvar, Yvar = Yvar,
-                  Xvar = Xvar, Zvar = Zvar,
-                  nZHvar = ncol(Zvar), wHvar = x$dataTable$weights,
-                  S = x$S, N = x$Nobs, FiMat = x$FiMat)),
-                  unname(x$mlParam))
-                } else {
-                  if (x$udist == "weibull") {
-                  hessAnalytical <- jacobian(function(parm) colSums(cgradmisfweibullnormlike_cauchit(parm,
-                    nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-                    nvZVvar = ncol(vHvar),
-                    uHvar = uHvar, vHvar = vHvar,
-                    Yvar = Yvar, Xvar = Xvar,
-                    Zvar = Zvar, nZHvar = ncol(Zvar),
-                    wHvar = x$dataTable$weights,
-                    S = x$S, N = x$Nobs, FiMat = x$FiMat)),
-                    unname(x$mlParam))
-                  } else {
-                  if (x$udist == "lognormal") {
-                    hessAnalytical <- jacobian(function(parm) colSums(cgradmisflognormlike_cauchit(parm,
-                    nXvar = ncol(Xvar), nmuZUvar = ncol(muHvar),
-                    nuZUvar = ncol(uHvar),
-                    nvZVvar = ncol(vHvar),
-                    muHvar = muHvar, uHvar = uHvar,
-                    vHvar = vHvar, Yvar = Yvar,
-                    Xvar = Xvar, Zvar = Zvar,
-                    nZHvar = ncol(Zvar),
-                    wHvar = x$dataTable$weights,
-                    S = x$S, N = x$Nobs,
-                    FiMat = x$FiMat)), unname(x$mlParam))
-                  }
-                  }
-                }
-                }
-              }
-              }
-            }
-            }
-          }
-          }
-        } else {
-          if (x$linkF == "cloglog") {
-          if (x$udist == "hnormal") {
-            hessAnalytical <- chessmisfhalfnormlike_cloglog(parm = x$mlParam,
-            nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-            nvZVvar = ncol(vHvar), uHvar = uHvar,
-            vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-            Zvar = Zvar, nZHvar = ncol(Zvar), wHvar = x$dataTable$weights,
-            S = x$S)
-          } else {
-            if (x$udist == "exponential") {
-            hessAnalytical <- chessmisfexponormlike_cloglog(parm = x$mlParam,
-              nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-              nvZVvar = ncol(vHvar), uHvar = uHvar,
-              vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-              Zvar = Zvar, nZHvar = ncol(Zvar), wHvar = x$dataTable$weights,
-              S = x$S)
-            } else {
-            if (x$udist == "tnormal") {
-              hessAnalytical <- chessmisftruncnormlike_cloglog(parm = x$mlParam,
-              nXvar = ncol(Xvar), nmuZUvar = ncol(muHvar),
-              nuZUvar = ncol(uHvar), nvZVvar = ncol(vHvar),
-              muHvar = muHvar, uHvar = uHvar, vHvar = vHvar,
-              Yvar = Yvar, Xvar = Xvar, Zvar = Zvar,
-              nZHvar = ncol(Zvar), wHvar = x$dataTable$weights,
-              S = x$S)
-            } else {
-              if (x$udist == "rayleigh") {
-              hessAnalytical <- chessmisfraynormlike_cloglog(parm = x$mlParam,
-                nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-                nvZVvar = ncol(vHvar), uHvar = uHvar,
-                vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-                Zvar = Zvar, nZHvar = ncol(Zvar),
-                wHvar = x$dataTable$weights, S = x$S)
-              } else {
-              if (x$udist == "uniform") {
-                hessAnalytical <- chessmisfuninormlike_cloglog(parm = x$mlParam,
-                nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-                nvZVvar = ncol(vHvar), uHvar = uHvar,
-                vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-                Zvar = Zvar, nZHvar = ncol(Zvar),
-                wHvar = x$dataTable$weights,
-                S = x$S)
-              } else {
-                if (x$udist == "genexponential") {
-                hessAnalytical <- chessmisfgenexponormlike_cloglog(parm = x$mlParam,
-                  nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-                  nvZVvar = ncol(vHvar), uHvar = uHvar,
-                  vHvar = vHvar, Yvar = Yvar,
-                  Xvar = Xvar, Zvar = Zvar, nZHvar = ncol(Zvar),
-                  wHvar = x$dataTable$weights,
-                  S = x$S)
-                } else {
-                if (x$udist == "tslaplace") {
-                  hessAnalytical <- chessmisftslnormlike_cloglog(parm = x$mlParam,
-                  nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-                  nvZVvar = ncol(vHvar), uHvar = uHvar,
-                  vHvar = vHvar, Yvar = Yvar,
-                  Xvar = Xvar, Zvar = Zvar,
-                  nZHvar = ncol(Zvar), wHvar = x$dataTable$weights,
-                  S = x$S)
-                } else {
-                  if (x$udist == "gamma") {
-                  hessAnalytical <- jacobian(function(parm) colSums(cgradmisfgammanormlike_cloglog(parm,
-                    nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-                    nvZVvar = ncol(vHvar),
-                    uHvar = uHvar, vHvar = vHvar,
-                    Yvar = Yvar, Xvar = Xvar,
-                    Zvar = Zvar, nZHvar = ncol(Zvar),
-                    wHvar = x$dataTable$weights,
-                    S = x$S, N = x$Nobs, FiMat = x$FiMat)),
-                    unname(x$mlParam))
-                  } else {
-                  if (x$udist == "weibull") {
-                    hessAnalytical <- jacobian(function(parm) colSums(cgradmisfweibullnormlike_cloglog(parm,
-                    nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-                    nvZVvar = ncol(vHvar),
-                    uHvar = uHvar, vHvar = vHvar,
-                    Yvar = Yvar, Xvar = Xvar,
-                    Zvar = Zvar, nZHvar = ncol(Zvar),
-                    wHvar = x$dataTable$weights,
-                    S = x$S, N = x$Nobs,
-                    FiMat = x$FiMat)), unname(x$mlParam))
-                  } else {
-                    if (x$udist == "lognormal") {
-                    hessAnalytical <- jacobian(function(parm) colSums(cgradmisflognormlike_cloglog(parm,
-                      nXvar = ncol(Xvar),
-                      nmuZUvar = ncol(muHvar),
-                      nuZUvar = ncol(uHvar),
-                      nvZVvar = ncol(vHvar),
-                      muHvar = muHvar, uHvar = uHvar,
-                      vHvar = vHvar, Yvar = Yvar,
-                      Xvar = Xvar, Zvar = Zvar,
-                      nZHvar = ncol(Zvar),
-                      wHvar = x$dataTable$weights,
-                      S = x$S, N = x$Nobs,
-                      FiMat = x$FiMat)),
-                      unname(x$mlParam))
-                    }
-                  }
-                  }
-                }
+                  unname(x$mlParam))")))
                 }
               }
               }

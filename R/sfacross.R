@@ -71,7 +71,7 @@
 #' Default = \code{FALSE}. (see section \sQuote{Details}).
 #' @param start Numeric vector. Optional starting values for the maximum
 #' likelihood (ML) estimation.
-#' @param method Optimization algorithm used for the estimation.  Default =
+#' @param method Optimization algorithm used for the estimation. Default =
 #' \code{'bfgs'}. 11 algorithms are available: \itemize{ \item \code{'bfgs'},
 #' for Broyden-Fletcher-Goldfarb-Shanno (see
 #' \code{\link[maxLik:maxBFGS]{maxBFGS}}) \item \code{'bhhh'}, for
@@ -131,19 +131,16 @@
 #'  ignored.
 #'
 #' @details
-#' The stochastic frontier model is defined as: 
+#' The stochastic frontier model for the cross-sectional data is defined as: 
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd("y_i = \\\alpha + \\\mathbf{x_i^{\\\prime}}\\\bm{\\\beta} + 
-#' v_i - Su_i")
-#' }
+#' \deqn{y_i = \alpha + \mathbf{x_i^{\prime}}\bm{\beta} +  v_i - Su_i}
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd("\\\epsilon_i = v_i -Su_i")
-#' }
+#' with
+#' 
+#' \deqn{\epsilon_i = v_i -Su_i}
 #'
-#' where \eqn{i} is the observation, \eqn{j} is the class, \eqn{y} is the
-#' output (cost, revenue, profit), \eqn{x} is the vector of main explanatory
+#' where \eqn{i} is the observation, \eqn{y} is the
+#' output (cost, revenue, profit), \eqn{\mathbf{x}} is the vector of main explanatory
 #' variables (inputs and other control variables), \eqn{u} is the one-sided
 #' error term with variance \eqn{\sigma_{u}^2}, and \eqn{v} is the two-sided
 #' error term with variance \eqn{\sigma_{v}^2}.
@@ -162,40 +159,34 @@
 #' To account for heteroscedasticity in the variance parameters of the error
 #' terms, a single part (right) formula can also be specified. To impose the
 #' positivity to these parameters, the variances are modelled as:
-#' \eqn{\sigma^2_u = \exp{(\delta'Z_u)}} or \eqn{\sigma^2_v =
-#' \exp{(\phi'Z_v)}}, where \eqn{Z_u} and \eqn{Z_v} are the heteroscedasticity
-#' variables (inefficiency drivers in the case of \eqn{Z_u}) and \eqn{\delta}
-#' and \eqn{\phi} the coefficients.  In the case of heterogeneity in the
-#' truncated mean \eqn{\mu}, it is modelled as \eqn{\mu=\omega'Z_{\mu}}. The
+#' \eqn{\sigma^2_u = \exp{(\bm{\delta}'\mathbf{Z}_u)}} or \eqn{\sigma^2_v =
+#' \exp{(\bm{\phi}'\mathbf{Z}_v)}}, where \eqn{\mathbf{Z}_u} and \eqn{\mathbf{Z}_v} are the heteroscedasticity
+#' variables (inefficiency drivers in the case of \eqn{\mathbf{Z}_u}) and \eqn{\bm{\delta}}
+#' and \eqn{\bm{\phi}} the coefficients. In the case of heterogeneity in the
+#' truncated mean \eqn{\mu}, it is modelled as \eqn{\mu=\bm{\omega}'\mathbf{Z}_{\mu}}. The
 #' scaling property can be applied for the truncated normal distribution:
-#' \eqn{u \sim h(Z_u, \delta)u} where \eqn{u} follows a truncated normal
+#' \eqn{u \sim h(\mathbf{Z}_u, \delta)u} where \eqn{u} follows a truncated normal
 #' distribution \eqn{N^+(\tau, \exp{(cu)})}.
 #'
 #' In the case of the truncated normal distribution, the convolution of
 #' \eqn{u_i} and \eqn{v_i} is:
-#'
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd("f(\\\epsilon_i)=\\\frac{1}{\\\sqrt{\\\\sigma_u^2 + 
-#' \\\sigma_v^2}}\\\phi\\\\left(\\\frac{S\\\epsilon_i + \\\mu}{\\\sqrt{
-#' \\\sigma_u^2 + \\\sigma_v^2}}\\\\right)\\\Phi\\\\left(\\\frac{
-#' \\\mu_{i*}}{\\\sigma_*}\\\\right)\\\Big/\\\Phi\\\\left(\\\frac{
-#' \\\mu}{\\\sigma_u}\\\\right)")
-#' }
+#' 
+#' \deqn{f(\epsilon_i)=\frac{1}{\sqrt{\sigma_u^2 + 
+#' \sigma_v^2}}\phi\left(\frac{S\epsilon_i + \mu}{\sqrt{
+#' \sigma_u^2 + \sigma_v^2}}\right)\Phi\left(\frac{
+#' \mu_{i*}}{\sigma_*}\right)\Big/\Phi\left(\frac{
+#' \mu}{\sigma_u}\right)}
 #'
 #' where
-#'
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd("\\\mu_{i*}=\\\frac{\\\mu\\\sigma_v^2 - 
-#' S\\\epsilon_i\\\sigma_u^2}{\\\sigma_u^2 + \\\sigma_v^2}")
-#' }
+#' 
+#' \deqn{\mu_{i*}=\frac{\mu\\\sigma_v^2 - 
+#' S\epsilon_i\sigma_u^2}{\sigma_u^2 + \sigma_v^2}}
 #'
 #' and
-#'
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd("\\\sigma_*^2 = \\\frac{\\\sigma_u^2 
-#' \\\sigma_v^2}{\\\sigma_u^2 + \\\sigma_v^2}")
-#' }
-#'
+#' 
+#' \deqn{\sigma_*^2 = \frac{\sigma_u^2 
+#' \sigma_v^2}{\sigma_u^2 + \sigma_v^2}}
+#' 
 #' In the case of the half normal distribution the convolution is obtained by
 #' setting \eqn{\mu=0}.
 #' 
@@ -203,10 +194,8 @@
 #' When option \code{weights} is specified and \code{wscale = TRUE}, the weights
 #' is scaled as 
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('new_{weights} = sample_{size} \\\times 
-#' \\\frac{old_{weights}}{\\\sum(old_{weights})}')
-#' }
+#' \deqn{new_{weights} = sample_{size} \times 
+#' \frac{old_{weights}}{\sum(old_{weights})}}
 #' 
 #' For difficult problems, non-gradient methods (e.g. \code{nm} or \code{sann}) 
 #' can be used to warm start the optimization and zoom in the neighborhood of 
@@ -747,6 +736,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
       }
     }
     cat("Initialization of", Nsim, simDist, "draws per observation ...\n")
+    # burn + 1 cause halton fn always starts with 0
     FiMat <- drawMat(N = N, Nsim = Nsim, simType = simType,
       prime = prime, burn = burn + 1, antithetics = antithetics,
       seed = seed)
@@ -810,14 +800,15 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
   olsSigmasq <- summary(olsRes)$sigma^2
   olsStder <- sqrt(diag(vcov(olsRes)))
   olsLoglik <- logLik(olsRes)[1]
-  if (inherits(data, "plm.dim")) {
-    dataTable <- data[validObs, 1:2]
+  obs_subset <- row.names(data) %in% attributes(mc)[["row.names"]]
+  if (inherits(data, "pdata.frame")) {
+    dataTable <- data[obs_subset, names(index(data))][validObs, ]
   } else {
     dataTable <- data.frame(IdObs = c(1:sum(validObs)))
   }
-  dataTable <- as_tibble(cbind(dataTable, data[, all.vars(terms(formula))],
-    weights = wHvar))
-  dataTable <- mutate(dataTable, olsResiduals = residuals(olsRes),
+  dataTable <- cbind(dataTable, data[obs_subset, all.vars(terms(formula))][validObs,
+    ], weights = wHvar)
+  dataTable <- cbind(dataTable, olsResiduals = residuals(olsRes),
     olsFitted = fitted(olsRes))
   olsSkew <- skewness(dataTable[["olsResiduals"]])
   olsM3Okay <- if (S * olsSkew < 0) {
@@ -923,19 +914,19 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
       if (method == "sr1") {
         list(type = "SR1 max.", nIter = mleList$mleObj$iterations,
           status = mleList$mleObj$status, mleLoglik = -mleList$mleObj$fval,
-          gradient = mleList$mleObj$gradient)
+          gradient = -mleList$mleObj$gradient)
       } else {
         if (method == "mla") {
           list(type = "Lev. Marquardt max.", nIter = mleList$mleObj$ni,
           status = switch(mleList$mleObj$istop, `1` = "convergence criteria were satisfied",
             `2` = "maximum number of iterations was reached",
             `4` = "algorithm encountered a problem in the function computation"),
-          mleLoglik = -mleList$mleObj$fn.value, gradient = mleList$mleObj$grad)
+          mleLoglik = -mleList$mleObj$fn.value, gradient = -mleList$mleObj$grad)
         } else {
           if (method == "sparse") {
           list(type = "Sparse Hessian max.", nIter = mleList$mleObj$iterations,
             status = mleList$mleObj$status, mleLoglik = -mleList$mleObj$fval,
-            gradient = mleList$mleObj$gradient)
+            gradient = -mleList$mleObj$gradient)
           } else {
           if (method == "nlminb") {
             list(type = "nlminb max.", nIter = mleList$mleObj$iterations,
@@ -947,16 +938,18 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
       }
     }
   })
-  # quick renaming -------
-  if (udist %in% c("tnormal", "lognormal")) {
-    names(mleList$startVal) <- fName_mu_sfacross(Xvar = Xvar,
-      udist = udist, muHvar = muHvar, uHvar = uHvar, vHvar = vHvar,
-      scaling = scaling)
-  } else {
-    names(mleList$startVal) <- fName_uv_sfacross(Xvar = Xvar,
-      udist = udist, uHvar = uHvar, vHvar = vHvar)
+  # quick renaming (only when start is provided) -------
+  if (!is.null(start)) {
+    if (udist %in% c("tnormal", "lognormal")) {
+      names(mleList$startVal) <- fName_mu_sfacross(Xvar = Xvar,
+        udist = udist, muHvar = muHvar, uHvar = uHvar,
+        vHvar = vHvar, scaling = scaling)
+    } else {
+      names(mleList$startVal) <- fName_uv_sfacross(Xvar = Xvar,
+        udist = udist, uHvar = uHvar, vHvar = vHvar)
+    }
+    names(mleList$mlParam) <- names(mleList$startVal)
   }
-  names(mleList$mlParam) <- names(mleList$startVal)
   rownames(mleList$invHessian) <- colnames(mleList$invHessian) <- names(mleList$mlParam)
   names(mleList$gradient) <- names(mleList$mlParam)
   colnames(mleList$mleObj$gradL_OBS) <- names(mleList$mlParam)
