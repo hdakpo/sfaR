@@ -38,12 +38,10 @@
 #'
 #' \itemize{ \item The conditional inefficiency is }
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('E\\\\left\\\\lbrack u_i|\\\epsilon_i\\\\right
-#' \\\\rbrack=\\\mu_{i\\\ast} + \\\sigma_\\\ast\\\frac{\\\phi
-#' \\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)}{
-#' \\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)}') 
-#' }
+#' \deqn{E\left\lbrack u_i|\epsilon_i\right
+#' \rbrack=\mu_{i\ast} + \sigma_\ast\frac{\phi
+#' \left(\frac{\mu_{i\ast}}{\sigma_\ast}\right)}{
+#' \Phi\left(\frac{\mu_{i\ast}}{\sigma_\ast}\right)}}
 #'
 #' where
 #' 
@@ -56,76 +54,60 @@
 #' \itemize{ \item The Battese and Coelli (1988) conditional efficiency is
 #' obtained by: } 
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('E\\\\left\\\\lbrack\\\exp{\\\\left(-u_i\\\\right)}
-#' |\\\\epsilon_i\\\\right\\\\rbrack = \\\exp{\\\\left(-\\\mu_{i\\\ast}+
-#' \\\frac{1}{2}\\\sigma_\\\ast^2\\\\right)}\\\frac{\\\Phi\\\\left(
-#' \\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}-\\\sigma_\\\ast\\\\right)}{
-#' \\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\right)}') 
-#' }
+#' \deqn{E\left\lbrack\exp{\left(-u_i\right)}
+#' |\epsilon_i\right\rbrack = \exp{\left(-\mu_{i\ast}+
+#' \frac{1}{2}\sigma_\ast^2\right)}\frac{\Phi\left(
+#' \frac{\mu_{i\ast}}{\sigma_\ast}-\sigma_\ast\right)}{
+#' \Phi\left(\frac{\mu_{i\ast}}{\sigma_\ast}\right)}}
 #' 
 #' \itemize{ \item The reciprocal of the Battese and Coelli (1988) conditional 
 #' efficiency is obtained by: } 
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('E\\\\left\\\\lbrack\\\exp{\\\\left(u_i\\\\right)}
-#' |\\\epsilon_i\\\\right\\\\rbrack = \\\exp{\\\\left(\\\mu_{i\\\ast}+
-#' \\\frac{1}{2}\\\sigma_\\\ast^2\\\\right)} \\\frac{\\\Phi\\\\left(
-#' \\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}+\\\sigma_\\\ast\\\\right)}{
-#' \\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)}') 
-#' }
+#' \deqn{E\left\lbrack\exp{\left(u_i\right)}
+#' |\epsilon_i\right\rbrack = \exp{\left(\mu_{i\ast}+
+#' \frac{1}{2}\sigma_\ast^2\right)} \frac{\Phi\left(
+#' \frac{\mu_{i\ast}}{\sigma_\ast}+\sigma_\ast\right)}{
+#' \Phi\left(\frac{\mu_{i\ast}}{\sigma_\ast}\right)}}
 #' 
 #' \itemize{ \item The conditional mode is computed using: }
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('M\\\\left\\\\lbrack u_i|\\\epsilon_i\\\\right
-#' \\\\rbrack= \\\mu_{i\\\ast} \\\quad \\\hbox{For} \\\quad 
-#' \\\mu_{i\\\ast} > 0') 
-#' }
+#' \deqn{M\left\lbrack u_i|\epsilon_i\right
+#' \rbrack= \mu_{i\ast} \quad \hbox{For} \quad 
+#' \mu_{i\ast} > 0}
 #' 
 #' and
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('M\\\\left\\\\lbrack u_i|\\\epsilon_i\\\\right
-#' \\\\rbrack= 0 \\\quad \\\hbox{For} \\\quad \\\mu_{i\\\ast} \\\\leq 0') 
-#' } 
+#' \deqn{M\left\lbrack u_i|\epsilon_i\right
+#' \rbrack= 0 \quad \hbox{For} \quad \mu_{i\ast} \leq 0}
 #' 
 #' \itemize{ \item The confidence intervals are obtained with: }
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('\\\mu_{i\\\ast} + I_L\\\sigma_\\\ast \\\\leq 
-#' E\\\\left\\\\lbrack u_i|\\\epsilon_i\\\\right\\\\rbrack \\\\leq 
-#' \\\mu_{i\\\ast} + I_U\\\sigma_\\\ast') 
-#' }
+#' \deqn{\mu_{i\ast} + I_L\sigma_\ast \leq 
+#' E\left\lbrack u_i|\epsilon_i\right\rbrack \leq 
+#' \mu_{i\ast} + I_U\sigma_\ast }
 #'
 #' with \eqn{LB_i = \mu_{i*} + I_L\sigma_*} and 
 #' \eqn{UB_i = \mu_{i*} + I_U\sigma_*}
 #'
 #' and
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('I_L = \\\Phi^{-1}\\\\left\\\\lbrace 1 -
-#' \\\\left(1-\\\frac{\\\alpha}{2}\\\\right)\\\\left\\\\lbrack 1-
-#' \\\Phi\\\\left(-\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)
-#' \\\\right\\\\rbrack\\\\right\\\\rbrace') 
-#' }
+#' \deqn{I_L = \Phi^{-1}\left\lbrace 1 -
+#' \left(1-\frac{\alpha}{2}\right)\left\lbrack 1-
+#' \Phi\left(-\frac{\mu_{i\ast}}{\sigma_\ast}\right)
+#' \right\rbrack\right\rbrace }
 #'
 #' and
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('I_U = \\\Phi^{-1}\\\\left\\\\lbrace 1-
-#' \\\frac{\\\alpha}{2}\\\\left\\\\lbrack 1-\\\Phi
-#' \\\\left(-\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)
-#' \\\\right\\\\rbrack\\\\right\\\\rbrace') 
-#' }
+#' \deqn{I_U = \Phi^{-1}\left\lbrace 1-
+#' \frac{\alpha}{2}\left\lbrack 1-\Phi
+#' \left(-\frac{\mu_{i\ast}}{\sigma_\ast}\right)
+#' \right\rbrack\right\rbrace}
 #'
 #' Thus
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('\\\exp{\\\\left(-UB_i\\\\right)} \\\\leq E\\\\left
-#' \\\\lbrack\\\exp{\\\\left(-u_i\\\\right)}|\\\epsilon_i\\\\right\\\\rbrack 
-#' \\\\leq\\\exp{\\\\left(-LB_i\\\\right)}') 
-#' }
+#' \deqn{\exp{\left(-UB_i\right)} \leq E\left
+#' \lbrack\exp{\left(-u_i\right)}|\epsilon_i\right\rbrack 
+#' \leq\exp{\left(-LB_i\right)}}
 #'
 #' @param object A stochastic frontier model returned
 #' by \code{\link{cnsfcross}}, \code{\link{gzisfcross}}, \code{\link{lcmcross}}, 
@@ -201,7 +183,7 @@
 #' \item{ReffBC_c#}{Reciprocal conditional efficiency (\code{teBC_reciprocal_c}) 
 #' for observations in class # only.}
 #' 
-#' \item{theta_c#}{In the case \code{udist = 'uniform'}. \eqn{u \in [0, \theta\mbox{_c#}]}.}
+#' \item{theta_c#}{In the case \code{udist = 'uniform'}. \eqn{u \in [0, \theta_{c\#}]}.}
 #'
 #' \bold{- For object of class \code{'sfacross'} or \code{'sfaselectioncross'} 
 #' the following elements are returned:}
