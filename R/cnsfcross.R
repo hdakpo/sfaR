@@ -83,12 +83,13 @@
 #' @param initAlg Character string specifying the algorithm used for 
 #' initialization and obtain the starting values (when \code{'whichStart = 2'}).
 #' Only \pkg{maxLik} package algorithms are available: 
-#' \itemize{ \item \code{'bfgs'}, for Broyden-Fletcher-Goldfarb-Shanno - Default - 
+#' \itemize{ \item \code{'bfgs'}, for Broyden-Fletcher-Goldfarb-Shanno 
 #' (see \code{\link[maxLik:maxBFGS]{maxBFGS}})
 #'  \item \code{'bhhh'}, for Berndt-Hall-Hall-Hausman 
 #'  (see \code{\link[maxLik:maxBHHH]{maxBHHH}}) 
 #'  \item \code{'nr'}, for Newton-Raphson (see \code{\link[maxLik:maxNR]{maxNR}})
-#' \item \code{'nm'}, for Nelder-Mead (see \code{\link[maxLik:maxNM]{maxNM}})
+#' \item \code{'nm'}, for Nelder-Mead - Default - 
+#'  (see \code{\link[maxLik:maxNM]{maxNM}})
 #' \item \code{'cg'}, for Conjugate Gradient 
 #' (see \code{\link[maxLik:maxCG]{maxCG}}) \item \code{'sann'}, for Simulated 
 #' Annealing (see \code{\link[maxLik:maxSANN]{maxSANN}})
@@ -516,7 +517,7 @@
 cnsfcross <- function(formula, muhet, uhet, vhet, thet, logDepVar = TRUE,
   data, subset, weights, wscale = TRUE, S = 1L, udist = "hnormal",
   sigmauType = "common", linkF = "logit", start = NULL, whichStart = 2L,
-  initAlg = "bfgs", initIter = 100, method = "bfgs", hessianType = 1,
+  initAlg = "nm", initIter = 100, method = "bfgs", hessianType = 1,
   simType = "halton", Nsim = 300, prime = 2L, burn = 10, antithetics = FALSE,
   seed = 12345, itermax = 2000L, printInfo = FALSE, tol = 1e-12,
   gradtol = 1e-06, stepmax = 0.1, qac = "marquardt") {
@@ -759,7 +760,7 @@ cnsfcross <- function(formula, muhet, uhet, vhet, thet, logDepVar = TRUE,
     }
     cat("Initialization of", Nsim, simDist, "draws per observation ...\n")
     FiMat <- drawMat(N = N, Nsim = Nsim, simType = simType,
-      prime = prime, burn = burn + 1, antithetics = antithetics,
+      prime = prime, burn = burn, antithetics = antithetics,
       seed = seed)
   }
   # Other optimization options -------

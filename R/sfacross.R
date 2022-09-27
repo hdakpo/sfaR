@@ -738,7 +738,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
     cat("Initialization of", Nsim, simDist, "draws per observation ...\n")
     # burn + 1 cause halton fn always starts with 0
     FiMat <- drawMat(N = N, Nsim = Nsim, simType = simType,
-      prime = prime, burn = burn + 1, antithetics = antithetics,
+      prime = prime, burn = burn, antithetics = antithetics,
       seed = seed)
   }
   # Other optimization options -------
