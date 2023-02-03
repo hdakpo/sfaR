@@ -363,24 +363,34 @@ cmcesfweibullnormlike_cloglog <- function(parm, nXvar, nuZUvar,
 #' @param N number of observations
 #' @param FiMat matrix of random draws
 #' @param printInfo logical print info during optimization
-#' @param itermax maximum iteration
+#' @param whichStart strategy to get starting values
+#' @param initIter maximum iterations for initialization
+#' @param initAlg algorithm for maxLik  
 #' @param tol parameter tolerance
 #' @noRd
 # same sigma_u
 cstcnsfweibullnorm <- function(olsObj, epsiRes, nXvar, nuZUvar,
   nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar,
-  N, FiMat, itermax, printInfo, tol) {
-  cat("Initialization: SFA + weibull - normal distributions...\n")
-  initWeibull <- maxLik(logLik = cweibullnormlike, start = cstweibullnorm(olsObj = olsObj,
-    epsiRes = epsiRes, S = S, nuZUvar = 1, uHvar = uHvar[,
-      1, drop = FALSE], nvZVvar = 1, vHvar = vHvar[, 1,
-      drop = FALSE]), grad = cgradweibullnormlike, method = "BFGS",
-    control = list(iterlim = itermax, printLevel = if (printInfo) 2 else 0,
-      reltol = tol), nXvar = nXvar, nuZUvar = 1, nvZVvar = 1,
-    uHvar = as.matrix(uHvar[, 1]), vHvar = as.matrix(vHvar[,
-      1]), Yvar = Yvar, Xvar = Xvar, S = S, N = N, FiMat = FiMat,
-    wHvar = wHvar)
-  Esti <- initWeibull$estimate
+  N, FiMat, whichStart, initIter, initAlg, printInfo, tol) {
+  if (whichStart == 1L) {
+    Esti <- cstweibullnorm(olsObj = olsObj, epsiRes = epsiRes,
+      S = S, nuZUvar = 1, uHvar = uHvar[, 1, drop = FALSE],
+      nvZVvar = 1, vHvar = vHvar[, 1, drop = FALSE])
+    initWeibull <- NULL
+  } else {
+    cat("Initialization: SFA + weibull - normal distributions...\n")
+    initWeibull <- maxLik::maxLik(logLik = cweibullnormlike,
+      start = cstweibullnorm(olsObj = olsObj, epsiRes = epsiRes,
+        S = S, nuZUvar = 1, uHvar = uHvar[, 1, drop = FALSE],
+        nvZVvar = 1, vHvar = vHvar[, 1, drop = FALSE]),
+      grad = cgradweibullnormlike, method = initAlg, control = list(iterlim = initIter,
+        printLevel = if (printInfo) 2 else 0, reltol = tol),
+      nXvar = nXvar, nuZUvar = 1, nvZVvar = 1, uHvar = uHvar[,
+        1, drop = FALSE], vHvar = vHvar[, 1, drop = FALSE],
+      Yvar = Yvar, Xvar = Xvar, S = S, N = N, FiMat = FiMat,
+      wHvar = wHvar)
+    Esti <- initWeibull$estimate
+  }
   StartVal <- c(Esti[1:nXvar], Esti[nXvar + 1], if (nuZUvar >
     1) rep(0, nuZUvar - 1), 0.95 * Esti[nXvar + 2], if (nvZVvar >
     1) rep(0, nvZVvar - 1), 1.05 * Esti[nXvar + 2], if (nvZVvar >
@@ -388,26 +398,32 @@ cstcnsfweibullnorm <- function(olsObj, epsiRes, nXvar, nuZUvar,
   names(StartVal) <- c(names(Esti)[1:nXvar], paste0("Zu_",
     colnames(uHvar)), paste0("Zv_", colnames(vHvar)), paste0("Zv_",
     colnames(vHvar)), "k", paste0("CN_", colnames(Zvar)))
-  names(initWeibull$estimate) <- c(names(Esti)[1:nXvar], paste0("Zu_",
-    colnames(uHvar)[1]), paste0("Zv_", colnames(vHvar)[1]),
-    "k")
   return(list(StartVal = StartVal, initWeibull = initWeibull))
 }
 
 # different sigma_u
 cstmcesfweibullnorm <- function(olsObj, epsiRes, nXvar, nuZUvar,
   nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar,
-  N, FiMat, itermax, printInfo, tol) {
-  cat("Initialization: SFA + weibull - normal distributions...\n")
-  initWeibull <- maxLik(logLik = cweibullnormlike, start = cstweibullnorm(olsObj = olsObj,
-    epsiRes = epsiRes, S = S, nuZUvar = 1, uHvar = as.matrix(uHvar[,
-      1]), nvZVvar = 1, vHvar = as.matrix(vHvar[, 1])),
-    grad = cgradweibullnormlike, method = "BFGS", control = list(iterlim = itermax,
-      printLevel = printInfo, reltol = tol), nXvar = nXvar,
-    nuZUvar = 1, nvZVvar = 1, uHvar = as.matrix(uHvar[, 1]),
-    vHvar = as.matrix(vHvar[, 1]), Yvar = Yvar, Xvar = Xvar,
-    S = S, wHvar = wHvar, N = N, FiMat = FiMat)
-  Esti <- initWeibull$estimate
+  N, FiMat, whichStart, initIter, initAlg, printInfo, tol) {
+  if (whichStart == 1L) {
+    Esti <- cstweibullnorm(olsObj = olsObj, epsiRes = epsiRes,
+      S = S, nuZUvar = 1, uHvar = uHvar[, 1, drop = FALSE],
+      nvZVvar = 1, vHvar = vHvar[, 1, drop = FALSE])
+    initWeibull <- NULL
+  } else {
+    cat("Initialization: SFA + weibull - normal distributions...\n")
+    initWeibull <- maxLik::maxLik(logLik = cweibullnormlike,
+      start = cstweibullnorm(olsObj = olsObj, epsiRes = epsiRes,
+        S = S, nuZUvar = 1, uHvar = uHvar[, 1, drop = FALSE],
+        nvZVvar = 1, vHvar = vHvar[, 1, drop = FALSE]),
+      grad = cgradweibullnormlike, method = initAlg, control = list(iterlim = initIter,
+        printLevel = if (printInfo) 2 else 0, reltol = tol),
+      nXvar = nXvar, nuZUvar = 1, nvZVvar = 1, uHvar = uHvar[,
+        1, drop = FALSE], vHvar = vHvar[, 1, drop = FALSE],
+      Yvar = Yvar, Xvar = Xvar, S = S, N = N, FiMat = FiMat,
+      wHvar = wHvar)
+    Esti <- initWeibull$estimate
+  }
   StartVal <- c(Esti[1:nXvar], 0.95 * Esti[nXvar + 1], if (nuZUvar >
     1) rep(0, nuZUvar - 1), 1.05 * Esti[nXvar + 1], if (nuZUvar >
     1) rep(0, nuZUvar - 1), 0.95 * Esti[nXvar + 2], if (nvZVvar >
@@ -418,9 +434,6 @@ cstmcesfweibullnorm <- function(olsObj, epsiRes, nXvar, nuZUvar,
     colnames(uHvar)), paste0("Zu_", colnames(uHvar)), paste0("Zv_",
     colnames(vHvar)), paste0("Zv_", colnames(vHvar)), "k",
     "k", paste0("MCE_", colnames(Zvar)))
-  names(initWeibull$estimate) <- c(names(Esti)[1:nXvar], paste0("Zu_",
-    colnames(uHvar)[1]), paste0("Zv_", colnames(vHvar)[1]),
-    "k")
   return(list(StartVal = StartVal, initWeibull = initWeibull))
 }
 
@@ -1183,6 +1196,9 @@ cgradmcesfweibullnormlike_cloglog <- function(parm, nXvar, nuZUvar,
 #' @param method algorithm for solver
 #' @param printInfo logical print info during optimization
 #' @param itermax maximum iteration
+#' @param whichStart strategy to get starting values
+#' @param initIter maximum iterations for initialization
+#' @param initAlg algorithm for maxLik  
 #' @param stepmax stepmax for ucminf
 #' @param tol parameter tolerance
 #' @param gradtol gradient tolerance
@@ -1195,13 +1211,15 @@ cgradmcesfweibullnormlike_cloglog <- function(parm, nXvar, nuZUvar,
 cnsfweibullnormAlgOpt_logit <- function(start, olsParam, dataTable,
   S, wHvar, nXvar, N, FiMat, uHvar, nuZUvar, vHvar, nvZVvar,
   Zvar, nZHvar, Yvar, Xvar, method, printInfo, itermax, stepmax,
-  tol, gradtol, hessianType, qac) {
+  whichStart, initIter, initAlg, tol, gradtol, hessianType,
+  qac) {
   start_st <- if (!is.null(start))
     start else cstcnsfweibullnorm(olsObj = olsParam, epsiRes = dataTable[["olsResiduals"]],
     S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
     nZHvar = nZHvar, uHvar = uHvar, nuZUvar = nuZUvar, vHvar = vHvar,
     nvZVvar = nvZVvar, nXvar = nXvar, Xvar = Xvar, Yvar = Yvar,
-    itermax = itermax, printInfo = printInfo, tol = tol)
+    whichStart = whichStart, initIter = initIter, initAlg = initAlg,
+    printInfo = printInfo, tol = tol)
   initWeibull <- start_st$initWeibull
   startVal <- start_st$StartVal
   startLoglik <- sum(ccnsfweibullnormlike_logit(startVal, nXvar = nXvar,
@@ -1209,14 +1227,14 @@ cnsfweibullnormAlgOpt_logit <- function(start, olsParam, dataTable,
     vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar,
     N = N, FiMat = FiMat, Zvar = Zvar, nZHvar = nZHvar))
   if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
-    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
-      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
-      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
-      sann = function(...) maxSANN(...))
+    maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...),
+      bhhh = function(...) maxLik::maxBHHH(...), nr = function(...) maxLik::maxNR(...),
+      nm = function(...) maxLik::maxNM(...), cg = function(...) maxLik::maxCG(...),
+      sann = function(...) maxLik::maxSANN(...))
     method <- "maxLikAlgo"
   }
   cat("CNSF Estimation...\n")
-  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+  mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
     fn = function(parm) -sum(ccnsfweibullnormlike_logit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -1236,7 +1254,7 @@ cnsfweibullnormAlgOpt_logit <- function(start, olsParam, dataTable,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
-      nZHvar = nZHvar), sr1 = trust.optim(x = startVal,
+      nZHvar = nZHvar), sr1 = trustOptim::trust.optim(x = startVal,
       fn = function(parm) -sum(ccnsfweibullnormlike_logit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -1248,7 +1266,7 @@ cnsfweibullnormAlgOpt_logit <- function(start, olsParam, dataTable,
         nZHvar = nZHvar)), method = "SR1", control = list(maxit = itermax,
         cgtol = gradtol, stop.trust.radius = tol, prec = tol,
         report.level = if (printInfo) 4L else 0, report.precision = 1L)),
-    sparse = trust.optim(x = startVal, fn = function(parm) -sum(ccnsfweibullnormlike_logit(parm,
+    sparse = trustOptim::trust.optim(x = startVal, fn = function(parm) -sum(ccnsfweibullnormlike_logit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
@@ -1256,7 +1274,7 @@ cnsfweibullnormAlgOpt_logit <- function(start, olsParam, dataTable,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
-      nZHvar = nZHvar)), hs = function(parm) as(jacobian(function(parm) -colSums(cgradcnsfweibullnormlike_logit(parm,
+      nZHvar = nZHvar)), hs = function(parm) as(calculus::jacobian(function(parm) -colSums(cgradcnsfweibullnormlike_logit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
@@ -1264,7 +1282,7 @@ cnsfweibullnormAlgOpt_logit <- function(start, olsParam, dataTable,
       control = list(maxit = itermax, cgtol = gradtol,
         stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 4L else 0,
         report.precision = 1L, preconditioner = 1L)),
-    mla = mla(b = startVal, fn = function(parm) -sum(ccnsfweibullnormlike_logit(parm,
+    mla = marqLevAlg::mla(b = startVal, fn = function(parm) -sum(ccnsfweibullnormlike_logit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
@@ -1299,7 +1317,6 @@ cnsfweibullnormAlgOpt_logit <- function(start, olsParam, dataTable,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -1312,13 +1329,13 @@ cnsfweibullnormAlgOpt_logit <- function(start, olsParam, dataTable,
     if (method == "ucminf")
       mleObj$hessian <- mleObj$hessian
     if (method == "nlminb")
-      mleObj$hessian <- jacobian(function(parm) -colSums(cgradcnsfweibullnormlike_logit(parm,
+      mleObj$hessian <- calculus::jacobian(function(parm) -colSums(cgradcnsfweibullnormlike_logit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
         nZHvar = nZHvar)), mleObj$par)
     if (method == "sr1")
-      mleObj$hessian <- jacobian(function(parm) -colSums(cgradcnsfweibullnormlike_logit(parm,
+      mleObj$hessian <- calculus::jacobian(function(parm) -colSums(cgradcnsfweibullnormlike_logit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
@@ -1342,13 +1359,15 @@ cnsfweibullnormAlgOpt_logit <- function(start, olsParam, dataTable,
 cnsfweibullnormAlgOpt_cauchit <- function(start, olsParam, dataTable,
   S, wHvar, nXvar, N, FiMat, uHvar, nuZUvar, vHvar, nvZVvar,
   Zvar, nZHvar, Yvar, Xvar, method, printInfo, itermax, stepmax,
-  tol, gradtol, hessianType, qac) {
+  whichStart, initIter, initAlg, tol, gradtol, hessianType,
+  qac) {
   start_st <- if (!is.null(start))
     start else cstcnsfweibullnorm(olsObj = olsParam, epsiRes = dataTable[["olsResiduals"]],
     S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
     nZHvar = nZHvar, uHvar = uHvar, nuZUvar = nuZUvar, vHvar = vHvar,
     nvZVvar = nvZVvar, nXvar = nXvar, Xvar = Xvar, Yvar = Yvar,
-    itermax = itermax, printInfo = printInfo, tol = tol)
+    whichStart = whichStart, initIter = initIter, initAlg = initAlg,
+    printInfo = printInfo, tol = tol)
   initWeibull <- start_st$initWeibull
   startVal <- start_st$StartVal
   startLoglik <- sum(ccnsfweibullnormlike_cauchit(startVal,
@@ -1357,14 +1376,14 @@ cnsfweibullnormAlgOpt_cauchit <- function(start, olsParam, dataTable,
     S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
     nZHvar = nZHvar))
   if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
-    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
-      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
-      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
-      sann = function(...) maxSANN(...))
+    maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...),
+      bhhh = function(...) maxLik::maxBHHH(...), nr = function(...) maxLik::maxNR(...),
+      nm = function(...) maxLik::maxNM(...), cg = function(...) maxLik::maxCG(...),
+      sann = function(...) maxLik::maxSANN(...))
     method <- "maxLikAlgo"
   }
   cat("CNSF Estimation...\n")
-  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+  mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
     fn = function(parm) -sum(ccnsfweibullnormlike_cauchit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -1384,7 +1403,7 @@ cnsfweibullnormAlgOpt_cauchit <- function(start, olsParam, dataTable,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
-      nZHvar = nZHvar), sr1 = trust.optim(x = startVal,
+      nZHvar = nZHvar), sr1 = trustOptim::trust.optim(x = startVal,
       fn = function(parm) -sum(ccnsfweibullnormlike_cauchit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -1396,7 +1415,7 @@ cnsfweibullnormAlgOpt_cauchit <- function(start, olsParam, dataTable,
         nZHvar = nZHvar)), method = "SR1", control = list(maxit = itermax,
         cgtol = gradtol, stop.trust.radius = tol, prec = tol,
         report.level = if (printInfo) 4L else 0, report.precision = 1L)),
-    sparse = trust.optim(x = startVal, fn = function(parm) -sum(ccnsfweibullnormlike_cauchit(parm,
+    sparse = trustOptim::trust.optim(x = startVal, fn = function(parm) -sum(ccnsfweibullnormlike_cauchit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
@@ -1404,7 +1423,7 @@ cnsfweibullnormAlgOpt_cauchit <- function(start, olsParam, dataTable,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
-      nZHvar = nZHvar)), hs = as(jacobian(function(parm) -colSums(cgradcnsfweibullnormlike_cauchit(parm,
+      nZHvar = nZHvar)), hs = as(calculus::jacobian(function(parm) -colSums(cgradcnsfweibullnormlike_cauchit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
@@ -1412,7 +1431,7 @@ cnsfweibullnormAlgOpt_cauchit <- function(start, olsParam, dataTable,
       control = list(maxit = itermax, cgtol = gradtol,
         stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 4L else 0,
         report.precision = 1L, preconditioner = 1L)),
-    mla = mla(b = startVal, fn = function(parm) -sum(ccnsfweibullnormlike_cauchit(parm,
+    mla = marqLevAlg::mla(b = startVal, fn = function(parm) -sum(ccnsfweibullnormlike_cauchit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
@@ -1447,7 +1466,6 @@ cnsfweibullnormAlgOpt_cauchit <- function(start, olsParam, dataTable,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -1460,13 +1478,13 @@ cnsfweibullnormAlgOpt_cauchit <- function(start, olsParam, dataTable,
     if (method == "ucminf")
       mleObj$hessian <- mleObj$hessian
     if (method == "nlminb")
-      mleObj$hessian <- jacobian(function(parm) colSums(cgradcnsfweibullnormlike_cauchit(parm,
+      mleObj$hessian <- calculus::jacobian(function(parm) colSums(cgradcnsfweibullnormlike_cauchit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
         nZHvar = nZHvar)), unname(mleObj$par))
     if (method == "sr1")
-      mleObj$hessian <- jacobian(function(parm) colSums(cgradcnsfweibullnormlike_cauchit(parm,
+      mleObj$hessian <- calculus::jacobian(function(parm) colSums(cgradcnsfweibullnormlike_cauchit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
@@ -1490,13 +1508,15 @@ cnsfweibullnormAlgOpt_cauchit <- function(start, olsParam, dataTable,
 cnsfweibullnormAlgOpt_probit <- function(start, olsParam, dataTable,
   S, wHvar, nXvar, N, FiMat, uHvar, nuZUvar, vHvar, nvZVvar,
   Zvar, nZHvar, Yvar, Xvar, method, printInfo, itermax, stepmax,
-  tol, gradtol, hessianType, qac) {
+  whichStart, initIter, initAlg, tol, gradtol, hessianType,
+  qac) {
   start_st <- if (!is.null(start))
     start else cstcnsfweibullnorm(olsObj = olsParam, epsiRes = dataTable[["olsResiduals"]],
     S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
     nZHvar = nZHvar, uHvar = uHvar, nuZUvar = nuZUvar, vHvar = vHvar,
     nvZVvar = nvZVvar, nXvar = nXvar, Xvar = Xvar, Yvar = Yvar,
-    itermax = itermax, printInfo = printInfo, tol = tol)
+    whichStart = whichStart, initIter = initIter, initAlg = initAlg,
+    printInfo = printInfo, tol = tol)
   initWeibull <- start_st$initWeibull
   startVal <- start_st$StartVal
   startLoglik <- sum(ccnsfweibullnormlike_probit(startVal,
@@ -1505,14 +1525,14 @@ cnsfweibullnormAlgOpt_probit <- function(start, olsParam, dataTable,
     S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
     nZHvar = nZHvar))
   if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
-    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
-      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
-      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
-      sann = function(...) maxSANN(...))
+    maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...),
+      bhhh = function(...) maxLik::maxBHHH(...), nr = function(...) maxLik::maxNR(...),
+      nm = function(...) maxLik::maxNM(...), cg = function(...) maxLik::maxCG(...),
+      sann = function(...) maxLik::maxSANN(...))
     method <- "maxLikAlgo"
   }
   cat("CNSF Estimation...\n")
-  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+  mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
     fn = function(parm) -sum(ccnsfweibullnormlike_probit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -1532,7 +1552,7 @@ cnsfweibullnormAlgOpt_probit <- function(start, olsParam, dataTable,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
-      nZHvar = nZHvar), sr1 = trust.optim(x = startVal,
+      nZHvar = nZHvar), sr1 = trustOptim::trust.optim(x = startVal,
       fn = function(parm) -sum(ccnsfweibullnormlike_probit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -1544,7 +1564,7 @@ cnsfweibullnormAlgOpt_probit <- function(start, olsParam, dataTable,
         nZHvar = nZHvar)), method = "SR1", control = list(maxit = itermax,
         cgtol = gradtol, stop.trust.radius = tol, prec = tol,
         report.level = if (printInfo) 4L else 0, report.precision = 1L)),
-    sparse = trust.optim(x = startVal, fn = function(parm) -sum(ccnsfweibullnormlike_probit(parm,
+    sparse = trustOptim::trust.optim(x = startVal, fn = function(parm) -sum(ccnsfweibullnormlike_probit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
@@ -1552,7 +1572,7 @@ cnsfweibullnormAlgOpt_probit <- function(start, olsParam, dataTable,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
-      nZHvar = nZHvar)), hs = as(jacobian(function(parm) -colSums(cgradcnsfweibullnormlike_probit(parm,
+      nZHvar = nZHvar)), hs = as(calculus::jacobian(function(parm) -colSums(cgradcnsfweibullnormlike_probit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
@@ -1560,7 +1580,7 @@ cnsfweibullnormAlgOpt_probit <- function(start, olsParam, dataTable,
       control = list(maxit = itermax, cgtol = gradtol,
         stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 4L else 0,
         report.precision = 1L, preconditioner = 1L)),
-    mla = mla(b = startVal, fn = function(parm) -sum(ccnsfweibullnormlike_probit(parm,
+    mla = marqLevAlg::mla(b = startVal, fn = function(parm) -sum(ccnsfweibullnormlike_probit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
@@ -1595,7 +1615,6 @@ cnsfweibullnormAlgOpt_probit <- function(start, olsParam, dataTable,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -1608,13 +1627,13 @@ cnsfweibullnormAlgOpt_probit <- function(start, olsParam, dataTable,
     if (method == "ucminf")
       mleObj$hessian <- mleObj$hessian
     if (method == "nlminb")
-      mleObj$hessian <- jacobian(function(parm) colSums(cgradcnsfweibullnormlike_probit(parm,
+      mleObj$hessian <- calculus::jacobian(function(parm) colSums(cgradcnsfweibullnormlike_probit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
         nZHvar = nZHvar)), unname(mleObj$par))
     if (method == "sr1")
-      mleObj$hessian <- jacobian(function(parm) colSums(cgradcnsfweibullnormlike_probit(parm,
+      mleObj$hessian <- calculus::jacobian(function(parm) colSums(cgradcnsfweibullnormlike_probit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
@@ -1638,13 +1657,15 @@ cnsfweibullnormAlgOpt_probit <- function(start, olsParam, dataTable,
 cnsfweibullnormAlgOpt_cloglog <- function(start, olsParam, dataTable,
   S, wHvar, nXvar, N, FiMat, uHvar, nuZUvar, vHvar, nvZVvar,
   Zvar, nZHvar, Yvar, Xvar, method, printInfo, itermax, stepmax,
-  tol, gradtol, hessianType, qac) {
+  whichStart, initIter, initAlg, tol, gradtol, hessianType,
+  qac) {
   start_st <- if (!is.null(start))
     start else cstcnsfweibullnorm(olsObj = olsParam, epsiRes = dataTable[["olsResiduals"]],
     S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
     nZHvar = nZHvar, uHvar = uHvar, nuZUvar = nuZUvar, vHvar = vHvar,
     nvZVvar = nvZVvar, nXvar = nXvar, Xvar = Xvar, Yvar = Yvar,
-    itermax = itermax, printInfo = printInfo, tol = tol)
+    whichStart = whichStart, initIter = initIter, initAlg = initAlg,
+    printInfo = printInfo, tol = tol)
   initWeibull <- start_st$initWeibull
   startVal <- start_st$StartVal
   startLoglik <- sum(ccnsfweibullnormlike_cloglog(startVal,
@@ -1653,14 +1674,14 @@ cnsfweibullnormAlgOpt_cloglog <- function(start, olsParam, dataTable,
     S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
     nZHvar = nZHvar))
   if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
-    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
-      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
-      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
-      sann = function(...) maxSANN(...))
+    maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...),
+      bhhh = function(...) maxLik::maxBHHH(...), nr = function(...) maxLik::maxNR(...),
+      nm = function(...) maxLik::maxNM(...), cg = function(...) maxLik::maxCG(...),
+      sann = function(...) maxLik::maxSANN(...))
     method <- "maxLikAlgo"
   }
   cat("CNSF Estimation...\n")
-  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+  mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
     fn = function(parm) -sum(ccnsfweibullnormlike_cloglog(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -1680,7 +1701,7 @@ cnsfweibullnormAlgOpt_cloglog <- function(start, olsParam, dataTable,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
-      nZHvar = nZHvar), sr1 = trust.optim(x = startVal,
+      nZHvar = nZHvar), sr1 = trustOptim::trust.optim(x = startVal,
       fn = function(parm) -sum(ccnsfweibullnormlike_cloglog(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -1692,7 +1713,7 @@ cnsfweibullnormAlgOpt_cloglog <- function(start, olsParam, dataTable,
         nZHvar = nZHvar)), method = "SR1", control = list(maxit = itermax,
         cgtol = gradtol, stop.trust.radius = tol, prec = tol,
         report.level = if (printInfo) 4L else 0, report.precision = 1L)),
-    sparse = trust.optim(x = startVal, fn = function(parm) -sum(ccnsfweibullnormlike_cloglog(parm,
+    sparse = trustOptim::trust.optim(x = startVal, fn = function(parm) -sum(ccnsfweibullnormlike_cloglog(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
@@ -1700,7 +1721,7 @@ cnsfweibullnormAlgOpt_cloglog <- function(start, olsParam, dataTable,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
-      nZHvar = nZHvar)), hs = as(jacobian(function(parm) -colSums(cgradcnsfweibullnormlike_cloglog(parm,
+      nZHvar = nZHvar)), hs = as(calculus::jacobian(function(parm) -colSums(cgradcnsfweibullnormlike_cloglog(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
@@ -1708,7 +1729,7 @@ cnsfweibullnormAlgOpt_cloglog <- function(start, olsParam, dataTable,
       control = list(maxit = itermax, cgtol = gradtol,
         stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 4L else 0,
         report.precision = 1L, preconditioner = 1L)),
-    mla = mla(b = startVal, fn = function(parm) -sum(ccnsfweibullnormlike_cloglog(parm,
+    mla = marqLevAlg::mla(b = startVal, fn = function(parm) -sum(ccnsfweibullnormlike_cloglog(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
@@ -1743,7 +1764,6 @@ cnsfweibullnormAlgOpt_cloglog <- function(start, olsParam, dataTable,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -1756,13 +1776,13 @@ cnsfweibullnormAlgOpt_cloglog <- function(start, olsParam, dataTable,
     if (method == "ucminf")
       mleObj$hessian <- mleObj$hessian
     if (method == "nlminb")
-      mleObj$hessian <- jacobian(function(parm) colSums(cgradcnsfweibullnormlike_cloglog(parm,
+      mleObj$hessian <- calculus::jacobian(function(parm) colSums(cgradcnsfweibullnormlike_cloglog(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
         nZHvar = nZHvar)), unname(mleObj$par))
     if (method == "sr1")
-      mleObj$hessian <- jacobian(function(parm) colSums(cgradcnsfweibullnormlike_cloglog(parm,
+      mleObj$hessian <- calculus::jacobian(function(parm) colSums(cgradcnsfweibullnormlike_cloglog(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
@@ -1788,13 +1808,15 @@ cnsfweibullnormAlgOpt_cloglog <- function(start, olsParam, dataTable,
 mcesfweibullnormAlgOpt_logit <- function(start, olsParam, dataTable,
   S, wHvar, nXvar, N, FiMat, uHvar, nuZUvar, vHvar, nvZVvar,
   Zvar, nZHvar, Yvar, Xvar, method, printInfo, itermax, stepmax,
-  tol, gradtol, hessianType, qac) {
+  whichStart, initIter, initAlg, tol, gradtol, hessianType,
+  qac) {
   start_st <- if (!is.null(start))
     start else cstmcesfweibullnorm(olsObj = olsParam, epsiRes = dataTable[["olsResiduals"]],
     S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
     nZHvar = nZHvar, uHvar = uHvar, nuZUvar = nuZUvar, vHvar = vHvar,
     nvZVvar = nvZVvar, nXvar = nXvar, Xvar = Xvar, Yvar = Yvar,
-    itermax = itermax, printInfo = printInfo, tol = tol)
+    whichStart = whichStart, initIter = initIter, initAlg = initAlg,
+    printInfo = printInfo, tol = tol)
   initWeibull <- start_st$initWeibull
   startVal <- start_st$StartVal
   startLoglik <- sum(cmcesfweibullnormlike_logit(startVal,
@@ -1803,14 +1825,14 @@ mcesfweibullnormAlgOpt_logit <- function(start, olsParam, dataTable,
     S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
     nZHvar = nZHvar))
   if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
-    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
-      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
-      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
-      sann = function(...) maxSANN(...))
+    maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...),
+      bhhh = function(...) maxLik::maxBHHH(...), nr = function(...) maxLik::maxNR(...),
+      nm = function(...) maxLik::maxNM(...), cg = function(...) maxLik::maxCG(...),
+      sann = function(...) maxLik::maxSANN(...))
     method <- "maxLikAlgo"
   }
   cat("MCESF Estimation...\n")
-  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+  mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
     fn = function(parm) -sum(cmcesfweibullnormlike_logit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -1830,7 +1852,7 @@ mcesfweibullnormAlgOpt_logit <- function(start, olsParam, dataTable,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
-      nZHvar = nZHvar), sr1 = trust.optim(x = startVal,
+      nZHvar = nZHvar), sr1 = trustOptim::trust.optim(x = startVal,
       fn = function(parm) -sum(cmcesfweibullnormlike_logit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -1842,7 +1864,7 @@ mcesfweibullnormAlgOpt_logit <- function(start, olsParam, dataTable,
         nZHvar = nZHvar)), method = "SR1", control = list(maxit = itermax,
         cgtol = gradtol, stop.trust.radius = tol, prec = tol,
         report.level = if (printInfo) 4L else 0, report.precision = 1L)),
-    sparse = trust.optim(x = startVal, fn = function(parm) -sum(cmcesfweibullnormlike_logit(parm,
+    sparse = trustOptim::trust.optim(x = startVal, fn = function(parm) -sum(cmcesfweibullnormlike_logit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
@@ -1850,7 +1872,7 @@ mcesfweibullnormAlgOpt_logit <- function(start, olsParam, dataTable,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
-      nZHvar = nZHvar)), hs = function(parm) as(jacobian(function(parm) -colSums(cgradmcesfweibullnormlike_logit(parm,
+      nZHvar = nZHvar)), hs = function(parm) as(calculus::jacobian(function(parm) -colSums(cgradmcesfweibullnormlike_logit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
@@ -1858,7 +1880,7 @@ mcesfweibullnormAlgOpt_logit <- function(start, olsParam, dataTable,
       control = list(maxit = itermax, cgtol = gradtol,
         stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 4L else 0,
         report.precision = 1L, preconditioner = 1L)),
-    mla = mla(b = startVal, fn = function(parm) -sum(cmcesfweibullnormlike_logit(parm,
+    mla = marqLevAlg::mla(b = startVal, fn = function(parm) -sum(cmcesfweibullnormlike_logit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
@@ -1893,7 +1915,6 @@ mcesfweibullnormAlgOpt_logit <- function(start, olsParam, dataTable,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -1906,13 +1927,13 @@ mcesfweibullnormAlgOpt_logit <- function(start, olsParam, dataTable,
     if (method == "ucminf")
       mleObj$hessian <- mleObj$hessian
     if (method == "nlminb")
-      mleObj$hessian <- jacobian(function(parm) -colSums(cgradmcesfweibullnormlike_logit(parm,
+      mleObj$hessian <- calculus::jacobian(function(parm) -colSums(cgradmcesfweibullnormlike_logit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
         nZHvar = nZHvar)), mleObj$par)
     if (method == "sr1")
-      mleObj$hessian <- jacobian(function(parm) -colSums(cgradmcesfweibullnormlike_logit(parm,
+      mleObj$hessian <- calculus::jacobian(function(parm) -colSums(cgradmcesfweibullnormlike_logit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
@@ -1936,13 +1957,15 @@ mcesfweibullnormAlgOpt_logit <- function(start, olsParam, dataTable,
 mcesfweibullnormAlgOpt_cauchit <- function(start, olsParam, dataTable,
   S, wHvar, nXvar, N, FiMat, uHvar, nuZUvar, vHvar, nvZVvar,
   Zvar, nZHvar, Yvar, Xvar, method, printInfo, itermax, stepmax,
-  tol, gradtol, hessianType, qac) {
+  whichStart, initIter, initAlg, tol, gradtol, hessianType,
+  qac) {
   start_st <- if (!is.null(start))
     start else cstmcesfweibullnorm(olsObj = olsParam, epsiRes = dataTable[["olsResiduals"]],
     S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
     nZHvar = nZHvar, uHvar = uHvar, nuZUvar = nuZUvar, vHvar = vHvar,
     nvZVvar = nvZVvar, nXvar = nXvar, Xvar = Xvar, Yvar = Yvar,
-    itermax = itermax, printInfo = printInfo, tol = tol)
+    whichStart = whichStart, initIter = initIter, initAlg = initAlg,
+    printInfo = printInfo, tol = tol)
   initWeibull <- start_st$initWeibull
   startVal <- start_st$StartVal
   startLoglik <- sum(cmcesfweibullnormlike_cauchit(startVal,
@@ -1951,14 +1974,14 @@ mcesfweibullnormAlgOpt_cauchit <- function(start, olsParam, dataTable,
     S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
     nZHvar = nZHvar))
   if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
-    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
-      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
-      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
-      sann = function(...) maxSANN(...))
+    maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...),
+      bhhh = function(...) maxLik::maxBHHH(...), nr = function(...) maxLik::maxNR(...),
+      nm = function(...) maxLik::maxNM(...), cg = function(...) maxLik::maxCG(...),
+      sann = function(...) maxLik::maxSANN(...))
     method <- "maxLikAlgo"
   }
   cat("MCESF Estimation...\n")
-  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+  mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
     fn = function(parm) -sum(cmcesfweibullnormlike_cauchit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -1978,7 +2001,7 @@ mcesfweibullnormAlgOpt_cauchit <- function(start, olsParam, dataTable,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
-      nZHvar = nZHvar), sr1 = trust.optim(x = startVal,
+      nZHvar = nZHvar), sr1 = trustOptim::trust.optim(x = startVal,
       fn = function(parm) -sum(cmcesfweibullnormlike_cauchit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -1990,7 +2013,7 @@ mcesfweibullnormAlgOpt_cauchit <- function(start, olsParam, dataTable,
         nZHvar = nZHvar)), method = "SR1", control = list(maxit = itermax,
         cgtol = gradtol, stop.trust.radius = tol, prec = tol,
         report.level = if (printInfo) 4L else 0, report.precision = 1L)),
-    sparse = trust.optim(x = startVal, fn = function(parm) -sum(cmcesfweibullnormlike_cauchit(parm,
+    sparse = trustOptim::trust.optim(x = startVal, fn = function(parm) -sum(cmcesfweibullnormlike_cauchit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
@@ -1998,7 +2021,7 @@ mcesfweibullnormAlgOpt_cauchit <- function(start, olsParam, dataTable,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
-      nZHvar = nZHvar)), hs = as(jacobian(function(parm) -colSums(cgradmcesfweibullnormlike_cauchit(parm,
+      nZHvar = nZHvar)), hs = as(calculus::jacobian(function(parm) -colSums(cgradmcesfweibullnormlike_cauchit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
@@ -2006,7 +2029,7 @@ mcesfweibullnormAlgOpt_cauchit <- function(start, olsParam, dataTable,
       control = list(maxit = itermax, cgtol = gradtol,
         stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 4L else 0,
         report.precision = 1L, preconditioner = 1L)),
-    mla = mla(b = startVal, fn = function(parm) -sum(cmcesfweibullnormlike_cauchit(parm,
+    mla = marqLevAlg::mla(b = startVal, fn = function(parm) -sum(cmcesfweibullnormlike_cauchit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
@@ -2041,7 +2064,6 @@ mcesfweibullnormAlgOpt_cauchit <- function(start, olsParam, dataTable,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -2054,13 +2076,13 @@ mcesfweibullnormAlgOpt_cauchit <- function(start, olsParam, dataTable,
     if (method == "ucminf")
       mleObj$hessian <- mleObj$hessian
     if (method == "nlminb")
-      mleObj$hessian <- jacobian(function(parm) colSums(cgradmcesfweibullnormlike_cauchit(parm,
+      mleObj$hessian <- calculus::jacobian(function(parm) colSums(cgradmcesfweibullnormlike_cauchit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
         nZHvar = nZHvar)), unname(mleObj$par))
     if (method == "sr1")
-      mleObj$hessian <- jacobian(function(parm) colSums(cgradmcesfweibullnormlike_cauchit(parm,
+      mleObj$hessian <- calculus::jacobian(function(parm) colSums(cgradmcesfweibullnormlike_cauchit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
@@ -2084,13 +2106,15 @@ mcesfweibullnormAlgOpt_cauchit <- function(start, olsParam, dataTable,
 mcesfweibullnormAlgOpt_probit <- function(start, olsParam, dataTable,
   S, wHvar, nXvar, N, FiMat, uHvar, nuZUvar, vHvar, nvZVvar,
   Zvar, nZHvar, Yvar, Xvar, method, printInfo, itermax, stepmax,
-  tol, gradtol, hessianType, qac) {
+  whichStart, initIter, initAlg, tol, gradtol, hessianType,
+  qac) {
   start_st <- if (!is.null(start))
     start else cstmcesfweibullnorm(olsObj = olsParam, epsiRes = dataTable[["olsResiduals"]],
     S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
     nZHvar = nZHvar, uHvar = uHvar, nuZUvar = nuZUvar, vHvar = vHvar,
     nvZVvar = nvZVvar, nXvar = nXvar, Xvar = Xvar, Yvar = Yvar,
-    itermax = itermax, printInfo = printInfo, tol = tol)
+    whichStart = whichStart, initIter = initIter, initAlg = initAlg,
+    printInfo = printInfo, tol = tol)
   initWeibull <- start_st$initWeibull
   startVal <- start_st$StartVal
   startLoglik <- sum(cmcesfweibullnormlike_probit(startVal,
@@ -2099,14 +2123,14 @@ mcesfweibullnormAlgOpt_probit <- function(start, olsParam, dataTable,
     S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
     nZHvar = nZHvar))
   if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
-    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
-      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
-      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
-      sann = function(...) maxSANN(...))
+    maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...),
+      bhhh = function(...) maxLik::maxBHHH(...), nr = function(...) maxLik::maxNR(...),
+      nm = function(...) maxLik::maxNM(...), cg = function(...) maxLik::maxCG(...),
+      sann = function(...) maxLik::maxSANN(...))
     method <- "maxLikAlgo"
   }
   cat("MCESF Estimation...\n")
-  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+  mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
     fn = function(parm) -sum(cmcesfweibullnormlike_probit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -2126,7 +2150,7 @@ mcesfweibullnormAlgOpt_probit <- function(start, olsParam, dataTable,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
-      nZHvar = nZHvar), sr1 = trust.optim(x = startVal,
+      nZHvar = nZHvar), sr1 = trustOptim::trust.optim(x = startVal,
       fn = function(parm) -sum(cmcesfweibullnormlike_probit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -2138,7 +2162,7 @@ mcesfweibullnormAlgOpt_probit <- function(start, olsParam, dataTable,
         nZHvar = nZHvar)), method = "SR1", control = list(maxit = itermax,
         cgtol = gradtol, stop.trust.radius = tol, prec = tol,
         report.level = if (printInfo) 4L else 0, report.precision = 1L)),
-    sparse = trust.optim(x = startVal, fn = function(parm) -sum(cmcesfweibullnormlike_probit(parm,
+    sparse = trustOptim::trust.optim(x = startVal, fn = function(parm) -sum(cmcesfweibullnormlike_probit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
@@ -2146,7 +2170,7 @@ mcesfweibullnormAlgOpt_probit <- function(start, olsParam, dataTable,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
-      nZHvar = nZHvar)), hs = as(jacobian(function(parm) -colSums(cgradmcesfweibullnormlike_probit(parm,
+      nZHvar = nZHvar)), hs = as(calculus::jacobian(function(parm) -colSums(cgradmcesfweibullnormlike_probit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
@@ -2154,7 +2178,7 @@ mcesfweibullnormAlgOpt_probit <- function(start, olsParam, dataTable,
       control = list(maxit = itermax, cgtol = gradtol,
         stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 4L else 0,
         report.precision = 1L, preconditioner = 1L)),
-    mla = mla(b = startVal, fn = function(parm) -sum(cmcesfweibullnormlike_probit(parm,
+    mla = marqLevAlg::mla(b = startVal, fn = function(parm) -sum(cmcesfweibullnormlike_probit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
@@ -2189,7 +2213,6 @@ mcesfweibullnormAlgOpt_probit <- function(start, olsParam, dataTable,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -2202,13 +2225,13 @@ mcesfweibullnormAlgOpt_probit <- function(start, olsParam, dataTable,
     if (method == "ucminf")
       mleObj$hessian <- mleObj$hessian
     if (method == "nlminb")
-      mleObj$hessian <- jacobian(function(parm) colSums(cgradmcesfweibullnormlike_probit(parm,
+      mleObj$hessian <- calculus::jacobian(function(parm) colSums(cgradmcesfweibullnormlike_probit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
         nZHvar = nZHvar)), unname(mleObj$par))
     if (method == "sr1")
-      mleObj$hessian <- jacobian(function(parm) colSums(cgradmcesfweibullnormlike_probit(parm,
+      mleObj$hessian <- calculus::jacobian(function(parm) colSums(cgradmcesfweibullnormlike_probit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
@@ -2232,13 +2255,15 @@ mcesfweibullnormAlgOpt_probit <- function(start, olsParam, dataTable,
 mcesfweibullnormAlgOpt_cloglog <- function(start, olsParam, dataTable,
   S, wHvar, nXvar, N, FiMat, uHvar, nuZUvar, vHvar, nvZVvar,
   Zvar, nZHvar, Yvar, Xvar, method, printInfo, itermax, stepmax,
-  tol, gradtol, hessianType, qac) {
+  whichStart, initIter, initAlg, tol, gradtol, hessianType,
+  qac) {
   start_st <- if (!is.null(start))
     start else cstmcesfweibullnorm(olsObj = olsParam, epsiRes = dataTable[["olsResiduals"]],
     S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
     nZHvar = nZHvar, uHvar = uHvar, nuZUvar = nuZUvar, vHvar = vHvar,
     nvZVvar = nvZVvar, nXvar = nXvar, Xvar = Xvar, Yvar = Yvar,
-    itermax = itermax, printInfo = printInfo, tol = tol)
+    whichStart = whichStart, initIter = initIter, initAlg = initAlg,
+    printInfo = printInfo, tol = tol)
   initWeibull <- start_st$initWeibull
   startVal <- start_st$StartVal
   startLoglik <- sum(cmcesfweibullnormlike_cloglog(startVal,
@@ -2247,14 +2272,14 @@ mcesfweibullnormAlgOpt_cloglog <- function(start, olsParam, dataTable,
     S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
     nZHvar = nZHvar))
   if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
-    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
-      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
-      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
-      sann = function(...) maxSANN(...))
+    maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...),
+      bhhh = function(...) maxLik::maxBHHH(...), nr = function(...) maxLik::maxNR(...),
+      nm = function(...) maxLik::maxNM(...), cg = function(...) maxLik::maxCG(...),
+      sann = function(...) maxLik::maxSANN(...))
     method <- "maxLikAlgo"
   }
   cat("MCESF Estimation...\n")
-  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+  mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
     fn = function(parm) -sum(cmcesfweibullnormlike_cloglog(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -2274,7 +2299,7 @@ mcesfweibullnormAlgOpt_cloglog <- function(start, olsParam, dataTable,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
-      nZHvar = nZHvar), sr1 = trust.optim(x = startVal,
+      nZHvar = nZHvar), sr1 = trustOptim::trust.optim(x = startVal,
       fn = function(parm) -sum(cmcesfweibullnormlike_cloglog(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -2286,7 +2311,7 @@ mcesfweibullnormAlgOpt_cloglog <- function(start, olsParam, dataTable,
         nZHvar = nZHvar)), method = "SR1", control = list(maxit = itermax,
         cgtol = gradtol, stop.trust.radius = tol, prec = tol,
         report.level = if (printInfo) 4L else 0, report.precision = 1L)),
-    sparse = trust.optim(x = startVal, fn = function(parm) -sum(cmcesfweibullnormlike_cloglog(parm,
+    sparse = trustOptim::trust.optim(x = startVal, fn = function(parm) -sum(cmcesfweibullnormlike_cloglog(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
@@ -2294,7 +2319,7 @@ mcesfweibullnormAlgOpt_cloglog <- function(start, olsParam, dataTable,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
-      nZHvar = nZHvar)), hs = as(jacobian(function(parm) -colSums(cgradmcesfweibullnormlike_cloglog(parm,
+      nZHvar = nZHvar)), hs = as(calculus::jacobian(function(parm) -colSums(cgradmcesfweibullnormlike_cloglog(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
@@ -2302,7 +2327,7 @@ mcesfweibullnormAlgOpt_cloglog <- function(start, olsParam, dataTable,
       control = list(maxit = itermax, cgtol = gradtol,
         stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 4L else 0,
         report.precision = 1L, preconditioner = 1L)),
-    mla = mla(b = startVal, fn = function(parm) -sum(cmcesfweibullnormlike_cloglog(parm,
+    mla = marqLevAlg::mla(b = startVal, fn = function(parm) -sum(cmcesfweibullnormlike_cloglog(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
@@ -2337,7 +2362,6 @@ mcesfweibullnormAlgOpt_cloglog <- function(start, olsParam, dataTable,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -2350,13 +2374,13 @@ mcesfweibullnormAlgOpt_cloglog <- function(start, olsParam, dataTable,
     if (method == "ucminf")
       mleObj$hessian <- mleObj$hessian
     if (method == "nlminb")
-      mleObj$hessian <- jacobian(function(parm) colSums(cgradmcesfweibullnormlike_cloglog(parm,
+      mleObj$hessian <- calculus::jacobian(function(parm) colSums(cgradmcesfweibullnormlike_cloglog(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
         nZHvar = nZHvar)), unname(mleObj$par))
     if (method == "sr1")
-      mleObj$hessian <- jacobian(function(parm) colSums(cgradmcesfweibullnormlike_cloglog(parm,
+      mleObj$hessian <- calculus::jacobian(function(parm) colSums(cgradmcesfweibullnormlike_cloglog(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar,
@@ -2490,7 +2514,7 @@ ccnsfweibullnormeff_logit <- function(object, level) {
       NA)
     ReffBC_c2 <- ifelse(Group_c == 2, teBC_reciprocal_c2,
       NA)
-    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+    res <- data.frame(Group_c = Group_c, PosteriorProb_c = P_cond_c,
       odRatio = odRatio, u_c = u_c, teJLMS_c = teJLMS_c,
       teBC_c = teBC_c, teBC_reciprocal_c = teBC_reciprocal_c,
       PosteriorProb_c1 = Pcond_c1, PriorProb_c1 = Probc1,
@@ -2500,7 +2524,7 @@ ccnsfweibullnormeff_logit <- function(object, level) {
       ineff_c1 = ineff_c1, ineff_c2 = ineff_c2, effBC_c1 = effBC_c1,
       effBC_c2 = effBC_c2, ReffBC_c1 = ReffBC_c1, ReffBC_c2 = ReffBC_c2)
   } else {
-    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+    res <- data.frame(Group_c = Group_c, PosteriorProb_c = P_cond_c,
       odRatio = odRatio, u_c = u_c, PosteriorProb_c1 = Pcond_c1,
       PriorProb_c1 = Probc1, u_c1 = u_c1, PosteriorProb_c2 = Pcond_c2,
       PriorProb_c2 = Probc2, u_c2 = u_c2, ineff_c1 = ineff_c1,
@@ -2615,7 +2639,7 @@ ccnsfweibullnormeff_cauchit <- function(object, level) {
       NA)
     ReffBC_c2 <- ifelse(Group_c == 2, teBC_reciprocal_c2,
       NA)
-    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+    res <- data.frame(Group_c = Group_c, PosteriorProb_c = P_cond_c,
       odRatio = odRatio, u_c = u_c, teJLMS_c = teJLMS_c,
       teBC_c = teBC_c, teBC_reciprocal_c = teBC_reciprocal_c,
       PosteriorProb_c1 = Pcond_c1, PriorProb_c1 = Probc1,
@@ -2625,7 +2649,7 @@ ccnsfweibullnormeff_cauchit <- function(object, level) {
       ineff_c1 = ineff_c1, ineff_c2 = ineff_c2, effBC_c1 = effBC_c1,
       effBC_c2 = effBC_c2, ReffBC_c1 = ReffBC_c1, ReffBC_c2 = ReffBC_c2)
   } else {
-    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+    res <- data.frame(Group_c = Group_c, PosteriorProb_c = P_cond_c,
       odRatio = odRatio, u_c = u_c, PosteriorProb_c1 = Pcond_c1,
       PriorProb_c1 = Probc1, u_c1 = u_c1, PosteriorProb_c2 = Pcond_c2,
       PriorProb_c2 = Probc2, u_c2 = u_c2, ineff_c1 = ineff_c1,
@@ -2740,7 +2764,7 @@ ccnsfweibullnormeff_probit <- function(object, level) {
       NA)
     ReffBC_c2 <- ifelse(Group_c == 2, teBC_reciprocal_c2,
       NA)
-    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+    res <- data.frame(Group_c = Group_c, PosteriorProb_c = P_cond_c,
       odRatio = odRatio, u_c = u_c, teJLMS_c = teJLMS_c,
       teBC_c = teBC_c, teBC_reciprocal_c = teBC_reciprocal_c,
       PosteriorProb_c1 = Pcond_c1, PriorProb_c1 = Probc1,
@@ -2750,7 +2774,7 @@ ccnsfweibullnormeff_probit <- function(object, level) {
       ineff_c1 = ineff_c1, ineff_c2 = ineff_c2, effBC_c1 = effBC_c1,
       effBC_c2 = effBC_c2, ReffBC_c1 = ReffBC_c1, ReffBC_c2 = ReffBC_c2)
   } else {
-    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+    res <- data.frame(Group_c = Group_c, PosteriorProb_c = P_cond_c,
       odRatio = odRatio, u_c = u_c, PosteriorProb_c1 = Pcond_c1,
       PriorProb_c1 = Probc1, u_c1 = u_c1, PosteriorProb_c2 = Pcond_c2,
       PriorProb_c2 = Probc2, u_c2 = u_c2, ineff_c1 = ineff_c1,
@@ -2865,7 +2889,7 @@ ccnsfweibullnormeff_cloglog <- function(object, level) {
       NA)
     ReffBC_c2 <- ifelse(Group_c == 2, teBC_reciprocal_c2,
       NA)
-    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+    res <- data.frame(Group_c = Group_c, PosteriorProb_c = P_cond_c,
       odRatio = odRatio, u_c = u_c, teJLMS_c = teJLMS_c,
       teBC_c = teBC_c, teBC_reciprocal_c = teBC_reciprocal_c,
       PosteriorProb_c1 = Pcond_c1, PriorProb_c1 = Probc1,
@@ -2875,7 +2899,7 @@ ccnsfweibullnormeff_cloglog <- function(object, level) {
       ineff_c1 = ineff_c1, ineff_c2 = ineff_c2, effBC_c1 = effBC_c1,
       effBC_c2 = effBC_c2, ReffBC_c1 = ReffBC_c1, ReffBC_c2 = ReffBC_c2)
   } else {
-    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+    res <- data.frame(Group_c = Group_c, PosteriorProb_c = P_cond_c,
       odRatio = odRatio, u_c = u_c, PosteriorProb_c1 = Pcond_c1,
       PriorProb_c1 = Probc1, u_c1 = u_c1, PosteriorProb_c2 = Pcond_c2,
       PriorProb_c2 = Probc2, u_c2 = u_c2, ineff_c1 = ineff_c1,
@@ -3003,7 +3027,7 @@ cmcesfweibullnormeff_logit <- function(object, level) {
       NA)
     ReffBC_c2 <- ifelse(Group_c == 2, teBC_reciprocal_c2,
       NA)
-    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+    res <- data.frame(Group_c = Group_c, PosteriorProb_c = P_cond_c,
       odRatio = odRatio, u_c = u_c, teJLMS_c = teJLMS_c,
       teBC_c = teBC_c, teBC_reciprocal_c = teBC_reciprocal_c,
       PosteriorProb_c1 = Pcond_c1, PriorProb_c1 = Probc1,
@@ -3013,7 +3037,7 @@ cmcesfweibullnormeff_logit <- function(object, level) {
       ineff_c1 = ineff_c1, ineff_c2 = ineff_c2, effBC_c1 = effBC_c1,
       effBC_c2 = effBC_c2, ReffBC_c1 = ReffBC_c1, ReffBC_c2 = ReffBC_c2)
   } else {
-    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+    res <- data.frame(Group_c = Group_c, PosteriorProb_c = P_cond_c,
       odRatio = odRatio, u_c = u_c, PosteriorProb_c1 = Pcond_c1,
       PriorProb_c1 = Probc1, u_c1 = u_c1, PosteriorProb_c2 = Pcond_c2,
       PriorProb_c2 = Probc2, u_c2 = u_c2, ineff_c1 = ineff_c1,
@@ -3139,7 +3163,7 @@ cmcesfweibullnormeff_cauchit <- function(object, level) {
       NA)
     ReffBC_c2 <- ifelse(Group_c == 2, teBC_reciprocal_c2,
       NA)
-    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+    res <- data.frame(Group_c = Group_c, PosteriorProb_c = P_cond_c,
       odRatio = odRatio, u_c = u_c, teJLMS_c = teJLMS_c,
       teBC_c = teBC_c, teBC_reciprocal_c = teBC_reciprocal_c,
       PosteriorProb_c1 = Pcond_c1, PriorProb_c1 = Probc1,
@@ -3149,7 +3173,7 @@ cmcesfweibullnormeff_cauchit <- function(object, level) {
       ineff_c1 = ineff_c1, ineff_c2 = ineff_c2, effBC_c1 = effBC_c1,
       effBC_c2 = effBC_c2, ReffBC_c1 = ReffBC_c1, ReffBC_c2 = ReffBC_c2)
   } else {
-    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+    res <- data.frame(Group_c = Group_c, PosteriorProb_c = P_cond_c,
       odRatio = odRatio, u_c = u_c, PosteriorProb_c1 = Pcond_c1,
       PriorProb_c1 = Probc1, u_c1 = u_c1, PosteriorProb_c2 = Pcond_c2,
       PriorProb_c2 = Probc2, u_c2 = u_c2, ineff_c1 = ineff_c1,
@@ -3275,7 +3299,7 @@ cmcesfweibullnormeff_probit <- function(object, level) {
       NA)
     ReffBC_c2 <- ifelse(Group_c == 2, teBC_reciprocal_c2,
       NA)
-    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+    res <- data.frame(Group_c = Group_c, PosteriorProb_c = P_cond_c,
       odRatio = odRatio, u_c = u_c, teJLMS_c = teJLMS_c,
       teBC_c = teBC_c, teBC_reciprocal_c = teBC_reciprocal_c,
       PosteriorProb_c1 = Pcond_c1, PriorProb_c1 = Probc1,
@@ -3285,7 +3309,7 @@ cmcesfweibullnormeff_probit <- function(object, level) {
       ineff_c1 = ineff_c1, ineff_c2 = ineff_c2, effBC_c1 = effBC_c1,
       effBC_c2 = effBC_c2, ReffBC_c1 = ReffBC_c1, ReffBC_c2 = ReffBC_c2)
   } else {
-    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+    res <- data.frame(Group_c = Group_c, PosteriorProb_c = P_cond_c,
       odRatio = odRatio, u_c = u_c, PosteriorProb_c1 = Pcond_c1,
       PriorProb_c1 = Probc1, u_c1 = u_c1, PosteriorProb_c2 = Pcond_c2,
       PriorProb_c2 = Probc2, u_c2 = u_c2, ineff_c1 = ineff_c1,
@@ -3411,7 +3435,7 @@ cmcesfweibullnormeff_cloglog <- function(object, level) {
       NA)
     ReffBC_c2 <- ifelse(Group_c == 2, teBC_reciprocal_c2,
       NA)
-    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+    res <- data.frame(Group_c = Group_c, PosteriorProb_c = P_cond_c,
       odRatio = odRatio, u_c = u_c, teJLMS_c = teJLMS_c,
       teBC_c = teBC_c, teBC_reciprocal_c = teBC_reciprocal_c,
       PosteriorProb_c1 = Pcond_c1, PriorProb_c1 = Probc1,
@@ -3421,7 +3445,7 @@ cmcesfweibullnormeff_cloglog <- function(object, level) {
       ineff_c1 = ineff_c1, ineff_c2 = ineff_c2, effBC_c1 = effBC_c1,
       effBC_c2 = effBC_c2, ReffBC_c1 = ReffBC_c1, ReffBC_c2 = ReffBC_c2)
   } else {
-    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+    res <- data.frame(Group_c = Group_c, PosteriorProb_c = P_cond_c,
       odRatio = odRatio, u_c = u_c, PosteriorProb_c1 = Pcond_c1,
       PriorProb_c1 = Probc1, u_c1 = u_c1, PosteriorProb_c2 = Pcond_c2,
       PriorProb_c2 = Probc2, u_c2 = u_c2, ineff_c1 = ineff_c1,
@@ -3489,7 +3513,7 @@ ccnsfmargweibullnorm_Eu_logit <- function(object) {
     "_c2")
   colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
     "_c")
-  return(bind_cols(margEff1, margEff2, margEff_c))
+  return(data.frame(margEff1, margEff2, margEff_c))
 }
 
 ccnsfmargweibullnorm_Vu_logit <- function(object) {
@@ -3546,7 +3570,7 @@ ccnsfmargweibullnorm_Vu_logit <- function(object) {
     "_c2")
   colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
     "_c")
-  return(bind_cols(margEff1, margEff2, margEff_c))
+  return(data.frame(margEff1, margEff2, margEff_c))
 }
 
 ## cauchit specification class membership
@@ -3602,7 +3626,7 @@ ccnsfmargweibullnorm_Eu_cauchit <- function(object) {
     "_c2")
   colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
     "_c")
-  return(bind_cols(margEff1, margEff2, margEff_c))
+  return(data.frame(margEff1, margEff2, margEff_c))
 }
 
 ccnsfmargweibullnorm_Vu_cauchit <- function(object) {
@@ -3659,7 +3683,7 @@ ccnsfmargweibullnorm_Vu_cauchit <- function(object) {
     "_c2")
   colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
     "_c")
-  return(bind_cols(margEff1, margEff2, margEff_c))
+  return(data.frame(margEff1, margEff2, margEff_c))
 }
 
 ## probit specification class membership
@@ -3715,7 +3739,7 @@ ccnsfmargweibullnorm_Eu_probit <- function(object) {
     "_c2")
   colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
     "_c")
-  return(bind_cols(margEff1, margEff2, margEff_c))
+  return(data.frame(margEff1, margEff2, margEff_c))
 }
 
 ccnsfmargweibullnorm_Vu_probit <- function(object) {
@@ -3772,7 +3796,7 @@ ccnsfmargweibullnorm_Vu_probit <- function(object) {
     "_c2")
   colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
     "_c")
-  return(bind_cols(margEff1, margEff2, margEff_c))
+  return(data.frame(margEff1, margEff2, margEff_c))
 }
 
 ## cloglog specification class membership
@@ -3828,7 +3852,7 @@ ccnsfmargweibullnorm_Eu_cloglog <- function(object) {
     "_c2")
   colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
     "_c")
-  return(bind_cols(margEff1, margEff2, margEff_c))
+  return(data.frame(margEff1, margEff2, margEff_c))
 }
 
 ccnsfmargweibullnorm_Vu_cloglog <- function(object) {
@@ -3885,7 +3909,7 @@ ccnsfmargweibullnorm_Vu_cloglog <- function(object) {
     "_c2")
   colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
     "_c")
-  return(bind_cols(margEff1, margEff2, margEff_c))
+  return(data.frame(margEff1, margEff2, margEff_c))
 }
 
 # different sigma_u
@@ -3940,9 +3964,9 @@ cmcesfmargweibullnorm_Eu_logit <- function(object) {
   Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
   Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
   margEff1 <- kronecker(matrix(delta1[2:object$nuZUvar] * 1/2,
-    nrow = 1), matrix(exp(Wu1/2) * gamma(1 + 1/k1), ncol = 1))
+    nrow = 1), matrix(exp(Wu1/2) * weibull(1 + 1/k1), ncol = 1))
   margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar] * 1/2,
-    nrow = 1), matrix(exp(Wu2/2) * gamma(1 + 1/k2), ncol = 1))
+    nrow = 1), matrix(exp(Wu2/2) * weibull(1 + 1/k2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
   colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
     "_c1")
@@ -3950,7 +3974,7 @@ cmcesfmargweibullnorm_Eu_logit <- function(object) {
     "_c2")
   colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
     "_c")
-  return(bind_cols(margEff1, margEff2, margEff_c))
+  return(data.frame(margEff1, margEff2, margEff_c))
 }
 
 cmcesfmargweibullnorm_Vu_logit <- function(object) {
@@ -4002,10 +4026,10 @@ cmcesfmargweibullnorm_Vu_logit <- function(object) {
   Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
   Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
   margEff1 <- kronecker(matrix(delta1[2:object$nuZUvar], nrow = 1),
-    matrix(exp(Wu1) * (gamma(1 + 2/k1) - (gamma(1 + 1/k1))^2),
+    matrix(exp(Wu1) * (weibull(1 + 2/k1) - (weibull(1 + 1/k1))^2),
       ncol = 1))
   margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar], nrow = 1),
-    matrix(exp(Wu2) * (gamma(1 + 2/k2) - (gamma(1 + 1/k2))^2),
+    matrix(exp(Wu2) * (weibull(1 + 2/k2) - (weibull(1 + 1/k2))^2),
       ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
   colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
@@ -4014,7 +4038,7 @@ cmcesfmargweibullnorm_Vu_logit <- function(object) {
     "_c2")
   colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
     "_c")
-  return(bind_cols(margEff1, margEff2, margEff_c))
+  return(data.frame(margEff1, margEff2, margEff_c))
 }
 
 ## cauchit specification class membership
@@ -4067,9 +4091,9 @@ cmcesfmargweibullnorm_Eu_cauchit <- function(object) {
   Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
   Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
   margEff1 <- kronecker(matrix(delta1[2:object$nuZUvar] * 1/2,
-    nrow = 1), matrix(exp(Wu1/2) * gamma(1 + 1/k1), ncol = 1))
+    nrow = 1), matrix(exp(Wu1/2) * weibull(1 + 1/k1), ncol = 1))
   margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar] * 1/2,
-    nrow = 1), matrix(exp(Wu2/2) * gamma(1 + 1/k2), ncol = 1))
+    nrow = 1), matrix(exp(Wu2/2) * weibull(1 + 1/k2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
   colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
     "_c1")
@@ -4077,7 +4101,7 @@ cmcesfmargweibullnorm_Eu_cauchit <- function(object) {
     "_c2")
   colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
     "_c")
-  return(bind_cols(margEff1, margEff2, margEff_c))
+  return(data.frame(margEff1, margEff2, margEff_c))
 }
 
 cmcesfmargweibullnorm_Vu_cauchit <- function(object) {
@@ -4129,10 +4153,10 @@ cmcesfmargweibullnorm_Vu_cauchit <- function(object) {
   Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
   Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
   margEff1 <- kronecker(matrix(delta1[2:object$nuZUvar], nrow = 1),
-    matrix(exp(Wu1) * (gamma(1 + 2/k1) - (gamma(1 + 1/k1))^2),
+    matrix(exp(Wu1) * (weibull(1 + 2/k1) - (weibull(1 + 1/k1))^2),
       ncol = 1))
   margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar], nrow = 1),
-    matrix(exp(Wu2) * (gamma(1 + 2/k2) - (gamma(1 + 1/k2))^2),
+    matrix(exp(Wu2) * (weibull(1 + 2/k2) - (weibull(1 + 1/k2))^2),
       ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
   colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
@@ -4141,7 +4165,7 @@ cmcesfmargweibullnorm_Vu_cauchit <- function(object) {
     "_c2")
   colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
     "_c")
-  return(bind_cols(margEff1, margEff2, margEff_c))
+  return(data.frame(margEff1, margEff2, margEff_c))
 }
 
 ## probit specification class membership
@@ -4194,9 +4218,9 @@ cmcesfmargweibullnorm_Eu_probit <- function(object) {
   Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
   Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
   margEff1 <- kronecker(matrix(delta1[2:object$nuZUvar] * 1/2,
-    nrow = 1), matrix(exp(Wu1/2) * gamma(1 + 1/k1), ncol = 1))
+    nrow = 1), matrix(exp(Wu1/2) * weibull(1 + 1/k1), ncol = 1))
   margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar] * 1/2,
-    nrow = 1), matrix(exp(Wu2/2) * gamma(1 + 1/k2), ncol = 1))
+    nrow = 1), matrix(exp(Wu2/2) * weibull(1 + 1/k2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
   colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
     "_c1")
@@ -4204,7 +4228,7 @@ cmcesfmargweibullnorm_Eu_probit <- function(object) {
     "_c2")
   colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
     "_c")
-  return(bind_cols(margEff1, margEff2, margEff_c))
+  return(data.frame(margEff1, margEff2, margEff_c))
 }
 
 cmcesfmargweibullnorm_Vu_probit <- function(object) {
@@ -4256,10 +4280,10 @@ cmcesfmargweibullnorm_Vu_probit <- function(object) {
   Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
   Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
   margEff1 <- kronecker(matrix(delta1[2:object$nuZUvar], nrow = 1),
-    matrix(exp(Wu1) * (gamma(1 + 2/k1) - (gamma(1 + 1/k1))^2),
+    matrix(exp(Wu1) * (weibull(1 + 2/k1) - (weibull(1 + 1/k1))^2),
       ncol = 1))
   margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar], nrow = 1),
-    matrix(exp(Wu2) * (gamma(1 + 2/k2) - (gamma(1 + 1/k2))^2),
+    matrix(exp(Wu2) * (weibull(1 + 2/k2) - (weibull(1 + 1/k2))^2),
       ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
   colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
@@ -4268,7 +4292,7 @@ cmcesfmargweibullnorm_Vu_probit <- function(object) {
     "_c2")
   colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
     "_c")
-  return(bind_cols(margEff1, margEff2, margEff_c))
+  return(data.frame(margEff1, margEff2, margEff_c))
 }
 
 ## cloglog specification class membership
@@ -4321,9 +4345,9 @@ cmcesfmargweibullnorm_Eu_cloglog <- function(object) {
   Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
   Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
   margEff1 <- kronecker(matrix(delta1[2:object$nuZUvar] * 1/2,
-    nrow = 1), matrix(exp(Wu1/2) * gamma(1 + 1/k1), ncol = 1))
+    nrow = 1), matrix(exp(Wu1/2) * weibull(1 + 1/k1), ncol = 1))
   margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar] * 1/2,
-    nrow = 1), matrix(exp(Wu2/2) * gamma(1 + 1/k2), ncol = 1))
+    nrow = 1), matrix(exp(Wu2/2) * weibull(1 + 1/k2), ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
   colnames(margEff1) <- paste0("Eu_", colnames(uHvar)[-1],
     "_c1")
@@ -4331,7 +4355,7 @@ cmcesfmargweibullnorm_Eu_cloglog <- function(object) {
     "_c2")
   colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
     "_c")
-  return(bind_cols(margEff1, margEff2, margEff_c))
+  return(data.frame(margEff1, margEff2, margEff_c))
 }
 
 cmcesfmargweibullnorm_Vu_cloglog <- function(object) {
@@ -4383,10 +4407,10 @@ cmcesfmargweibullnorm_Vu_cloglog <- function(object) {
   Pcond_c2 <- Probc2 * Pi2/(Probc1 * Pi1 + Probc2 * Pi2)
   Group_c <- ifelse(Pcond_c1 > Pcond_c2, 1, 2)
   margEff1 <- kronecker(matrix(delta1[2:object$nuZUvar], nrow = 1),
-    matrix(exp(Wu1) * (gamma(1 + 2/k1) - (gamma(1 + 1/k1))^2),
+    matrix(exp(Wu1) * (weibull(1 + 2/k1) - (weibull(1 + 1/k1))^2),
       ncol = 1))
   margEff2 <- kronecker(matrix(delta2[2:object$nuZUvar], nrow = 1),
-    matrix(exp(Wu2) * (gamma(1 + 2/k2) - (gamma(1 + 1/k2))^2),
+    matrix(exp(Wu2) * (weibull(1 + 2/k2) - (weibull(1 + 1/k2))^2),
       ncol = 1))
   margEff_c <- ifelse(Group_c == 1, margEff1, margEff2)
   colnames(margEff1) <- paste0("Vu_", colnames(uHvar)[-1],
@@ -4395,5 +4419,5 @@ cmcesfmargweibullnorm_Vu_cloglog <- function(object) {
     "_c2")
   colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
     "_c")
-  return(bind_cols(margEff1, margEff2, margEff_c))
+  return(data.frame(margEff1, margEff2, margEff_c))
 }
