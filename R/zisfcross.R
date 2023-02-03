@@ -78,7 +78,7 @@
 #' @param whichStart Integer. If \code{'whichStart = 1'}, the starting values 
 #' are obtained from the method of moments. When \code{'whichStart = 2'}
 #' (Default), the model is initialized by solving the homoscedastic pooled 
-#' cross section. \code{'whichStart = 1'} can be fast especially in the case of
+#' cross section SFA model. \code{'whichStart = 1'} can be fast especially in the case of
 #' maximum simulated likelihood.
 #' @param initAlg Character string specifying the algorithm used for 
 #' initialization and obtain the starting values (when \code{'whichStart = 2'}).
@@ -544,7 +544,7 @@ zisfcross <- function(formula, muhet, uhet, vhet, thet, logDepVar = TRUE,
     nomatch = 0L)
   mc <- mc[c(1L, m)]
   mc$drop.unused.levels <- TRUE
-  formula <- interCheckMain(formula = formula)
+  formula <- interCheckMain(formula = formula, data = data)
   if (!missing(muhet)) {
     muhet <- clhsCheck_mu(formula = muhet, scaling = FALSE)
   } else {
@@ -751,7 +751,7 @@ zisfcross <- function(formula, muhet, uhet, vhet, thet, logDepVar = TRUE,
     }
     cat("Initialization of", Nsim, simDist, "draws per observation ...\n")
     FiMat <- drawMat(N = N, Nsim = Nsim, simType = simType,
-      prime = prime, burn = burn, antithetics = antithetics,
+      prime = prime, burn = burn + 1, antithetics = antithetics,
       seed = seed)
   }
   # Other optimization options -------
