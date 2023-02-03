@@ -492,7 +492,6 @@ truncnormscalAlgOpt <- function(start, olsParam, dataTable, S,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -570,11 +569,11 @@ ctruncnormscaleff <- function(object, level) {
     teBCUB <- exp(-uLB)
     teBC_reciprocal <- exp(mustar + 1/2 * sigmastar^2) *
       pnorm(mustar/sigmastar + sigmastar)/pnorm(mustar/sigmastar)
-    res <- bind_cols(u = u, uLB = uLB, uUB = uUB, teJLMS = teJLMS,
+    res <- data.frame(u = u, uLB = uLB, uUB = uUB, teJLMS = teJLMS,
       m = m, teMO = teMO, teBC = teBC, teBCLB = teBCLB,
       teBCUB = teBCUB, teBC_reciprocal = teBC_reciprocal)
   } else {
-    res <- bind_cols(u = u, uLB = uLB, uUB = uUB, m = m)
+    res <- data.frame(u = u, uLB = uLB, uUB = uUB, m = m)
   }
   return(res)
 }
@@ -598,7 +597,7 @@ cmargtruncnormscal_Eu <- function(object) {
   margEff <- kronecker(matrix(delta, nrow = 1), matrix(m1 *
     hi, ncol = 1))
   colnames(margEff) <- paste0("Eu_", colnames(uHvar)[-1])
-  return(as_tibble(margEff))
+  return(data.frame(margEff))
 }
 
 cmargtruncnormscal_Vu <- function(object) {
@@ -618,5 +617,5 @@ cmargtruncnormscal_Vu <- function(object) {
   margEff <- kronecker(matrix(2 * delta, nrow = 1), matrix(m2 *
     hi2))
   colnames(margEff) <- paste0("Vu_", colnames(uHvar)[-1])
-  return(as_tibble(margEff))
+  return(data.frame(margEff))
 }

@@ -476,7 +476,6 @@ weibullnormAlgOpt <- function(start, olsParam, dataTable, S,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -587,37 +586,35 @@ cweibullnormeff <- function(object, level) {
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
     as.numeric(crossprod(matrix(beta), t(Xvar)))
   u <- numeric(object$Nobs)
+  density_epsilon_vec <- numeric(object$Nobs)
   for (i in seq_along(1:object$Nobs)) {
     ur <- exp(Wu[i]/2) * (-log(1 - object$FiMat[i, ]))^(1/k)
-    density_epsilon <- mean(1/exp(Wv[i]/2) * dnorm((epsilon[i] +
+    density_epsilon_vec[i] <- mean(1/exp(Wv[i]/2) * dnorm((epsilon[i] +
       object$S * ur)/exp(Wv[i]/2)))
     u[i] <- hcubature(f = fnCondEffWeibull, lowerLimit = 0,
       upperLimit = Inf, maxEval = 100, fDim = 1, sigmaU = exp(Wu[i]/2),
       sigmaV = exp(Wv[i]/2), k = k, epsilon = epsilon[i],
-      S = object$S, vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon
+      S = object$S, vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon_vec[i]
   }
   if (object$logDepVar == TRUE) {
     teJLMS <- exp(-u)
     teBC <- numeric(object$Nobs)
     teBC_reciprocal <- numeric(object$Nobs)
     for (i in seq_along(1:object$Nobs)) {
-      ur <- exp(Wu[i]/2) * (-log(1 - object$FiMat[i, ]))^(1/k)
-      density_epsilon <- mean(1/exp(Wv[i]/2) * dnorm((epsilon[i] +
-        object$S * ur)/exp(Wv[i]/2)))
       teBC[i] <- hcubature(f = fnCondBCEffWeibull, lowerLimit = 0,
         upperLimit = Inf, maxEval = 100, fDim = 1, sigmaU = exp(Wu[i]/2),
         sigmaV = exp(Wv[i]/2), k = k, epsilon = epsilon[i],
-        S = object$S, vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon
+        S = object$S, vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon_vec[i]
       teBC_reciprocal[i] <- hcubature(f = fnCondBCreciprocalEffWeibull,
         lowerLimit = 0, upperLimit = Inf, maxEval = 100,
         fDim = 1, sigmaU = exp(Wu[i]/2), sigmaV = exp(Wv[i]/2),
         k = k, epsilon = epsilon[i], S = object$S, vectorInterface = FALSE,
-        tol = 1e-15)$integral/density_epsilon
+        tol = 1e-15)$integral/density_epsilon_vec[i]
     }
-    res <- bind_cols(u = u, teJLMS = teJLMS, teBC = teBC,
+    res <- data.frame(u = u, teJLMS = teJLMS, teBC = teBC,
       teBC_reciprocal = teBC_reciprocal)
   } else {
-    res <- bind_cols(u = u)
+    res <- data.frame(u = u)
   }
   return(res)
 }
@@ -637,7 +634,7 @@ cmargweibull_Eu <- function(object) {
   margEff <- kronecker(matrix(delta[2:object$nuZUvar] * 1/2,
     nrow = 1), matrix(exp(Wu/2) * gamma(1 + 1/k), ncol = 1))
   colnames(margEff) <- paste0("Eu_", colnames(uHvar)[-1])
-  return(as_tibble(margEff))
+  return(data.frame(margEff))
 }
 
 cmargweibull_Vu <- function(object) {
@@ -652,5 +649,5 @@ cmargweibull_Vu <- function(object) {
     matrix(exp(Wu) * (gamma(1 + 2/k) - (gamma(1 + 1/k))^2),
       ncol = 1))
   colnames(margEff) <- paste0("Vu_", colnames(uHvar)[-1])
-  return(as_tibble(margEff))
+  return(data.frame(margEff))
 }

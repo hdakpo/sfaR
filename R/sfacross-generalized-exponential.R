@@ -375,7 +375,6 @@ genexponormAlgOpt <- function(start, olsParam, dataTable, S,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -446,10 +445,10 @@ cgenexponormeff <- function(object, level) {
       pnorm(a + exp(Wv/2)) - exp(B) * exp(b * exp(Wv/2) +
       exp(Wv)/2) * pnorm(b + exp(Wv/2)))/(exp(A) * pnorm(a) -
       exp(B) * pnorm(b))
-    res <- bind_cols(u = u, teJLMS = teJLMS, teBC = teBC,
+    res <- data.frame(u = u, teJLMS = teJLMS, teBC = teBC,
       teBC_reciprocal = teBC_reciprocal)
   } else {
-    res <- bind_cols(u = u)
+    res <- data.frame(u = u)
   }
   return(res)
 }
@@ -467,7 +466,7 @@ cmarggenexponorm_Eu <- function(object) {
   margEff <- kronecker(matrix(delta[2:object$nuZUvar] * 3/4,
     nrow = 1), matrix(exp(Wu/2), ncol = 1))
   colnames(margEff) <- paste0("Eu_", colnames(uHvar)[-1])
-  return(as_tibble(margEff))
+  return(data.frame(margEff))
 }
 
 cmarggenexponorm_Vu <- function(object) {
@@ -479,5 +478,5 @@ cmarggenexponorm_Vu <- function(object) {
   margEff <- kronecker(matrix(delta[2:object$nuZUvar] * 5/4,
     nrow = 1), matrix(exp(Wu), ncol = 1))
   colnames(margEff) <- paste0("Vu_", colnames(uHvar)[-1])
-  return(as_tibble(margEff))
+  return(data.frame(margEff))
 }

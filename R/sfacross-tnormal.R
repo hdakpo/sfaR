@@ -464,7 +464,6 @@ truncnormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -544,11 +543,11 @@ ctruncnormeff <- function(object, level) {
     teBCUB <- exp(-uLB)
     teBC_reciprocal <- exp(mustar + 1/2 * sigmastar^2) *
       pnorm(mustar/sigmastar + sigmastar)/pnorm(mustar/sigmastar)
-    res <- bind_cols(u = u, uLB = uLB, uUB = uUB, teJLMS = teJLMS,
+    res <- data.frame(u = u, uLB = uLB, uUB = uUB, teJLMS = teJLMS,
       m = m, teMO = teMO, teBC = teBC, teBCLB = teBCLB,
       teBCUB = teBCUB, teBC_reciprocal = teBC_reciprocal)
   } else {
-    res <- bind_cols(u = u, uLB = uLB, uUB = uUB, m = m)
+    res <- data.frame(u = u, uLB = uLB, uUB = uUB, m = m)
   }
   return(res)
 }
@@ -583,7 +582,7 @@ cmargtruncnorm_Eu <- function(object) {
     mu_mat[, !idTRUE_mu], Wu_mat[, !idTRUE_Wu])
   colnames(margEff) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
     colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
-  return(as_tibble(margEff))
+  return(data.frame(margEff))
 }
 
 cmargtruncnorm_Vu <- function(object) {
@@ -617,5 +616,5 @@ cmargtruncnorm_Vu <- function(object) {
     mu_mat[, !idTRUE_mu], Wu_mat[, !idTRUE_Wu])
   colnames(margEff) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
     colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
-  return(as_tibble(margEff))
+  return(data.frame(margEff))
 }

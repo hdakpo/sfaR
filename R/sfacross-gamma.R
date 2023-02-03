@@ -512,7 +512,6 @@ gammanormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -603,10 +602,10 @@ cgammanormeff <- function(object, level) {
       epsilon + exp(Wv)/2) * pnorm(-exp(Wv/2 - Wu/2) -
       object$S * epsilon/exp(Wv/2) + exp(Wv/2)) * Ki/(pnorm(-exp(Wv/2 -
       Wu/2) - object$S * epsilon/exp(Wv/2)) * Hi2)
-    res <- bind_cols(u = u, teJLMS = teJLMS, teBC = teBC,
+    res <- data.frame(u = u, teJLMS = teJLMS, teBC = teBC,
       teBC_reciprocal = teBC_reciprocal)
   } else {
-    res <- bind_cols(u = u)
+    res <- data.frame(u = u)
   }
   return(res)
 }
@@ -626,7 +625,7 @@ cmarggammanorm_Eu <- function(object) {
   margEff <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
     matrix(P/2 * exp(Wu/2), ncol = 1))
   colnames(margEff) <- paste0("Eu_", colnames(uHvar)[-1])
-  return(as_tibble(margEff))
+  return(data.frame(margEff))
 }
 
 cmarggammanorm_Vu <- function(object) {
@@ -640,5 +639,5 @@ cmarggammanorm_Vu <- function(object) {
   margEff <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
     matrix(P * exp(Wu), ncol = 1))
   colnames(margEff) <- paste0("Vu_", colnames(uHvar)[-1])
-  return(as_tibble(margEff))
+  return(data.frame(margEff))
 }

@@ -330,7 +330,6 @@ uninormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -421,13 +420,13 @@ cuninormeff <- function(object, level) {
     teBC2_reciprocal <- exp(-object$S * epsilon + exp(Wv)/2) *
       (1 - pnorm(object$S * epsilon/exp(Wv/2) - exp(Wv/2)))/(1 -
       pnorm(object$S * epsilon/exp(Wv/2)))
-    res <- bind_cols(u1 = u1, u2 = u2, uLB = uLB, uUB = uUB,
+    res <- data.frame(u1 = u1, u2 = u2, uLB = uLB, uUB = uUB,
       teJLMS1 = teJLMS1, teJLMS2 = teJLMS2, m = m, teMO = teMO,
       teBC1 = teBC1, teBC2 = teBC2, teBCLB = teBCLB, teBCUB = teBCUB,
       teBC1_reciprocal = teBC1_reciprocal, teBC2_reciprocal = teBC2_reciprocal, 
       theta = theta)
   } else {
-    res <- bind_cols(u1 = u1, u2 = u2, uLB = uLB, uUB = uUB,
+    res <- data.frame(u1 = u1, u2 = u2, uLB = uLB, uUB = uUB,
       m = m, theta = theta)
   }
   return(res)

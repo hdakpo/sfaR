@@ -22,7 +22,7 @@
 #' heterogeneity in the mean of the pre-truncated distribution as in Kumbhakar
 #' \emph{et al.} (1991), Huang and Liu (1994) and Battese and Coelli (1995).
 #'
-#' Ten distributions are possible for the one-sided error term and nine
+#' Ten distributions are possible for the one-sided error term and eleven
 #' optimization algorithms are available.
 #'
 #' The truncated normal - normal distribution with scaling property as in Wang
@@ -133,7 +133,7 @@
 #' @details
 #' The stochastic frontier model for the cross-sectional data is defined as: 
 #' 
-#' \deqn{y_i = \alpha + \mathbf{x_i^{\prime}}\bm{\beta} +  v_i - Su_i}
+#' \deqn{y_i = \alpha + \mathbf{x_i^{\prime}}\bm{\beta} + v_i - Su_i}
 #' 
 #' with
 #' 
@@ -520,7 +520,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
     nomatch = 0L)
   mc <- mc[c(1L, m)]
   mc$drop.unused.levels <- TRUE
-  formula <- interCheckMain(formula = formula)
+  formula <- interCheckMain(formula = formula, data = data)
   if (!missing(muhet)) {
     muhet <- clhsCheck_mu(formula = muhet, scaling = scaling)
   } else {
@@ -738,7 +738,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
     cat("Initialization of", Nsim, simDist, "draws per observation ...\n")
     # burn + 1 cause halton fn always starts with 0
     FiMat <- drawMat(N = N, Nsim = Nsim, simType = simType,
-      prime = prime, burn = burn, antithetics = antithetics,
+      prime = prime, burn = burn + 1, antithetics = antithetics,
       seed = seed)
   }
   # Other optimization options -------
@@ -796,6 +796,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
    due to potential perfect multicollinearity",
       call. = FALSE)
   }
+  names(olsRes$coefficients) <- colnames(Xvar)
   olsParam <- c(olsRes$coefficients)
   olsSigmasq <- summary(olsRes)$sigma^2
   olsStder <- sqrt(diag(vcov(olsRes)))

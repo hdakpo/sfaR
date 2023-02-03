@@ -418,7 +418,6 @@ tslnormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -490,10 +489,10 @@ ctslnormeff <- function(object, level) {
       exp(Wv)/2) * pnorm(a + exp(Wv/2)) - exp(B) * exp(b *
       exp(Wv/2) + exp(Wv)/2) * pnorm(b + exp(Wv/2)))/(2 *
       exp(A) * pnorm(a) - exp(B) * pnorm(b))
-    res <- bind_cols(u = u, teJLMS = teJLMS, teBC = teBC,
+    res <- data.frame(u = u, teJLMS = teJLMS, teBC = teBC,
       teBC_reciprocal = teBC_reciprocal)
   } else {
-    res <- bind_cols(u = u)
+    res <- data.frame(u = u)
   }
   return(res)
 }
@@ -514,7 +513,7 @@ cmargtslnorm_Eu <- function(object) {
     4 * lambda + 2 * lambda^2)/((1 + lambda) * (1 + 2 * lambda)),
     nrow = 1), matrix(exp(Wu/2), ncol = 1))
   colnames(margEff) <- paste0("Eu_", colnames(uHvar)[-1])
-  return(as_tibble(margEff))
+  return(data.frame(margEff))
 }
 
 cmargtslnorm_Vu <- function(object) {
@@ -530,5 +529,5 @@ cmargtslnorm_Vu <- function(object) {
     lambda)^2 * (1 + 2 * lambda)^2), nrow = 1), matrix(exp(Wu),
     ncol = 1))
   colnames(margEff) <- paste0("Vu_", colnames(uHvar)[-1])
-  return(as_tibble(margEff))
+  return(data.frame(margEff))
 }

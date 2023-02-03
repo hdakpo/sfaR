@@ -462,7 +462,7 @@ lognormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
       muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
       Xvar = Xvar, S = S, N = N, FiMat = FiMat, wHvar = wHvar)),
-    function(parm) as(-chesslognormlike(parm, nXvar = nXvar,
+    hs = function(parm) as(-chesslognormlike(parm, nXvar = nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
       muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
       Xvar = Xvar, S = S, N = N, FiMat = FiMat, wHvar = wHvar),
@@ -512,7 +512,6 @@ lognormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -661,39 +660,36 @@ clognormeff <- function(object, level) {
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
     as.numeric(crossprod(matrix(beta), t(Xvar)))
   u <- numeric(object$Nobs)
+  density_epsilon_vec <- numeric(object$Nobs)
   for (i in 1:object$Nobs) {
     ur <- exp(mu[i] + exp(Wu[i]/2) * qnorm(object$FiMat[i,
       ]))
-    density_epsilon <- (mean(1/exp(Wv[i]/2) * dnorm((epsilon[i] +
+    density_epsilon_vec[i] <- (mean(1/exp(Wv[i]/2) * dnorm((epsilon[i] +
       object$S * ur)/exp(Wv[i]/2))))
     u[i] <- hcubature(f = fnCondEffLogNorm, lowerLimit = 0,
       upperLimit = Inf, maxEval = 100, fDim = 1, sigmaU = exp(Wu[i]/2),
       sigmaV = exp(Wv[i]/2), mu = mu[i], epsilon = epsilon[i],
-      S = object$S, vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon
+      S = object$S, vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon_vec[i]
   }
   if (object$logDepVar == TRUE) {
     teJLMS <- exp(-u)
     teBC <- numeric(object$Nobs)
     teBC_reciprocal <- numeric(object$Nobs)
     for (i in 1:object$Nobs) {
-      ur <- exp(mu[i] + exp(Wu[i]/2) * qnorm(object$FiMat[i,
-        ]))
-      density_epsilon <- (mean(1/exp(Wv[i]/2) * dnorm((epsilon[i] +
-        object$S * ur)/exp(Wv[i]/2))))
       teBC[i] <- hcubature(f = fnCondBCEffLogNorm, lowerLimit = 0,
         upperLimit = Inf, maxEval = 100, fDim = 1, sigmaU = exp(Wu[i]/2),
         sigmaV = exp(Wv[i]/2), mu = mu[i], epsilon = epsilon[i],
-        S = object$S, vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon
+        S = object$S, vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon_vec[i]
       teBC_reciprocal[i] <- hcubature(f = fnCondBCreciprocalEffLogNorm,
         lowerLimit = 0, upperLimit = Inf, maxEval = 100,
         fDim = 1, sigmaU = exp(Wu[i]/2), sigmaV = exp(Wv[i]/2),
         mu = mu[i], epsilon = epsilon[i], S = object$S,
-        vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon
+        vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon_vec[i]
     }
-    res <- bind_cols(u = u, teJLMS = teJLMS, teBC = teBC,
+    res <- data.frame(u = u, teJLMS = teJLMS, teBC = teBC,
       teBC_reciprocal = teBC_reciprocal)
   } else {
-    res <- bind_cols(u = u)
+    res <- data.frame(u = u)
   }
   return(res)
 }
@@ -725,7 +721,7 @@ cmarglognorm_Eu <- function(object) {
     mu_mat[, !idTRUE_mu], Wu_mat[, !idTRUE_Wu])
   colnames(margEff) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
     colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
-  return(as_tibble(margEff))
+  return(data.frame(margEff))
 }
 
 cmarglognorm_Vu <- function(object) {
@@ -751,5 +747,5 @@ cmarglognorm_Vu <- function(object) {
     mu_mat[, !idTRUE_mu], Wu_mat[, !idTRUE_Wu])
   colnames(margEff) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
     colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
-  return(as_tibble(margEff))
+  return(data.frame(margEff))
 }
