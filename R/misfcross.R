@@ -24,7 +24,7 @@
 #' heterogeneity in the mean of the pre-truncated distribution as in Kumbhakar
 #' \emph{et al.} (1991), Huang and Liu (1994) and Battese and Coelli (1995).
 #'
-#' Ten distributions are possible for the one-sided error term and nine
+#' Ten distributions are possible for the one-sided error term and eleven
 #' optimization algorithms are available.
 #'
 #' @aliases misfcross print.misfcross
@@ -75,7 +75,7 @@
 #' @param whichStart Integer. If \code{'whichStart = 1'}, the starting values 
 #' are obtained from the method of moments. When \code{'whichStart = 2'}
 #' (Default), the model is initialized by solving the homoscedastic pooled 
-#' cross section. \code{'whichStart = 1'} can be fast especially in the case of
+#' cross section SFA model. \code{'whichStart = 1'} can be fast especially in the case of
 #' maximum simulated likelihood.
 #' @param initAlg Character string specifying the algorithm used for 
 #' initialization and obtain the starting values (when \code{'whichStart = 2'}).
@@ -525,7 +525,7 @@ misfcross <- function(formula, muhet, uhet, vhet, thet, logDepVar = TRUE,
     nomatch = 0L)
   mc <- mc[c(1L, m)]
   mc$drop.unused.levels <- TRUE
-  formula <- interCheckMain(formula = formula)
+  formula <- interCheckMain(formula = formula, data = data)
   if (!missing(muhet)) {
     muhet <- clhsCheck_mu(formula = muhet, scaling = FALSE)
   } else {
@@ -721,7 +721,7 @@ misfcross <- function(formula, muhet, uhet, vhet, thet, logDepVar = TRUE,
     }
     cat("Initialization of", Nsim, simDist, "draws per observation ...\n")
     FiMat <- drawMat(N = N, Nsim = Nsim, simType = simType,
-      prime = prime, burn = burn, antithetics = antithetics,
+      prime = prime, burn = burn + 1, antithetics = antithetics,
       seed = seed)
   }
   # Other optimization options -------
@@ -799,6 +799,7 @@ misfcross <- function(formula, muhet, uhet, vhet, thet, logDepVar = TRUE,
    due to potential perfect multicollinearity",
       call. = FALSE)
   }
+  names(olsRes$coefficients) <- colnames(Xvar)
   olsParam <- c(olsRes$coefficients)
   obs_subset <- row.names(data) %in% attributes(mc)[["row.names"]]
   if (inherits(data, "pdata.frame")) {

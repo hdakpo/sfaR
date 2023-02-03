@@ -145,22 +145,32 @@ cmisfexponormlike_cloglog <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param Zvar matrix of separating variables
 #' @param nZHvar number of separating variables
 #' @param printInfo logical print info during optimization
-#' @param itermax maximum iteration
+#' @param whichStart strategy to get starting values
+#' @param initIter maximum iterations for initialization
+#' @param initAlg algorithm for maxLik  
 #' @param tol parameter tolerance
 #' @noRd
 cstmisfexponorm <- function(olsObj, epsiRes, nXvar, nuZUvar,
   nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar,
-  itermax, printInfo, tol) {
-  cat("Initialization: SFA + exponential - normal distributions...\n")
-  initExpo <- maxLik(logLik = cexponormlike, start = cstexponorm(olsObj = olsObj,
-    epsiRes = epsiRes, S = S, nuZUvar = 1, uHvar = as.matrix(uHvar[,
-      1]), nvZVvar = 1, vHvar = as.matrix(vHvar[, 1])),
-    grad = cgradexponormlike, method = "BFGS", control = list(iterlim = itermax,
-      printLevel = printInfo, reltol = tol), nXvar = nXvar,
-    nuZUvar = 1, nvZVvar = 1, uHvar = as.matrix(uHvar[, 1]),
-    vHvar = as.matrix(vHvar[, 1]), Yvar = Yvar, Xvar = Xvar,
-    S = S, wHvar = wHvar)
-  Esti <- initExpo$estimate
+  whichStart, initIter, initAlg, printInfo, tol) {
+  if (whichStart == 1L) {
+    Esti <- cstexponorm(olsObj = olsObj, epsiRes = epsiRes,
+      S = S, nuZUvar = 1, uHvar = uHvar[, 1, drop = FALSE],
+      nvZVvar = 1, vHvar = vHvar[, 1, drop = FALSE])
+    initExpo <- NULL
+  } else {
+    cat("Initialization: SFA + exponential - normal distributions...\n")
+    initExpo <- maxLik::maxLik(logLik = cexponormlike, start = cstexponorm(olsObj = olsObj,
+      epsiRes = epsiRes, S = S, nuZUvar = 1, uHvar = uHvar[,
+        1, drop = FALSE], nvZVvar = 1, vHvar = vHvar[,
+        1, drop = FALSE]), grad = cgradexponormlike,
+      method = initAlg, control = list(iterlim = initIter,
+        printLevel = if (printInfo) 2 else 0, reltol = tol),
+      nXvar = nXvar, nuZUvar = 1, nvZVvar = 1, uHvar = uHvar[,
+        1, drop = FALSE], vHvar = vHvar[, 1, drop = FALSE],
+      Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar)
+    Esti <- initExpo$estimate
+  }
   StartVal <- c(Esti[1:nXvar], 0.95 * Esti[nXvar + 1], if (nuZUvar >
     1) rep(0, nuZUvar - 1), 1.05 * Esti[nXvar + 1], if (nuZUvar >
     1) rep(0, nuZUvar - 1), Esti[nXvar + 2], if (nvZVvar >
@@ -168,8 +178,6 @@ cstmisfexponorm <- function(olsObj, epsiRes, nXvar, nuZUvar,
   names(StartVal) <- c(names(Esti)[1:nXvar], paste0("Zu_",
     colnames(uHvar)), paste0("Zu_", colnames(uHvar)), paste0("Zv_",
     colnames(vHvar)), paste0("MI_", colnames(Zvar)))
-  names(initExpo$estimate) <- c(names(Esti)[1:nXvar], paste0("Zu_",
-    colnames(uHvar)[1]), paste0("Zv_", colnames(vHvar)[1]))
   return(list(StartVal = StartVal, initExpo = initExpo))
 }
 
@@ -1199,6 +1207,9 @@ chessmisfexponormlike_cloglog <- function(parm, nXvar, nuZUvar,
 #' @param method algorithm for solver
 #' @param printInfo logical print info during optimization
 #' @param itermax maximum iteration
+#' @param whichStart strategy to get starting values
+#' @param initIter maximum iterations for initialization
+#' @param initAlg algorithm for maxLik  
 #' @param stepmax stepmax for ucminf
 #' @param tol parameter tolerance
 #' @param gradtol gradient tolerance
@@ -1209,13 +1220,14 @@ chessmisfexponormlike_cloglog <- function(parm, nXvar, nuZUvar,
 misfexponormAlgOpt_logit <- function(start, olsParam, dataTable,
   S, wHvar, nXvar, uHvar, nuZUvar, vHvar, nvZVvar, Zvar, nZHvar,
   Yvar, Xvar, method, printInfo, itermax, stepmax, tol, gradtol,
-  hessianType, qac) {
+  whichStart, initIter, initAlg, hessianType, qac) {
   start_st <- if (!is.null(start))
     start else cstmisfexponorm(olsObj = olsParam, epsiRes = dataTable[["olsResiduals"]],
     S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar, uHvar = uHvar,
     nuZUvar = nuZUvar, vHvar = vHvar, nvZVvar = nvZVvar,
-    nXvar = nXvar, Xvar = Xvar, Yvar = Yvar, itermax = itermax,
-    printInfo = printInfo, tol = tol)
+    nXvar = nXvar, Xvar = Xvar, Yvar = Yvar, whichStart = whichStart,
+    initIter = initIter, initAlg = initAlg, printInfo = printInfo,
+    tol = tol)
   initExpo <- start_st$initExpo
   startVal <- start_st$StartVal
   startLoglik <- sum(cmisfexponormlike_logit(startVal, nXvar = nXvar,
@@ -1223,14 +1235,14 @@ misfexponormAlgOpt_logit <- function(start, olsParam, dataTable,
     vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar,
     Zvar = Zvar, nZHvar = nZHvar))
   if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
-    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
-      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
-      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
-      sann = function(...) maxSANN(...))
+    maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...),
+      bhhh = function(...) maxLik::maxBHHH(...), nr = function(...) maxLik::maxNR(...),
+      nm = function(...) maxLik::maxNM(...), cg = function(...) maxLik::maxCG(...),
+      sann = function(...) maxLik::maxSANN(...))
     method <- "maxLikAlgo"
   }
   cat("MISF Estimation...\n")
-  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+  mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
     fn = function(parm) -sum(cmisfexponormlike_logit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -1249,7 +1261,7 @@ misfexponormAlgOpt_logit <- function(start, olsParam, dataTable,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
-    sr1 = trust.optim(x = startVal, fn = function(parm) -sum(cmisfexponormlike_logit(parm,
+    sr1 = trustOptim::trust.optim(x = startVal, fn = function(parm) -sum(cmisfexponormlike_logit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
@@ -1259,7 +1271,7 @@ misfexponormAlgOpt_logit <- function(start, olsParam, dataTable,
         S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
       method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
         stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 4L else 0,
-        report.precision = 1L)), sparse = trust.optim(x = startVal,
+        report.precision = 1L)), sparse = trustOptim::trust.optim(x = startVal,
       fn = function(parm) -sum(cmisfexponormlike_logit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -1275,7 +1287,7 @@ misfexponormAlgOpt_logit <- function(start, olsParam, dataTable,
         "dgCMatrix"), method = "Sparse", control = list(maxit = itermax,
         cgtol = gradtol, stop.trust.radius = tol, prec = tol,
         report.level = if (printInfo) 4L else 0, report.precision = 1L,
-        preconditioner = 1L)), mla = mla(b = startVal,
+        preconditioner = 1L)), mla = marqLevAlg::mla(b = startVal,
       fn = function(parm) -sum(cmisfexponormlike_logit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -1317,7 +1329,6 @@ misfexponormAlgOpt_logit <- function(start, olsParam, dataTable,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -1354,13 +1365,14 @@ misfexponormAlgOpt_logit <- function(start, olsParam, dataTable,
 misfexponormAlgOpt_cauchit <- function(start, olsParam, dataTable,
   S, wHvar, nXvar, uHvar, nuZUvar, vHvar, nvZVvar, Zvar, nZHvar,
   Yvar, Xvar, method, printInfo, itermax, stepmax, tol, gradtol,
-  hessianType, qac) {
+  whichStart, initIter, initAlg, hessianType, qac) {
   start_st <- if (!is.null(start))
     start else cstmisfexponorm(olsObj = olsParam, epsiRes = dataTable[["olsResiduals"]],
     S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar, uHvar = uHvar,
     nuZUvar = nuZUvar, vHvar = vHvar, nvZVvar = nvZVvar,
-    nXvar = nXvar, Xvar = Xvar, Yvar = Yvar, itermax = itermax,
-    printInfo = printInfo, tol = tol)
+    nXvar = nXvar, Xvar = Xvar, Yvar = Yvar, whichStart = whichStart,
+    initIter = initIter, initAlg = initAlg, printInfo = printInfo,
+    tol = tol)
   initExpo <- start_st$initExpo
   startVal <- start_st$StartVal
   startLoglik <- sum(cmisfexponormlike_cauchit(startVal, nXvar = nXvar,
@@ -1368,14 +1380,14 @@ misfexponormAlgOpt_cauchit <- function(start, olsParam, dataTable,
     vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar,
     Zvar = Zvar, nZHvar = nZHvar))
   if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
-    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
-      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
-      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
-      sann = function(...) maxSANN(...))
+    maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...),
+      bhhh = function(...) maxLik::maxBHHH(...), nr = function(...) maxLik::maxNR(...),
+      nm = function(...) maxLik::maxNM(...), cg = function(...) maxLik::maxCG(...),
+      sann = function(...) maxLik::maxSANN(...))
     method <- "maxLikAlgo"
   }
   cat("MISF Estimation...\n")
-  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+  mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
     fn = function(parm) -sum(cmisfexponormlike_cauchit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -1394,7 +1406,7 @@ misfexponormAlgOpt_cauchit <- function(start, olsParam, dataTable,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
-    sr1 = trust.optim(x = startVal, fn = function(parm) -sum(cmisfexponormlike_cauchit(parm,
+    sr1 = trustOptim::trust.optim(x = startVal, fn = function(parm) -sum(cmisfexponormlike_cauchit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
@@ -1404,7 +1416,7 @@ misfexponormAlgOpt_cauchit <- function(start, olsParam, dataTable,
         S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
       method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
         stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 4L else 0,
-        report.precision = 1L)), sparse = trust.optim(x = startVal,
+        report.precision = 1L)), sparse = trustOptim::trust.optim(x = startVal,
       fn = function(parm) -sum(cmisfexponormlike_cauchit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -1420,7 +1432,7 @@ misfexponormAlgOpt_cauchit <- function(start, olsParam, dataTable,
         "dgCMatrix"), method = "Sparse", control = list(maxit = itermax,
         cgtol = gradtol, stop.trust.radius = tol, prec = tol,
         report.level = if (printInfo) 4L else 0, report.precision = 1L,
-        preconditioner = 1L)), mla = mla(b = startVal,
+        preconditioner = 1L)), mla = marqLevAlg::mla(b = startVal,
       fn = function(parm) -sum(cmisfexponormlike_cauchit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -1462,7 +1474,6 @@ misfexponormAlgOpt_cauchit <- function(start, olsParam, dataTable,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -1499,13 +1510,14 @@ misfexponormAlgOpt_cauchit <- function(start, olsParam, dataTable,
 misfexponormAlgOpt_probit <- function(start, olsParam, dataTable,
   S, wHvar, nXvar, uHvar, nuZUvar, vHvar, nvZVvar, Zvar, nZHvar,
   Yvar, Xvar, method, printInfo, itermax, stepmax, tol, gradtol,
-  hessianType, qac) {
+  whichStart, initIter, initAlg, hessianType, qac) {
   start_st <- if (!is.null(start))
     start else cstmisfexponorm(olsObj = olsParam, epsiRes = dataTable[["olsResiduals"]],
     S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar, uHvar = uHvar,
     nuZUvar = nuZUvar, vHvar = vHvar, nvZVvar = nvZVvar,
-    nXvar = nXvar, Xvar = Xvar, Yvar = Yvar, itermax = itermax,
-    printInfo = printInfo, tol = tol)
+    nXvar = nXvar, Xvar = Xvar, Yvar = Yvar, whichStart = whichStart,
+    initIter = initIter, initAlg = initAlg, printInfo = printInfo,
+    tol = tol)
   initExpo <- start_st$initExpo
   startVal <- start_st$StartVal
   startLoglik <- sum(cmisfexponormlike_probit(startVal, nXvar = nXvar,
@@ -1513,14 +1525,14 @@ misfexponormAlgOpt_probit <- function(start, olsParam, dataTable,
     vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar,
     Zvar = Zvar, nZHvar = nZHvar))
   if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
-    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
-      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
-      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
-      sann = function(...) maxSANN(...))
+    maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...),
+      bhhh = function(...) maxLik::maxBHHH(...), nr = function(...) maxLik::maxNR(...),
+      nm = function(...) maxLik::maxNM(...), cg = function(...) maxLik::maxCG(...),
+      sann = function(...) maxLik::maxSANN(...))
     method <- "maxLikAlgo"
   }
   cat("MISF Estimation...\n")
-  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+  mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
     fn = function(parm) -sum(cmisfexponormlike_probit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -1539,7 +1551,7 @@ misfexponormAlgOpt_probit <- function(start, olsParam, dataTable,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
-    sr1 = trust.optim(x = startVal, fn = function(parm) -sum(cmisfexponormlike_probit(parm,
+    sr1 = trustOptim::trust.optim(x = startVal, fn = function(parm) -sum(cmisfexponormlike_probit(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
@@ -1549,7 +1561,7 @@ misfexponormAlgOpt_probit <- function(start, olsParam, dataTable,
         S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
       method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
         stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 4L else 0,
-        report.precision = 1L)), sparse = trust.optim(x = startVal,
+        report.precision = 1L)), sparse = trustOptim::trust.optim(x = startVal,
       fn = function(parm) -sum(cmisfexponormlike_probit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -1565,7 +1577,7 @@ misfexponormAlgOpt_probit <- function(start, olsParam, dataTable,
         "dgCMatrix"), method = "Sparse", control = list(maxit = itermax,
         cgtol = gradtol, stop.trust.radius = tol, prec = tol,
         report.level = if (printInfo) 4L else 0, report.precision = 1L,
-        preconditioner = 1L)), mla = mla(b = startVal,
+        preconditioner = 1L)), mla = marqLevAlg::mla(b = startVal,
       fn = function(parm) -sum(cmisfexponormlike_probit(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -1607,7 +1619,6 @@ misfexponormAlgOpt_probit <- function(start, olsParam, dataTable,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -1644,13 +1655,14 @@ misfexponormAlgOpt_probit <- function(start, olsParam, dataTable,
 misfexponormAlgOpt_cloglog <- function(start, olsParam, dataTable,
   S, wHvar, nXvar, uHvar, nuZUvar, vHvar, nvZVvar, Zvar, nZHvar,
   Yvar, Xvar, method, printInfo, itermax, stepmax, tol, gradtol,
-  hessianType, qac) {
+  whichStart, initIter, initAlg, hessianType, qac) {
   start_st <- if (!is.null(start))
     start else cstmisfexponorm(olsObj = olsParam, epsiRes = dataTable[["olsResiduals"]],
     S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar, uHvar = uHvar,
     nuZUvar = nuZUvar, vHvar = vHvar, nvZVvar = nvZVvar,
-    nXvar = nXvar, Xvar = Xvar, Yvar = Yvar, itermax = itermax,
-    printInfo = printInfo, tol = tol)
+    nXvar = nXvar, Xvar = Xvar, Yvar = Yvar, whichStart = whichStart,
+    initIter = initIter, initAlg = initAlg, printInfo = printInfo,
+    tol = tol)
   initExpo <- start_st$initExpo
   startVal <- start_st$StartVal
   startLoglik <- sum(cmisfexponormlike_cloglog(startVal, nXvar = nXvar,
@@ -1658,14 +1670,14 @@ misfexponormAlgOpt_cloglog <- function(start, olsParam, dataTable,
     vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar,
     Zvar = Zvar, nZHvar = nZHvar))
   if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
-    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
-      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
-      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
-      sann = function(...) maxSANN(...))
+    maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...),
+      bhhh = function(...) maxLik::maxBHHH(...), nr = function(...) maxLik::maxNR(...),
+      nm = function(...) maxLik::maxNM(...), cg = function(...) maxLik::maxCG(...),
+      sann = function(...) maxLik::maxSANN(...))
     method <- "maxLikAlgo"
   }
   cat("MISF Estimation...\n")
-  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+  mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
     fn = function(parm) -sum(cmisfexponormlike_cloglog(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -1684,7 +1696,7 @@ misfexponormAlgOpt_cloglog <- function(start, olsParam, dataTable,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
-    sr1 = trust.optim(x = startVal, fn = function(parm) -sum(cmisfexponormlike_cloglog(parm,
+    sr1 = trustOptim::trust.optim(x = startVal, fn = function(parm) -sum(cmisfexponormlike_cloglog(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
@@ -1694,7 +1706,7 @@ misfexponormAlgOpt_cloglog <- function(start, olsParam, dataTable,
         S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
       method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
         stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 4L else 0,
-        report.precision = 1L)), sparse = trust.optim(x = startVal,
+        report.precision = 1L)), sparse = trustOptim::trust.optim(x = startVal,
       fn = function(parm) -sum(cmisfexponormlike_cloglog(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -1710,7 +1722,7 @@ misfexponormAlgOpt_cloglog <- function(start, olsParam, dataTable,
         "dgCMatrix"), method = "Sparse", control = list(maxit = itermax,
         cgtol = gradtol, stop.trust.radius = tol, prec = tol,
         report.level = if (printInfo) 4L else 0, report.precision = 1L,
-        preconditioner = 1L)), mla = mla(b = startVal,
+        preconditioner = 1L)), mla = marqLevAlg::mla(b = startVal,
       fn = function(parm) -sum(cmisfexponormlike_cloglog(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -1752,7 +1764,6 @@ misfexponormAlgOpt_cloglog <- function(start, olsParam, dataTable,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -1856,7 +1867,7 @@ cmisfexponormeff_logit <- function(object, level) {
       NA)
     ReffBC_c2 <- ifelse(Group_c == 2, teBC_reciprocal_c2,
       NA)
-    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+    res <- data.frame(Group_c = Group_c, PosteriorProb_c = P_cond_c,
       u_c = u_c, teJLMS_c = teJLMS_c, teBC_c = teBC_c,
       teBC_reciprocal_c = teBC_reciprocal_c, PosteriorProb_c1 = Pcond_c1,
       PriorProb_c1 = Probc1, u_c1 = u_c1, teBC_c1 = teBC_c1,
@@ -1866,7 +1877,7 @@ cmisfexponormeff_logit <- function(object, level) {
       ineff_c2 = ineff_c2, effBC_c1 = effBC_c1, effBC_c2 = effBC_c2,
       ReffBC_c1 = ReffBC_c1, ReffBC_c2 = ReffBC_c2)
   } else {
-    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+    res <- data.frame(Group_c = Group_c, PosteriorProb_c = P_cond_c,
       u_c = u_c, PosteriorProb_c1 = Pcond_c1, PriorProb_c1 = Probc1,
       u_c1 = u_c1, PosteriorProb_c2 = Pcond_c2, PriorProb_c2 = Probc2,
       u_c2 = u_c2, ineff_c1 = ineff_c1, ineff_c2 = ineff_c2)
@@ -1940,7 +1951,7 @@ cmisfexponormeff_cauchit <- function(object, level) {
       NA)
     ReffBC_c2 <- ifelse(Group_c == 2, teBC_reciprocal_c2,
       NA)
-    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+    res <- data.frame(Group_c = Group_c, PosteriorProb_c = P_cond_c,
       u_c = u_c, teJLMS_c = teJLMS_c, teBC_c = teBC_c,
       teBC_reciprocal_c = teBC_reciprocal_c, PosteriorProb_c1 = Pcond_c1,
       PriorProb_c1 = Probc1, u_c1 = u_c1, teBC_c1 = teBC_c1,
@@ -1950,7 +1961,7 @@ cmisfexponormeff_cauchit <- function(object, level) {
       ineff_c2 = ineff_c2, effBC_c1 = effBC_c1, effBC_c2 = effBC_c2,
       ReffBC_c1 = ReffBC_c1, ReffBC_c2 = ReffBC_c2)
   } else {
-    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+    res <- data.frame(Group_c = Group_c, PosteriorProb_c = P_cond_c,
       u_c = u_c, PosteriorProb_c1 = Pcond_c1, PriorProb_c1 = Probc1,
       u_c1 = u_c1, PosteriorProb_c2 = Pcond_c2, PriorProb_c2 = Probc2,
       u_c2 = u_c2, ineff_c1 = ineff_c1, ineff_c2 = ineff_c2)
@@ -2024,7 +2035,7 @@ cmisfexponormeff_probit <- function(object, level) {
       NA)
     ReffBC_c2 <- ifelse(Group_c == 2, teBC_reciprocal_c2,
       NA)
-    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+    res <- data.frame(Group_c = Group_c, PosteriorProb_c = P_cond_c,
       u_c = u_c, teJLMS_c = teJLMS_c, teBC_c = teBC_c,
       teBC_reciprocal_c = teBC_reciprocal_c, PosteriorProb_c1 = Pcond_c1,
       PriorProb_c1 = Probc1, u_c1 = u_c1, teBC_c1 = teBC_c1,
@@ -2034,7 +2045,7 @@ cmisfexponormeff_probit <- function(object, level) {
       ineff_c2 = ineff_c2, effBC_c1 = effBC_c1, effBC_c2 = effBC_c2,
       ReffBC_c1 = ReffBC_c1, ReffBC_c2 = ReffBC_c2)
   } else {
-    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+    res <- data.frame(Group_c = Group_c, PosteriorProb_c = P_cond_c,
       u_c = u_c, PosteriorProb_c1 = Pcond_c1, PriorProb_c1 = Probc1,
       u_c1 = u_c1, PosteriorProb_c2 = Pcond_c2, PriorProb_c2 = Probc2,
       u_c2 = u_c2, ineff_c1 = ineff_c1, ineff_c2 = ineff_c2)
@@ -2108,7 +2119,7 @@ cmisfexponormeff_cloglog <- function(object, level) {
       NA)
     ReffBC_c2 <- ifelse(Group_c == 2, teBC_reciprocal_c2,
       NA)
-    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+    res <- data.frame(Group_c = Group_c, PosteriorProb_c = P_cond_c,
       u_c = u_c, teJLMS_c = teJLMS_c, teBC_c = teBC_c,
       teBC_reciprocal_c = teBC_reciprocal_c, PosteriorProb_c1 = Pcond_c1,
       PriorProb_c1 = Probc1, u_c1 = u_c1, teBC_c1 = teBC_c1,
@@ -2118,7 +2129,7 @@ cmisfexponormeff_cloglog <- function(object, level) {
       ineff_c2 = ineff_c2, effBC_c1 = effBC_c1, effBC_c2 = effBC_c2,
       ReffBC_c1 = ReffBC_c1, ReffBC_c2 = ReffBC_c2)
   } else {
-    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+    res <- data.frame(Group_c = Group_c, PosteriorProb_c = P_cond_c,
       u_c = u_c, PosteriorProb_c1 = Pcond_c1, PriorProb_c1 = Probc1,
       u_c1 = u_c1, PosteriorProb_c2 = Pcond_c2, PriorProb_c2 = Probc2,
       u_c2 = u_c2, ineff_c1 = ineff_c1, ineff_c2 = ineff_c2)
@@ -2178,7 +2189,7 @@ cmisfmargexponorm_Eu_logit <- function(object) {
     "_c2")
   colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
     "_c")
-  return(bind_cols(margEff1, margEff2, margEff_c))
+  return(data.frame(margEff1, margEff2, margEff_c))
 }
 
 cmisfmargexponorm_Vu_logit <- function(object) {
@@ -2228,7 +2239,7 @@ cmisfmargexponorm_Vu_logit <- function(object) {
     "_c2")
   colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
     "_c")
-  return(bind_cols(margEff1, margEff2, margEff_c))
+  return(data.frame(margEff1, margEff2, margEff_c))
 }
 
 # cauchit specification class membership
@@ -2279,7 +2290,7 @@ cmisfmargexponorm_Eu_cauchit <- function(object) {
     "_c2")
   colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
     "_c")
-  return(bind_cols(margEff1, margEff2, margEff_c))
+  return(data.frame(margEff1, margEff2, margEff_c))
 }
 
 cmisfmargexponorm_Vu_cauchit <- function(object) {
@@ -2329,7 +2340,7 @@ cmisfmargexponorm_Vu_cauchit <- function(object) {
     "_c2")
   colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
     "_c")
-  return(bind_cols(margEff1, margEff2, margEff_c))
+  return(data.frame(margEff1, margEff2, margEff_c))
 }
 
 # probit specification class membership
@@ -2380,7 +2391,7 @@ cmisfmargexponorm_Eu_probit <- function(object) {
     "_c2")
   colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
     "_c")
-  return(bind_cols(margEff1, margEff2, margEff_c))
+  return(data.frame(margEff1, margEff2, margEff_c))
 }
 
 cmisfmargexponorm_Vu_probit <- function(object) {
@@ -2430,7 +2441,7 @@ cmisfmargexponorm_Vu_probit <- function(object) {
     "_c2")
   colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
     "_c")
-  return(bind_cols(margEff1, margEff2, margEff_c))
+  return(data.frame(margEff1, margEff2, margEff_c))
 }
 
 # cloglog specification class membership
@@ -2481,7 +2492,7 @@ cmisfmargexponorm_Eu_cloglog <- function(object) {
     "_c2")
   colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
     "_c")
-  return(bind_cols(margEff1, margEff2, margEff_c))
+  return(data.frame(margEff1, margEff2, margEff_c))
 }
 
 cmisfmargexponorm_Vu_cloglog <- function(object) {
@@ -2531,5 +2542,5 @@ cmisfmargexponorm_Vu_cloglog <- function(object) {
     "_c2")
   colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
     "_c")
-  return(bind_cols(margEff1, margEff2, margEff_c))
+  return(data.frame(margEff1, margEff2, margEff_c))
 }
