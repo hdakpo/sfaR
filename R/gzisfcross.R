@@ -13,12 +13,12 @@
 #'
 #' @description
 #' \code{\link{gzisfcross}} is a symbolic formula based function for the
-#' estimation of the latent class stochastic frontier model (GZISF) in the case
-#' of cross-sectional or pooled cross-section data. The model is estimated
-#' using maximum likelihood (ML).
+#' estimation of the generalized zero inefficiency stochastic frontier model 
+#' (GZISF) in the case of cross-sectional or pooled cross-section data. 
+#' The model is estimated using maximum likelihood (ML).
 #'
 #' Only the half-normal distribution is possible for the one-sided error term.
-#' Nine optimization algorithms are available.
+#' Eleven optimization algorithms are available.
 #'
 #' The function also accounts for heteroscedasticity in both one-sided and
 #' two-sided error terms, as in Reifschneider and Stevenson (1991), Caudill and
@@ -41,12 +41,12 @@
 #' @param data The data frame containing the data.
 #' @param subset An optional vector specifying a subset of observations to be
 #' used in the optimization process.
-#' @param weights An optional vector of weights to be used for weighted log-likelihood.
-#' Should be \code{NULL} or numeric vector with positive values. When \code{NULL}, 
-#' a numeric vector of 1 is used.
-#' @param wscale Logical. When \code{weights} is not \code{NULL}, a scaling transformation
-#' is used such that the the \code{weights} sums to the sample size. Default \code{TRUE}.
-#' When \code{FALSE} no scaling is used.
+#' @param weights An optional vector of weights to be used for weighted 
+#' log-likelihood. Should be \code{NULL} or numeric vector with positive values. 
+#' When \code{NULL}, a numeric vector of 1 is used.
+#' @param wscale Logical. When \code{weights} is not \code{NULL}, a scaling 
+#' transformation is used such that the the \code{weights} sums to the sample 
+#' size. Default \code{TRUE}. When \code{FALSE} no scaling is used.
 #' @param S If \code{S = 1} (default), a production (profit) frontier is
 #' estimated: \eqn{\epsilon_i = v_i-u_i}. If \code{S = -1}, a cost frontier is
 #' estimated: \eqn{\epsilon_i = v_i+u_i}.
@@ -56,7 +56,26 @@
 #' implemented.
 #' @param start Numeric vector. Optional starting values for the maximum
 #' likelihood (ML) estimation.
-#' @param gzisfClasses Number of classes to be estimated (default = \code{2}).  A
+#' @param whichStart Integer. If \code{'whichStart = 1'}, the starting values 
+#' are obtained from the method of moments. When \code{'whichStart = 2'}
+#' (Default), the model is initialized by solving the homoscedastic pooled 
+#' cross section SFA model. \code{'whichStart = 1'} can be fast.
+#' @param initAlg Character string specifying the algorithm used for 
+#' initialization and obtain the starting values (when \code{'whichStart = 2'}).
+#' Only \pkg{maxLik} package algorithms are available: 
+#' \itemize{ \item \code{'bfgs'}, for Broyden-Fletcher-Goldfarb-Shanno - Default - 
+#' (see \code{\link[maxLik:maxBFGS]{maxBFGS}})
+#'  \item \code{'bhhh'}, for Berndt-Hall-Hall-Hausman 
+#'  (see \code{\link[maxLik:maxBHHH]{maxBHHH}}) 
+#'  \item \code{'nr'}, for Newton-Raphson (see \code{\link[maxLik:maxNR]{maxNR}})
+#' \item \code{'nm'}, for Nelder-Mead (see \code{\link[maxLik:maxNM]{maxNM}})
+#' \item \code{'cg'}, for Conjugate Gradient 
+#' (see \code{\link[maxLik:maxCG]{maxCG}}) \item \code{'sann'}, for Simulated 
+#' Annealing (see \code{\link[maxLik:maxSANN]{maxSANN}})
+#' }
+#' @param initIter Maximum number of iterations for initialization algorithm.
+#' Default \code{100}.
+#' @param gzisfClasses Number of classes to be estimated (default = \code{2}). A
 #' maximum of five classes can be estimated.
 ##' @param method Optimization algorithm used for the estimation.  Default =
 #' \code{'bfgs'}. 11 algorithms are available: \itemize{ \item \code{'bfgs'},
@@ -65,16 +84,18 @@
 #' Berndt-Hall-Hall-Hausman (see \code{\link[maxLik:maxBHHH]{maxBHHH}}) \item
 #' \code{'nr'}, for Newton-Raphson (see \code{\link[maxLik:maxNR]{maxNR}}) 
 #' \item \code{'nm'}, for Nelder-Mead (see \code{\link[maxLik:maxNM]{maxNM}}) 
-#' \item \code{'cg'}, for Conjugate Gradient (see \code{\link[maxLik:maxCG]{maxCG}})
-#' \item \code{'sann'}, for Simulated Annealing (see \code{\link[maxLik:maxSANN]{maxSANN}})
-#' \item \code{'ucminf'}, implements a quasi-Newton type with BFGS updating of the
-#' inverse Hessian and soft line search with a trust region type monitoring of
-#' the input to the line search algorithm (see \code{\link[ucminf:ucminf]{ucminf}})
+#' \item \code{'cg'}, for Conjugate Gradient 
+#' (see \code{\link[maxLik:maxCG]{maxCG}}) \item \code{'sann'}, for Simulated 
+#' Annealing (see \code{\link[maxLik:maxSANN]{maxSANN}}) \item \code{'ucminf'}, 
+#' implements a quasi-Newton type with BFGS updating of the inverse Hessian and 
+#' soft line search with a trust region type monitoring of the input to the line 
+#' search algorithm (see \code{\link[ucminf:ucminf]{ucminf}})
 #' \item \code{'mla'}, for general-purpose optimization based on
 #' Marquardt-Levenberg algorithm (see \code{\link[marqLevAlg:mla]{mla}})
 #' \item \code{'sr1'}, for Symmetric Rank 1 (see
-#' \code{\link[trustOptim:trust.optim]{trust.optim}}) \item \code{'sparse'}, for trust
-#' regions and sparse Hessian (see \code{\link[trustOptim:trust.optim]{trust.optim}}) \item
+#' \code{\link[trustOptim:trust.optim]{trust.optim}}) \item \code{'sparse'}, 
+#' for trust regions and sparse Hessian 
+#' (see \code{\link[trustOptim:trust.optim]{trust.optim}}) \item
 #' \code{'nlminb'}, for optimization using PORT routines (see
 #' \code{\link[stats:nlminb]{nlminb}})}
 #' @param hessianType Integer. If \code{1} (default), analytic Hessian is
@@ -101,13 +122,10 @@
 #' @details
 #' GZISF is an estimation of a finite mixture of production functions:
 #'
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('y_i = \\\alpha_j + \\\mathbf{x_i^{\\\prime}} \\\bm{\\\beta_j} + v_{i|j} - Su_{i|j}')
-#' }
+#' \deqn{y_i = \alpha_j + \mathbf{x_i^{\prime}} 
+#' \bm{\beta_j} + v_{i|j} - Su_{i|j}}
 #'
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('\\\epsilon_{i|j} = v_{i|j} - Su_{i|j}')
-#' }
+#' \deqn{\epsilon_{i|j} = v_{i|j} - Su_{i|j}}
 #'
 #' where \eqn{i} is the observation, \eqn{j} is the class, \eqn{y} is the
 #' output (cost, revenue, profit), \eqn{x} is the vector of main explanatory
@@ -124,37 +142,39 @@
 #' The contribution of observation \eqn{i} to the likelihood conditional on
 #' class \eqn{j} is defined as: 
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('P(i|j) = \\\frac{2}{\\\sqrt{\\\sigma_{u|j}^2 + \\\sigma_{v|j}^2}}\\\phi\\\\left(\\\frac{S\\\epsilon_{i|j}}{\\\sqrt{\\\sigma_{u|j}^2 +\\\sigma_{v|j}^2}}\\\\right)\\\Phi\\\\left(\\\frac{\\\mu_{i*|j}}{\\\sigma_{*|j}}\\\\right)')
-#' }
+#' \deqn{P(i|j) = \frac{2}{\sqrt{\sigma_{u|j}^2 + 
+#' \sigma_{v|j}^2}}\phi\left(\frac{S\epsilon_{i|j}}{\sqrt{
+#' \sigma_{u|j}^2 +\sigma_{v|j}^2}}\right)\Phi\left(\frac{
+#' \mu_{i*|j}}{\sigma_{*|j}}\right)}
 #'
 #' where 
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('\\\mu_{i*|j}=\\\frac{- S\\\epsilon_{i|j}\\\sigma_{u|j}^2}{\\\sigma_{u|j}^2 + \\\sigma_{v|j}^2}')
-#' }
+#' \deqn{\mu_{i*|j}=\frac{- S\epsilon_{i|j}
+#' \sigma_{u|j}^2}{\sigma_{u|j}^2 + \sigma_{v|j}^2}}
 #'
 #' and 
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('\\\sigma_*^2 = \\\frac{\\\sigma_{u|j}^2 \\\sigma_{v|j}^2}{\\\sigma_{u|j}^2 + \\\sigma_{v|j}^2}')
-#' }
+#' \deqn{\sigma_*^2 = \frac{\sigma_{u|j}^2 
+#' \sigma_{v|j}^2}{\sigma_{u|j}^2 + \sigma_{v|j}^2}}
+#' 
+#' For the last class \eqn{J} we have:
+#' 
+#' \deqn{P(i|J) = \frac{1}{\sigma_{v|J}}\phi\left(\frac{S\epsilon_{i|J}}{\sigma_{v|J}}\right)}
 #'
 #' The prior probability of using a particular technology can depend on some
 #' covariates (namely the variables separating the observations into classes)
 #' using a logit specification: 
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('\\\pi(i,j) = \\\frac{\\\exp{(\\\theta_j'Z_{hi})}}{\\\sum_{m=1}^{J}\\\exp{(\\\theta_m'Z_{hi})}}')
-#' }
+#' \deqn{\pi(i,j) = \frac{\exp{(\bm{\theta}_j'\mathbf{Z}_{hi})}}{
+#' \sum_{m=1}^{J}\exp{(\bm{\theta}_m'\mathbf{Z}_{hi})}}}
 #'
-#' with \eqn{Z_h} the covariates, \eqn{\theta} the coefficients estimated for
-#' the covariates, and \eqn{\exp(\theta_J'Z_h)=1}.
+#' with \eqn{\mathbf{Z}_h} the covariates, \eqn{\bm{\theta}} the coefficients estimated for
+#' the covariates, and \eqn{\exp(\bm{\theta}_J'\mathbf{Z}_h)=1}.
 #'
 #' The unconditional likelihood of observation \eqn{i} is simply the average
 #' over the \eqn{J} classes:
 #'
-#' \eqn{P(i) = \sum_{m=1}^{J}\pi(i,m)P(i|m)}
+#' \deqn{P(i) = \sum_{m=1}^{J}\pi(i,m)P(i|m)}
 #'
 #' The number of classes can be retained based on information criterion (see
 #' for instance \code{\link[=ic.gzisfcross]{ic}}).
@@ -162,42 +182,46 @@
 #' Class assignment is based on the largest posterior probability. This
 #' probability is obtained using Bayes' rule, as follows for class \eqn{j}:
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('w\\\\left(j|i\\\\right)=\\\frac{P\\\\left(i|j\\\\right)\\\pi\\\\left(i,j\\\\right)}{\\\sum_{m=1}^JP\\\\left(i|m\\\\right)\\\pi\\\\left(i, m\\\\right)}')
-#' }
-#'
+#' \deqn{w\left(j|i\right)=\frac{P\left(i|j
+#' \right)\pi\left(i,j\right)}{\sum_{m=1}^JP
+#' \left(i|m\right)\pi\left(i, m\right)}}
+#' 
 #' To accommodate heteroscedasticity in the variance parameters of the error
 #' terms, a single part (right) formula can also be specified. To impose the
 #' positivity on these parameters, the variances are modelled respectively as:
-#' \eqn{\sigma^2_{u|j} = \exp{(\delta_j'Z_u)}} and \eqn{\sigma^2_{v|j} =
-#' \exp{(\phi_j'Z_v)}}, where \eqn{Z_u} and \eqn{Z_v} are the
-#' heteroscedasticity variables (inefficiency drivers in the case of \eqn{Z_u})
-#' and \eqn{\delta} and \eqn{\phi} the coefficients.  In the case of
-#' heterogeneity in the truncated mean \eqn{\mu}, it is modelled as
-#' \eqn{\mu=\omega'Z_{\mu}}.
+#' \eqn{\sigma^2_{u|j} = \exp{(\bm{\delta}_j'Z_u)}} and \eqn{\sigma^2_{v|j} =
+#' \exp{(\bm{\phi}_j'\mathbf{Z}_v)}}, where \eqn{\mathbf{Z}_u} and \eqn{\mathbf{Z}_v} are the
+#' heteroscedasticity variables (inefficiency drivers in the case of \eqn{\mathbf{Z}_u})
+#' and \eqn{\bm{\delta}} and \eqn{\bm{\phi}} the coefficients. \code{'gzisfcross'} only 
+#' supports the half-normal distribution for the one-sided error term.
 #' 
 #' \code{gzisfcross} allows for the maximization of weighted log-likelihood.
 #' When option \code{weights} is specified and \code{wscale = TRUE}, the weights
 #' is scaled as 
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('new_{weights} = sample_{size} \\\times \\\frac{old_{weights}}{\\\sum(old_{weights})}')
-#' }
+#' \deqn{new_{weights} = sample_{size} \times 
+#' \frac{old_{weights}}{\sum(old_{weights})}}
 #' 
-#' For difficult problems, non-gradient methods (e.g. \code{nm} or \code{sann}) can be 
-#' used to warm start the optimization and zoom in the neighborhood of the 
-#' solution. Then a gradient-based methods is recommanded in the second step. In the case
-#' of \code{sann}, we recommand to significantly increase the iteration limit 
-#' (e.g. \code{itermax = 20000}). The Conjugate Gradient (\code{cg}) can also be used
-#' in the first stage.
+#' For difficult problems, non-gradient methods (e.g. \code{nm} or 
+#' \code{sann}) can be used to warm start the optimization and zoom in the 
+#' neighborhood of the solution. Then a gradient-based methods is recommanded 
+#' in the second step. In the case of \code{sann}, we recommand to significantly 
+#' increase the iteration limit (e.g. \code{itermax = 20000}). The Conjugate 
+#' Gradient (\code{cg}) can also be used in the first stage.
 #' 
-#' A set of extractor functions for fitted model objects is available for objects of class
-#' \code{'gzisfcross'} including methods to the generic functions \code{\link[=print.gzisfcross]{print}},
-#' \code{\link[=summary.gzisfcross]{summary}}, \code{\link[=coef.gzisfcross]{coef}}, 
-#' \code{\link[=fitted.gzisfcross]{fitted}}, \code{\link[=logLik.gzisfcross]{logLik}}, 
-#' \code{\link[=residuals.gzisfcross]{residuals}}, \code{\link[=vcov.gzisfcross]{vcov}}, 
-#' \code{\link[=efficiencies.gzisfcross]{efficiencies}}, \code{\link[=ic.gzisfcross]{ic}}, 
-#' \code{\link[=marginal.gzisfcross]{marginal}}, \code{\link[=estfun.gzisfcross]{estfun}} and 
+#' A set of extractor functions for fitted model objects is available for 
+#' objects of class \code{'gzisfcross'} including methods to the generic 
+#' functions \code{\link[=print.gzisfcross]{print}},
+#' \code{\link[=summary.gzisfcross]{summary}}, 
+#' \code{\link[=coef.gzisfcross]{coef}}, 
+#' \code{\link[=fitted.gzisfcross]{fitted}}, 
+#' \code{\link[=logLik.gzisfcross]{logLik}}, 
+#' \code{\link[=residuals.gzisfcross]{residuals}}, 
+#' \code{\link[=vcov.gzisfcross]{vcov}}, 
+#' \code{\link[=efficiencies.gzisfcross]{efficiencies}}, 
+#' \code{\link[=ic.gzisfcross]{ic}}, 
+#' \code{\link[=marginal.gzisfcross]{marginal}}, 
+#' \code{\link[=estfun.gzisfcross]{estfun}} and 
 #' \code{\link[=bread.gzisfcross]{bread}} (from the \CRANpkg{sandwich} package), 
 #' [lmtest::coeftest()] (from the \CRANpkg{lmtest} package).
 #'
@@ -242,10 +266,11 @@
 #' ML estimations, and the individual observation log-likelihood. When \code{weights}
 #' is specified an additional variable is also provided in \code{dataTable}.}
 #'
-#' \item{initHalf}{When \code{start = NULL}. Initial ML estimation with half
-#' normal distribution for the one-sided error term. Model to construct the
-#' starting values for the latent class estimation. Object of class
-#' \code{'maxLik'} and \code{'maxim'} returned.}
+#' \item{initHalf}{When \code{start = NULL} and \code{whichStart == 2L}. 
+#' Initial ML estimation with half normal distribution for the one-sided error 
+#' term. Model to construct the starting values for the generalized zero 
+#' inefficiency estimation. Object of class \code{'maxLik'} and 
+#' \code{'maxim'} returned.}
 #' 
 #' \item{isWeights}{Logical. If \code{TRUE} weighted log-likelihood is
 #' maximized.}
@@ -288,7 +313,8 @@
 #'
 # @author K Hervé Dakpo
 #'
-#' @seealso \code{\link[=print.gzisfcross]{print}} for printing \code{gzisfcross} object.
+#' @seealso \code{\link[=print.gzisfcross]{print}} for printing \code{gzisfcross} 
+#' object.
 #' 
 #' \code{\link[=summary.gzisfcross]{summary}} for creating and printing
 #' summary results.
@@ -307,11 +333,11 @@
 #' \code{\link[=logLik.gzisfcross]{logLik}} for extracting log-likelihood
 #' value(s) of the estimation.
 #'
-#' \code{\link[=marginal.gzisfcross]{marginal}} for computing marginal effects of
-#' inefficiency drivers.
+#' \code{\link[=marginal.gzisfcross]{marginal}} for computing marginal effects 
+#' of inefficiency drivers.
 #'
-#' \code{\link[=residuals.gzisfcross]{residuals}} for extracting residuals of the
-#' estimation.
+#' \code{\link[=residuals.gzisfcross]{residuals}} for extracting residuals of 
+#' the estimation.
 #'
 #' \code{\link[=vcov.gzisfcross]{vcov}} for computing the variance-covariance
 #' matrix of the coefficients.
@@ -356,23 +382,26 @@
 #' ## Using data on eighty-two countries production (DGP)
 #' # GZISF Cobb Douglas (production function) half normal distribution
 #' # Intercept and initStat used as separating variables
-#' cb_2c_gz_h1 <- gzisfcross(formula = ly ~ lk + ll + yr, thet = ~initStat, data = worldprod)
+#' cb_2c_gz_h1 <- gzisfcross(formula = ly ~ lk + ll + yr, thet = ~initStat, 
+#' data = worldprod)
 #' summary(cb_2c_gz_h1)
 #'
 #' # summary of the initial ML model
-#' summary(cb_2c_h1$InitHalf)
+#' summary(cb_2c_gz_h1$InitHalf)
 #'
 #' # Only the intercept is used as the separating variable and only variable
 #' # initStat is used as inefficiency driver
-#' cb_2c_gz_h2 <- gzisfcross(formula = ly ~ lk + ll + yr, uhet = ~initStat, data = worldprod)
+#' cb_2c_gz_h2 <- gzisfcross(formula = ly ~ lk + ll + yr, uhet = ~initStat, 
+#' data = worldprod)
 #' summary(cb_2c_gz_h2)
 #'
 #' @export
 gzisfcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
   data, subset, weights, wscale = TRUE, S = 1L, udist = "hnormal",
-  start = NULL, gzisfClasses = 2, method = "bfgs", hessianType = 1,
-  itermax = 2000L, printInfo = FALSE, tol = 1e-12, gradtol = 1e-06,
-  stepmax = 0.1, qac = "marquardt") {
+  start = NULL, whichStart = 2L, initAlg = "bfgs", initIter = 100,
+  gzisfClasses = 2, method = "bfgs", hessianType = 1, itermax = 2000L,
+  printInfo = FALSE, tol = 1e-12, gradtol = 1e-06, stepmax = 0.1,
+  qac = "marquardt") {
   # u distribution check -------
   udist <- tolower(udist)
   if (udist != "hnormal") {
@@ -389,7 +418,7 @@ gzisfcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
     nomatch = 0L)
   mc <- mc[c(1L, m)]
   mc$drop.unused.levels <- TRUE
-  formula <- interCheckMain(formula = formula)
+  formula <- interCheckMain(formula = formula, data = data)
   if (!missing(uhet)) {
     uhet <- clhsCheck_u(formula = uhet, scaling = FALSE)
   } else {
@@ -483,8 +512,8 @@ gzisfcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
       call. = FALSE)
   }
   # Number of parameters -------
-  nParm <- gzisfClasses * (nXvar + nuZUvar + nvZVvar) + (gzisfClasses -
-    1) * nZHvar
+  nParm <- (gzisfClasses - 1) * (nXvar + nuZUvar + nvZVvar) +
+    nXvar + nvZVvar + (gzisfClasses - 1) * nZHvar
   # Checking starting values when provided -------
   if (!is.null(start)) {
     if (length(start) != nParm) {
@@ -494,6 +523,11 @@ gzisfcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
   }
   if (nParm > N) {
     stop("Model has more parameters than observations", call. = FALSE)
+  }
+  # check whichStart
+  if (length(whichStart) != 1 || !(whichStart %in% c(1L, 2L))) {
+    stop("argument 'whichStart' must equal either 1 or 2",
+      call. = FALSE)
   }
   # Check algorithms -------
   method <- tolower(method)
@@ -509,6 +543,26 @@ gzisfcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
       call. = FALSE)
   }
   # Other optimization options -------
+  if (!is.numeric(initIter) || length(initIter) != 1) {
+    stop("argument 'initIter' must be a single numeric scalar",
+      call. = FALSE)
+  }
+  if (initIter != round(initIter)) {
+    stop("argument 'initIter' must be an integer", call. = FALSE)
+  }
+  if (initIter <= 0) {
+    stop("argument 'initIter' must be positive", call. = FALSE)
+  }
+  initIter <- as.integer(initIter)
+  if (!is.numeric(itermax) || length(itermax) != 1) {
+    stop("argument 'itermax' must be a single numeric scalar",
+      call. = FALSE)
+  }
+  initAlg <- tolower(initAlg)
+  if (!(initAlg %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann"))) {
+    stop("Unknown or non-available optimization algorithm: ",
+      paste(initAlg), call. = FALSE)
+  }
   if (!is.numeric(itermax) || length(itermax) != 1) {
     stop("argument 'itermax' must be a single numeric scalar",
       call. = FALSE)
@@ -563,15 +617,18 @@ gzisfcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
    due to potential perfect multicollinearity",
       call. = FALSE)
   }
+  names(olsRes$coefficients) <- colnames(Xvar)
   olsParam <- c(olsRes$coefficients)
-  if (inherits(data, "plm.dim")) {
-    dataTable <- data[validObs, 1:2]
+  obs_subset <- row.names(data) %in% attributes(mc)[["row.names"]]
+  if (inherits(data, "pdata.frame")) {
+    dataTable <- data[obs_subset, names(index(data))][validObs,
+      ]
   } else {
     dataTable <- data.frame(IdObs = c(1:sum(validObs)))
   }
-  dataTable <- as_tibble(cbind(dataTable, data[, all.vars(terms(formula))],
-    weights = wHvar))
-  dataTable <- mutate(dataTable, olsResiduals = residuals(olsRes),
+  dataTable <- cbind(dataTable, data[obs_subset, all.vars(terms(formula))][validObs,
+    ], weights = wHvar)
+  dataTable <- cbind(dataTable, olsResiduals = residuals(olsRes),
     olsFitted = fitted(olsRes))
   olsSkew <- skewness(dataTable[["olsResiduals"]])
   if (S * olsSkew > 0) {
@@ -588,14 +645,15 @@ gzisfcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
     nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
     uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Zvar = Zvar,
     nZHvar = nZHvar, Xvar = Xvar, S = S, wHvar = wHvar, method = method,
+    initAlg = initAlg, initIter = initIter, whichStart = whichStart,
     printInfo = printInfo, itermax = itermax, stepmax = stepmax,
     tol = tol, gradtol = gradtol, hessianType = hessianType,
     qac = qac)
   ## MLE run -------
-  mleList <- tryCatch(switch(as.character(gzisfClasses), `2` = do.call(LCM2ChnormAlgOpt,
-    FunArgs), `3` = do.call(LCM3ChnormAlgOpt, FunArgs), `4` = do.call(LCM4ChnormAlgOpt,
-    FunArgs), `5` = do.call(LCM5ChnormAlgOpt, FunArgs)),
-    error = function(e) e)
+  mleList <- tryCatch(switch(as.character(gzisfClasses), `2` = do.call(GZISF2ChnormAlgOpt,
+    FunArgs), `3` = do.call(GZISF3ChnormAlgOpt, FunArgs),
+    `4` = do.call(GZISF4ChnormAlgOpt, FunArgs), `5` = do.call(GZISF5ChnormAlgOpt,
+      FunArgs)), error = function(e) e)
   if (inherits(mleList, "error")) {
     stop("The current error occurs during optimization:\n",
       mleList$message, call. = FALSE)
@@ -722,7 +780,9 @@ gzisfcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
   returnObj$startVal <- mleList$startVal
   returnObj$dataTable <- dataTable
   if (is.null(start)) {
-    returnObj$initHalf <- mleList$initHalf
+    if (whichStart == 2L) {
+      returnObj$initHalf <- mleList$initHalf
+    }
   }
   returnObj$isWeights <- !all.equal(wHvar, rep(1, N))
   returnObj$optType <- mleList$type
@@ -790,28 +850,28 @@ bread.gzisfcross <- function(x, ...) {
     vHvar <- model.matrix(x$formula, rhs = 3, data = x$dataTable)
     Zvar <- model.matrix(x$formula, rhs = 4, data = x$dataTable)
     if (x$nClasses == 2) {
-      hessAnalytical <- chessLCMhalfnormlike2C(parm = x$mlParam,
+      hessAnalytical <- chessGZISFhalfnormlike2C(parm = x$mlParam,
         nXvar = ncol(Xvar), nuZUvar = ncol(uHvar), nvZVvar = ncol(vHvar),
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         wHvar = x$dataTable$weights, S = x$S, Zvar = Zvar,
         nZHvar = ncol(Zvar))
     } else {
       if (x$nClasses == 3) {
-        hessAnalytical <- chessLCMhalfnormlike3C(parm = x$mlParam,
+        hessAnalytical <- chessGZISFhalfnormlike3C(parm = x$mlParam,
           nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
           nvZVvar = ncol(vHvar), uHvar = uHvar, vHvar = vHvar,
           Yvar = Yvar, Xvar = Xvar, wHvar = x$dataTable$weights,
           S = x$S, Zvar = Zvar, nZHvar = ncol(Zvar))
       } else {
         if (x$nClasses == 4) {
-          hessAnalytical <- chessLCMhalfnormlike4C(parm = x$mlParam,
+          hessAnalytical <- chessGZISFhalfnormlike4C(parm = x$mlParam,
           nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
           nvZVvar = ncol(vHvar), uHvar = uHvar, vHvar = vHvar,
           Yvar = Yvar, Xvar = Xvar, wHvar = x$dataTable$weights,
           S = x$S, Zvar = Zvar, nZHvar = ncol(Zvar))
         } else {
           if (x$nClasses == 5) {
-          hessAnalytical <- chessLCMhalfnormlike5C(parm = x$mlParam,
+          hessAnalytical <- chessGZISFhalfnormlike5C(parm = x$mlParam,
             nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
             nvZVvar = ncol(vHvar), uHvar = uHvar, vHvar = vHvar,
             Yvar = Yvar, Xvar = Xvar, wHvar = x$dataTable$weights,
