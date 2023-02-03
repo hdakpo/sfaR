@@ -100,7 +100,7 @@
 #' \code{simType = 'ghalton'}, Generalized-Halton draws are used for MSL. If
 #' \code{simType = 'sobol'}, Sobol draws are used for MSL. If \code{simType =
 #' 'uniform'}, uniform draws are used for MSL. (see section \sQuote{Details}).
-#' @param Nsim Number of draws for MSL.
+#' @param Nsim Number of draws for MSL. Default 100.
 #' @param prime Prime number considered for Halton and Generalized-Halton
 #' draws. Default = \code{2}.
 #' @param burn Number of the first observations discarded in the case of Halton
