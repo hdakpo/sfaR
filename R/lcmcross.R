@@ -19,7 +19,7 @@
 #' Kumbhakar (2014, p282).
 #'
 #' Only the half-normal distribution is possible for the one-sided error term.
-#' Nine optimization algorithms are available.
+#' Eleven optimization algorithms are available.
 #'
 #' The function also accounts for heteroscedasticity in both one-sided and
 #' two-sided error terms, as in Reifschneider and Stevenson (1991), Caudill and
@@ -57,6 +57,26 @@
 #' implemented.
 #' @param start Numeric vector. Optional starting values for the maximum
 #' likelihood (ML) estimation.
+#' @param whichStart Integer. If \code{'whichStart = 1'}, the starting values 
+#' are obtained from the method of moments. When \code{'whichStart = 2'}
+#' (Default), the model is initialized by solving the homoscedastic pooled 
+#' cross section SFA model. \code{'whichStart = 1'} can be fast.
+#' @param initAlg Character string specifying the algorithm used for 
+#' initialization and obtain the starting values (when \code{'whichStart = 2'}).
+#' Only \pkg{maxLik} package algorithms are available: 
+#' \itemize{ \item \code{'bfgs'}, for Broyden-Fletcher-Goldfarb-Shanno 
+#' (see \code{\link[maxLik:maxBFGS]{maxBFGS}})
+#'  \item \code{'bhhh'}, for Berndt-Hall-Hall-Hausman 
+#'  (see \code{\link[maxLik:maxBHHH]{maxBHHH}}) 
+#'  \item \code{'nr'}, for Newton-Raphson (see \code{\link[maxLik:maxNR]{maxNR}})
+#' \item \code{'nm'}, for Nelder-Mead - Default - 
+#'  (see \code{\link[maxLik:maxNM]{maxNM}})
+#' \item \code{'cg'}, for Conjugate Gradient 
+#' (see \code{\link[maxLik:maxCG]{maxCG}}) \item \code{'sann'}, for Simulated 
+#' Annealing (see \code{\link[maxLik:maxSANN]{maxSANN}})
+#' }
+#' @param initIter Maximum number of iterations for initialization algorithm.
+#' Default \code{100}.
 #' @param lcmClasses Number of classes to be estimated (default = \code{2}). A
 #' maximum of five classes can be estimated.
 ##' @param method Optimization algorithm used for the estimation.  Default =
@@ -107,14 +127,10 @@
 #' @details
 #' LCM is an estimation of a finite mixture of production functions:
 #'
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('y_i = \\\alpha_j + \\\mathbf{x_i^{\\\prime}} 
-#' \\\bm{\\\beta_j} + v_{i|j} - Su_{i|j}')
-#' }
-#'
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('\\\epsilon_{i|j} = v_{i|j} - Su_{i|j}')
-#' }
+#'\deqn{y_i = \alpha_j + \mathbf{x_i^{\prime}} 
+#' \bm{\beta_j} + v_{i|j} - Su_{i|j}}
+#' 
+#' \deqn{\epsilon_{i|j} = v_{i|j} - Su_{i|j}}
 #'
 #' where \eqn{i} is the observation, \eqn{j} is the class, \eqn{y} is the
 #' output (cost, revenue, profit), \eqn{x} is the vector of main explanatory
@@ -128,43 +144,35 @@
 #' The contribution of observation \eqn{i} to the likelihood conditional on
 #' class \eqn{j} is defined as: 
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('P(i|j) = \\\frac{2}{\\\sqrt{\\\sigma_{u|j}^2 + 
-#' \\\sigma_{v|j}^2}}\\\phi\\\\left(\\\frac{S\\\epsilon_{i|j}}{\\\sqrt{
-#' \\\sigma_{u|j}^2 +\\\sigma_{v|j}^2}}\\\\right)\\\Phi\\\\left(\\\frac{
-#' \\\mu_{i*|j}}{\\\sigma_{*|j}}\\\\right)')
-#' }
+#' \deqn{P(i|j) = \frac{2}{\sqrt{\sigma_{u|j}^2 + 
+#' \sigma_{v|j}^2}}\phi\left(\frac{S\epsilon_{i|j}}{\sqrt{
+#' \sigma_{u|j}^2 +\sigma_{v|j}^2}}\right)\Phi\left(\frac{
+#' \mu_{i*|j}}{\sigma_{*|j}}\right)}
 #'
 #' where 
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('\\\mu_{i*|j}=\\\frac{- S\\\epsilon_{i|j}
-#' \\\sigma_{u|j}^2}{\\\sigma_{u|j}^2 + \\\sigma_{v|j}^2}')
-#' }
+#' \deqn{\mu_{i*|j}=\frac{- S\epsilon_{i|j}
+#' \sigma_{u|j}^2}{\sigma_{u|j}^2 + \sigma_{v|j}^2}}
 #'
 #' and 
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('\\\sigma_*^2 = \\\frac{\\\sigma_{u|j}^2 
-#' \\\sigma_{v|j}^2}{\\\sigma_{u|j}^2 + \\\sigma_{v|j}^2}')
-#' }
-#'
+#' \deqn{\sigma_*^2 = \frac{\sigma_{u|j}^2 
+#' \sigma_{v|j}^2}{\sigma_{u|j}^2 + \sigma_{v|j}^2}}
+#' 
 #' The prior probability of using a particular technology can depend on some
 #' covariates (namely the variables separating the observations into classes)
 #' using a logit specification: 
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('\\\pi(i,j) = \\\frac{\\\exp{(\\\theta_j'Z_{hi})}}{
-#' \\\sum_{m=1}^{J}\\\exp{(\\\theta_m'Z_{hi})}}')
-#' }
-#'
-#' with \eqn{Z_h} the covariates, \eqn{\theta} the coefficients estimated for
-#' the covariates, and \eqn{\exp(\theta_J'Z_h)=1}.
+#' \deqn{\pi(i,j) = \frac{\exp{(\bm{\theta}_j'\mathbf{Z}_{hi})}}{
+#' \sum_{m=1}^{J}\exp{(\bm{\theta}_m'\mathbf{Z}_{hi})}}}
+#' 
+#' with \eqn{\mathbf{Z}_h} the covariates, \eqn{\bm{\theta}} the coefficients estimated for
+#' the covariates, and \eqn{\exp(\bm{\theta}_J'\mathbf{Z}_h)=1}.
 #'
 #' The unconditional likelihood of observation \eqn{i} is simply the average
 #' over the \eqn{J} classes:
 #'
-#' \eqn{P(i) = \sum_{m=1}^{J}\pi(i,m)P(i|m)}
+#' \deqn{P(i) = \sum_{m=1}^{J}\pi(i,m)P(i|m)}
 #'
 #' The number of classes can be retained based on information criterion (see
 #' for instance \code{\link[=ic.lcmcross]{ic}}).
@@ -172,30 +180,25 @@
 #' Class assignment is based on the largest posterior probability. This
 #' probability is obtained using Bayes' rule, as follows for class \eqn{j}:
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('w\\\\left(j|i\\\\right)=\\\frac{P\\\\left(i|j\\\\right)
-#' \\\pi\\\\left(i,j\\\\right)}{\\\sum_{m=1}^JP\\\\left(i|m\\\\right)
-#' \\\pi\\\\left(i, m\\\\right)}')
-#' }
+#' \deqn{w\left(j|i\right)=\frac{P\left(i|j\right)
+#' \pi\left(i,j\right)}{\sum_{m=1}^JP\left(i|m\right)
+#' \pi\left(i, m\right)}}
 #'
 #' To accommodate heteroscedasticity in the variance parameters of the error
 #' terms, a single part (right) formula can also be specified. To impose the
 #' positivity on these parameters, the variances are modelled respectively as:
-#' \eqn{\sigma^2_{u|j} = \exp{(\delta_j'Z_u)}} and \eqn{\sigma^2_{v|j} =
-#' \exp{(\phi_j'Z_v)}}, where \eqn{Z_u} and \eqn{Z_v} are the
-#' heteroscedasticity variables (inefficiency drivers in the case of \eqn{Z_u})
-#' and \eqn{\delta} and \eqn{\phi} the coefficients.  In the case of
-#' heterogeneity in the truncated mean \eqn{\mu}, it is modelled as
-#' \eqn{\mu=\omega'Z_{\mu}}.
+#' \eqn{\sigma^2_{u|j} = \exp{(\bm{\delta}_j'\mathbf{Z}_u)}} and \eqn{\sigma^2_{v|j} =
+#' \exp{(\bm{\phi}_j'\mathbf{Z}_v)}}, where \eqn{Z_u} and \eqn{Z_v} are the
+#' heteroscedasticity variables (inefficiency drivers in the case of \eqn{\mathbf{Z}_u})
+#' and \eqn{\bm{\delta}} and \eqn{\bm{\phi}} the coefficients. \code{'lcmcross'} only 
+#' supports the half-normal distribution for the one-sided error term.
 #' 
 #' \code{lcmcross} allows for the maximization of weighted log-likelihood.
 #' When option \code{weights} is specified and \code{wscale = TRUE}, the weights
 #' is scaled as 
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('new_{weights} = sample_{size} \\\times 
-#' \\\frac{old_{weights}}{\\\sum(old_{weights})}')
-#' }
+#' \deqn{new_{weights} = sample_{size} \times 
+#' \frac{old_{weights}}{\sum(old_{weights})}}
 #' 
 #' For difficult problems, non-gradient methods (e.g. \code{nm} or 
 #' \code{sann}) can be used to warm start the optimization and zoom in the 
@@ -262,10 +265,11 @@
 #' \code{weights} is specified an additional variable is also provided in 
 #' \code{dataTable}.}
 #'
-#' \item{initHalf}{When \code{start = NULL}. Initial ML estimation with half
-#' normal distribution for the one-sided error term. Model to construct the
-#' starting values for the latent class estimation. Object of class
-#' \code{'maxLik'} and \code{'maxim'} returned.}
+#' \item{initHalf}{When \code{start = NULL} and \code{whichStart == 2L}. 
+#' Initial ML estimation with half normal distribution for the one-sided error 
+#' term. Model to construct the starting values for 
+#' the latent class estimation. Object of class \code{'maxLik'} and 
+#' \code{'maxim'} returned.}
 #' 
 #' \item{isWeights}{Logical. If \code{TRUE} weighted log-likelihood is
 #' maximized.}
@@ -390,15 +394,17 @@
 #'
 #' # Only the intercept is used as the separating variable and only variable
 #' # initStat is used as inefficiency driver
-#' cb_2c_h3 <- lcmcross(formula = ly ~ lk + ll + yr, uhet = ~initStat, data = worldprod)
+#' cb_2c_h3 <- lcmcross(formula = ly ~ lk + ll + yr, uhet = ~initStat, 
+#' data = worldprod)
 #' summary(cb_2c_h3)
 #'
 #' @export
 lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
   data, subset, weights, wscale = TRUE, S = 1L, udist = "hnormal",
-  start = NULL, lcmClasses = 2, method = "bfgs", hessianType = 1,
-  itermax = 2000L, printInfo = FALSE, tol = 1e-12, gradtol = 1e-06,
-  stepmax = 0.1, qac = "marquardt") {
+  start = NULL, whichStart = 2L, initAlg = "nm", initIter = 100,
+  lcmClasses = 2, method = "bfgs", hessianType = 1, itermax = 2000L,
+  printInfo = FALSE, tol = 1e-12, gradtol = 1e-06, stepmax = 0.1,
+  qac = "marquardt") {
   # u distribution check -------
   udist <- tolower(udist)
   if (udist != "hnormal") {
@@ -415,7 +421,7 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
     nomatch = 0L)
   mc <- mc[c(1L, m)]
   mc$drop.unused.levels <- TRUE
-  formula <- interCheckMain(formula = formula)
+  formula <- interCheckMain(formula = formula, data = data)
   if (!missing(uhet)) {
     uhet <- clhsCheck_u(formula = uhet, scaling = FALSE)
   } else {
@@ -521,6 +527,11 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
   if (nParm > N) {
     stop("Model has more parameters than observations", call. = FALSE)
   }
+  # check whichStart
+  if (length(whichStart) != 1 || !(whichStart %in% c(1L, 2L))) {
+    stop("argument 'whichStart' must equal either 1 or 2",
+      call. = FALSE)
+  }
   # Check algorithms -------
   method <- tolower(method)
   if (!(method %in% c("ucminf", "bfgs", "bhhh", "nr", "nm",
@@ -535,6 +546,26 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
       call. = FALSE)
   }
   # Other optimization options -------
+  if (!is.numeric(initIter) || length(initIter) != 1) {
+    stop("argument 'initIter' must be a single numeric scalar",
+      call. = FALSE)
+  }
+  if (initIter != round(initIter)) {
+    stop("argument 'initIter' must be an integer", call. = FALSE)
+  }
+  if (initIter <= 0) {
+    stop("argument 'initIter' must be positive", call. = FALSE)
+  }
+  initIter <- as.integer(initIter)
+  if (!is.numeric(itermax) || length(itermax) != 1) {
+    stop("argument 'itermax' must be a single numeric scalar",
+      call. = FALSE)
+  }
+  initAlg <- tolower(initAlg)
+  if (!(initAlg %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann"))) {
+    stop("Unknown or non-available optimization algorithm: ",
+      paste(initAlg), call. = FALSE)
+  }
   if (!is.numeric(itermax) || length(itermax) != 1) {
     stop("argument 'itermax' must be a single numeric scalar",
       call. = FALSE)
@@ -589,15 +620,18 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
    due to potential perfect multicollinearity",
       call. = FALSE)
   }
+  names(olsRes$coefficients) <- colnames(Xvar)
   olsParam <- c(olsRes$coefficients)
-  if (inherits(data, "plm.dim")) {
-    dataTable <- data[validObs, 1:2]
+  obs_subset <- row.names(data) %in% attributes(mc)[["row.names"]]
+  if (inherits(data, "pdata.frame")) {
+    dataTable <- data[obs_subset, names(index(data))][validObs,
+      ]
   } else {
     dataTable <- data.frame(IdObs = c(1:sum(validObs)))
   }
-  dataTable <- as_tibble(cbind(dataTable, data[, all.vars(terms(formula))],
-    weights = wHvar))
-  dataTable <- mutate(dataTable, olsResiduals = residuals(olsRes),
+  dataTable <- cbind(dataTable, data[obs_subset, all.vars(terms(formula))][validObs,
+    ], weights = wHvar)
+  dataTable <- cbind(dataTable, olsResiduals = residuals(olsRes),
     olsFitted = fitted(olsRes))
   olsSkew <- skewness(dataTable[["olsResiduals"]])
   if (S * olsSkew > 0) {
@@ -614,6 +648,7 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
     nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
     uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Zvar = Zvar,
     nZHvar = nZHvar, Xvar = Xvar, S = S, wHvar = wHvar, method = method,
+    initAlg = initAlg, initIter = initIter, whichStart = whichStart,
     printInfo = printInfo, itermax = itermax, stepmax = stepmax,
     tol = tol, gradtol = gradtol, hessianType = hessianType,
     qac = qac)
@@ -747,7 +782,9 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
   returnObj$startVal <- mleList$startVal
   returnObj$dataTable <- dataTable
   if (is.null(start)) {
-    returnObj$initHalf <- mleList$initHalf
+    if (whichStart == 2L) {
+      returnObj$initHalf <- mleList$initHalf
+    }
   }
   returnObj$isWeights <- !all.equal(wHvar, rep(1, N))
   returnObj$optType <- mleList$type

@@ -134,22 +134,32 @@ cLCMhalfnormlike5C <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param Zvar matrix of separating variables
 #' @param nZHvar number of separating variables
 #' @param printInfo logical print info during optimization
-#' @param itermax maximum iteration
+#' @param whichStart strategy to get starting values
+#' @param initIter maximum iterations for initialization
+#' @param initAlg algorithm for maxLik  
 #' @param tol parameter tolerance
 #' @noRd
 csLCMfhalfnorm5C <- function(olsObj, epsiRes, nXvar, nuZUvar,
   nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, Zvar, nZHvar,
-  itermax, printInfo, tol) {
-  cat("Initialization: SFA halfnormal - normal distribution...\n")
-  initHalf <- maxLik(logLik = chalfnormlike, start = csthalfnorm(olsObj = olsObj,
-    epsiRes = epsiRes, S = S, nuZUvar = 1, uHvar = as.matrix(uHvar[,
-      1]), nvZVvar = 1, vHvar = as.matrix(vHvar[, 1])),
-    grad = cgradhalfnormlike, method = "BFGS", control = list(iterlim = itermax,
-      printLevel = if (printInfo) 2 else 0, reltol = tol),
-    nXvar = nXvar, nuZUvar = 1, nvZVvar = 1, uHvar = as.matrix(uHvar[,
-      1]), vHvar = as.matrix(vHvar[, 1]), Yvar = Yvar,
-    Xvar = Xvar, S = S, wHvar = wHvar)
-  Esti <- initHalf$estimate
+  whichStart, initIter, initAlg, printInfo, tol) {
+  if (whichStart == 1L) {
+    Esti <- csthalfnorm(olsObj = olsObj, epsiRes = epsiRes,
+      S = S, nuZUvar = 1, uHvar = uHvar[, 1, drop = FALSE],
+      nvZVvar = 1, vHvar = vHvar[, 1, drop = FALSE])
+    initHalf <- NULL
+  } else {
+    cat("Initialization: SFA + halfnormal - normal distributions...\n")
+    initHalf <- maxLik::maxLik(logLik = chalfnormlike, start = csthalfnorm(olsObj = olsObj,
+      epsiRes = epsiRes, S = S, nuZUvar = 1, uHvar = uHvar[,
+        1, drop = FALSE], nvZVvar = 1, vHvar = vHvar[,
+        1, drop = FALSE]), grad = cgradhalfnormlike,
+      method = initAlg, control = list(iterlim = initIter,
+        printLevel = printInfo, reltol = tol), nXvar = nXvar,
+      nuZUvar = 1, nvZVvar = 1, uHvar = uHvar[, 1, drop = FALSE],
+      vHvar = vHvar[, 1, drop = FALSE], Yvar = Yvar, Xvar = Xvar,
+      S = S, wHvar = wHvar)
+    Esti <- initHalf$estimate
+  }
   StartVal <- c(Esti[1:(nXvar + 1)], if (nuZUvar > 1) rep(0,
     nuZUvar - 1), Esti[nXvar + 2], if (nvZVvar > 1) rep(0,
     nvZVvar - 1), 0.98 * Esti[1:nXvar], Esti[nXvar + 1],
@@ -2050,6 +2060,9 @@ chessLCMhalfnormlike5C <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param method algorithm for solver
 #' @param printInfo logical print info during optimization
 #' @param itermax maximum iteration
+#' @param whichStart strategy to get starting values
+#' @param initIter maximum iterations for initialization
+#' @param initAlg algorithm for maxLik  
 #' @param stepmax stepmax for ucminf
 #' @param tol parameter tolerance
 #' @param gradtol gradient tolerance
@@ -2059,7 +2072,7 @@ chessLCMhalfnormlike5C <- function(parm, nXvar, nuZUvar, nvZVvar,
 LCM5ChnormAlgOpt <- function(start, olsParam, dataTable, S, wHvar,
   nXvar, uHvar, nuZUvar, vHvar, nvZVvar, Zvar, nZHvar, Yvar,
   Xvar, method, printInfo, itermax, stepmax, tol, gradtol,
-  hessianType, qac) {
+  whichStart, initIter, initAlg, hessianType, qac) {
   if (!is.null(start)) {
     startVal <- start
   } else {
@@ -2067,7 +2080,8 @@ LCM5ChnormAlgOpt <- function(start, olsParam, dataTable, S, wHvar,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar,
-      itermax = itermax, tol = tol, printInfo = printInfo)
+      whichStart = whichStart, initIter = initIter, initAlg = initAlg,
+      tol = tol, printInfo = printInfo)
     initHalf <- start_st$initHalf
     startVal <- start_st$StartVal
   }
@@ -2076,14 +2090,14 @@ LCM5ChnormAlgOpt <- function(start, olsParam, dataTable, S, wHvar,
     vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar,
     Zvar = Zvar, nZHvar = nZHvar))
   if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
-    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
-      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
-      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
-      sann = function(...) maxSANN(...))
+    maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...),
+      bhhh = function(...) maxLik::maxBHHH(...), nr = function(...) maxLik::maxNR(...),
+      nm = function(...) maxLik::maxNM(...), cg = function(...) maxLik::maxCG(...),
+      sann = function(...) maxLik::maxSANN(...))
     method <- "maxLikAlgo"
   }
   cat("LCM 5 Classes Estimation...\n")
-  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+  mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
     fn = function(parm) -sum(cLCMhalfnormlike5C(parm, nXvar = nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
       vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar,
@@ -2101,7 +2115,7 @@ LCM5ChnormAlgOpt <- function(start, olsParam, dataTable, S, wHvar,
     nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
     uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
     S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar),
-    sr1 = trust.optim(x = startVal, fn = function(parm) -sum(cLCMhalfnormlike5C(parm,
+    sr1 = trustOptim::trust.optim(x = startVal, fn = function(parm) -sum(cLCMhalfnormlike5C(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
@@ -2111,7 +2125,7 @@ LCM5ChnormAlgOpt <- function(start, olsParam, dataTable, S, wHvar,
         S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar)),
       method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
         stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
-        report.precision = 1L)), sparse = trust.optim(x = startVal,
+        report.precision = 1L)), sparse = trustOptim::trust.optim(x = startVal,
       fn = function(parm) -sum(cLCMhalfnormlike5C(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -2127,7 +2141,7 @@ LCM5ChnormAlgOpt <- function(start, olsParam, dataTable, S, wHvar,
         "dgCMatrix"), method = "Sparse", control = list(maxit = itermax,
         cgtol = gradtol, stop.trust.radius = tol, prec = tol,
         report.level = if (printInfo) 2 else 0, report.precision = 1L,
-        preconditioner = 1L)), mla = mla(b = startVal,
+        preconditioner = 1L)), mla = marqLevAlg::mla(b = startVal,
       fn = function(parm) -sum(cLCMhalfnormlike5C(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
@@ -2169,7 +2183,6 @@ LCM5ChnormAlgOpt <- function(start, olsParam, dataTable, S, wHvar,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -2394,7 +2407,7 @@ cLCM5Chalfnormeff <- function(object, level) {
       NA)
     ReffBC_c5 <- ifelse(Group_c == 5, teBC_reciprocal_c5,
       NA)
-    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+    res <- data.frame(Group_c = Group_c, PosteriorProb_c = P_cond_c,
       u_c = u_c, teJLMS_c = teJLMS_c, teBC_c = teBC_c,
       teBC_reciprocal_c = teBC_reciprocal_c, PosteriorProb_c1 = Pcond_c1,
       PriorProb_c1 = Probc1, u_c1 = u_c1, teBC_c1 = teBC_c1,
@@ -2413,7 +2426,7 @@ cLCM5Chalfnormeff <- function(object, level) {
       ReffBC_c1 = ReffBC_c1, ReffBC_c2 = ReffBC_c2, ReffBC_c3 = ReffBC_c3,
       ReffBC_c4 = ReffBC_c4, ReffBC_c5 = ReffBC_c5)
   } else {
-    res <- bind_cols(Group_c = Group_c, PosteriorProb_c = P_cond_c,
+    res <- data.frame(Group_c = Group_c, PosteriorProb_c = P_cond_c,
       u_c = u_c, PosteriorProb_c1 = Pcond_c1, PriorProb_c1 = Probc1,
       u_c1 = u_c1, PosteriorProb_c2 = Pcond_c2, PriorProb_c2 = Probc2,
       u_c2 = u_c2, PosteriorProb_c3 = Pcond_c3, PriorProb_c3 = Probc3,
@@ -2581,7 +2594,7 @@ cmargLCM5Chalfnorm_Eu <- function(object) {
     4, margEff_c4, margEff_c5))))
   colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
     "_c")
-  margEff <- bind_cols(margEff_c, margEff_c1, margEff_c2, margEff_c3,
+  margEff <- data.frame(margEff_c, margEff_c1, margEff_c2, margEff_c3,
     margEff_c4, margEff_c5)
   return(margEff)
 }
@@ -2743,7 +2756,7 @@ cmargLCM5Chalfnorm_Vu <- function(object) {
     4, margEff_c4, margEff_c5))))
   colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
     "_c")
-  margEff <- bind_cols(margEff_c, margEff_c1, margEff_c2, margEff_c3,
+  margEff <- data.frame(margEff_c, margEff_c1, margEff_c2, margEff_c3,
     margEff_c4, margEff_c5)
   return(margEff)
 }
