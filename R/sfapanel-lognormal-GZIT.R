@@ -8,16 +8,16 @@
 # Data: Panel data                                                             #
 # Model: Panel Stochastic Frontier Model                                       #
 # Inefficiency structure: u_it = g(zit)u_i                                     #
-#                         Battese and Coelli 1992 specifications:              #
+#                         Battese and Coelli 1992 specification:               #
 #                          - g(zit) = exp(-eta * (t - T))                      #
+#                         Cuesta and Orea (2002), Feng and Serletis (2009)     #
 #                          - g(zit) = exp(-eta1 * (t - T) - eta2 * (t - T)^2)  #
+#                         Alvarez, Amsler, Orea, Schmidt (2006)                #
 #                          - g(zit) = exp(eta * gHvar)                         #
 #                         Kumbhakar and Wang 2005 specification:               #
 #                          - g(zit) = exp(eta * (t - t1))                      #
 #                         Cuesta 2000 specification:                           #
 #                          - g(zit) = exp(-eta_i * (t - T))                    #
-#                         Modified Lee and Schmidt 1993                        #
-#                          - g(zit) = exp(-eta_t * (t - T)): g(zit) = 1 for T  #
 # Convolution: lognormal - normal                                              #
 #------------------------------------------------------------------------------#
 
@@ -93,66 +93,75 @@ plognormlike_gzit <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param N number of observations
 #' @param FiMat matrix of random draws
 #' @param printInfo logical print info during optimization
-#' @param itermax maximum iteration
+#' @param whichStart strategy to get starting values
+#' @param initIter maximum iterations for initialization
+#' @param initAlg algorithm for maxLik  
 #' @param tol parameter tolerance
 #' @noRd
 pstlognorm_gzit <- function(olsObj, epsiRes, nXvar, nmuZUvar,
   nuZUvar, nvZVvar, muHvar, uHvar, vHvar, ngZGvar, gHvar, Yvar,
-  Xvar, S, wHvar, modelType, itermax, printInfo, tol, N, FiMat) {
-  cat("Initialization: SFA + log-normal-normal distribution...\n")
-  initLog <- maxLik(logLik = clognormlike, start = cstlognorm(olsObj = olsObj,
-    epsiRes = epsiRes, S = S, nuZUvar = 1, uHvar = as.matrix(uHvar[,
-      1]), nvZVvar = 1, vHvar = as.matrix(vHvar[, 1]),
-    nmuZUvar = 1, muHvar = as.matrix(muHvar[, 1])), grad = cgradlognormlike,
-    method = "BFGS", control = list(iterlim = itermax, printLevel = if (printInfo) 2 else 0,
-      reltol = tol), nXvar = nXvar, nuZUvar = 1, nmuZUvar = 1,
-    muHvar = as.matrix(muHvar[, 1]), nvZVvar = 1, uHvar = as.matrix(uHvar[,
-      1]), vHvar = as.matrix(vHvar[, 1]), Yvar = Yvar,
-    Xvar = Xvar, S = S, wHvar = wHvar, N = N, FiMat = FiMat)
-  Esti <- initLog$estimate
+  Xvar, S, wHvar, modelType, whichStart, printInfo, tol, N,
+  FiMat, initIter, initAlg) {
+  if (whichStart == 1L) {
+    Esti <- cstlognorm(olsObj = olsObj, epsiRes = epsiRes,
+      S = S, nuZUvar = 1, uHvar = uHvar[, 1, drop = FALSE],
+      nvZVvar = 1, vHvar = vHvar[, 1, drop = FALSE], nmuZUvar = 1,
+      muHvar = muHvar[, 1, drop = FALSE])
+    initLog <- NULL
+  } else {
+    cat("Initialization: SFA + lognormal-normal distribution...\n")
+    initLog <- maxLik::maxLik(logLik = clognormlike, start = cstlognorm(olsObj = olsObj,
+      epsiRes = epsiRes, S = S, nuZUvar = 1, uHvar = uHvar[,
+        1, drop = FALSE], nvZVvar = 1, vHvar = vHvar[,
+        1, drop = FALSE], nmuZUvar = 1, muHvar = muHvar[,
+        1, drop = FALSE]), grad = cgradlognormlike, method = initAlg,
+      control = list(iterlim = initIter, printLevel = if (printInfo) 2 else 0,
+        reltol = tol), nXvar = nXvar, nuZUvar = 1, nmuZUvar = 1,
+      muHvar = muHvar[, 1, drop = FALSE], nvZVvar = 1,
+      uHvar = uHvar[, 1, drop = FALSE], vHvar = vHvar[,
+        1, drop = FALSE], Yvar = Yvar, Xvar = Xvar, S = S,
+      wHvar = wHvar, N = N, FiMat = FiMat)
+    Esti <- initLog$estimate
+  }
   StartVal <- c(Esti[1:(nXvar)], Esti[nXvar + 1], if (nmuZUvar >
-                                                      1) {
+    1) {
     rep(0, nmuZUvar - 1)
   }, Esti[nXvar + 2], if (nuZUvar > 1) {
     rep(0, nuZUvar - 1)
   }, Esti[nXvar + 3], if (nvZVvar > 1) {
     rep(0, nvZVvar - 1)
   }, if (modelType %in% c("bc92a", "kw05")) {
-    0.001} else {
-      if (modelType == "bc92b") {
-        c(0.001, 0.001)
+    0.001
+  } else {
+    if (modelType == "bc92b") {
+      c(0.001, 0.001)
+    } else {
+      if (modelType == "bc92c") {
+        rep(0, ngZGvar)
       } else {
-        if (modelType == "bc92c") {
-          rep(0, ngZGvar)
-        } else {
-          if (modelType %in% c("c00", "mols93")) {
-            rep(0.001, ngZGvar)
-          }
+        if (modelType == "c00") {
+          rep(0.001, ngZGvar)
         }
       }
-    } 
-  )
+    }
+  })
   names(StartVal) <- c(names(Esti)[1:nXvar], paste0("Zmu_",
-                                                    colnames(muHvar)), paste0("Zu_",
-                                                    colnames(uHvar)), paste0("Zv_", colnames(vHvar)), if (modelType %in% c("bc92a", "kw05")) {
-                                                      "eta"
-                                                    } else {
-                                                      if (modelType == "bc92b") {
-                                                        c("eta1", "eta2")
-                                                      } else {
-                                                        if (modelType == "bc92c") {
-                                                          paste0("Zg_",colnames(gHvar))
-                                                        } else {
-                                                          if (modelType %in% c("c00", "mols93")) {
-                                                            paste0("eta_", colnames(gHvar))
-                                                          }
-                                                        }
-                                                      }
-                                                    }
-  )
-  names(initLog$estimate) <- c(names(Esti)[1:nXvar], paste0("Zmu_",
-    colnames(muHvar)), paste0("Zu_", colnames(uHvar)[1]),
-    paste0("Zv_", colnames(vHvar)[1]))
+    colnames(muHvar)), paste0("Zu_", colnames(uHvar)), paste0("Zv_",
+    colnames(vHvar)), if (modelType %in% c("bc92a", "kw05")) {
+    "eta"
+  } else {
+    if (modelType == "bc92b") {
+      c("eta1", "eta2")
+    } else {
+      if (modelType == "bc92c") {
+        paste0("Zg_", colnames(gHvar))
+      } else {
+        if (modelType == "c00") {
+          paste0("eta_", colnames(gHvar))
+        }
+      }
+    }
+  })
   return(list(StartVal = StartVal, initLog = initLog))
 }
 
@@ -203,15 +212,15 @@ pgradlognormlike_gzit <- function(parm, nXvar, nuZUvar, nvZVvar,
     sum))
   Xepsi_it <- sweep(-Xvar, MARGIN = 1, STATS = epsilon_it,
     FUN = "*")
-  Xepsi_i <- apply(Xepsi_it, 2, function(x) tapply(x, pindex[, 1],
-    sum))
+  Xepsi_i <- apply(Xepsi_it, 2, function(x) tapply(x, pindex[,
+    1], sum))
   Zitgitepsit <- sweep(gHvar, MARGIN = 1, STATS = git * epsilon_it,
     FUN = "*")
-  Zigiepsi <- apply(Zitgitepsit, 2, function(x) tapply(x, pindex[, 1],
-    sum))
+  Zigiepsi <- apply(Zitgitepsit, 2, function(x) tapply(x, pindex[,
+    1], sum))
   Zitgitsq <- sweep(gHvar, MARGIN = 1, STATS = 2 * git^2, FUN = "*")
-  Zigisq <- apply(Zitgitsq, 2, function(x) tapply(x, pindex[, 1],
-    sum))
+  Zigisq <- apply(Zitgitsq, 2, function(x) tapply(x, pindex[,
+    1], sum))
   ewu_h <- exp(Wu/2)
   ewv <- exp(Wv)
   qFimat <- qnorm(FiMat)
@@ -296,6 +305,7 @@ pgradlognormlike_gzit <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param vHvar_p matrix of Zv variables for cross-section
 #' @param Yvar vector of dependent variable
 #' @param Xvar matrix of main variables
+#' @param modelType specification of inefficiency model G(t)u_i
 #' @param gHvar matrix of inefficiency determinants
 #' @param ngZGvar number of variables explaining inefficiency
 #' @param wHvar_c vector of weights (weighted likelihood) pooled data
@@ -310,18 +320,21 @@ pgradlognormlike_gzit <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param method algorithm for solver
 #' @param printInfo logical print info during optimization
 #' @param itermax maximum iteration
+#' @param whichStart strategy to get starting values
+#' @param initIter maximum iterations for initialization
+#' @param initAlg algorithm for maxLik  
 #' @param stepmax stepmax for ucminf
 #' @param tol parameter tolerance
 #' @param gradtol gradient tolerance
 #' @param hessianType how hessian is computed
 #' @param qac qac option for maxLik
 #' @noRd
-lognormAlgOpt_gzit <- function(start, olsParam, dataTable,
-  S, gHvar, ngZGvar, nXvar, muHvar_c, muHvar_p, nmuZUvar, N,
-  NT, FiMat_N, FiMat_NT, uHvar_c, uHvar_p, nuZUvar, vHvar_c,
-  vHvar_p, nvZVvar, pindex, TT, Yvar, Xvar, wHvar_c, wHvar_p,
+lognormAlgOpt_gzit <- function(start, olsParam, dataTable, S,
+  gHvar, ngZGvar, nXvar, muHvar_c, muHvar_p, nmuZUvar, N, NT,
+  FiMat_N, FiMat_NT, uHvar_c, uHvar_p, nuZUvar, vHvar_c, vHvar_p,
+  nvZVvar, pindex, TT, Yvar, Xvar, wHvar_c, wHvar_p, modelType,
   method, printInfo, itermax, stepmax, tol, gradtol, hessianType,
-  qac) {
+  whichStart, initIter, initAlg, qac) {
   if (!is.null(start)) {
     startVal <- start
   } else {
@@ -329,8 +342,10 @@ lognormAlgOpt_gzit <- function(start, olsParam, dataTable,
       nmuZUvar = nmuZUvar, muHvar = muHvar_c, N = NT, FiMat = FiMat_NT,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       gHvar = gHvar, ngZGvar = ngZGvar, uHvar = uHvar_c,
-      vHvar = vHvar_c, Yvar = Yvar, Xvar = Xvar, S = S,
-      wHvar = wHvar_c, itermax = itermax, tol = tol, printInfo = printInfo)
+      modelType = modelType, vHvar = vHvar_c, Yvar = Yvar,
+      Xvar = Xvar, S = S, initIter = initIter, initAlg = initAlg,
+      wHvar = wHvar_c, whichStart = whichStart, tol = tol,
+      printInfo = printInfo)
     InitLog <- start_st$initLog
     startVal <- start_st$StartVal
   }
@@ -340,13 +355,14 @@ lognormAlgOpt_gzit <- function(start, olsParam, dataTable,
     Xvar = Xvar, pindex = pindex, TT = TT, S = S, wHvar = wHvar_p,
     nmuZUvar = nmuZUvar, muHvar = muHvar_p, N = N, FiMat = FiMat_N))
   if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
-    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
-      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
-      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
-      sann = function(...) maxSANN(...))
+    maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...),
+      bhhh = function(...) maxLik::maxBHHH(...), nr = function(...) maxLik::maxNR(...),
+      nm = function(...) maxLik::maxNM(...), cg = function(...) maxLik::maxCG(...),
+      sann = function(...) maxLik::maxSANN(...))
     method <- "maxLikAlgo"
   }
-  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+  cat("SFA Panel BC92-type Estimation...\n")
+  mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
     fn = function(parm) -sum(plognormlike_gzit(parm, nXvar = nXvar,
       gHvar = gHvar, ngZGvar = ngZGvar, nuZUvar = nuZUvar,
       nvZVvar = nvZVvar, uHvar = uHvar_p, vHvar = vHvar_p,
@@ -368,7 +384,7 @@ lognormAlgOpt_gzit <- function(start, olsParam, dataTable,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
       vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar, pindex = pindex,
       TT = TT, S = S, wHvar = wHvar_p, nmuZUvar = nmuZUvar,
-      muHvar = muHvar_p, N = N, FiMat = FiMat_N), sr1 = trust.optim(x = startVal,
+      muHvar = muHvar_p, N = N, FiMat = FiMat_N), sr1 = trustOptim::trust.optim(x = startVal,
       fn = function(parm) -sum(plognormlike_gzit(parm,
         nXvar = nXvar, gHvar = gHvar, ngZGvar = ngZGvar,
         nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
@@ -383,7 +399,7 @@ lognormAlgOpt_gzit <- function(start, olsParam, dataTable,
         muHvar = muHvar_p, N = N, FiMat = FiMat_N)),
       method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
         stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
-        report.precision = 1L)), sparse = trust.optim(x = startVal,
+        report.precision = 1L)), sparse = trustOptim::trust.optim(x = startVal,
       fn = function(parm) -sum(plognormlike_gzit(parm,
         nXvar = nXvar, gHvar = gHvar, ngZGvar = ngZGvar,
         nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
@@ -396,7 +412,7 @@ lognormAlgOpt_gzit <- function(start, olsParam, dataTable,
         vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar, pindex = pindex,
         TT = TT, S = S, wHvar = wHvar_p, nmuZUvar = nmuZUvar,
         muHvar = muHvar_p, N = N, FiMat = FiMat_N)),
-      hs = function(parm) as(jacobian(function(parm) -colSums(pgradlognormlike_gzit(parm,
+      hs = function(parm) as(calculus::jacobian(function(parm) -colSums(pgradlognormlike_gzit(parm,
         nXvar = nXvar, gHvar = gHvar, ngZGvar = ngZGvar,
         nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
         vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar, pindex = pindex,
@@ -405,7 +421,7 @@ lognormAlgOpt_gzit <- function(start, olsParam, dataTable,
         parm), "dgCMatrix"), method = "Sparse", control = list(maxit = itermax,
         cgtol = gradtol, stop.trust.radius = tol, prec = tol,
         report.level = if (printInfo) 2 else 0, report.precision = 1L,
-        preconditioner = 1L)), mla = mla(b = startVal,
+        preconditioner = 1L)), mla = marqLevAlg::mla(b = startVal,
       fn = function(parm) -sum(plognormlike_gzit(parm,
         nXvar = nXvar, gHvar = gHvar, ngZGvar = ngZGvar,
         nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
@@ -449,7 +465,6 @@ lognormAlgOpt_gzit <- function(start, olsParam, dataTable,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -460,7 +475,7 @@ lognormAlgOpt_gzit <- function(start, olsParam, dataTable,
   }
   if (hessianType != 2) {
     if (method %in% c("ucminf", "nlminb"))
-      mleObj$hessian <- jacobian(function(parm) colSums(pgradlognormlike_gzit(parm,
+      mleObj$hessian <- calculus::jacobian(function(parm) colSums(pgradlognormlike_gzit(parm,
         nXvar = nXvar, gHvar = gHvar, ngZGvar = ngZGvar,
         nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
         vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar, pindex = pindex,
@@ -468,7 +483,7 @@ lognormAlgOpt_gzit <- function(start, olsParam, dataTable,
         muHvar = muHvar_p, N = N, FiMat = FiMat_N)),
         mleObj$par)
     if (method == "sr1")
-      mleObj$hessian <- jacobian(function(parm) colSums(pgradlognormlike_gzit(parm,
+      mleObj$hessian <- calculus::jacobian(function(parm) colSums(pgradlognormlike_gzit(parm,
         nXvar = nXvar, gHvar = gHvar, ngZGvar = ngZGvar,
         nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
         vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar, pindex = pindex,
@@ -508,8 +523,8 @@ lognormAlgOpt_gzit <- function(start, olsParam, dataTable,
 #' @param S integer for cost/prod estimation
 #' @param TT time presence vector
 #' @noRd
-fnCondEffLogNorm_bc92I <- function(u, sigmaU, sigmaV, mu, S,
-  TT, epsilon_isq, giepsi, gisq) {
+fnCondEffLogNorm_gzit <- function(u, sigmaU, sigmaV, mu, S, TT,
+  epsilon_isq, giepsi, gisq) {
   1/(sigmaU * sigmaV^TT * (2 * pi)^(TT/2)) * dnorm((log(u) -
     mu)/sigmaU) * exp(-(epsilon_isq + 2 * S * u * giepsi +
     u^2 * gisq)/(2 * sigmaV^2))
@@ -526,11 +541,11 @@ fnCondEffLogNorm_bc92I <- function(u, sigmaU, sigmaV, mu, S,
 #' @param S integer for cost/prod estimation
 #' @param TT time presence vector
 #' @noRd
-fnCondBCEffLogNorm_bc92I <- function(u, sigmaU, sigmaV, mu, S,
-  TT, epsilon_isq, giepsi, gisq) {
-  exp(-u)/u * 1/(sigmaU * sigmaV^TT * (2 * pi)^(TT/2)) * dnorm((log(u) -
-    mu)/sigmaU) * exp(-(epsilon_isq + 2 * S * u * giepsi +
-    u^2 * gisq)/(2 * sigmaV^2))
+fnCondBCEffLogNorm_gzit <- function(u, sigmaU, sigmaV, mu, S,
+  TT, epsilon_isq, giepsi, gisq, git) {
+  exp(-git * u)/u * 1/(sigmaU * sigmaV^TT * (2 * pi)^(TT/2)) *
+    dnorm((log(u) - mu)/sigmaU) * exp(-(epsilon_isq + 2 *
+    S * u * giepsi + u^2 * gisq)/(2 * sigmaV^2))
 }
 
 # fn reciprocal conditional efficiencies----------
@@ -544,11 +559,11 @@ fnCondBCEffLogNorm_bc92I <- function(u, sigmaU, sigmaV, mu, S,
 #' @param S integer for cost/prod estimation
 #' @param TT time presence vector
 #' @noRd
-fnCondBCreciprocalEffLogNorm_bc92I <- function(u, sigmaU, sigmaV,
-  mu, S, TT, epsilon_isq, giepsi, gisq) {
-  exp(u)/u * 1/(sigmaU * sigmaV^TT * (2 * pi)^(TT/2)) * dnorm((log(u) -
-    mu)/sigmaU) * exp(-(epsilon_isq + 2 * S * u * giepsi +
-    u^2 * gisq)/(2 * sigmaV^2))
+fnCondBCreciprocalEffLogNorm_gzit <- function(u, sigmaU, sigmaV,
+  mu, S, TT, epsilon_isq, giepsi, gisq, git) {
+  exp(git * u)/u * 1/(sigmaU * sigmaV^TT * (2 * pi)^(TT/2)) *
+    dnorm((log(u) - mu)/sigmaU) * exp(-(epsilon_isq + 2 *
+    S * u * giepsi + u^2 * gisq)/(2 * sigmaV^2))
 }
 
 # Conditional efficiencies estimation ----------
@@ -556,7 +571,7 @@ fnCondBCreciprocalEffLogNorm_bc92I <- function(u, sigmaU, sigmaV,
 #' @param object object of class sfacross
 #' @param level level for confidence interval
 #' @noRd
-plognormeff_bc92I <- function(object, level) {
+plognormeff_gzit <- function(object, level) {
   beta <- object$mlParam[1:(object$nXvar)]
   omega <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nmuZUvar)]
@@ -576,8 +591,7 @@ plognormeff_bc92I <- function(object, level) {
     rhs = 3)
   vHvar_c <- model.matrix(object$formula, data = object$dataTable,
     rhs = 4)
-  gHvar <- model.matrix(object$formula, data = object$dataTable,
-    rhs = 5)
+  gHvar <- object$gHvar
   pindex <- object$dataTable[, 1:2]
   invariance <- object$invariance
   if (invariance == 1) {
@@ -629,48 +643,53 @@ plognormeff_bc92I <- function(object, level) {
   giepsi <- as.numeric(tapply(git_epsit, pindex[, 1], sum))
   gisq <- as.numeric(tapply(git^2, pindex[, 1], sum))
   u <- numeric(object$Nid)
+  density_epsilon_vec <- numeric(object$Nid)
   for (i in 1:object$Nid) {
     ur <- exp(mu[i] + exp(Wu[i]/2) * qnorm(object$FiMat[i,
       ]))
-    density_epsilon <- mean(1/((2 * pi)^(TT[i]/2) * exp(Wv[i]/2 *
-      TT[i])) * exp(-(epsilon_isq[i] + 2 * object$S * ur *
-      giepsi[i] + ur^2 * gisq[i])/(2 * exp(Wv[i]))))
-    u[i] <- hcubature(f = fnCondEffLogNorm_bc92I, lowerLimit = 0,
+    density_epsilon_vec[i] <- mean(1/((2 * pi)^(TT[i]/2) *
+      exp(Wv[i]/2 * TT[i])) * exp(-(epsilon_isq[i] + 2 *
+      object$S * ur * giepsi[i] + ur^2 * gisq[i])/(2 *
+      exp(Wv[i]))))
+    u[i] <- hcubature(f = fnCondEffLogNorm_gzit, lowerLimit = 0,
       upperLimit = Inf, maxEval = 100, fDim = 1, sigmaU = exp(Wu[i]/2),
       sigmaV = exp(Wv[i]/2), mu = mu[i], TT = TT[i], epsilon_isq = epsilon_isq[i],
       giepsi = giepsi[i], gisq = gisq[i], S = object$S,
-      vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon
+      vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon_vec[i]
   }
-  if (object$logDepVar == TRUE) {
-    teJLMS <- exp(-u)
-    teBC <- numeric(object$Nobs)
-    teBC_reciprocal <- numeric(object$Nobs)
-    for (i in 1:object$Nobs) {
-      ur <- exp(mu[i] + exp(Wu[i]/2) * qnorm(object$FiMat[i,
-        ]))
-      density_epsilon <- mean(1/((2 * pi)^(TT[i]/2) * exp(Wv[i]/2 *
-        TT[i])) * exp(-(epsilon_isq[i] + 2 * object$S *
-        ur * giepsi[i] + ur^2 * gisq[i])/(2 * exp(Wv[i]))))
-      teBC[i] <- hcubature(f = fnCondBCEffLogNorm_bc92I,
-        lowerLimit = 0, upperLimit = Inf, maxEval = 100,
-        fDim = 1, sigmaU = exp(Wu[i]/2), sigmaV = exp(Wv[i]/2),
-        mu = mu[i], TT = TT[i], epsilon_isq = epsilon_isq[i],
-        giepsi = giepsi[i], gisq = gisq[i], S = object$S,
-        vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon
-      teBC_reciprocal[i] <- hcubature(f = fnCondBCreciprocalEffLogNorm_bc92I,
-        lowerLimit = 0, upperLimit = Inf, maxEval = 100,
-        fDim = 1, sigmaU = exp(Wu[i]/2), sigmaV = exp(Wv[i]/2),
-        mu = mu[i], TT = TT[i], epsilon_isq = epsilon_isq[i],
-        giepsi = giepsi[i], gisq = gisq[i], S = object$S,
-        vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon
-    }
-    res <- data.frame(levels(pindex[, 1]), u = u, teJLMS = teJLMS,
-      teBC = teBC, teBC_reciprocal = teBC_reciprocal)
-  } else {
-    res <- data.frame(levels(pindex[, 1]), u = u)
-  }
+  res <- data.frame(levels(pindex[, 1]), u = u, giepsi = giepsi,
+    gisq = gisq, epsilon_isq = epsilon_isq, density_epsilon_vec = density_epsilon_vec,
+    Wu = Wu, Wv = Wv, mu = mu, TT = TT)
   names(res)[1] <- names(pindex)[1]
   res <- merge(pindex, res, by = names(pindex)[1])
+  res$u <- res$u * git
+  if (object$logDepVar == TRUE) {
+    res$teJLMS <- exp(-res$u)
+    res$teBC <- numeric(object$Nobs)
+    res$teBC_reciprocal <- numeric(object$Nobs)
+    for (i in 1:object$Nobs) {
+      res$teBC[i] <- hcubature(f = fnCondBCEffLogNorm_gzit,
+        lowerLimit = 0, upperLimit = Inf, maxEval = 100,
+        fDim = 1, sigmaU = exp(res$Wu[i]/2), sigmaV = exp(res$Wv[i]/2),
+        mu = res$mu[i], TT = res$TT[i], epsilon_isq = res$epsilon_isq[i],
+        giepsi = res$giepsi[i], gisq = res$gisq[i], S = object$S,
+        git = git[i], vectorInterface = FALSE, tol = 1e-15)$integral/res$density_epsilon_vec[i]
+      res$teBC_reciprocal[i] <- hcubature(f = fnCondBCreciprocalEffLogNorm_gzit,
+        lowerLimit = 0, upperLimit = Inf, maxEval = 100,
+        fDim = 1, sigmaU = exp(res$Wu[i]/2), sigmaV = exp(res$Wv[i]/2),
+        mu = res$mu[i], TT = res$TT[i], epsilon_isq = res$epsilon_isq[i],
+        giepsi = res$giepsi[i], gisq = res$gisq[i], S = object$S,
+        git = git[i], vectorInterface = FALSE, tol = 1e-15)$integral/res$density_epsilon_vec[i]
+    }
+  }
+  res$giepsi <- NULL
+  res$gisq <- NULL
+  res$epsilon_isq <- NULL
+  res$density_epsilon_vec <- NULL
+  res$Wu <- NULL
+  res$Wv <- NULL
+  res$mu <- NULL
+  res$TT <- NULL
   res <- pdata.frame(res, names(res)[1:2])
   return(res)
 }

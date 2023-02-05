@@ -8,16 +8,16 @@
 # Data: Panel data                                                             #
 # Model: Panel Stochastic Frontier Model                                       #
 # Inefficiency structure: u_it = g(zit)u_i                                     #
-#                         Battese and Coelli 1992 specifications:              #
+#                         Battese and Coelli 1992 specification:               #
 #                          - g(zit) = exp(-eta * (t - T))                      #
+#                         Cuesta and Orea (2002), Feng and Serletis (2009)     #
 #                          - g(zit) = exp(-eta1 * (t - T) - eta2 * (t - T)^2)  #
+#                         Alvarez, Amsler, Orea, Schmidt (2006)                #
 #                          - g(zit) = exp(eta * gHvar)                         #
 #                         Kumbhakar and Wang 2005 specification:               #
 #                          - g(zit) = exp(eta * (t - t1))                      #
 #                         Cuesta 2000 specification:                           #
 #                          - g(zit) = exp(-eta_i * (t - T))                    #
-#                         Modified Lee and Schmidt 1993                        #
-#                          - g(zit) = exp(-eta_t * (t - T)): g(zit) = 1 for T  #
 # Convolution: exponential - normal                                            #
 #------------------------------------------------------------------------------#
 
@@ -75,61 +75,69 @@ pexponormlike_gzit <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param nXvar number of main variables (inputs + env. var)
 #' @param wHvar vector of weights (weighted likelihood)
 #' @param printInfo logical print info during optimization
-#' @param itermax maximum iteration
+#' @param whichStart strategy to get starting values
+#' @param initIter maximum iterations for initialization
+#' @param initAlg algorithm for maxLik  
 #' @param tol parameter tolerance
 #' @noRd
 pstexponorm_gzit <- function(olsObj, epsiRes, nXvar, nuZUvar,
-  nvZVvar, uHvar, vHvar, Yvar, Xvar, ngZGvar, gHvar, S, wHvar, modelType, 
-  itermax, printInfo, tol) {
-  cat("Initialization: SFA + exponential-normal distribution...\n")
-  initExpo <- maxLik(logLik = cexponormlike, start = cstexponorm(olsObj = olsObj,
-    epsiRes = epsiRes, S = S, nuZUvar = 1, uHvar = as.matrix(uHvar[,
-      1]), nvZVvar = 1, vHvar = as.matrix(vHvar[, 1])),
-    grad = cgradexponormlike, method = "BFGS", control = list(iterlim = itermax,
-      printLevel = if (printInfo) 2 else 0, reltol = tol),
-    nXvar = nXvar, nuZUvar = 1, uHvar = as.matrix(uHvar[,
-      1]), nvZVvar = 1, vHvar = as.matrix(vHvar[, 1]),
-    Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar)
-  Esti <- initExpo$estimate
+  nvZVvar, uHvar, vHvar, Yvar, Xvar, ngZGvar, gHvar, S, wHvar,
+  modelType, whichStart, initIter, initAlg, printInfo, tol) {
+  if (whichStart == 1L) {
+    Esti <- cstexponorm(olsObj = olsObj, epsiRes = epsiRes,
+      S = S, nuZUvar = 1, uHvar = uHvar[, 1, drop = FALSE],
+      nvZVvar = 1, vHvar = vHvar[, 1, drop = FALSE])
+    initExpo <- NULL
+  } else {
+    cat("Initialization: SFA + exponential-normal distribution...\n")
+    initExpo <- maxLik::maxLik(logLik = cexponormlike, start = cstexponorm(olsObj = olsObj,
+      epsiRes = epsiRes, S = S, nuZUvar = 1, uHvar = uHvar[,
+        1, drop = FALSE], nvZVvar = 1, vHvar = vHvar[,
+        1, drop = FALSE]), grad = cgradexponormlike,
+      method = initAlg, control = list(iterlim = initIter,
+        printLevel = if (printInfo) 2 else 0, reltol = tol),
+      nXvar = nXvar, nuZUvar = 1, uHvar = uHvar[, 1, drop = FALSE],
+      nvZVvar = 1, vHvar = vHvar[, 1, drop = FALSE], Yvar = Yvar,
+      Xvar = Xvar, S = S, wHvar = wHvar)
+    Esti <- initExpo$estimate
+  }
   StartVal <- c(Esti[1:(nXvar)], Esti[nXvar + 1], if (nuZUvar >
-                                                      1) {
+    1) {
     rep(0, nuZUvar - 1)
   }, Esti[nXvar + 2], if (nvZVvar > 1) {
     rep(0, nvZVvar - 1)
   }, if (modelType %in% c("bc92a", "kw05")) {
-    0.001} else {
-      if (modelType == "bc92b") {
-        c(0.001, 0.001)
+    0.001
+  } else {
+    if (modelType == "bc92b") {
+      c(0.001, 0.001)
+    } else {
+      if (modelType == "bc92c") {
+        rep(0, ngZGvar)
       } else {
-        if (modelType == "bc92c") {
-          rep(0, ngZGvar)
-        } else {
-          if (modelType %in% c("c00", "mols93")) {
-            rep(0.001, ngZGvar)
-          }
+        if (modelType == "c00") {
+          rep(0.001, ngZGvar)
         }
       }
-    } 
-  )
+    }
+  })
   names(StartVal) <- c(names(Esti)[1:nXvar], paste0("Zu_",
-                                                    colnames(uHvar)), paste0("Zv_", colnames(vHvar)), if (modelType %in% c("bc92a", "kw05")) {
-                                                      "eta"
-                                                    } else {
-                                                      if (modelType == "bc92b") {
-                                                        c("eta1", "eta2")
-                                                      } else {
-                                                        if (modelType == "bc92c") {
-                                                          paste0("Zg_",colnames(gHvar))
-                                                        } else {
-                                                          if (modelType %in% c("c00", "mols93")) {
-                                                            paste0("eta_", colnames(gHvar))
-                                                          }
-                                                        }
-                                                      }
-                                                    }
-  )
-  names(initExpo$estimate) <- c(names(Esti)[1:nXvar], paste0("Zu_",
-    colnames(uHvar)[1]), paste0("Zv_", colnames(vHvar)[1]))
+    colnames(uHvar)), paste0("Zv_", colnames(vHvar)), if (modelType %in%
+    c("bc92a", "kw05")) {
+    "eta"
+  } else {
+    if (modelType == "bc92b") {
+      c("eta1", "eta2")
+    } else {
+      if (modelType == "bc92c") {
+        paste0("Zg_", colnames(gHvar))
+      } else {
+        if (modelType == "c00") {
+          paste0("eta_", colnames(gHvar))
+        }
+      }
+    }
+  })
   return(list(StartVal = StartVal, initExpo = initExpo))
 }
 
@@ -170,15 +178,15 @@ pgradexponormlike_gzit <- function(parm, nXvar, nuZUvar, nvZVvar,
     sum))
   Xepsi_it <- sweep(-2 * Xvar, MARGIN = 1, STATS = epsilon_it,
     FUN = "*")
-  Xepsi_i <- apply(Xepsi_it, 2, function(x) tapply(x, pindex[, 1],
-    sum))
+  Xepsi_i <- apply(Xepsi_it, 2, function(x) tapply(x, pindex[,
+    1], sum))
   Zitgitepsit <- sweep(gHvar, MARGIN = 1, STATS = git * epsilon_it,
     FUN = "*")
-  Zigiepsi <- apply(Zitgitepsit, 2, function(x) tapply(x, pindex[, 1],
-    sum))
+  Zigiepsi <- apply(Zitgitepsit, 2, function(x) tapply(x, pindex[,
+    1], sum))
   Zitgitsq <- sweep(gHvar, MARGIN = 1, STATS = 2 * git^2, FUN = "*")
-  Zigisq <- apply(Zitgitsq, 2, function(x) tapply(x, pindex[, 1],
-    sum))
+  Zigisq <- apply(Zitgitsq, 2, function(x) tapply(x, pindex[,
+    1], sum))
   ewv <- exp(Wv)
   ewu_h <- exp(Wu/2)
   sqvg <- sqrt(ewv/gisq)
@@ -262,20 +270,20 @@ phessexponormlike_gzit <- function(parm, nXvar, nuZUvar, nvZVvar,
     sum))
   Xepsi_it <- sweep(-2 * Xvar, MARGIN = 1, STATS = epsilon_it,
     FUN = "*")
-  Xepsi_i <- apply(Xepsi_it, 2, function(x) tapply(x, pindex[, 1],
-    sum))
+  Xepsi_i <- apply(Xepsi_it, 2, function(x) tapply(x, pindex[,
+    1], sum))
   Zitgitepsit <- sweep(gHvar, MARGIN = 1, STATS = git * epsilon_it,
     FUN = "*")
-  Zigiepsi <- apply(Zitgitepsit, 2, function(x) tapply(x, pindex[, 1],
-    sum))
+  Zigiepsi <- apply(Zitgitepsit, 2, function(x) tapply(x, pindex[,
+    1], sum))
   Zitgitsq <- sweep(gHvar, MARGIN = 1, STATS = 2 * git^2, FUN = "*")
-  Zigisq <- apply(Zitgitsq, 2, function(x) tapply(x, pindex[, 1],
-    sum))
+  Zigisq <- apply(Zitgitsq, 2, function(x) tapply(x, pindex[,
+    1], sum))
   Xzigi <- list()
   for (i in 1:ngZGvar) {
     Xzigi[[i]] <- apply(sweep(-Xvar, MARGIN = 1, STATS = gHvar[,
-      i] * git, FUN = "*"), 2, function(x) tapply(x, pindex[, 1],
-      sum))
+      i] * git, FUN = "*"), 2, function(x) tapply(x, pindex[,
+      1], sum))
   }
   Zisqgiepsi <- list()
   for (i in 1:ngZGvar) {
@@ -292,8 +300,8 @@ phessexponormlike_gzit <- function(parm, nXvar, nuZUvar, nvZVvar,
   Xsq <- list()
   for (i in 1:nXvar) {
     Xsq[[i]] <- apply(sweep(Xvar, MARGIN = 1, STATS = Xvar[,
-      i], FUN = "*"), 2, function(x) tapply(x, pindex[, 1],
-      sum))
+      i], FUN = "*"), 2, function(x) tapply(x, pindex[,
+      1], sum))
   }
   ewv <- exp(Wv)
   ewu_h <- exp(Wu/2)
@@ -408,12 +416,42 @@ phessexponormlike_gzit <- function(parm, nXvar, nuZUvar, nvZVvar,
 }
 
 # Optimization using different algorithms ----------
-
-exponormAlgOpt_gzit <- function(start, olsParam, dataTable,
-  S, nXvar, uHvar_c, uHvar_p, nuZUvar, vHvar_c, vHvar_p, nvZVvar,
+#' optimizations solve for exponential-normal distribution
+#' @param start starting value for optimization
+#' @param olsParam OLS coefficients
+#' @param dataTable dataframe contains id of observations
+#' @param nXvar number of main variables (inputs + env. var)
+#' @param nuZUvar number of Zu variables
+#' @param nvZVvar number of Zv variables
+#' @param uHvar_c matrix of Zu variables for pooled data
+#' @param vHvar_c matrix of Zv variables for pooled data
+#' @param uHvar_p matrix of Zu variables for cross-section
+#' @param vHvar_p matrix of Zv variables for cross-section
+#' @param Yvar vector of dependent variable
+#' @param Xvar matrix of main variables
+#' @param modelType specification of inefficiency model G(t)u_i
+#' @param wHvar_c vector of weights (weighted likelihood) pooled data
+#' @param wHvar_p vector of weights (weighted likelihood) cross-section
+#' @param S integer for cost/prod estimation
+#' @param pindex panel indices (ID, TIME)
+#' @param TT vector of time of presence
+#' @param method algorithm for solver
+#' @param printInfo logical print info during optimization
+#' @param itermax maximum iteration
+#' @param whichStart strategy to get starting values
+#' @param initIter maximum iterations for initialization
+#' @param initAlg algorithm for maxLik  
+#' @param stepmax stepmax for ucminf
+#' @param tol parameter tolerance
+#' @param gradtol gradient tolerance
+#' @param hessianType how hessian is computed
+#' @param qac qac option for maxLik
+#' @noRd
+exponormAlgOpt_gzit <- function(start, olsParam, dataTable, S,
+  nXvar, uHvar_c, uHvar_p, nuZUvar, vHvar_c, vHvar_p, nvZVvar,
   gHvar, ngZGvar, Yvar, Xvar, pindex, TT, wHvar_c, wHvar_p,
-  method, printInfo, itermax, stepmax, tol, gradtol, hessianType,
-  qac) {
+  whichStart, initIter, initAlg, method, printInfo, itermax,
+  stepmax, tol, gradtol, hessianType, modelType, qac) {
   if (!is.null(start)) {
     startVal <- start
   } else {
@@ -421,8 +459,9 @@ exponormAlgOpt_gzit <- function(start, olsParam, dataTable,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       gHvar = gHvar, ngZGvar = ngZGvar, uHvar = uHvar_c,
       vHvar = vHvar_c, Yvar = Yvar, Xvar = Xvar, S = S,
+      whichStart = whichStart, initIter = initIter, initAlg = initAlg,
       wHvar = wHvar_c, ngZGvar = ngZGvar, gHvar = gHvar,
-      itermax = itermax, tol = tol, printInfo = printInfo)
+      modelType = modelType, tol = tol, printInfo = printInfo)
     InitExpo <- start_st$initExpo
     startVal <- start_st$StartVal
   }
@@ -432,13 +471,14 @@ exponormAlgOpt_gzit <- function(start, olsParam, dataTable,
     Xvar = Xvar, pindex = pindex, TT = TT, S = S, wHvar = wHvar_p,
     ngZGvar = ngZGvar, gHvar = gHvar))
   if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
-    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
-      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
-      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
-      sann = function(...) maxSANN(...))
+    maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...),
+      bhhh = function(...) maxLik::maxBHHH(...), nr = function(...) maxLik::maxNR(...),
+      nm = function(...) maxLik::maxNM(...), cg = function(...) maxLik::maxCG(...),
+      sann = function(...) maxLik::maxSANN(...))
     method <- "maxLikAlgo"
   }
-  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+  cat("SFA Panel BC92-type Estimation...\n")
+  mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
     fn = function(parm) {
       -sum(pexponormlike_gzit(parm, nXvar = nXvar, nuZUvar = nuZUvar,
         nvZVvar = nvZVvar, uHvar = uHvar_p, gHvar = gHvar,
@@ -461,20 +501,22 @@ exponormAlgOpt_gzit <- function(start, olsParam, dataTable,
     nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
     uHvar = uHvar_p, gHvar = gHvar, ngZGvar = ngZGvar, vHvar = vHvar_p,
     Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT, S = S,
-    wHvar = wHvar_p), sr1 = trust.optim(x = startVal, fn = function(parm) {
-    -sum(pexponormlike_gzit(parm, nXvar = nXvar, nuZUvar = nuZUvar,
-      nvZVvar = nvZVvar, uHvar = uHvar_p, gHvar = gHvar,
-      ngZGvar = ngZGvar, vHvar = vHvar_p, Yvar = Yvar,
-      Xvar = Xvar, pindex = pindex, TT = TT, S = S, wHvar = wHvar_p))
-  }, gr = function(parm) {
-    -colSums(pgradexponormlike_gzit(parm, nXvar = nXvar,
-      nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
-      gHvar = gHvar, ngZGvar = ngZGvar, vHvar = vHvar_p,
-      Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT,
-      S = S, wHvar = wHvar_p))
-  }, method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
-    stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
-    report.precision = 1L)), sparse = trust.optim(x = startVal,
+    wHvar = wHvar_p), sr1 = trustOptim::trust.optim(x = startVal,
+    fn = function(parm) {
+      -sum(pexponormlike_gzit(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+        nvZVvar = nvZVvar, uHvar = uHvar_p, gHvar = gHvar,
+        ngZGvar = ngZGvar, vHvar = vHvar_p, Yvar = Yvar,
+        Xvar = Xvar, pindex = pindex, TT = TT, S = S,
+        wHvar = wHvar_p))
+    }, gr = function(parm) {
+      -colSums(pgradexponormlike_gzit(parm, nXvar = nXvar,
+        nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
+        gHvar = gHvar, ngZGvar = ngZGvar, vHvar = vHvar_p,
+        Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT,
+        S = S, wHvar = wHvar_p))
+    }, method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
+      stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
+      report.precision = 1L)), sparse = trustOptim::trust.optim(x = startVal,
     fn = function(parm) {
       -sum(pexponormlike_gzit(parm, nXvar = nXvar, nuZUvar = nuZUvar,
         nvZVvar = nvZVvar, uHvar = uHvar_p, gHvar = gHvar,
@@ -488,31 +530,34 @@ exponormAlgOpt_gzit <- function(start, olsParam, dataTable,
         Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT,
         S = S, wHvar = wHvar_p))
     }, hs = function(parm) {
-      as(-phessexponormlike_gzit(parm, nXvar = nXvar,
-        nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
-        gHvar = gHvar, ngZGvar = ngZGvar, vHvar = vHvar_p,
-        Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT,
-        S = S, wHvar = wHvar_p), "dgCMatrix")
+      as(-phessexponormlike_gzit(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+        nvZVvar = nvZVvar, uHvar = uHvar_p, gHvar = gHvar,
+        ngZGvar = ngZGvar, vHvar = vHvar_p, Yvar = Yvar,
+        Xvar = Xvar, pindex = pindex, TT = TT, S = S,
+        wHvar = wHvar_p), "dgCMatrix")
     }, method = "Sparse", control = list(maxit = itermax,
       cgtol = gradtol, stop.trust.radius = tol, prec = tol,
       report.level = if (printInfo) 2 else 0, report.precision = 1L,
-      preconditioner = 1L)), mla = mla(b = startVal, fn = function(parm) {
-    -sum(pexponormlike_gzit(parm, nXvar = nXvar, nuZUvar = nuZUvar,
-      nvZVvar = nvZVvar, uHvar = uHvar_p, gHvar = gHvar,
-      ngZGvar = ngZGvar, vHvar = vHvar_p, Yvar = Yvar,
-      Xvar = Xvar, pindex = pindex, TT = TT, S = S, wHvar = wHvar_p))
-  }, gr = function(parm) {
-    -colSums(pgradexponormlike_gzit(parm, nXvar = nXvar,
-      nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
-      gHvar = gHvar, ngZGvar = ngZGvar, vHvar = vHvar_p,
-      Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT,
-      S = S, wHvar = wHvar_p))
-  }, hess = function(parm) {
-    -phessexponormlike_gzit(parm, nXvar = nXvar, nuZUvar = nuZUvar,
-      nvZVvar = nvZVvar, uHvar = uHvar_p, gHvar = gHvar,
-      ngZGvar = ngZGvar, vHvar = vHvar_p, Yvar = Yvar,
-      Xvar = Xvar, pindex = pindex, TT = TT, S = S, wHvar = wHvar_p)
-  }, print.info = printInfo, maxiter = itermax, epsa = gradtol,
+      preconditioner = 1L)), mla = marqLevAlg::mla(b = startVal,
+    fn = function(parm) {
+      -sum(pexponormlike_gzit(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+        nvZVvar = nvZVvar, uHvar = uHvar_p, gHvar = gHvar,
+        ngZGvar = ngZGvar, vHvar = vHvar_p, Yvar = Yvar,
+        Xvar = Xvar, pindex = pindex, TT = TT, S = S,
+        wHvar = wHvar_p))
+    }, gr = function(parm) {
+      -colSums(pgradexponormlike_gzit(parm, nXvar = nXvar,
+        nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
+        gHvar = gHvar, ngZGvar = ngZGvar, vHvar = vHvar_p,
+        Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT,
+        S = S, wHvar = wHvar_p))
+    }, hess = function(parm) {
+      -phessexponormlike_gzit(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+        nvZVvar = nvZVvar, uHvar = uHvar_p, gHvar = gHvar,
+        ngZGvar = ngZGvar, vHvar = vHvar_p, Yvar = Yvar,
+        Xvar = Xvar, pindex = pindex, TT = TT, S = S,
+        wHvar = wHvar_p)
+    }, print.info = printInfo, maxiter = itermax, epsa = gradtol,
     epsb = gradtol), nlminb = nlminb(start = startVal, objective = function(parm) {
     -sum(pexponormlike_gzit(parm, nXvar = nXvar, nuZUvar = nuZUvar,
       nvZVvar = nvZVvar, uHvar = uHvar_p, gHvar = gHvar,
@@ -545,7 +590,6 @@ exponormAlgOpt_gzit <- function(start, olsParam, dataTable,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -570,11 +614,10 @@ exponormAlgOpt_gzit <- function(start, olsParam, dataTable,
         TT = TT, S = S, wHvar = wHvar_p)
     }
   }
-  mleObj$logL_OBS <- pexponormlike_gzit(parm = mlParam,
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-    uHvar = uHvar_p, gHvar = gHvar, ngZGvar = ngZGvar, vHvar = vHvar_p,
-    Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT, S = S,
-    wHvar = wHvar_p)
+  mleObj$logL_OBS <- pexponormlike_gzit(parm = mlParam, nXvar = nXvar,
+    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
+    gHvar = gHvar, ngZGvar = ngZGvar, vHvar = vHvar_p, Yvar = Yvar,
+    Xvar = Xvar, pindex = pindex, TT = TT, S = S, wHvar = wHvar_p)
   mleObj$gradL_OBS <- pgradexponormlike_gzit(parm = mlParam,
     nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
     uHvar = uHvar_p, gHvar = gHvar, ngZGvar = ngZGvar, vHvar = vHvar_p,
@@ -609,8 +652,7 @@ pexponormeff_gzit <- function(object, level) {
     rhs = 2)
   vHvar_c <- model.matrix(object$formula, data = object$dataTable,
     rhs = 3)
-  gHvar <- model.matrix(object$formula, data = object$dataTable,
-    rhs = 4)
+  gHvar <- object$gHvar
   pindex <- object$dataTable[, 1:2]
   invariance <- object$invariance
   if (invariance == 1) {
@@ -649,14 +691,15 @@ pexponormeff_gzit <- function(object, level) {
   giepsi <- as.numeric(tapply(git_epsit, pindex[, 1], sum))
   gisq <- as.numeric(tapply(git^2, pindex[, 1], sum))
   mustar <- -(exp(Wv)/(gisq * exp(Wu/2)) + object$S * giepsi/gisq)
-  u <- mustar + sqrt(exp(Wv)) * dnorm(mustar/sqrt(exp(Wv)))/pnorm(mustar/sqrt(exp(Wv)))
-  uLB <- mustar + qnorm(1 - (1 - (1 - level)/2) * (1 - pnorm(-mustar/sqrt(exp(Wv))))) *
-    sqrt(exp(Wv))
-  uUB <- mustar + qnorm(1 - (1 - level)/2 * (1 - pnorm(-mustar/sqrt(exp(Wv))))) *
-    sqrt(exp(Wv))
+  sigmastar <- sqrt(exp(Wv)/gisq)
+  u <- mustar + sigmastar * dnorm(mustar/sigmastar)/pnorm(mustar/sigmastar)
+  uLB <- mustar + qnorm(1 - (1 - (1 - level)/2) * (1 - pnorm(-mustar/sigmastar))) *
+    sigmastar
+  uUB <- mustar + qnorm(1 - (1 - level)/2 * (1 - pnorm(-mustar/sigmastar))) *
+    sigmastar
   m <- ifelse(mustar > 0, mustar, 0)
   res <- data.frame(levels(pindex[, 1]), u = u, uLB = uLB,
-    uUB = uUB, m = m, mustar = mustar)
+    uUB = uUB, m = m, mustar = mustar, sigmastar = sigmastar)
   names(res)[1] <- names(pindex)[1]
   res <- merge(pindex, res, by = names(pindex)[1])
   res$u <- res$u * git
@@ -666,14 +709,14 @@ pexponormeff_gzit <- function(object, level) {
   if (object$logDepVar == TRUE) {
     res$teJLMS <- exp(-res$u)
     res$teMO <- exp(-res$m)
-    res$teBC <- exp(-res$mustar * git + 1/2 * exp(Wv) * git^2) *
-      pnorm(res$mustar/sqrt(exp(Wv)) - sqrt(exp(Wv)) *
-        git)/pnorm(res$mustar/sqrt(exp(Wv)))
+    res$teBC <- exp(-res$mustar * git + 1/2 * res$sigmastar^2 *
+      git^2) * pnorm(res$mustar/res$sigmastar - res$sigmastar *
+      git)/pnorm(res$mustar/res$sigmastar)
     res$teBCLB <- exp(-res$uUB)
     res$teBCUB <- exp(-res$uLB)
-    res$teBC_reciprocal <- exp(res$mustar * git + 1/2 * exp(Wv) *
-      git^2) * pnorm(res$mustar/sqrt(exp(Wv)) + sqrt(exp(Wv)) *
-      git)/pnorm(res$mustar/sqrt(exp(Wv)))
+    teBC_reciprocal <- exp(res$mustar * git + 1/2 * res$sigmastar^2 *
+      git^2) * pnorm(res$mustar/res$sigmastar + res$sigmastar *
+      git)/pnorm(res$mustar/res$sigmastar)
   }
   res$mustar <- NULL
   res$sigmastar <- NULL

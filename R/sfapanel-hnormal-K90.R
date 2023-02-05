@@ -67,22 +67,32 @@ phalfnormlike_k90 <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param nXvar number of main variables (inputs + env. var)
 #' @param wHvar vector of weights (weighted likelihood)
 #' @param printInfo logical print info during optimization
-#' @param itermax maximum iteration
+#' @param whichStart strategy to get starting values
+#' @param initIter maximum iterations for initialization
+#' @param initAlg algorithm for maxLik  
 #' @param tol parameter tolerance
 #' @noRd
 psthalfnorm_k90 <- function(olsObj, epsiRes, nXvar, nuZUvar,
-  nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, itermax, printInfo,
-  tol) {
-  cat("Initialization: SFA + halfnormal-normal distribution...\n")
-  initHalf <- maxLik(logLik = chalfnormlike, start = csthalfnorm(olsObj = olsObj,
-    epsiRes = epsiRes, S = S, nuZUvar = 1, uHvar = as.matrix(uHvar[,
-      1]), nvZVvar = 1, vHvar = as.matrix(vHvar[, 1])),
-    grad = cgradhalfnormlike, method = "BFGS", control = list(iterlim = itermax,
-      printLevel = if (printInfo) 2 else 0, reltol = tol),
-    nXvar = nXvar, nuZUvar = 1, uHvar = as.matrix(uHvar[,
-      1]), nvZVvar = 1, vHvar = as.matrix(vHvar[, 1]),
-    Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar)
-  Esti <- initHalf$estimate
+  nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, printInfo, tol,
+  whichStart, initIter, initAlg) {
+  if (whichStart == 1L) {
+    Esti <- csthalfnorm(olsObj = olsObj, epsiRes = epsiRes,
+      S = S, nuZUvar = 1, uHvar = uHvar[, 1, drop = FALSE],
+      nvZVvar = 1, vHvar = vHvar[, 1, drop = FALSE])
+    initHalf <- NULL
+  } else {
+    cat("Initialization: SFA + halfnormal-normal distribution...\n")
+    initHalf <- maxLik::maxLik(logLik = chalfnormlike, start = csthalfnorm(olsObj = olsObj,
+      epsiRes = epsiRes, S = S, nuZUvar = 1, uHvar = uHvar[,
+        1, drop = FALSE], nvZVvar = 1, vHvar = vHvar[,
+        1, drop = FALSE]), grad = cgradhalfnormlike,
+      method = initAlg, control = list(iterlim = initIter,
+        printLevel = if (printInfo) 2 else 0, reltol = tol),
+      nXvar = nXvar, nuZUvar = 1, uHvar = uHvar[, 1, drop = FALSE],
+      nvZVvar = 1, vHvar = vHvar[, 1, drop = FALSE], Yvar = Yvar,
+      Xvar = Xvar, S = S, wHvar = wHvar)
+    Esti <- initHalf$estimate
+  }
   StartVal <- c(Esti[1:(nXvar)], Esti[nXvar + 1], if (nuZUvar >
     1) {
     rep(0, nuZUvar - 1)
@@ -92,8 +102,6 @@ psthalfnorm_k90 <- function(olsObj, epsiRes, nXvar, nuZUvar,
   names(StartVal) <- c(names(Esti)[1:nXvar], paste0("Zu_",
     colnames(uHvar)), paste0("Zv_", colnames(vHvar)), "eta1",
     "eta2")
-  names(initHalf$estimate) <- c(names(Esti)[1:nXvar], paste0("Zu_",
-    colnames(uHvar)[1]), paste0("Zv_", colnames(vHvar)[1]))
   return(list(StartVal = StartVal, initHalf = initHalf))
 }
 
@@ -479,6 +487,9 @@ phesshalfnormlike_k90 <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param method algorithm for solver
 #' @param printInfo logical print info during optimization
 #' @param itermax maximum iteration
+#' @param whichStart strategy to get starting values
+#' @param initIter maximum iterations for initialization
+#' @param initAlg algorithm for maxLik 
 #' @param stepmax stepmax for ucminf
 #' @param tol parameter tolerance
 #' @param gradtol gradient tolerance
@@ -488,15 +499,16 @@ phesshalfnormlike_k90 <- function(parm, nXvar, nuZUvar, nvZVvar,
 halfnormAlgOpt_k90 <- function(start, olsParam, dataTable, S,
   nXvar, uHvar_c, uHvar_p, nuZUvar, vHvar_c, vHvar_p, nvZVvar,
   Yvar, Xvar, wHvar_c, wHvar_p, pindex, TT, method, printInfo,
-  itermax, stepmax, tol, gradtol, hessianType, qac) {
+  whichStart, initIter, initAlg, itermax, stepmax, tol, gradtol,
+  hessianType, qac) {
   if (!is.null(start)) {
     startVal <- start
   } else {
     start_st <- psthalfnorm_k90(olsObj = olsParam, epsiRes = dataTable[["olsResiduals"]],
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar_c, vHvar = vHvar_c, Yvar = Yvar, Xvar = Xvar,
-      S = S, wHvar = wHvar_c, itermax = itermax, tol = tol,
-      printInfo = printInfo)
+      S = S, wHvar = wHvar_c, tol = tol, whichStart = whichStart,
+      initIter = initIter, initAlg = initAlg, printInfo = printInfo)
     InitHalf <- start_st$initHalf
     startVal <- start_st$StartVal
   }
@@ -505,13 +517,14 @@ halfnormAlgOpt_k90 <- function(start, olsParam, dataTable, S,
     vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar, pindex = pindex,
     TT = TT, S = S, wHvar = wHvar_p))
   if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
-    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
-      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
-      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
-      sann = function(...) maxSANN(...))
+    maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...),
+      bhhh = function(...) maxLik::maxBHHH(...), nr = function(...) maxLik::maxNR(...),
+      nm = function(...) maxLik::maxNM(...), cg = function(...) maxLik::maxCG(...),
+      sann = function(...) maxLik::maxSANN(...))
     method <- "maxLikAlgo"
   }
-  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+  cat("SFA Panel K90 Estimation...\n")
+  mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
     fn = function(parm) {
       -sum(phalfnormlike_k90(parm, nXvar = nXvar, nuZUvar = nuZUvar,
         nvZVvar = nvZVvar, uHvar = uHvar_p, vHvar = vHvar_p,
@@ -531,7 +544,7 @@ halfnormAlgOpt_k90 <- function(start, olsParam, dataTable, S,
       iterlim = itermax, reltol = tol, tol = tol, qac = qac),
     nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
     uHvar = uHvar_p, vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar,
-    pindex = pindex, TT = TT, S = S, wHvar = wHvar_p), sr1 = trust.optim(x = startVal,
+    pindex = pindex, TT = TT, S = S, wHvar = wHvar_p), sr1 = trustOptim::trust.optim(x = startVal,
     fn = function(parm) {
       -sum(phalfnormlike_k90(parm, nXvar = nXvar, nuZUvar = nuZUvar,
         nvZVvar = nvZVvar, uHvar = uHvar_p, vHvar = vHvar_p,
@@ -544,7 +557,7 @@ halfnormAlgOpt_k90 <- function(start, olsParam, dataTable, S,
         TT = TT, S = S, wHvar = wHvar_p))
     }, method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
       stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
-      report.precision = 1L)), sparse = trust.optim(x = startVal,
+      report.precision = 1L)), sparse = trustOptim::trust.optim(x = startVal,
     fn = function(parm) {
       -sum(phalfnormlike_k90(parm, nXvar = nXvar, nuZUvar = nuZUvar,
         nvZVvar = nvZVvar, uHvar = uHvar_p, vHvar = vHvar_p,
@@ -563,22 +576,23 @@ halfnormAlgOpt_k90 <- function(start, olsParam, dataTable, S,
     }, method = "Sparse", control = list(maxit = itermax,
       cgtol = gradtol, stop.trust.radius = tol, prec = tol,
       report.level = if (printInfo) 2 else 0, report.precision = 1L,
-      preconditioner = 1L)), mla = mla(b = startVal, fn = function(parm) {
-    -sum(phalfnormlike_k90(parm, nXvar = nXvar, nuZUvar = nuZUvar,
-      nvZVvar = nvZVvar, uHvar = uHvar_p, vHvar = vHvar_p,
-      Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT,
-      S = S, wHvar = wHvar_p))
-  }, gr = function(parm) {
-    -colSums(pgradhalfnormlike_k90(parm, nXvar = nXvar, nuZUvar = nuZUvar,
-      nvZVvar = nvZVvar, uHvar = uHvar_p, vHvar = vHvar_p,
-      Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT,
-      S = S, wHvar = wHvar_p))
-  }, hess = function(parm) {
-    -phesshalfnormlike_k90(parm, nXvar = nXvar, nuZUvar = nuZUvar,
-      nvZVvar = nvZVvar, uHvar = uHvar_p, vHvar = vHvar_p,
-      Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT,
-      S = S, wHvar = wHvar_p)
-  }, print.info = printInfo, maxiter = itermax, epsa = gradtol,
+      preconditioner = 1L)), mla = marqLevAlg::mla(b = startVal,
+    fn = function(parm) {
+      -sum(phalfnormlike_k90(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+        nvZVvar = nvZVvar, uHvar = uHvar_p, vHvar = vHvar_p,
+        Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT,
+        S = S, wHvar = wHvar_p))
+    }, gr = function(parm) {
+      -colSums(pgradhalfnormlike_k90(parm, nXvar = nXvar,
+        nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
+        vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar, pindex = pindex,
+        TT = TT, S = S, wHvar = wHvar_p))
+    }, hess = function(parm) {
+      -phesshalfnormlike_k90(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+        nvZVvar = nvZVvar, uHvar = uHvar_p, vHvar = vHvar_p,
+        Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT,
+        S = S, wHvar = wHvar_p)
+    }, print.info = printInfo, maxiter = itermax, epsa = gradtol,
     epsb = gradtol), nlminb = nlminb(start = startVal, objective = function(parm) {
     -sum(phalfnormlike_k90(parm, nXvar = nXvar, nuZUvar = nuZUvar,
       nvZVvar = nvZVvar, uHvar = uHvar_p, vHvar = vHvar_p,
@@ -609,7 +623,6 @@ halfnormAlgOpt_k90 <- function(start, olsParam, dataTable, S,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {

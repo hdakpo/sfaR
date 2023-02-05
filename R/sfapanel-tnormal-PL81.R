@@ -71,24 +71,36 @@ ptruncnormlike_pl81 <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param nXvar number of main variables (inputs + env. var)
 #' @param wHvar vector of weights (weighted likelihood)
 #' @param printInfo logical print info during optimization
-#' @param itermax maximum iteration
+#' @param whichStart strategy to get starting values
+#' @param initIter maximum iterations for initialization
+#' @param initAlg algorithm for maxLik 
 #' @param tol parameter tolerance
 #' @noRd
 psttruncnorm_pl81 <- function(olsObj, epsiRes, nXvar, nuZUvar,
   muHvar, nmuZUvar, nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar,
-  itermax, printInfo, tol) {
-  cat("Initialization: SFA + truncated-normal distribution...\n")
-  initTrunc <- maxLik(logLik = ctruncnormlike, start = csttruncnorm(olsObj = olsObj,
-    epsiRes = epsiRes, S = S, nmuZUvar = 1, nuZUvar = 1,
-    muHvar = as.matrix(muHvar[, 1]), uHvar = as.matrix(uHvar[,
-      1]), nvZVvar = 1, vHvar = as.matrix(vHvar[, 1])),
-    grad = cgradtruncnormlike, method = "BFGS", control = list(iterlim = itermax,
-      printLevel = if (printInfo) 2 else 0, reltol = tol),
-    nXvar = nXvar, nmuZUvar = 1, nuZUvar = 1, muHvar = as.matrix(muHvar[,
-      1]), uHvar = as.matrix(uHvar[, 1]), nvZVvar = 1,
-    vHvar = as.matrix(vHvar[, 1]), Yvar = Yvar, Xvar = Xvar,
-    S = S, wHvar = wHvar)
-  Esti <- initTrunc$estimate
+  whichStart, initIter, initAlg, printInfo, tol) {
+  if (whichStart == 1L) {
+    Esti <- csttruncnorm(olsObj = olsObj, epsiRes = epsiRes,
+      S = S, nmuZUvar = 1, nuZUvar = 1, muHvar = muHvar[,
+        1, drop = FALSE], uHvar = uHvar[, 1, drop = FALSE],
+      nvZVvar = 1, vHvar = vHvar[, 1, drop = FALSE])
+    initTrunc <- NULL
+  } else {
+    cat("Initialization: SFA + truncated-normal distribution...\n")
+    initTrunc <- maxLik::maxLik(logLik = ctruncnormlike,
+      start = csttruncnorm(olsObj = olsObj, epsiRes = epsiRes,
+        S = S, nmuZUvar = 1, nuZUvar = 1, muHvar = muHvar[,
+          1, drop = FALSE], uHvar = uHvar[, 1, drop = FALSE],
+        nvZVvar = 1, vHvar = vHvar[, 1, drop = FALSE]),
+      grad = cgradtruncnormlike, hess = chesstruncnormlike,
+      method = initAlg, control = list(iterlim = initIter,
+        printLevel = if (printInfo) 2 else 0, reltol = tol),
+      nXvar = nXvar, nmuZUvar = 1, nuZUvar = 1, muHvar = muHvar[,
+        1, drop = FALSE], uHvar = uHvar[, 1, drop = FALSE],
+      nvZVvar = 1, vHvar = vHvar[, 1, drop = FALSE], Yvar = Yvar,
+      Xvar = Xvar, S = S, wHvar = wHvar)
+    Esti <- initTrunc$estimate
+  }
   StartVal <- c(Esti[1:(nXvar)], Esti[nXvar + 1], if (nmuZUvar >
     1) {
     rep(0, nmuZUvar - 1)
@@ -100,9 +112,6 @@ psttruncnorm_pl81 <- function(olsObj, epsiRes, nXvar, nuZUvar,
   names(StartVal) <- c(names(Esti)[1:nXvar], paste0("Zmu_",
     colnames(muHvar)), paste0("Zu_", colnames(uHvar)), paste0("Zv_",
     colnames(vHvar)))
-  names(initTrunc$estimate) <- c(names(Esti)[1:nXvar], paste0("Zmu_",
-    colnames(muHvar)[1]), paste0("Zu_", colnames(uHvar)[1]),
-    paste0("Zv_", colnames(vHvar)[1]))
   return(list(StartVal = StartVal, initTrunc = initTrunc))
 }
 
@@ -368,6 +377,9 @@ phesstruncnormlike_pl81 <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param method algorithm for solver
 #' @param printInfo logical print info during optimization
 #' @param itermax maximum iteration
+#' @param whichStart strategy to get starting values
+#' @param initIter maximum iterations for initialization
+#' @param initAlg algorithm for maxLik 
 #' @param stepmax stepmax for ucminf
 #' @param tol parameter tolerance
 #' @param gradtol gradient tolerance
@@ -378,7 +390,8 @@ truncnormAlgOpt_pl81 <- function(start, olsParam, dataTable,
   S, nXvar, muHvar_c, muHvar_p, nmuZUvar, uHvar_c, uHvar_p,
   nuZUvar, vHvar_c, vHvar_p, nvZVvar, Yvar, Xvar, wHvar_c = wHvar_c,
   wHvar_p = wHvar_p, pindex, TT, method, printInfo, itermax,
-  stepmax, tol, gradtol, hessianType, qac) {
+  stepmax, tol, gradtol, whichStart, initIter, initAlg, hessianType,
+  qac) {
   if (!is.null(start)) {
     startVal <- start
   } else {
@@ -386,7 +399,8 @@ truncnormAlgOpt_pl81 <- function(start, olsParam, dataTable,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       nmuZUvar = nmuZUvar, muHvar = muHvar_c, uHvar = uHvar_c,
       vHvar = vHvar_c, Yvar = Yvar, Xvar = Xvar, S = S,
-      wHvar = wHvar_c, itermax = itermax, tol = tol, printInfo = printInfo)
+      wHvar = wHvar_c, tol = tol, whichStart = whichStart,
+      initIter = initIter, initAlg = initAlg, printInfo = printInfo)
     Inittrunc <- start_st$inittrunc
     startVal <- start_st$StartVal
   }
@@ -396,13 +410,14 @@ truncnormAlgOpt_pl81 <- function(start, olsParam, dataTable,
     Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT, S = S,
     wHvar = wHvar_p))
   if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
-    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
-      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
-      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
-      sann = function(...) maxSANN(...))
+    maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...),
+      bhhh = function(...) maxLik::maxBHHH(...), nr = function(...) maxLik::maxNR(...),
+      nm = function(...) maxLik::maxNM(...), cg = function(...) maxLik::maxCG(...),
+      sann = function(...) maxLik::maxSANN(...))
     method <- "maxLikAlgo"
   }
-  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+  cat("SFA Panel PL81 Estimation...\n")
+  mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
     fn = function(parm) {
       -sum(ptruncnormlike_pl81(parm, nXvar = nXvar, nuZUvar = nuZUvar,
         nvZVvar = nvZVvar, uHvar = uHvar_p, nmuZUvar = nmuZUvar,
@@ -425,7 +440,7 @@ truncnormAlgOpt_pl81 <- function(start, olsParam, dataTable,
     nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
     nmuZUvar = nmuZUvar, muHvar = muHvar_p, uHvar = uHvar_p,
     vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar, pindex = pindex,
-    TT = TT, S = S, wHvar = wHvar_p), sr1 = trust.optim(x = startVal,
+    TT = TT, S = S, wHvar = wHvar_p), sr1 = trustOptim::trust.optim(x = startVal,
     fn = function(parm) {
       -sum(ptruncnormlike_pl81(parm, nXvar = nXvar, nuZUvar = nuZUvar,
         nvZVvar = nvZVvar, uHvar = uHvar_p, nmuZUvar = nmuZUvar,
@@ -440,7 +455,7 @@ truncnormAlgOpt_pl81 <- function(start, olsParam, dataTable,
         S = S, wHvar = wHvar_p))
     }, method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
       stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
-      report.precision = 1L)), sparse = trust.optim(x = startVal,
+      report.precision = 1L)), sparse = trustOptim::trust.optim(x = startVal,
     fn = function(parm) {
       -sum(ptruncnormlike_pl81(parm, nXvar = nXvar, nuZUvar = nuZUvar,
         nvZVvar = nvZVvar, uHvar = uHvar_p, nmuZUvar = nmuZUvar,
@@ -462,23 +477,26 @@ truncnormAlgOpt_pl81 <- function(start, olsParam, dataTable,
     }, method = "Sparse", control = list(maxit = itermax,
       cgtol = gradtol, stop.trust.radius = tol, prec = tol,
       report.level = if (printInfo) 2 else 0, report.precision = 1L,
-      preconditioner = 1L)), mla = mla(b = startVal, fn = function(parm) {
-    -sum(ptruncnormlike_pl81(parm, nXvar = nXvar, nuZUvar = nuZUvar,
-      nvZVvar = nvZVvar, uHvar = uHvar_p, nmuZUvar = nmuZUvar,
-      muHvar = muHvar_p, vHvar = vHvar_p, Yvar = Yvar,
-      Xvar = Xvar, pindex = pindex, TT = TT, S = S, wHvar = wHvar_p))
-  }, gr = function(parm) {
-    -colSums(pgradtruncnormlike_pl81(parm, nXvar = nXvar,
-      nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
-      muHvar = muHvar_p, uHvar = uHvar_p, vHvar = vHvar_p,
-      Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT,
-      S = S, wHvar = wHvar_p))
-  }, hess = function(parm) {
-    -phesstruncnormlike_pl81(parm, nXvar = nXvar, nuZUvar = nuZUvar,
-      nvZVvar = nvZVvar, nmuZUvar = nmuZUvar, muHvar = muHvar_p,
-      uHvar = uHvar_p, vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar,
-      pindex = pindex, TT = TT, S = S, wHvar = wHvar_p)
-  }, print.info = printInfo, maxiter = itermax, epsa = gradtol,
+      preconditioner = 1L)), mla = marqLevAlg::mla(b = startVal,
+    fn = function(parm) {
+      -sum(ptruncnormlike_pl81(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+        nvZVvar = nvZVvar, uHvar = uHvar_p, nmuZUvar = nmuZUvar,
+        muHvar = muHvar_p, vHvar = vHvar_p, Yvar = Yvar,
+        Xvar = Xvar, pindex = pindex, TT = TT, S = S,
+        wHvar = wHvar_p))
+    }, gr = function(parm) {
+      -colSums(pgradtruncnormlike_pl81(parm, nXvar = nXvar,
+        nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
+        muHvar = muHvar_p, uHvar = uHvar_p, vHvar = vHvar_p,
+        Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT,
+        S = S, wHvar = wHvar_p))
+    }, hess = function(parm) {
+      -phesstruncnormlike_pl81(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+        nvZVvar = nvZVvar, nmuZUvar = nmuZUvar, muHvar = muHvar_p,
+        uHvar = uHvar_p, vHvar = vHvar_p, Yvar = Yvar,
+        Xvar = Xvar, pindex = pindex, TT = TT, S = S,
+        wHvar = wHvar_p)
+    }, print.info = printInfo, maxiter = itermax, epsa = gradtol,
     epsb = gradtol), nlminb = nlminb(start = startVal, objective = function(parm) {
     -sum(ptruncnormlike_pl81(parm, nXvar = nXvar, nuZUvar = nuZUvar,
       nvZVvar = nvZVvar, nmuZUvar = nmuZUvar, muHvar = muHvar_p,
@@ -511,7 +529,6 @@ truncnormAlgOpt_pl81 <- function(start, olsParam, dataTable,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {

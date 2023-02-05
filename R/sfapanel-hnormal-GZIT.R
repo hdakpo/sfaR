@@ -8,16 +8,16 @@
 # Data: Panel data                                                             #
 # Model: Panel Stochastic Frontier Model                                       #
 # Inefficiency structure: u_it = g(zit)u_i                                     #
-#                         Battese and Coelli 1992 specifications:              #
+#                         Battese and Coelli 1992 specification:               #
 #                          - g(zit) = exp(-eta * (t - T))                      #
+#                         Cuesta and Orea (2002), Feng and Serletis (2009)     #
 #                          - g(zit) = exp(-eta1 * (t - T) - eta2 * (t - T)^2)  #
+#                         Alvarez, Amsler, Orea, Schmidt (2006)                #
 #                          - g(zit) = exp(eta * gHvar)                         #
 #                         Kumbhakar and Wang 2005 specification:               #
 #                          - g(zit) = exp(eta * (t - t1))                      #
 #                         Cuesta 2000 specification:                           #
 #                          - g(zit) = exp(-eta_i * (t - T))                    #
-#                         Modified Lee and Schmidt 1993                        #
-#                          - g(zit) = exp(-eta_t * (t - T)): g(zit) = 1 for T  #
 # Convolution: halfnormal - normal                                             #
 #------------------------------------------------------------------------------#
 
@@ -79,62 +79,70 @@ phalfnormlike_gzit <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param gHvar matrix of inefficiency determinants
 #' @param ngZGvar number of variables explaining inefficiency
 #' @param wHvar vector of weights (weighted likelihood)
+#' @param whichStart strategy to get starting values
 #' @param printInfo logical print info during optimization
-#' @param itermax maximum iteration
+#' @param initIter maximum iterations for initialization
+#' @param initAlg algorithm for maxLik  
 #' @param tol parameter tolerance
 #' @noRd
 psthalfnorm_gzit <- function(olsObj, epsiRes, nXvar, nuZUvar,
-  nvZVvar, uHvar, vHvar, ngZGvar, gHvar, Yvar, Xvar, S, wHvar, modelType,
-  itermax, printInfo, tol) {
-  cat("Initialization: SFA + halfnormal-normal distribution...\n")
-  initHalf <- maxLik(logLik = chalfnormlike, start = csthalfnorm(olsObj = olsObj,
-    epsiRes = epsiRes, S = S, nuZUvar = 1, uHvar = as.matrix(uHvar[,
-      1]), nvZVvar = 1, vHvar = as.matrix(vHvar[, 1])),
-    grad = cgradhalfnormlike, method = "BFGS", control = list(iterlim = itermax,
-      printLevel = if (printInfo) 2 else 0, reltol = tol),
-    nXvar = nXvar, nuZUvar = 1, uHvar = as.matrix(uHvar[,
-      1]), nvZVvar = 1, vHvar = as.matrix(vHvar[, 1]),
-    Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar)
-  Esti <- initHalf$estimate
+  nvZVvar, uHvar, vHvar, ngZGvar, gHvar, Yvar, Xvar, S, wHvar,
+  modelType, printInfo, tol, whichStart, initIter, initAlg) {
+  if (whichStart == 1L) {
+    Esti <- csthalfnorm(olsObj = olsObj, epsiRes = epsiRes,
+      S = S, nuZUvar = 1, uHvar = uHvar[, 1, drop = FALSE],
+      nvZVvar = 1, vHvar = vHvar[, 1, drop = FALSE])
+    initHalf <- NULL
+  } else {
+    cat("Initialization: SFA + halfnormal-normal distribution...\n")
+    initHalf <- maxLik::maxLik(logLik = chalfnormlike, start = csthalfnorm(olsObj = olsObj,
+      epsiRes = epsiRes, S = S, nuZUvar = 1, uHvar = uHvar[,
+        1, drop = FALSE], nvZVvar = 1, vHvar = vHvar[,
+        1, drop = FALSE]), grad = cgradhalfnormlike,
+      method = initAlg, control = list(iterlim = initIter,
+        printLevel = if (printInfo) 2 else 0, reltol = tol),
+      nXvar = nXvar, nuZUvar = 1, uHvar = uHvar[, 1, drop = FALSE],
+      nvZVvar = 1, vHvar = vHvar[, 1, drop = FALSE], Yvar = Yvar,
+      Xvar = Xvar, S = S, wHvar = wHvar)
+    Esti <- initHalf$estimate
+  }
   StartVal <- c(Esti[1:(nXvar)], Esti[nXvar + 1], if (nuZUvar >
     1) {
     rep(0, nuZUvar - 1)
   }, Esti[nXvar + 2], if (nvZVvar > 1) {
     rep(0, nvZVvar - 1)
   }, if (modelType %in% c("bc92a", "kw05")) {
-    0.001} else {
-      if (modelType == "bc92b") {
-        c(0.001, 0.001)
-      } else {
-        if (modelType == "bc92c") {
-          rep(0, ngZGvar)
-        } else {
-          if (modelType %in% c("c00", "mols93")) {
-            rep(0.001, ngZGvar)
-          }
-        }
-      }
-    } 
-  )
-  names(StartVal) <- c(names(Esti)[1:nXvar], paste0("Zu_",
-    colnames(uHvar)), paste0("Zv_", colnames(vHvar)), if (modelType %in% c("bc92a", "kw05")) {
-      "eta"
+    0.001
+  } else {
+    if (modelType == "bc92b") {
+      c(0.001, 0.001)
     } else {
-      if (modelType == "bc92b") {
-        c("eta1", "eta2")
+      if (modelType == "bc92c") {
+        rep(0, ngZGvar)
       } else {
-        if (modelType == "bc92c") {
-          paste0("Zg_",colnames(gHvar))
-        } else {
-          if (modelType %in% c("c00", "mols93")) {
-            paste0("eta_", colnames(gHvar))
-          }
+        if (modelType == "c00") {
+          rep(0.001, ngZGvar)
         }
       }
     }
-    )
-  names(initHalf$estimate) <- c(names(Esti)[1:nXvar], paste0("Zu_",
-    colnames(uHvar)[1]), paste0("Zv_", colnames(vHvar)[1]))
+  })
+  names(StartVal) <- c(names(Esti)[1:nXvar], paste0("Zu_",
+    colnames(uHvar)), paste0("Zv_", colnames(vHvar)), if (modelType %in%
+    c("bc92a", "kw05")) {
+    "eta"
+  } else {
+    if (modelType == "bc92b") {
+      c("eta1", "eta2")
+    } else {
+      if (modelType == "bc92c") {
+        paste0("Zg_", colnames(gHvar))
+      } else {
+        if (modelType == "c00") {
+          paste0("eta_", colnames(gHvar))
+        }
+      }
+    }
+  })
   return(list(StartVal = StartVal, initHalf = initHalf))
 }
 
@@ -177,15 +185,15 @@ pgradhalfnormlike_gzit <- function(parm, nXvar, nuZUvar, nvZVvar,
     sum))
   Xepsi_it <- sweep(-2 * Xvar, MARGIN = 1, STATS = epsilon_it,
     FUN = "*")
-  Xepsi_i <- apply(Xepsi_it, 2, function(x) tapply(x, pindex[, 1],
-    sum))
+  Xepsi_i <- apply(Xepsi_it, 2, function(x) tapply(x, pindex[,
+    1], sum))
   Zitgitepsit <- sweep(gHvar, MARGIN = 1, STATS = git * epsilon_it,
     FUN = "*")
-  Zigiepsi <- apply(Zitgitepsit, 2, function(x) tapply(x, pindex[, 1],
-    sum))
+  Zigiepsi <- apply(Zitgitepsit, 2, function(x) tapply(x, pindex[,
+    1], sum))
   Zitgitsq <- sweep(gHvar, MARGIN = 1, STATS = 2 * git^2, FUN = "*")
-  Zigisq <- apply(Zitgitsq, 2, function(x) tapply(x, pindex[, 1],
-    sum))
+  Zigisq <- apply(Zitgitsq, 2, function(x) tapply(x, pindex[,
+    1], sum))
   ewu <- exp(Wu)
   ewv <- exp(Wv)
   sigmasq <- (ewu * gisq + ewv)
@@ -265,20 +273,20 @@ phesshalfnormlike_gzit <- function(parm, nXvar, nuZUvar, nvZVvar,
     sum))
   Xepsi_it <- sweep(-2 * Xvar, MARGIN = 1, STATS = epsilon_it,
     FUN = "*")
-  Xepsi_i <- apply(Xepsi_it, 2, function(x) tapply(x, pindex[, 1],
-    sum))
+  Xepsi_i <- apply(Xepsi_it, 2, function(x) tapply(x, pindex[,
+    1], sum))
   Zitgitepsit <- sweep(gHvar, MARGIN = 1, STATS = git * epsilon_it,
     FUN = "*")
-  Zigiepsi <- apply(Zitgitepsit, 2, function(x) tapply(x, pindex[, 1],
-    sum))
+  Zigiepsi <- apply(Zitgitepsit, 2, function(x) tapply(x, pindex[,
+    1], sum))
   Zitgitsq <- sweep(gHvar, MARGIN = 1, STATS = 2 * git^2, FUN = "*")
-  Zigisq <- apply(Zitgitsq, 2, function(x) tapply(x, pindex[, 1],
-    sum))
+  Zigisq <- apply(Zitgitsq, 2, function(x) tapply(x, pindex[,
+    1], sum))
   Xzigi <- list()
   for (i in 1:ngZGvar) {
     Xzigi[[i]] <- apply(sweep(-Xvar, MARGIN = 1, STATS = gHvar[,
-      i] * git, FUN = "*"), 2, function(x) tapply(x, pindex[, 1],
-      sum))
+      i] * git, FUN = "*"), 2, function(x) tapply(x, pindex[,
+      1], sum))
   }
   Zisqgiepsi <- list()
   for (i in 1:ngZGvar) {
@@ -295,8 +303,8 @@ phesshalfnormlike_gzit <- function(parm, nXvar, nuZUvar, nvZVvar,
   Xsq <- list()
   for (i in 1:nXvar) {
     Xsq[[i]] <- apply(sweep(2 * Xvar, MARGIN = 1, STATS = Xvar[,
-      i], FUN = "*"), 2, function(x) tapply(x, pindex[, 1],
-      sum))
+      i], FUN = "*"), 2, function(x) tapply(x, pindex[,
+      1], sum))
   }
   ewu <- exp(Wu)
   ewv <- exp(Wv)
@@ -478,17 +486,20 @@ phesshalfnormlike_gzit <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param method algorithm for solver
 #' @param printInfo logical print info during optimization
 #' @param itermax maximum iteration
+#' @param whichStart strategy to get starting values
+#' @param initIter maximum iterations for initialization
+#' @param initAlg algorithm for maxLik  
 #' @param stepmax stepmax for ucminf
 #' @param tol parameter tolerance
 #' @param gradtol gradient tolerance
 #' @param hessianType how hessian is computed
 #' @param qac qac option for maxLik
 #' @noRd
-halfnormAlgOpt_gzit <- function(start, olsParam, dataTable,
-  S, nXvar, uHvar_c, uHvar_p, nuZUvar, vHvar_c, vHvar_p, nvZVvar,
-  modelType, gHvar, ngZGvar, Yvar, Xvar, pindex, TT, wHvar_c, wHvar_p,
-  method, printInfo, itermax, stepmax, tol, gradtol, hessianType,
-  qac) {
+halfnormAlgOpt_gzit <- function(start, olsParam, dataTable, S,
+  nXvar, uHvar_c, uHvar_p, nuZUvar, vHvar_c, vHvar_p, nvZVvar,
+  modelType, gHvar, ngZGvar, Yvar, Xvar, pindex, TT, wHvar_c,
+  wHvar_p, method, printInfo, itermax, stepmax, tol, gradtol,
+  hessianType, whichStart, initIter, initAlg, qac) {
   if (!is.null(start)) {
     startVal <- start
   } else {
@@ -496,8 +507,9 @@ halfnormAlgOpt_gzit <- function(start, olsParam, dataTable,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       gHvar = gHvar, ngZGvar = ngZGvar, uHvar = uHvar_c,
       vHvar = vHvar_c, Yvar = Yvar, Xvar = Xvar, S = S,
-      wHvar = wHvar_c, modelType = modelType, ngZGvar = ngZGvar, gHvar = gHvar,
-      itermax = itermax, tol = tol, printInfo = printInfo)
+      whichStart = whichStart, initIter = initIter, initAlg = initAlg,
+      wHvar = wHvar_c, modelType = modelType, ngZGvar = ngZGvar,
+      gHvar = gHvar, tol = tol, printInfo = printInfo)
     InitHalf <- start_st$initHalf
     startVal <- start_st$StartVal
   }
@@ -507,13 +519,14 @@ halfnormAlgOpt_gzit <- function(start, olsParam, dataTable,
     Xvar = Xvar, pindex = pindex, TT = TT, S = S, wHvar = wHvar_p,
     ngZGvar = ngZGvar, gHvar = gHvar))
   if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
-    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
-      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
-      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
-      sann = function(...) maxSANN(...))
+    maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...),
+      bhhh = function(...) maxLik::maxBHHH(...), nr = function(...) maxLik::maxNR(...),
+      nm = function(...) maxLik::maxNM(...), cg = function(...) maxLik::maxCG(...),
+      sann = function(...) maxLik::maxSANN(...))
     method <- "maxLikAlgo"
   }
-  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+  cat("SFA Panel BC92-type Estimation...\n")
+  mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
     fn = function(parm) {
       -sum(phalfnormlike_gzit(parm, nXvar = nXvar, nuZUvar = nuZUvar,
         nvZVvar = nvZVvar, uHvar = uHvar_p, gHvar = gHvar,
@@ -536,20 +549,22 @@ halfnormAlgOpt_gzit <- function(start, olsParam, dataTable,
     nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
     uHvar = uHvar_p, gHvar = gHvar, ngZGvar = ngZGvar, vHvar = vHvar_p,
     Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT, S = S,
-    wHvar = wHvar_p), sr1 = trust.optim(x = startVal, fn = function(parm) {
-    -sum(phalfnormlike_gzit(parm, nXvar = nXvar, nuZUvar = nuZUvar,
-      nvZVvar = nvZVvar, uHvar = uHvar_p, gHvar = gHvar,
-      ngZGvar = ngZGvar, vHvar = vHvar_p, Yvar = Yvar,
-      Xvar = Xvar, pindex = pindex, TT = TT, S = S, wHvar = wHvar_p))
-  }, gr = function(parm) {
-    -colSums(pgradhalfnormlike_gzit(parm, nXvar = nXvar,
-      nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
-      gHvar = gHvar, ngZGvar = ngZGvar, vHvar = vHvar_p,
-      Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT,
-      S = S, wHvar = wHvar_p))
-  }, method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
-    stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
-    report.precision = 1L)), sparse = trust.optim(x = startVal,
+    wHvar = wHvar_p), sr1 = trustOptim::trust.optim(x = startVal,
+    fn = function(parm) {
+      -sum(phalfnormlike_gzit(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+        nvZVvar = nvZVvar, uHvar = uHvar_p, gHvar = gHvar,
+        ngZGvar = ngZGvar, vHvar = vHvar_p, Yvar = Yvar,
+        Xvar = Xvar, pindex = pindex, TT = TT, S = S,
+        wHvar = wHvar_p))
+    }, gr = function(parm) {
+      -colSums(pgradhalfnormlike_gzit(parm, nXvar = nXvar,
+        nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
+        gHvar = gHvar, ngZGvar = ngZGvar, vHvar = vHvar_p,
+        Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT,
+        S = S, wHvar = wHvar_p))
+    }, method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
+      stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
+      report.precision = 1L)), sparse = trustOptim::trust.optim(x = startVal,
     fn = function(parm) {
       -sum(phalfnormlike_gzit(parm, nXvar = nXvar, nuZUvar = nuZUvar,
         nvZVvar = nvZVvar, uHvar = uHvar_p, gHvar = gHvar,
@@ -563,31 +578,34 @@ halfnormAlgOpt_gzit <- function(start, olsParam, dataTable,
         Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT,
         S = S, wHvar = wHvar_p))
     }, hs = function(parm) {
-      as(-phesshalfnormlike_gzit(parm, nXvar = nXvar,
-        nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
-        gHvar = gHvar, ngZGvar = ngZGvar, vHvar = vHvar_p,
-        Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT,
-        S = S, wHvar = wHvar_p), "dgCMatrix")
+      as(-phesshalfnormlike_gzit(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+        nvZVvar = nvZVvar, uHvar = uHvar_p, gHvar = gHvar,
+        ngZGvar = ngZGvar, vHvar = vHvar_p, Yvar = Yvar,
+        Xvar = Xvar, pindex = pindex, TT = TT, S = S,
+        wHvar = wHvar_p), "dgCMatrix")
     }, method = "Sparse", control = list(maxit = itermax,
       cgtol = gradtol, stop.trust.radius = tol, prec = tol,
       report.level = if (printInfo) 2 else 0, report.precision = 1L,
-      preconditioner = 1L)), mla = mla(b = startVal, fn = function(parm) {
-    -sum(phalfnormlike_gzit(parm, nXvar = nXvar, nuZUvar = nuZUvar,
-      nvZVvar = nvZVvar, uHvar = uHvar_p, gHvar = gHvar,
-      ngZGvar = ngZGvar, vHvar = vHvar_p, Yvar = Yvar,
-      Xvar = Xvar, pindex = pindex, TT = TT, S = S, wHvar = wHvar_p))
-  }, gr = function(parm) {
-    -colSums(pgradhalfnormlike_gzit(parm, nXvar = nXvar,
-      nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
-      gHvar = gHvar, ngZGvar = ngZGvar, vHvar = vHvar_p,
-      Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT,
-      S = S, wHvar = wHvar_p))
-  }, hess = function(parm) {
-    -phesshalfnormlike_gzit(parm, nXvar = nXvar, nuZUvar = nuZUvar,
-      nvZVvar = nvZVvar, uHvar = uHvar_p, gHvar = gHvar,
-      ngZGvar = ngZGvar, vHvar = vHvar_p, Yvar = Yvar,
-      Xvar = Xvar, pindex = pindex, TT = TT, S = S, wHvar = wHvar_p)
-  }, print.info = printInfo, maxiter = itermax, epsa = gradtol,
+      preconditioner = 1L)), mla = marqLevAlg::mla(b = startVal,
+    fn = function(parm) {
+      -sum(phalfnormlike_gzit(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+        nvZVvar = nvZVvar, uHvar = uHvar_p, gHvar = gHvar,
+        ngZGvar = ngZGvar, vHvar = vHvar_p, Yvar = Yvar,
+        Xvar = Xvar, pindex = pindex, TT = TT, S = S,
+        wHvar = wHvar_p))
+    }, gr = function(parm) {
+      -colSums(pgradhalfnormlike_gzit(parm, nXvar = nXvar,
+        nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
+        gHvar = gHvar, ngZGvar = ngZGvar, vHvar = vHvar_p,
+        Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT,
+        S = S, wHvar = wHvar_p))
+    }, hess = function(parm) {
+      -phesshalfnormlike_gzit(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+        nvZVvar = nvZVvar, uHvar = uHvar_p, gHvar = gHvar,
+        ngZGvar = ngZGvar, vHvar = vHvar_p, Yvar = Yvar,
+        Xvar = Xvar, pindex = pindex, TT = TT, S = S,
+        wHvar = wHvar_p)
+    }, print.info = printInfo, maxiter = itermax, epsa = gradtol,
     epsb = gradtol), nlminb = nlminb(start = startVal, objective = function(parm) {
     -sum(phalfnormlike_gzit(parm, nXvar = nXvar, nuZUvar = nuZUvar,
       nvZVvar = nvZVvar, uHvar = uHvar_p, gHvar = gHvar,
@@ -620,7 +638,6 @@ halfnormAlgOpt_gzit <- function(start, olsParam, dataTable,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -645,11 +662,10 @@ halfnormAlgOpt_gzit <- function(start, olsParam, dataTable,
         TT = TT, S = S, wHvar = wHvar_p)
     }
   }
-  mleObj$logL_OBS <- phalfnormlike_gzit(parm = mlParam,
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-    uHvar = uHvar_p, gHvar = gHvar, ngZGvar = ngZGvar, vHvar = vHvar_p,
-    Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT, S = S,
-    wHvar = wHvar_p)
+  mleObj$logL_OBS <- phalfnormlike_gzit(parm = mlParam, nXvar = nXvar,
+    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
+    gHvar = gHvar, ngZGvar = ngZGvar, vHvar = vHvar_p, Yvar = Yvar,
+    Xvar = Xvar, pindex = pindex, TT = TT, S = S, wHvar = wHvar_p)
   mleObj$gradL_OBS <- pgradhalfnormlike_gzit(parm = mlParam,
     nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
     uHvar = uHvar_p, gHvar = gHvar, ngZGvar = ngZGvar, vHvar = vHvar_p,
@@ -684,8 +700,7 @@ phalfnormeff_gzit <- function(object, level) {
     rhs = 2)
   vHvar_c <- model.matrix(object$formula, data = object$dataTable,
     rhs = 3)
-  gHvar <- model.matrix(object$formula, data = object$dataTable,
-    rhs = 4) # maybe have to be regenerated or ...
+  gHvar <- object$gHvar
   pindex <- object$dataTable[, 1:2]
   invariance <- object$invariance
   if (invariance == 1) {

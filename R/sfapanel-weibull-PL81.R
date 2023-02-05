@@ -69,23 +69,34 @@ pweibullnormlike_pl81 <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param N number of observations
 #' @param FiMat matrix of random draws
 #' @param printInfo logical print info during optimization
-#' @param itermax maximum iteration
+#' @param whichStart strategy to get starting values
+#' @param initIter maximum iterations for initialization
+#' @param initAlg algorithm for maxLik 
 #' @param tol parameter tolerance
 #' @noRd
 pstweibullnorm_pl81 <- function(olsObj, epsiRes, nXvar, nuZUvar,
-  nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, itermax, printInfo,
-  tol, N, FiMat) {
-  cat("Initialization: SFA + weibull-normal distribution...\n")
-  initWeibull <- maxLik(logLik = cweibullnormlike, start = cstweibullnorm(olsObj = olsObj,
-    epsiRes = epsiRes, S = S, nuZUvar = 1, uHvar = as.matrix(uHvar[,
-      1]), nvZVvar = 1, vHvar = as.matrix(vHvar[, 1])),
-    grad = cgradweibullnormlike, method = "BFGS", control = list(iterlim = itermax,
-      printLevel = if (printInfo) 2 else 0, reltol = tol),
-    nXvar = nXvar, nuZUvar = 1, uHvar = as.matrix(uHvar[,
-      1]), nvZVvar = 1, vHvar = as.matrix(vHvar[, 1]),
-    Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar, N = N,
-    FiMat = FiMat, )
-  Esti <- initWeibull$estimate
+  nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, whichStart,
+  initIter, initAlg, printInfo, tol, N, FiMat) {
+  if (whichStart == 1L) {
+    Esti <- cstweibullnorm(olsObj = olsObj, epsiRes = epsiRes,
+      S = S, nuZUvar = 1, uHvar = uHvar[, 1, drop = FALSE],
+      nvZVvar = 1, vHvar = vHvar[, 1, drop = FALSE])
+    initWeibull <- NULL
+  } else {
+    cat("Initialization: SFA + weibull-normal distribution...\n")
+    initWeibull <- maxLik::maxLik(logLik = cweibullnormlike,
+      start = cstweibullnorm(olsObj = olsObj, epsiRes = epsiRes,
+        S = S, nuZUvar = 1, uHvar = uHvar[, 1, drop = FALSE],
+        nvZVvar = 1, vHvar = vHvar[, 1, drop = FALSE]),
+      grad = cgradweibullnormlike, hess = chessweibullnormlike,
+      method = initAlg, control = list(iterlim = initIter,
+        printLevel = if (printInfo) 2 else 0, reltol = tol),
+      nXvar = nXvar, nuZUvar = 1, uHvar = uHvar[, 1, drop = FALSE],
+      nvZVvar = 1, vHvar = vHvar[, 1, drop = FALSE], Yvar = Yvar,
+      Xvar = Xvar, S = S, wHvar = wHvar, N = N, FiMat = FiMat,
+      )
+    Esti <- initWeibull$estimate
+  }
   StartVal <- c(Esti[1:(nXvar)], Esti[nXvar + 1], if (nuZUvar >
     1) {
     rep(0, nuZUvar - 1)
@@ -94,9 +105,6 @@ pstweibullnorm_pl81 <- function(olsObj, epsiRes, nXvar, nuZUvar,
   }, Esti[nXvar + 3])
   names(StartVal) <- c(names(Esti)[1:nXvar], paste0("Zu_",
     colnames(uHvar)), paste0("Zv_", colnames(vHvar)), "k")
-  names(initWeibull$estimate) <- c(names(Esti)[1:nXvar], paste0("Zu_",
-    colnames(uHvar)[1]), paste0("Zv_", colnames(vHvar)[1]),
-    "k")
   return(list(StartVal = StartVal, initWeibull = initWeibull))
 }
 
@@ -207,6 +215,9 @@ pgradweibullnormlike_pl81 <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param method algorithm for solver
 #' @param printInfo logical print info during optimization
 #' @param itermax maximum iteration
+#' @param whichStart strategy to get starting values
+#' @param initIter maximum iterations for initialization
+#' @param initAlg algorithm for maxLik 
 #' @param stepmax stepmax for ucminf
 #' @param tol parameter tolerance
 #' @param gradtol gradient tolerance
@@ -216,8 +227,8 @@ pgradweibullnormlike_pl81 <- function(parm, nXvar, nuZUvar, nvZVvar,
 weibullnormAlgOpt_pl81 <- function(start, olsParam, dataTable,
   S, nXvar, N, NT, FiMat_N, FiMat_NT, uHvar_c, uHvar_p, nuZUvar,
   vHvar_c, vHvar_p, nvZVvar, Yvar, Xvar, wHvar_c, wHvar_p,
-  pindex, TT, method, printInfo, itermax, stepmax, tol, gradtol,
-  hessianType, qac) {
+  pindex, TT, method, printInfo, itermax, stepmax, tol, whichStart,
+  initIter, initAlg, gradtol, hessianType, qac) {
   if (!is.null(start)) {
     startVal <- start
   } else {
@@ -225,8 +236,9 @@ weibullnormAlgOpt_pl81 <- function(start, olsParam, dataTable,
       N = NT, FiMat = FiMat_NT, nXvar = nXvar, nuZUvar = nuZUvar,
       nvZVvar = nvZVvar, uHvar = uHvar_c, vHvar = vHvar_c,
       Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar_c,
-      itermax = itermax, tol = tol, printInfo = printInfo)
-    InitWeibull <- start_st$initWeibull
+      tol = tol, printInfo = printInfo, whichStart = whichStart,
+      initIter = initIter, initAlg = initAlg)
+    initWeibull <- start_st$initWeibull
     startVal <- start_st$StartVal
   }
   startLoglik <- sum(pweibullnormlike_pl81(startVal, nXvar = nXvar,
@@ -234,13 +246,14 @@ weibullnormAlgOpt_pl81 <- function(start, olsParam, dataTable,
     vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar, pindex = pindex,
     TT = TT, S = S, N = N, FiMat = FiMat_N, wHvar = wHvar_p))
   if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
-    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
-      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
-      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
-      sann = function(...) maxSANN(...))
+    maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...),
+      bhhh = function(...) maxLik::maxBHHH(...), nr = function(...) maxLik::maxNR(...),
+      nm = function(...) maxLik::maxNM(...), cg = function(...) maxLik::maxCG(...),
+      sann = function(...) maxLik::maxSANN(...))
     method <- "maxLikAlgo"
   }
-  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+  cat("SFA Panel PL81 Estimation...\n")
+  mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
     fn = function(parm) -sum(pweibullnormlike_pl81(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar_p, vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar,
@@ -258,18 +271,8 @@ weibullnormAlgOpt_pl81 <- function(start, olsParam, dataTable,
     nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
     uHvar = uHvar_p, vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar,
     pindex = pindex, TT = TT, S = S, wHvar = wHvar_p, N = N,
-    FiMat = FiMat_N), sr1 = trust.optim(x = startVal, fn = function(parm) -sum(pweibullnormlike_pl81(parm,
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-    uHvar = uHvar_p, vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar,
-    pindex = pindex, TT = TT, S = S, wHvar = wHvar_p, N = N,
-    FiMat = FiMat_N)), gr = function(parm) -colSums(pgradweibullnormlike_pl81(parm,
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-    uHvar = uHvar_p, vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar,
-    pindex = pindex, TT = TT, S = S, wHvar = wHvar_p, N = N,
-    FiMat = FiMat_N)), method = "SR1", control = list(maxit = itermax,
-    cgtol = gradtol, stop.trust.radius = tol, prec = tol,
-    report.level = if (printInfo) 2 else 0, report.precision = 1L)),
-    sparse = trust.optim(x = startVal, fn = function(parm) -sum(pweibullnormlike_pl81(parm,
+    FiMat = FiMat_N), sr1 = trustOptim::trust.optim(x = startVal,
+    fn = function(parm) -sum(pweibullnormlike_pl81(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar_p, vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar,
       pindex = pindex, TT = TT, S = S, wHvar = wHvar_p,
@@ -277,15 +280,10 @@ weibullnormAlgOpt_pl81 <- function(start, olsParam, dataTable,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar_p, vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar,
       pindex = pindex, TT = TT, S = S, wHvar = wHvar_p,
-      N = N, FiMat = FiMat_N)), hs = function(parm) as(jacobian(function(parm) -colSums(pgradweibullnormlike_pl81(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar_p, vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar,
-      pindex = pindex, TT = TT, S = S, wHvar = wHvar_p,
-      N = N, FiMat = FiMat_N)), unname(parm)), "dgCMatrix"), method = "Sparse",
-      control = list(maxit = itermax, cgtol = gradtol,
-        stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
-        report.precision = 1L, preconditioner = 1L)),
-    mla = mla(b = startVal, fn = function(parm) -sum(pweibullnormlike_pl81(parm,
+      N = N, FiMat = FiMat_N)), method = "SR1", control = list(maxit = itermax,
+      cgtol = gradtol, stop.trust.radius = tol, prec = tol,
+      report.level = if (printInfo) 2 else 0, report.precision = 1L)),
+    sparse = trustOptim::trust.optim(x = startVal, fn = function(parm) -sum(pweibullnormlike_pl81(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar_p, vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar,
       pindex = pindex, TT = TT, S = S, wHvar = wHvar_p,
@@ -293,7 +291,24 @@ weibullnormAlgOpt_pl81 <- function(start, olsParam, dataTable,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar_p, vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar,
       pindex = pindex, TT = TT, S = S, wHvar = wHvar_p,
-      N = N, FiMat = FiMat_N)), print.info = printInfo,
+      N = N, FiMat = FiMat_N)), hs = function(parm) as(calculus::jacobian(function(parm) -colSums(pgradweibullnormlike_pl81(parm,
+      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar_p, vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar,
+      pindex = pindex, TT = TT, S = S, wHvar = wHvar_p,
+      N = N, FiMat = FiMat_N)), unname(parm)), "dgCMatrix"),
+      method = "Sparse", control = list(maxit = itermax,
+        cgtol = gradtol, stop.trust.radius = tol, prec = tol,
+        report.level = if (printInfo) 2 else 0, report.precision = 1L,
+        preconditioner = 1L)), mla = marqLevAlg::mla(b = startVal,
+      fn = function(parm) -sum(pweibullnormlike_pl81(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar_p, vHvar = vHvar_p, Yvar = Yvar,
+        Xvar = Xvar, pindex = pindex, TT = TT, S = S,
+        wHvar = wHvar_p, N = N, FiMat = FiMat_N)), gr = function(parm) -colSums(pgradweibullnormlike_pl81(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar_p, vHvar = vHvar_p, Yvar = Yvar,
+        Xvar = Xvar, pindex = pindex, TT = TT, S = S,
+        wHvar = wHvar_p, N = N, FiMat = FiMat_N)), print.info = printInfo,
       maxiter = itermax, epsa = gradtol, epsb = gradtol),
     nlminb = nlminb(start = startVal, objective = function(parm) -sum(pweibullnormlike_pl81(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
@@ -320,7 +335,6 @@ weibullnormAlgOpt_pl81 <- function(start, olsParam, dataTable,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -331,13 +345,13 @@ weibullnormAlgOpt_pl81 <- function(start, olsParam, dataTable,
   }
   if (hessianType != 2) {
     if (method %in% c("ucminf", "nlminb"))
-      mleObj$hessian <- jacobian(function(parm) colSums(pgradweibullnormlike_pl81(parm,
+      mleObj$hessian <- calculus::jacobian(function(parm) colSums(pgradweibullnormlike_pl81(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar_p, vHvar = vHvar_p, Yvar = Yvar,
         Xvar = Xvar, pindex = pindex, TT = TT, S = S,
         wHvar = wHvar_p, N = N, FiMat = FiMat_N)), unname(mleObj$par))
     if (method == "sr1")
-      mleObj$hessian <- jacobian(function(parm) colSums(pgradweibullnormlike_pl81(parm,
+      mleObj$hessian <- calculus::jacobian(function(parm) colSums(pgradweibullnormlike_pl81(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar_p, vHvar = vHvar_p, Yvar = Yvar,
         Xvar = Xvar, pindex = pindex, TT = TT, S = S,
@@ -355,7 +369,7 @@ weibullnormAlgOpt_pl81 <- function(start, olsParam, dataTable,
     FiMat = FiMat_N)
   if (is.null(start)) {
     return(list(startVal = startVal, startLoglik = startLoglik,
-      mleObj = mleObj, mlParam = mlParam, InitWeibull = InitWeibull))
+      mleObj = mleObj, mlParam = mlParam, initWeibull = initWeibull))
   } else {
     return(list(startVal = startVal, startLoglik = startLoglik,
       mleObj = mleObj, mlParam = mlParam))
@@ -473,38 +487,35 @@ pweibullnormeff_pl81 <- function(object, level) {
   epsilon_isq <- as.numeric(tapply(epsilon_it^2, pindex[, 1],
     sum))
   u <- numeric(object$Nid)
+  density_epsilon_vec <- numeric(object$Nid)
   for (i in seq_along(1:object$Nid)) {
     ur <- exp(Wu[i]/2) * (-log(1 - object$FiMat[i, ]))^(1/k)
-    density_epsilon <- mean(1/((2 * pi)^(TT[i]/2) * exp(Wv[i]/2 *
-      TT[i])) * exp(-(epsilon_isq[i] + 2 * object$S * ur *
-      epsilon_i[i] + ur^2)/(2 * exp(Wv[i]))))
+    density_epsilon_vec[i] <- mean(1/((2 * pi)^(TT[i]/2) *
+      exp(Wv[i]/2 * TT[i])) * exp(-(epsilon_isq[i] + 2 *
+      object$S * ur * epsilon_i[i] + ur^2)/(2 * exp(Wv[i]))))
     u[i] <- hcubature(f = fnCondEffWeibull_pl81, lowerLimit = 0,
       upperLimit = Inf, maxEval = 100, fDim = 1, sigmaU = exp(Wu[i]/2),
       sigmaV = exp(Wv[i]/2), k = k, epsilon_i = epsilon_i[i],
       epsilon_isq = epsilon_isq[i], TT = TT[i], S = object$S,
-      vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon
+      vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon_vec[i]
   }
   if (object$logDepVar == TRUE) {
     teJLMS <- exp(-u)
     teBC <- numeric(object$Nid)
     teBC_reciprocal <- numeric(object$Nid)
     for (i in seq_along(1:object$Nid)) {
-      ur <- exp(Wu[i]/2) * (-log(1 - object$FiMat[i, ]))^(1/k)
-      density_epsilon <- mean(1/((2 * pi)^(TT[i]/2) * exp(Wv[i]/2 *
-        TT[i])) * exp(-(epsilon_isq[i] + 2 * object$S *
-        ur * epsilon_i[i] + ur^2)/(2 * exp(Wv[i]))))
       teBC[i] <- hcubature(f = fnCondBCEffWeibull_pl81,
         lowerLimit = 0, upperLimit = Inf, maxEval = 100,
         fDim = 1, sigmaU = exp(Wu[i]/2), sigmaV = exp(Wv[i]/2),
         k = k, epsilon_i = epsilon_i[i], epsilon_isq = epsilon_isq[i],
         TT = TT[i], S = object$S, vectorInterface = FALSE,
-        tol = 1e-15)$integral/density_epsilon
+        tol = 1e-15)$integral/density_epsilon_vec[i]
       teBC_reciprocal[i] <- hcubature(f = fnCondBCreciprocalEffWeibull_pl81,
         lowerLimit = 0, upperLimit = Inf, maxEval = 100,
         fDim = 1, sigmaU = exp(Wu[i]/2), sigmaV = exp(Wv[i]/2),
         k = k, epsilon_i = epsilon_i[i], epsilon_isq = epsilon_isq[i],
         TT = TT[i], S = object$S, vectorInterface = FALSE,
-        tol = 1e-15)$integral/density_epsilon
+        tol = 1e-15)$integral/density_epsilon_vec[i]
     }
     res <- data.frame(levels(pindex[, 1]), u = u, teJLMS = teJLMS,
       teBC = teBC, teBC_reciprocal = teBC_reciprocal)

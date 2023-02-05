@@ -60,22 +60,32 @@ pexponormlike_pl81 <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param nXvar number of main variables (inputs + env. var)
 #' @param wHvar vector of weights (weighted likelihood)
 #' @param printInfo logical print info during optimization
-#' @param itermax maximum iteration
+#' @param whichStart strategy to get starting values
+#' @param initIter maximum iterations for initialization
+#' @param initAlg algorithm for maxLik 
 #' @param tol parameter tolerance
 #' @noRd
 pstexponorm_pl81 <- function(olsObj, epsiRes, nXvar, nuZUvar,
-  nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, itermax, printInfo,
-  tol) {
-  cat("Initialization: SFA + exponential-normal distribution...\n")
-  initExpo <- maxLik(logLik = cexponormlike, start = cstexponorm(olsObj = olsObj,
-    epsiRes = epsiRes, S = S, nuZUvar = 1, uHvar = as.matrix(uHvar[,
-      1]), nvZVvar = 1, vHvar = as.matrix(vHvar[, 1])),
-    grad = cgradexponormlike, method = "BFGS", control = list(iterlim = itermax,
-      printLevel = if (printInfo) 2 else 0, reltol = tol),
-    nXvar = nXvar, nuZUvar = 1, uHvar = as.matrix(uHvar[,
-      1]), nvZVvar = 1, vHvar = as.matrix(vHvar[, 1]),
-    Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar)
-  Esti <- initExpo$estimate
+  nvZVvar, uHvar, vHvar, Yvar, Xvar, S, wHvar, whichStart,
+  initIter, initAlg, printInfo, tol) {
+  if (whichStart == 1L) {
+    Esti <- cstexponorm(olsObj = olsObj, epsiRes = epsiRes,
+      S = S, nuZUvar = 1, uHvar = uHvar[, 1, drop = FALSE],
+      nvZVvar = 1, vHvar = vHvar[, 1, drop = FALSE])
+    initExpo <- NULL
+  } else {
+    cat("Initialization: SFA + exponential-normal distribution...\n")
+    initExpo <- maxLik::maxLik(logLik = cexponormlike, start = cstexponorm(olsObj = olsObj,
+      epsiRes = epsiRes, S = S, nuZUvar = 1, uHvar = uHvar[,
+        1, drop = FALSE], nvZVvar = 1, vHvar = vHvar[,
+        1, drop = FALSE]), grad = cgradexponormlike,
+      method = initAlg, control = list(iterlim = initIter,
+        printLevel = if (printInfo) 2 else 0, reltol = tol),
+      nXvar = nXvar, nuZUvar = 1, uHvar = uHvar[, 1, drop = FALSE],
+      nvZVvar = 1, vHvar = vHvar[, 1, drop = FALSE], Yvar = Yvar,
+      Xvar = Xvar, S = S, wHvar = wHvar)
+    Esti <- initExpo$estimate
+  }
   StartVal <- c(Esti[1:(nXvar)], Esti[nXvar + 1], if (nuZUvar >
     1) {
     rep(0, nuZUvar - 1)
@@ -84,10 +94,9 @@ pstexponorm_pl81 <- function(olsObj, epsiRes, nXvar, nuZUvar,
   })
   names(StartVal) <- c(names(Esti)[1:nXvar], paste0("Zu_",
     colnames(uHvar)), paste0("Zv_", colnames(vHvar)))
-  names(initExpo$estimate) <- c(names(Esti)[1:nXvar], paste0("Zu_",
-    colnames(uHvar)[1]), paste0("Zv_", colnames(vHvar)[1]))
   return(list(StartVal = StartVal, initExpo = initExpo))
 }
+
 
 # Gradient of the likelihood function ----------
 #' gradient for halfnormal-normal distribution
@@ -213,16 +222,16 @@ phessexponormlike_pl81 <- function(parm, nXvar, nuZUvar, nvZVvar,
   hessll <- matrix(nrow = nXvar + nuZUvar + nvZVvar, ncol = nXvar +
     nuZUvar + nvZVvar)
   hessll[1:nXvar, 1:nXvar] <- crossprod(sweep(X_iM, MARGIN = 1,
-    STATS = wHvar * S^2 * (1/ewv - dmusig * sigx8/TT)/TT, FUN = "*"),
-    X_iM) - sapply(1:nXvar, function(x) {
+    STATS = wHvar * S^2 * (1/ewv - dmusig * sigx8/TT)/TT,
+    FUN = "*"), X_iM) - sapply(1:nXvar, function(x) {
     crossprod(Xsq[[x]], as.matrix(wHvar/ewv))
   })
   hessll[1:nXvar, (nXvar + 1):(nXvar + nuZUvar)] <- crossprod(sweep(X_iM,
     MARGIN = 1, STATS = wHvar * S * (0.5 * (dmusig * (sigx9 -
       epsi_sig3)/TT) - 0.5)/(wutt), FUN = "*"), uHvar)
   hessll[1:nXvar, (nXvar + nuZUvar + 1):(nXvar + nuZUvar +
-    nvZVvar)] <- crossprod(sweep(Xepsi_i, MARGIN = 1, STATS = 2 * wHvar * 
-    (ewv * 2/(2 * ewv)^2), FUN = "*"), vHvar) + crossprod(sweep(X_iM,
+    nvZVvar)] <- crossprod(sweep(Xepsi_i, MARGIN = 1, STATS = 2 *
+    wHvar * (ewv * 2/(2 * ewv)^2), FUN = "*"), vHvar) + crossprod(sweep(X_iM,
     MARGIN = 1, STATS = wHvar * S * ((1 - dmusig * sigx8 *
       wvtt) * sigx2 - 0.5 * (sigx5/ssq_v^2)), FUN = "*"),
     vHvar)
@@ -270,6 +279,9 @@ phessexponormlike_pl81 <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param method algorithm for solver
 #' @param printInfo logical print info during optimization
 #' @param itermax maximum iteration
+#' @param whichStart strategy to get starting values
+#' @param initIter maximum iterations for initialization
+#' @param initAlg algorithm for maxLik 
 #' @param stepmax stepmax for ucminf
 #' @param tol parameter tolerance
 #' @param gradtol gradient tolerance
@@ -279,15 +291,16 @@ phessexponormlike_pl81 <- function(parm, nXvar, nuZUvar, nvZVvar,
 exponormAlgOpt_pl81 <- function(start, olsParam, dataTable, S,
   nXvar, uHvar_c, uHvar_p, nuZUvar, vHvar_c, vHvar_p, nvZVvar,
   Yvar, Xvar, wHvar_c, wHvar_p, pindex, TT, method, printInfo,
-  itermax, stepmax, tol, gradtol, hessianType, qac) {
+  itermax, stepmax, tol, gradtol, whichStart, initIter, initAlg,
+  hessianType, qac) {
   if (!is.null(start)) {
     startVal <- start
   } else {
     start_st <- pstexponorm_pl81(olsObj = olsParam, epsiRes = dataTable[["olsResiduals"]],
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar_c, vHvar = vHvar_c, Yvar = Yvar, Xvar = Xvar,
-      S = S, wHvar = wHvar_c, itermax = itermax, tol = tol,
-      printInfo = printInfo)
+      S = S, wHvar = wHvar_c, tol = tol, whichStart = whichStart,
+      initIter = initIter, initAlg = initAlg, printInfo = printInfo)
     InitExpo <- start_st$initExpo
     startVal <- start_st$StartVal
   }
@@ -296,13 +309,14 @@ exponormAlgOpt_pl81 <- function(start, olsParam, dataTable, S,
     vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar, pindex = pindex,
     TT = TT, S = S, wHvar = wHvar_p))
   if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
-    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
-      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
-      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
-      sann = function(...) maxSANN(...))
+    maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...),
+      bhhh = function(...) maxLik::maxBHHH(...), nr = function(...) maxLik::maxNR(...),
+      nm = function(...) maxLik::maxNM(...), cg = function(...) maxLik::maxCG(...),
+      sann = function(...) maxLik::maxSANN(...))
     method <- "maxLikAlgo"
   }
-  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+  cat("SFA Panel PL81 Estimation...\n")
+  mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
     fn = function(parm) {
       -sum(pexponormlike_pl81(parm, nXvar = nXvar, nuZUvar = nuZUvar,
         nvZVvar = nvZVvar, uHvar = uHvar_p, vHvar = vHvar_p,
@@ -322,7 +336,7 @@ exponormAlgOpt_pl81 <- function(start, olsParam, dataTable, S,
       iterlim = itermax, reltol = tol, tol = tol, qac = qac),
     nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
     uHvar = uHvar_p, vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar,
-    pindex = pindex, TT = TT, S = S, wHvar = wHvar_p), sr1 = trust.optim(x = startVal,
+    pindex = pindex, TT = TT, S = S, wHvar = wHvar_p), sr1 = trustOptim::trust.optim(x = startVal,
     fn = function(parm) {
       -sum(pexponormlike_pl81(parm, nXvar = nXvar, nuZUvar = nuZUvar,
         nvZVvar = nvZVvar, uHvar = uHvar_p, vHvar = vHvar_p,
@@ -335,7 +349,7 @@ exponormAlgOpt_pl81 <- function(start, olsParam, dataTable, S,
         TT = TT, S = S, wHvar = wHvar_p))
     }, method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
       stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
-      report.precision = 1L)), sparse = trust.optim(x = startVal,
+      report.precision = 1L)), sparse = trustOptim::trust.optim(x = startVal,
     fn = function(parm) {
       -sum(pexponormlike_pl81(parm, nXvar = nXvar, nuZUvar = nuZUvar,
         nvZVvar = nvZVvar, uHvar = uHvar_p, vHvar = vHvar_p,
@@ -354,22 +368,23 @@ exponormAlgOpt_pl81 <- function(start, olsParam, dataTable, S,
     }, method = "Sparse", control = list(maxit = itermax,
       cgtol = gradtol, stop.trust.radius = tol, prec = tol,
       report.level = if (printInfo) 2 else 0, report.precision = 1L,
-      preconditioner = 1L)), mla = mla(b = startVal, fn = function(parm) {
-    -sum(pexponormlike_pl81(parm, nXvar = nXvar, nuZUvar = nuZUvar,
-      nvZVvar = nvZVvar, uHvar = uHvar_p, vHvar = vHvar_p,
-      Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT,
-      S = S, wHvar = wHvar_p))
-  }, gr = function(parm) {
-    -colSums(pgradexponormlike_pl81(parm, nXvar = nXvar,
-      nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
-      vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar, pindex = pindex,
-      TT = TT, S = S, wHvar = wHvar_p))
-  }, hess = function(parm) {
-    -phessexponormlike_pl81(parm, nXvar = nXvar, nuZUvar = nuZUvar,
-      nvZVvar = nvZVvar, uHvar = uHvar_p, vHvar = vHvar_p,
-      Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT,
-      S = S, wHvar = wHvar_p)
-  }, print.info = printInfo, maxiter = itermax, epsa = gradtol,
+      preconditioner = 1L)), mla = marqLevAlg::mla(b = startVal,
+    fn = function(parm) {
+      -sum(pexponormlike_pl81(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+        nvZVvar = nvZVvar, uHvar = uHvar_p, vHvar = vHvar_p,
+        Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT,
+        S = S, wHvar = wHvar_p))
+    }, gr = function(parm) {
+      -colSums(pgradexponormlike_pl81(parm, nXvar = nXvar,
+        nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
+        vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar, pindex = pindex,
+        TT = TT, S = S, wHvar = wHvar_p))
+    }, hess = function(parm) {
+      -phessexponormlike_pl81(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+        nvZVvar = nvZVvar, uHvar = uHvar_p, vHvar = vHvar_p,
+        Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT,
+        S = S, wHvar = wHvar_p)
+    }, print.info = printInfo, maxiter = itermax, epsa = gradtol,
     epsb = gradtol), nlminb = nlminb(start = startVal, objective = function(parm) {
     -sum(pexponormlike_pl81(parm, nXvar = nXvar, nuZUvar = nuZUvar,
       nvZVvar = nvZVvar, uHvar = uHvar_p, vHvar = vHvar_p,
@@ -400,7 +415,6 @@ exponormAlgOpt_pl81 <- function(start, olsParam, dataTable, S,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -443,7 +457,7 @@ exponormAlgOpt_pl81 <- function(start, olsParam, dataTable, S,
 }
 
 # Conditional efficiencies estimation ----------
-#' efficiencies for halfnormal-normal distribution
+#' efficiencies for exponential-normal distribution
 #' @param object object of class sfacross
 #' @param level level for confidence interval
 #' @noRd
@@ -495,21 +509,22 @@ pexponormeff_pl81 <- function(object, level) {
     t(Xvar)))
   epsilon_i <- as.numeric(tapply(epsilon_it, pindex[, 1], sum))
   mustar <- -(exp(Wv)/(TT * exp(Wu/2)) + object$S * epsilon_i/TT)
-  u <- mustar + sqrt(exp(Wv)) * dnorm(mustar/sqrt(exp(Wv)))/pnorm(mustar/sqrt(exp(Wv)))
-  uLB <- mustar + qnorm(1 - (1 - (1 - level)/2) * (1 - pnorm(-mustar/sqrt(exp(Wv))))) *
-    sqrt(exp(Wv))
-  uUB <- mustar + qnorm(1 - (1 - level)/2 * (1 - pnorm(-mustar/sqrt(exp(Wv))))) *
-    sqrt(exp(Wv))
+  sigmastar <- sqrt(exp(Wv)/TT)
+  u <- mustar + sigmastar * dnorm(mustar/sigmastar)/pnorm(mustar/sigmastar)
+  uLB <- mustar + qnorm(1 - (1 - (1 - level)/2) * (1 - pnorm(-mustar/sigmastar))) *
+    sigmastar
+  uUB <- mustar + qnorm(1 - (1 - level)/2 * (1 - pnorm(-mustar/sigmastar))) *
+    sigmastar
   m <- ifelse(mustar > 0, mustar, 0)
   if (object$logDepVar == TRUE) {
     teJLMS <- exp(-u)
     teMO <- exp(-m)
-    teBC <- exp(-mustar + 1/2 * exp(Wv)) * pnorm(mustar/sqrt(exp(Wv)) -
-      sqrt(exp(Wv)))/pnorm(mustar/sqrt(exp(Wv)))
+    teBC <- exp(-mustar + 1/2 * sigmastar^2) * pnorm(mustar/sigmastar -
+      sigmastar)/pnorm(mustar/sigmastar)
     teBCLB <- exp(-uUB)
     teBCUB <- exp(-uLB)
-    teBC_reciprocal <- exp(mustar + 1/2 * exp(Wv)) * pnorm(mustar/sqrt(exp(Wv)) +
-      sqrt(exp(Wv)))/pnorm(mustar/sqrt(exp(Wv)))
+    teBC_reciprocal <- exp(mustar + 1/2 * sigmastar^2) *
+      pnorm(mustar/sigmastar + sigmastar)/pnorm(mustar/sigmastar)
     res <- data.frame(levels(pindex[, 1]), u = u, uLB = uLB,
       uUB = uUB, teJLMS = teJLMS, m = m, teMO = teMO, teBC = teBC,
       teBCLB = teBCLB, teBCUB = teBCUB, teBC_reciprocal = teBC_reciprocal)

@@ -8,16 +8,16 @@
 # Data: Panel data                                                             #
 # Model: Panel Stochastic Frontier Model                                       #
 # Inefficiency structure: u_it = g(zit)u_i                                     #
-#                         Battese and Coelli 1992 specifications:              #
+#                         Battese and Coelli 1992 specification:               #
 #                          - g(zit) = exp(-eta * (t - T))                      #
+#                         Cuesta and Orea (2002), Feng and Serletis (2009)     #
 #                          - g(zit) = exp(-eta1 * (t - T) - eta2 * (t - T)^2)  #
+#                         Alvarez, Amsler, Orea, Schmidt (2006)                #
 #                          - g(zit) = exp(eta * gHvar)                         #
 #                         Kumbhakar and Wang 2005 specification:               #
 #                          - g(zit) = exp(eta * (t - t1))                      #
 #                         Cuesta 2000 specification:                           #
 #                          - g(zit) = exp(-eta_i * (t - T))                    #
-#                         Modified Lee and Schmidt 1993                        #
-#                          - g(zit) = exp(-eta_t * (t - T)): g(zit) = 1 for T  #
 # Convolution: weibull - normal                                                #
 #------------------------------------------------------------------------------#
 
@@ -88,63 +88,72 @@ pweibullnormlike_gzit <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param N number of observations
 #' @param FiMat matrix of random draws
 #' @param printInfo logical print info during optimization
-#' @param itermax maximum iteration
+#' @param whichStart strategy to get starting values
+#' @param initIter maximum iterations for initialization
+#' @param initAlg algorithm for maxLik  
 #' @param tol parameter tolerance
 #' @noRd
 pstweibullnorm_gzit <- function(olsObj, epsiRes, nXvar, nuZUvar,
-  nvZVvar, uHvar, vHvar, Yvar, Xvar, ngZGvar, gHvar, S, wHvar,modelType,
-  itermax, printInfo, tol, N, FiMat) {
-  cat("Initialization: SFA + weibull-normal distribution...\n")
-  initWeibull <- maxLik(logLik = cweibullnormlike, start = cstweibullnorm(olsObj = olsObj,
-    epsiRes = epsiRes, S = S, nuZUvar = 1, uHvar = as.matrix(uHvar[,
-      1]), nvZVvar = 1, vHvar = as.matrix(vHvar[, 1])),
-    grad = cgradweibullnormlike, method = "BFGS", control = list(iterlim = itermax,
-      printLevel = if (printInfo) 2 else 0, reltol = tol),
-    nXvar = nXvar, nuZUvar = 1, uHvar = as.matrix(uHvar[,
-      1]), nvZVvar = 1, vHvar = as.matrix(vHvar[, 1]),
-    Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar, N = N,
-    FiMat = FiMat, )
-  Esti <- initWeibull$estimate
+  nvZVvar, uHvar, vHvar, Yvar, Xvar, ngZGvar, gHvar, S, wHvar,
+  modelType, initIter, initAlg, whichStart, printInfo, tol,
+  N, FiMat) {
+  if (whichStart == 1L) {
+    Esti <- cstweibullnorm(olsObj = olsObj, epsiRes = epsiRes,
+      S = S, nuZUvar = 1, uHvar = uHvar[, 1, drop = FALSE],
+      nvZVvar = 1, vHvar = vHvar[, 1, drop = FALSE])
+    initWeibull <- NULL
+  } else {
+    cat("Initialization: SFA + weibull-normal distribution...\n")
+    initWeibull <- maxLik::maxLik(logLik = cweibullnormlike,
+      start = cstweibullnorm(olsObj = olsObj, epsiRes = epsiRes,
+        S = S, nuZUvar = 1, uHvar = uHvar[, 1, drop = FALSE],
+        nvZVvar = 1, vHvar = vHvar[, 1, drop = FALSE]),
+      grad = cgradweibullnormlike, hess = chessweibullnormlike,
+      method = initAlg, control = list(iterlim = initIter,
+        printLevel = if (printInfo) 2 else 0, reltol = tol),
+      nXvar = nXvar, nuZUvar = 1, uHvar = uHvar[, 1, drop = FALSE],
+      nvZVvar = 1, vHvar = vHvar[, 1, drop = FALSE], Yvar = Yvar,
+      Xvar = Xvar, S = S, wHvar = wHvar, N = N, FiMat = FiMat,
+      )
+    Esti <- initWeibull$estimate
+  }
   StartVal <- c(Esti[1:(nXvar)], Esti[nXvar + 1], if (nuZUvar >
-                                                      1) {
+    1) {
     rep(0, nuZUvar - 1)
   }, Esti[nXvar + 2], if (nvZVvar > 1) {
     rep(0, nvZVvar - 1)
   }, Esti[nXvar + 3], if (modelType %in% c("bc92a", "kw05")) {
-    0.001} else {
+    0.001
+  } else {
+    if (modelType == "bc92b") {
+      c(0.001, 0.001)
+    } else {
+      if (modelType == "bc92c") {
+        rep(0, ngZGvar)
+      } else {
+        if (modelType == "c00") {
+          rep(0.001, ngZGvar)
+        }
+      }
+    }
+  })
+  names(StartVal) <- c(names(Esti)[1:nXvar], paste0("Zu_",
+    colnames(uHvar)), paste0("Zv_", colnames(vHvar)), "k",
+    if (modelType %in% c("bc92a", "kw05")) {
+      "eta"
+    } else {
       if (modelType == "bc92b") {
-        c(0.001, 0.001)
+        c("eta1", "eta2")
       } else {
         if (modelType == "bc92c") {
-          rep(0, ngZGvar)
+          paste0("Zg_", colnames(gHvar))
         } else {
-          if (modelType %in% c("c00", "mols93")) {
-            rep(0.001, ngZGvar)
+          if (modelType == "c00") {
+          paste0("eta_", colnames(gHvar))
           }
         }
       }
-    } 
-  )
-  names(StartVal) <- c(names(Esti)[1:nXvar], paste0("Zu_",
-                                                    colnames(uHvar)), paste0("Zv_", colnames(vHvar)), "k", if (modelType %in% c("bc92a", "kw05")) {
-                                                      "eta"
-                                                    } else {
-                                                      if (modelType == "bc92b") {
-                                                        c("eta1", "eta2")
-                                                      } else {
-                                                        if (modelType == "bc92c") {
-                                                          paste0("Zg_",colnames(gHvar))
-                                                        } else {
-                                                          if (modelType %in% c("c00", "mols93")) {
-                                                            paste0("eta_", colnames(gHvar))
-                                                          }
-                                                        }
-                                                      }
-                                                    }
-  )
-  names(initWeibull$estimate) <- c(names(Esti)[1:nXvar], paste0("Zu_",
-    colnames(uHvar)[1]), paste0("Zv_", colnames(vHvar)[1]),
-    "k")
+    })
   return(list(StartVal = StartVal, initWeibull = initWeibull))
 }
 
@@ -167,9 +176,9 @@ pstweibullnorm_gzit <- function(olsObj, epsiRes, nXvar, nuZUvar,
 #' @param N number of observations
 #' @param FiMat matrix of random draws
 #' @noRd
-pgradweibullnormlike_gzit <- function(parm, nXvar, nuZUvar,
-  nvZVvar, uHvar, vHvar, Yvar, Xvar, pindex, TT, S, wHvar,
-  ngZGvar, gHvar, N, FiMat) {
+pgradweibullnormlike_gzit <- function(parm, nXvar, nuZUvar, nvZVvar,
+  uHvar, vHvar, Yvar, Xvar, pindex, TT, S, wHvar, ngZGvar,
+  gHvar, N, FiMat) {
   beta <- parm[1:(nXvar)]
   delta <- parm[(nXvar + 1):(nXvar + nuZUvar)]
   phi <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
@@ -194,11 +203,11 @@ pgradweibullnormlike_gzit <- function(parm, nXvar, nuZUvar,
     sum))
   Zitgitepsit <- sweep(gHvar, MARGIN = 1, STATS = git * epsilon_it,
     FUN = "*")
-  Zigiepsi <- apply(Zitgitepsit, 2, function(x) tapply(x, pindex[, 1],
-    sum))
+  Zigiepsi <- apply(Zitgitepsit, 2, function(x) tapply(x, pindex[,
+    1], sum))
   Zitgitsq <- sweep(gHvar, MARGIN = 1, STATS = 2 * git^2, FUN = "*")
-  Zigisq <- apply(Zitgitsq, 2, function(x) tapply(x, pindex[, 1],
-    sum))
+  Zigisq <- apply(Zitgitsq, 2, function(x) tapply(x, pindex[,
+    1], sum))
   ewu_h <- exp(Wu/2)
   ewv <- exp(Wv)
   lFimat <- (-log(1 - FiMat))^(1/k)
@@ -275,6 +284,7 @@ pgradweibullnormlike_gzit <- function(parm, nXvar, nuZUvar,
 #' @param vHvar_p matrix of Zv variables for cross-section
 #' @param Yvar vector of dependent variable
 #' @param Xvar matrix of main variables
+#' @param modelType specification of inefficiency model G(t)u_i
 #' @param gHvar matrix of inefficiency determinants
 #' @param ngZGvar number of variables explaining inefficiency
 #' @param wHvar_c vector of weights (weighted likelihood) pooled data
@@ -289,6 +299,9 @@ pgradweibullnormlike_gzit <- function(parm, nXvar, nuZUvar,
 #' @param method algorithm for solver
 #' @param printInfo logical print info during optimization
 #' @param itermax maximum iteration
+#' @param whichStart strategy to get starting values
+#' @param initIter maximum iterations for initialization
+#' @param initAlg algorithm for maxLik  
 #' @param stepmax stepmax for ucminf
 #' @param tol parameter tolerance
 #' @param gradtol gradient tolerance
@@ -296,20 +309,22 @@ pgradweibullnormlike_gzit <- function(parm, nXvar, nuZUvar,
 #' @param qac qac option for maxLik
 #' @noRd
 weibullnormAlgOpt_gzit <- function(start, olsParam, dataTable,
-  S, gHvar, ngZGvar, nXvar, N, NT, FiMat_N, FiMat_NT, uHvar_c,
-  uHvar_p, nuZUvar, vHvar_c, vHvar_p, nvZVvar, pindex, TT,
-  Yvar, Xvar, wHvar_c, wHvar_p, method, printInfo, itermax,
-  stepmax, tol, gradtol, hessianType, qac) {
+  S, modelType, gHvar, ngZGvar, nXvar, N, NT, FiMat_N, FiMat_NT,
+  uHvar_c, uHvar_p, nuZUvar, vHvar_c, vHvar_p, nvZVvar, pindex,
+  TT, Yvar, Xvar, wHvar_c, wHvar_p, method, printInfo, itermax,
+  whichStart, initIter, initAlg, stepmax, tol, gradtol, hessianType,
+  qac) {
   if (!is.null(start)) {
     startVal <- start
   } else {
-    start_st <- pstweibullnorm_gzit(olsObj = olsParam,
-      epsiRes = dataTable[["olsResiduals"]], N = NT, FiMat = FiMat_NT,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      gHvar = gHvar, ngZGvar = ngZGvar, uHvar = uHvar_c,
+    start_st <- pstweibullnorm_gzit(olsObj = olsParam, epsiRes = dataTable[["olsResiduals"]],
+      N = NT, FiMat = FiMat_NT, nXvar = nXvar, nuZUvar = nuZUvar,
+      nvZVvar = nvZVvar, gHvar = gHvar, ngZGvar = ngZGvar,
+      uHvar = uHvar_c, initIter = initIter, initAlg = initAlg,
       vHvar = vHvar_c, Yvar = Yvar, Xvar = Xvar, S = S,
-      wHvar = wHvar_c, itermax = itermax, tol = tol, printInfo = printInfo)
-    InitLog <- start_st$initLog
+      modelType = modelType, wHvar = wHvar_c, whichStart = whichStart,
+      tol = tol, printInfo = printInfo)
+    initWeibull <- start_st$initWeibull
     startVal <- start_st$StartVal
   }
   startLoglik <- sum(pweibullnormlike_gzit(startVal, nXvar = nXvar,
@@ -317,13 +332,15 @@ weibullnormAlgOpt_gzit <- function(start, olsParam, dataTable,
     gHvar = gHvar, ngZGvar = ngZGvar, vHvar = vHvar_p, Yvar = Yvar,
     Xvar = Xvar, pindex = pindex, TT = TT, S = S, wHvar = wHvar_p,
     N = N, FiMat = FiMat_N))
-  if (method %in% c("bfgs", "bhhh", "nr", "nm")) {
-    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
-      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
-      nm = function(...) maxNM(...))
+  if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
+    maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...),
+      bhhh = function(...) maxLik::maxBHHH(...), nr = function(...) maxLik::maxNR(...),
+      nm = function(...) maxLik::maxNM(...), cg = function(...) maxLik::maxCG(...),
+      sann = function(...) maxLik::maxSANN(...))
     method <- "maxLikAlgo"
   }
-  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+  cat("SFA Panel BC92-type Estimation...\n")
+  mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
     fn = function(parm) -sum(pweibullnormlike_gzit(parm,
       nXvar = nXvar, gHvar = gHvar, ngZGvar = ngZGvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
@@ -337,14 +354,13 @@ weibullnormAlgOpt_gzit <- function(start, olsParam, dataTable,
     hessian = 0, control = list(trace = if (printInfo) 1 else 0,
       maxeval = itermax, stepmax = stepmax, xtol = tol,
       grtol = gradtol)), maxLikAlgo = maxRoutine(fn = pweibullnormlike_gzit,
-    grad = pgradweibullnormlike_gzit, start = startVal,
-    finalHessian = if (hessianType == 2) "bhhh" else TRUE,
-    control = list(printLevel = if (printInfo) 2 else 0,
+    grad = pgradweibullnormlike_gzit, start = startVal, finalHessian = if (hessianType ==
+      2) "bhhh" else TRUE, control = list(printLevel = if (printInfo) 2 else 0,
       iterlim = itermax, reltol = tol, tol = tol, qac = qac),
     nXvar = nXvar, gHvar = gHvar, ngZGvar = ngZGvar, nuZUvar = nuZUvar,
     nvZVvar = nvZVvar, uHvar = uHvar_p, vHvar = vHvar_p,
     Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT, S = S,
-    wHvar = wHvar_p, N = N, FiMat = FiMat_N), sr1 = trust.optim(x = startVal,
+    wHvar = wHvar_p, N = N, FiMat = FiMat_N), sr1 = trustOptim::trust.optim(x = startVal,
     fn = function(parm) -sum(pweibullnormlike_gzit(parm,
       nXvar = nXvar, gHvar = gHvar, ngZGvar = ngZGvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
@@ -357,7 +373,7 @@ weibullnormAlgOpt_gzit <- function(start, olsParam, dataTable,
       TT = TT, S = S, wHvar = wHvar_p, N = N, FiMat = FiMat_N)),
     method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
       stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
-      report.precision = 1L)), sparse = trust.optim(x = startVal,
+      report.precision = 1L)), sparse = trustOptim::trust.optim(x = startVal,
     fn = function(parm) -sum(pweibullnormlike_gzit(parm,
       nXvar = nXvar, gHvar = gHvar, ngZGvar = ngZGvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
@@ -368,7 +384,7 @@ weibullnormAlgOpt_gzit <- function(start, olsParam, dataTable,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
       vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar, pindex = pindex,
       TT = TT, S = S, wHvar = wHvar_p, N = N, FiMat = FiMat_N)),
-    hs = function(parm) as(jacobian(function(parm) -colSums(pgradweibullnormlike_gzit(parm,
+    hs = function(parm) as(calculus::jacobian(function(parm) -colSums(pgradweibullnormlike_gzit(parm,
       nXvar = nXvar, gHvar = gHvar, ngZGvar = ngZGvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
       vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar, pindex = pindex,
@@ -376,28 +392,29 @@ weibullnormAlgOpt_gzit <- function(start, olsParam, dataTable,
       parm), "dgCMatrix"), method = "Sparse", control = list(maxit = itermax,
       cgtol = gradtol, stop.trust.radius = tol, prec = tol,
       report.level = if (printInfo) 2 else 0, report.precision = 1L,
-      preconditioner = 1L)), mla = mla(b = startVal, fn = function(parm) -sum(pweibullnormlike_gzit(parm,
-    nXvar = nXvar, gHvar = gHvar, ngZGvar = ngZGvar, nuZUvar = nuZUvar,
-    nvZVvar = nvZVvar, uHvar = uHvar_p, vHvar = vHvar_p,
-    Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT, S = S,
-    wHvar = wHvar_p, N = N, FiMat = FiMat_N)), gr = function(parm) -colSums(pgradweibullnormlike_gzit(parm,
-    nXvar = nXvar, gHvar = gHvar, ngZGvar = ngZGvar, nuZUvar = nuZUvar,
-    nvZVvar = nvZVvar, uHvar = uHvar_p, vHvar = vHvar_p,
-    Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT, S = S,
-    wHvar = wHvar_p, N = N, FiMat = FiMat_N)), print.info = printInfo,
-    maxiter = itermax, epsa = gradtol, epsb = gradtol), nlminb = nlminb(start = startVal,
-    objective = function(parm) -sum(pweibullnormlike_gzit(parm,
+      preconditioner = 1L)), mla = marqLevAlg::mla(b = startVal,
+    fn = function(parm) -sum(pweibullnormlike_gzit(parm,
       nXvar = nXvar, gHvar = gHvar, ngZGvar = ngZGvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
       vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar, pindex = pindex,
       TT = TT, S = S, wHvar = wHvar_p, N = N, FiMat = FiMat_N)),
-    gradient = function(parm) -colSums(pgradweibullnormlike_gzit(parm,
+    gr = function(parm) -colSums(pgradweibullnormlike_gzit(parm,
       nXvar = nXvar, gHvar = gHvar, ngZGvar = ngZGvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
       vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar, pindex = pindex,
       TT = TT, S = S, wHvar = wHvar_p, N = N, FiMat = FiMat_N)),
-    control = list(iter.max = itermax, trace = if (printInfo) 1 else 0,
-      eval.max = itermax, rel.tol = tol, x.tol = tol)))
+    print.info = printInfo, maxiter = itermax, epsa = gradtol,
+    epsb = gradtol), nlminb = nlminb(start = startVal, objective = function(parm) -sum(pweibullnormlike_gzit(parm,
+    nXvar = nXvar, gHvar = gHvar, ngZGvar = ngZGvar, nuZUvar = nuZUvar,
+    nvZVvar = nvZVvar, uHvar = uHvar_p, vHvar = vHvar_p,
+    Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT, S = S,
+    wHvar = wHvar_p, N = N, FiMat = FiMat_N)), gradient = function(parm) -colSums(pgradweibullnormlike_gzit(parm,
+    nXvar = nXvar, gHvar = gHvar, ngZGvar = ngZGvar, nuZUvar = nuZUvar,
+    nvZVvar = nvZVvar, uHvar = uHvar_p, vHvar = vHvar_p,
+    Yvar = Yvar, Xvar = Xvar, pindex = pindex, TT = TT, S = S,
+    wHvar = wHvar_p, N = N, FiMat = FiMat_N)), control = list(iter.max = itermax,
+    trace = if (printInfo) 1 else 0, eval.max = itermax,
+    rel.tol = tol, x.tol = tol)))
   if (method %in% c("ucminf", "nlminb")) {
     mleObj$gradient <- colSums(pgradweibullnormlike_gzit(mleObj$par,
       nXvar = nXvar, gHvar = gHvar, ngZGvar = ngZGvar,
@@ -412,7 +429,6 @@ weibullnormAlgOpt_gzit <- function(start, olsParam, dataTable,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -423,14 +439,14 @@ weibullnormAlgOpt_gzit <- function(start, olsParam, dataTable,
   }
   if (hessianType != 2) {
     if (method %in% c("ucminf", "nlminb"))
-      mleObj$hessian <- jacobian(function(parm) colSums(pgradweibullnormlike_gzit(parm,
+      mleObj$hessian <- calculus::jacobian(function(parm) colSums(pgradweibullnormlike_gzit(parm,
         nXvar = nXvar, gHvar = gHvar, ngZGvar = ngZGvar,
         nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
         vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar, pindex = pindex,
         TT = TT, S = S, wHvar = wHvar_p, N = N, FiMat = FiMat_N)),
         mleObj$par)
     if (method == "sr1")
-      mleObj$hessian <- jacobian(function(parm) colSums(pgradweibullnormlike_gzit(parm,
+      mleObj$hessian <- calculus::jacobian(function(parm) colSums(pgradweibullnormlike_gzit(parm,
         nXvar = nXvar, gHvar = gHvar, ngZGvar = ngZGvar,
         nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar_p,
         vHvar = vHvar_p, Yvar = Yvar, Xvar = Xvar, pindex = pindex,
@@ -449,7 +465,7 @@ weibullnormAlgOpt_gzit <- function(start, olsParam, dataTable,
     wHvar = wHvar_p, N = N, FiMat = FiMat_N)
   if (is.null(start)) {
     return(list(startVal = startVal, startLoglik = startLoglik,
-      mleObj = mleObj, mlParam = mlParam, InitLog = InitLog))
+      mleObj = mleObj, mlParam = mlParam, initWeibull = initWeibull))
   } else {
     return(list(startVal = startVal, startLoglik = startLoglik,
       mleObj = mleObj, mlParam = mlParam))
@@ -467,8 +483,8 @@ weibullnormAlgOpt_gzit <- function(start, olsParam, dataTable,
 #' @param S integer for cost/prod estimation
 #' @param TT time presence vector
 #' @noRd
-fnCondEffWeibull_gzit <- function(u, sigmaU, sigmaV, k, S,
-  TT, epsilon_isq, giepsi, gisq) {
+fnCondEffWeibull_gzit <- function(u, sigmaU, sigmaV, k, S, TT,
+  epsilon_isq, giepsi, gisq) {
   u * k/(sigmaU * sigmaV^TT * (2 * pi)^(TT/2)) * (u/sigmaU)^(k -
     1) * exp(-(u/sigmaU)^k) * exp(-(epsilon_isq + 2 * S *
     u * giepsi + u^2 * gisq)/(2 * sigmaV^2))
@@ -485,11 +501,11 @@ fnCondEffWeibull_gzit <- function(u, sigmaU, sigmaV, k, S,
 #' @param S integer for cost/prod estimation
 #' @param TT time presence vector
 #' @noRd
-fnCondBCEffWeibull_gzit <- function(u, sigmaU, sigmaV, k,
-  S, TT, epsilon_isq, giepsi, gisq) {
-  exp(-u) * k/(sigmaU * sigmaV^TT * (2 * pi)^(TT/2)) * (u/sigmaU)^(k -
-    1) * exp(-(u/sigmaU)^k) * exp(-(epsilon_isq + 2 * S *
-    u * giepsi + u^2 * gisq)/(2 * sigmaV^2))
+fnCondBCEffWeibull_gzit <- function(u, sigmaU, sigmaV, k, S,
+  TT, epsilon_isq, giepsi, gisq, git) {
+  exp(-git * u) * k/(sigmaU * sigmaV^TT * (2 * pi)^(TT/2)) *
+    (u/sigmaU)^(k - 1) * exp(-(u/sigmaU)^k) * exp(-(epsilon_isq +
+    2 * S * u * giepsi + u^2 * gisq)/(2 * sigmaV^2))
 }
 
 # fn reciprocal conditional efficiencies----------
@@ -504,10 +520,10 @@ fnCondBCEffWeibull_gzit <- function(u, sigmaU, sigmaV, k,
 #' @param TT time presence vector
 #' @noRd
 fnCondBCreciprocalEffWeibull_gzit <- function(u, sigmaU, sigmaV,
-  k, S, TT, epsilon_isq, giepsi, gisq) {
-  exp(u) * k/(sigmaU * sigmaV^TT * (2 * pi)^(TT/2)) * (u/sigmaU)^(k -
-    1) * exp(-(u/sigmaU)^k) * exp(-(epsilon_isq + 2 * S *
-    u * giepsi + u^2 * gisq)/(2 * sigmaV^2))
+  k, S, TT, epsilon_isq, giepsi, gisq, git) {
+  exp(git * u) * k/(sigmaU * sigmaV^TT * (2 * pi)^(TT/2)) *
+    (u/sigmaU)^(k - 1) * exp(-(u/sigmaU)^k) * exp(-(epsilon_isq +
+    2 * S * u * giepsi + u^2 * gisq)/(2 * sigmaV^2))
 }
 
 # Conditional efficiencies estimation ----------
@@ -532,8 +548,7 @@ pweibullnormeff_gzit <- function(object, level) {
     rhs = 2)
   vHvar_c <- model.matrix(object$formula, data = object$dataTable,
     rhs = 3)
-  gHvar <- model.matrix(object$formula, data = object$dataTable,
-    rhs = 4)
+  gHvar <- object$gHvar
   pindex <- object$dataTable[, 1:2]
   invariance <- object$invariance
   if (invariance == 1) {
@@ -575,46 +590,52 @@ pweibullnormeff_gzit <- function(object, level) {
   giepsi <- as.numeric(tapply(git_epsit, pindex[, 1], sum))
   gisq <- as.numeric(tapply(git^2, pindex[, 1], sum))
   u <- numeric(object$Nid)
+  density_epsilon_vec <- numeric(object$Nid)
   for (i in seq_along(1:object$Nid)) {
     ur <- exp(Wu[i]/2) * (-log(1 - object$FiMat[i, ]))^(1/k)
-    density_epsilon <- mean(1/((2 * pi)^(TT[i]/2) * exp(Wv[i]/2 *
-      TT[i])) * exp(-(epsilon_isq[i] + 2 * object$S * ur *
-      giepsi[i] + ur^2 * gisq[i])/(2 * exp(Wv[i]))))
+    density_epsilon_vec[i] <- mean(1/((2 * pi)^(TT[i]/2) *
+      exp(Wv[i]/2 * TT[i])) * exp(-(epsilon_isq[i] + 2 *
+      object$S * ur * giepsi[i] + ur^2 * gisq[i])/(2 *
+      exp(Wv[i]))))
     u[i] <- hcubature(f = fnCondEffWeibull_gzit, lowerLimit = 0,
       upperLimit = Inf, maxEval = 100, fDim = 1, sigmaU = exp(Wu[i]/2),
       sigmaV = exp(Wv[i]/2), k = k, epsilon_isq = epsilon_isq[i],
       giepsi = giepsi[i], gisq = gisq[i], TT = TT[i], S = object$S,
-      vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon
+      vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon_vec[i]
   }
-  if (object$logDepVar == TRUE) {
-    teJLMS <- exp(-u)
-    teBC <- numeric(object$Nid)
-    teBC_reciprocal <- numeric(object$Nid)
-    for (i in seq_along(1:object$Nid)) {
-      ur <- exp(Wu[i]/2) * (-log(1 - object$FiMat[i, ]))^(1/k)
-      density_epsilon <- mean(1/((2 * pi)^(TT[i]/2) * exp(Wv[i]/2 *
-        TT[i])) * exp(-(epsilon_isq[i] + 2 * object$S *
-        ur * giepsi[i] + ur^2 * gisq[i])/(2 * exp(Wv[i]))))
-      teBC[i] <- hcubature(f = fnCondBCEffWeibull_gzit,
-        lowerLimit = 0, upperLimit = Inf, maxEval = 100,
-        fDim = 1, sigmaU = exp(Wu[i]/2), sigmaV = exp(Wv[i]/2),
-        k = k, epsilon_isq = epsilon_isq[i], giepsi = giepsi[i],
-        gisq = gisq[i], TT = TT[i], S = object$S, vectorInterface = FALSE,
-        tol = 1e-15)$integral/density_epsilon
-      teBC_reciprocal[i] <- hcubature(f = fnCondBCreciprocalEffWeibull_gzit,
-        lowerLimit = 0, upperLimit = Inf, maxEval = 100,
-        fDim = 1, sigmaU = exp(Wu[i]/2), sigmaV = exp(Wv[i]/2),
-        k = k, epsilon_isq = epsilon_isq[i], giepsi = giepsi[i],
-        gisq = gisq[i], TT = TT[i], S = object$S, vectorInterface = FALSE,
-        tol = 1e-15)$integral/density_epsilon
-    }
-    res <- data.frame(levels(pindex[, 1]), u = u, teJLMS = teJLMS,
-      teBC = teBC, teBC_reciprocal = teBC_reciprocal)
-  } else {
-    res <- data.frame(levels(pindex[, 1]), u = u)
-  }
+  res <- data.frame(levels(pindex[, 1]), u = u, giepsi = giepsi,
+    gisq = gisq, epsilon_isq = epsilon_isq, density_epsilon_vec = density_epsilon_vec,
+    Wu = Wu, Wv = Wv, mu = mu, TT = TT)
   names(res)[1] <- names(pindex)[1]
   res <- merge(pindex, res, by = names(pindex)[1])
+  res$u <- res$u * git
+  if (object$logDepVar == TRUE) {
+    res$teJLMS <- exp(-res$u)
+    res$teBC <- numeric(object$Nid)
+    res$teBC_reciprocal <- numeric(object$Nid)
+    for (i in seq_along(1:object$Nid)) {
+      res$teBC[i] <- hcubature(f = fnCondBCEffWeibull_gzit,
+        lowerLimit = 0, upperLimit = Inf, maxEval = 100,
+        fDim = 1, sigmaU = exp(res$Wu[i]/2), sigmaV = exp(res$Wv[i]/2),
+        k = k, epsilon_isq = res$epsilon_isq[i], giepsi = res$giepsi[i],
+        gisq = res$gisq[i], TT = res$TT[i], S = object$S,
+        git = git[i], vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon_vec[i]
+      res$teBC_reciprocal[i] <- hcubature(f = fnCondBCreciprocalEffWeibull_gzit,
+        lowerLimit = 0, upperLimit = Inf, maxEval = 100,
+        fDim = 1, sigmaU = exp(res$Wu[i]/2), sigmaV = exp(res$Wv[i]/2),
+        k = k, epsilon_isq = res$epsilon_isq[i], giepsi = res$giepsi[i],
+        gisq = res$gisq[i], TT = res$TT[i], S = object$S,
+        git = git[i], vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon_vec[i]
+    }
+  }
+  res$giepsi <- NULL
+  res$gisq <- NULL
+  res$epsilon_isq <- NULL
+  res$density_epsilon_vec <- NULL
+  res$Wu <- NULL
+  res$Wv <- NULL
+  res$mu <- NULL
+  res$TT <- NULL
   res <- pdata.frame(res, names(res)[1:2])
   return(res)
 }
