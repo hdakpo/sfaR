@@ -5,16 +5,16 @@
 ################################################################################
 
 #------------------------------------------------------------------------------#
-# Model: Standard Stochastic Frontier Analysis                                 #
+# Model: Stochastic Frontier Analysis                                          #
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
 
-#' Stochastic frontier estimation using cross-section data
+#' Stochastic frontier estimation using cross-sectional data
 #'
 #' @description
 #' \code{\link{sfacross}} is a symbolic formula-based function for the
 #' estimation of stochastic frontier models in the case of cross-sectional or
-#' pooled cross-section data, using maximum (simulated) likelihood - M(S)L.
+#' pooled cross-sectional data, using maximum (simulated) likelihood - M(S)L.
 #'
 #' The function accounts for heteroscedasticity in both one-sided and two-sided
 #' error terms as in Reifschneider and Stevenson (1991), Caudill and Ford
@@ -558,6 +558,11 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
   if (N == 0L) {
     stop("0 (non-NA) cases", call. = FALSE)
   }
+  # if subset is non-missing and there NA, force data to
+  # change
+  data <- data[row.names(data) %in% attr(mc, "row.names"),
+    ]
+  data <- data[validObs, ]
   wHvar <- as.vector(model.weights(mc))
   if (length(wscale) != 1 || !is.logical(wscale[1])) {
     stop("argument 'wscale' must be a single logical value",
@@ -801,14 +806,13 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
   olsSigmasq <- summary(olsRes)$sigma^2
   olsStder <- sqrt(diag(vcov(olsRes)))
   olsLoglik <- logLik(olsRes)[1]
-  obs_subset <- row.names(data) %in% attributes(mc)[["row.names"]]
   if (inherits(data, "pdata.frame")) {
-    dataTable <- data[obs_subset, names(index(data))][validObs, ]
+    dataTable <- data[, names(index(data))]
   } else {
     dataTable <- data.frame(IdObs = c(1:sum(validObs)))
   }
-  dataTable <- cbind(dataTable, data[obs_subset, all.vars(terms(formula))][validObs,
-    ], weights = wHvar)
+  dataTable <- cbind(dataTable, data[, all.vars(terms(formula))],
+    weights = wHvar)
   dataTable <- cbind(dataTable, olsResiduals = residuals(olsRes),
     olsFitted = fitted(olsRes))
   olsSkew <- skewness(dataTable[["olsResiduals"]])
@@ -826,10 +830,10 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
   model misspecification or sample 'bad luck'",
       call. = FALSE)
   }
-  CoelliM3Test <- c(z = sum(dataTable[["olsResiduals"]]^3)/N/sqrt(6 *
-    (sum(dataTable[["olsResiduals"]]^2)/N)^3/N), p.value = 2 *
-    pnorm(-abs(sum(dataTable[["olsResiduals"]]^3)/N/sqrt(6 *
-      (sum(dataTable[["olsResiduals"]]^2)/N)^3/N))))
+  m2 <- mean((dataTable[["olsResiduals"]] - mean(dataTable[["olsResiduals"]]))^2)
+  m3 <- mean((dataTable[["olsResiduals"]] - mean(dataTable[["olsResiduals"]]))^3)
+  CoelliM3Test <- c(z = m3/sqrt(6 * m2^3/N), p.value = 2 *
+                      pnorm(-abs(m3/sqrt(6 * m2^3/N))))
   AgostinoTest <- dagoTest(dataTable[["olsResiduals"]])
   class(AgostinoTest) <- "dagoTest"
   # Step 2: MLE arguments -------
@@ -894,7 +898,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
     lognormal = do.call(lognormAlgOpt, FunArgs), weibull = do.call(weibullnormAlgOpt,
       FunArgs), genexponential = do.call(genexponormAlgOpt,
       FunArgs), tslaplace = do.call(tslnormAlgOpt, FunArgs)),
-    error = function(e) e)
+    error = function(e) print(e))
   if (inherits(mleList, "error")) {
     stop("The current error occurs during optimization:\n",
       mleList$message, call. = FALSE)
@@ -1024,7 +1028,7 @@ print.sfacross <- function(x, ...) {
   cat(deparse(x$call))
   cat("\n\n")
   cat("Likelihood estimates using", x$optType, "\n")
-  cat(sfadist(x$udist), "\n")
+  cat(sfacrossdist(x$udist), "\n")
   cat("Status:", x$optStatus, "\n\n")
   cat(x$typeSfa, "\n")
   print.default(format(x$mlParam), print.gap = 2, quote = FALSE)
