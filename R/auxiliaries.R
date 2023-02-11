@@ -6,9 +6,10 @@
 
 # Intercept check for main formula ----------
 #' @param formula main formula of model
+#' @param data data: for cases where '.' is used
 #' @noRd
-interCheckMain <- function(formula) {
-  terM <- terms(formula(formula))
+interCheckMain <- function(formula, data) {
+  terM <- terms(formula(formula), data = data)
   if (attr(terM, "response") == 0)
     stop("'formula' has no left hand side", call. = FALSE)
   if (length(attr(terM, "term.labels")) == 0 && attr(terM,
@@ -137,7 +138,7 @@ clhsCheck_q <- function(formula) {
   return(formula)
 }
 
-# Intercept hetero. in u (panel data pl81) ----------
+# Intercept hetero. in u (panel data) ----------
 #' @param formula main formula of model
 #' @noRd
 plhsCheck_u <- function(formula) {
@@ -156,7 +157,7 @@ plhsCheck_u <- function(formula) {
   return(formula)
 }
 
-# Intercept hetero. in mu (panel data pl81) ----------
+# Intercept hetero. in mu (panel data) ----------
 #' @param formula formula for heterogeneity in inefficiency term
 #' @noRd
 plhsCheck_mu <- function(formula) {
@@ -176,14 +177,15 @@ plhsCheck_mu <- function(formula) {
 }
 
 # remove int. in uhet (panel data bc92c) ----------
-#' @param formula formula for group variable
+#' @param formula formula for efficiency determinants
 #' @noRd
 plhsCheck_u_bc92c <- function(formula) {
   terM <- terms(formula(formula))
   if (attr(terM, "response") == 1)
     formula[[2]] <- NULL
   if (attr(terM, "intercept") == 1) {
-    formula <- formula(paste0(" ~ 0 + ", attr(terM, "term.labels")))
+    formula <- formula(paste0(c(" ~ 0", attr(terM, "term.labels")),
+      collapse = " + "))
   }
   return(formula)
 }
@@ -223,7 +225,8 @@ clhsCheck_meta <- function(formula) {
       call. = FALSE)
   }
   if (attr(terM, "intercept") == 1) {
-    formula <- formula(paste0(" ~ 0 + ", attr(terM, "term.labels")))
+    formula <- formula(paste0(c(" ~ 0", attr(terM, "term.labels")),
+      collapse = " + "))
   }
   return(formula)
 }
@@ -240,6 +243,23 @@ formDist_sfacross <- function(udist, formula, muhet, uhet, vhet) {
     formula <- as.Formula(formula, muhet, uhet, vhet)
   } else {
     formula <- as.Formula(formula, uhet, vhet)
+  }
+  return(formula)
+}
+
+# Formulas depending on the distribution ----------
+#' @param udist inefficiency term distribution
+#' @param formula formula for model
+#' @param muhet heterogeneity in mu
+#' @param uhet heteroscedasticity in u
+#' @param vhet heteroscedasticity in v
+#' @noRd
+formDist_sfapanel_bc92c <- function(udist, formula, muhet, uhet,
+  vhet, ghet) {
+  if (udist %in% c("tnormal", "lognormal")) {
+    formula <- as.Formula(formula, muhet, uhet, vhet, ghet)
+  } else {
+    formula <- as.Formula(formula, uhet, vhet, ghet)
   }
   return(formula)
 }
@@ -269,7 +289,8 @@ formDist_gzisfcross <- function(formula, uhet, vhet, thet) {
 #' @param uhet heteroscedasticity in u
 #' @param vhet heteroscedasticity in v
 #' @noRd
-formDist_selectioncross <- function(udist, formula, uhet, vhet) {
+formDist_sfaselectioncross <- function(udist, formula, uhet,
+  vhet) {
   formula <- as.Formula(formula, uhet, vhet)
   return(formula)
 }
@@ -422,10 +443,11 @@ fName_uv_sfacross <- function(Xvar, udist, uHvar, vHvar) {
 #' @param muHvar heterogeneity variables in mu
 #' @param uHvar heteroscedasticity variables in u
 #' @param vHvar heteroscedasticity variables in v
+#' @param modelType type of panel model estimated
 #' @noRd
 fName_mu_sfapanel <- function(Xvar, udist, muHvar, uHvar, vHvar,
-  modelType) {
-  if (modelType == "pl81") {
+  modelType, gHvar) {
+  if (modelType %in% c("pl81", "tfe")) {
     c(colnames(Xvar), if (udist == "gamma") {
       c(paste0("Zmu_", colnames(muHvar)), paste0("Zu_",
         colnames(uHvar)), paste0("Zv_", colnames(vHvar)),
@@ -470,7 +492,7 @@ fName_mu_sfapanel <- function(Xvar, udist, muHvar, uHvar, vHvar,
         }
       })
     } else {
-      if (modelType %in% c("bc92b", "k90")) {
+      if (modelType %in% c("bc92b", "k90", "mbc92")) {
         c(colnames(Xvar), if (udist == "gamma") {
           c(paste0("Zmu_", colnames(muHvar)), paste0("Zu_",
           colnames(uHvar)), paste0("Zv_", colnames(vHvar)),
@@ -492,6 +514,57 @@ fName_mu_sfapanel <- function(Xvar, udist, muHvar, uHvar, vHvar,
           }
           }
         })
+      } else {
+        if (modelType %in% c("cu00", "bc92c")) {
+          c(colnames(Xvar), if (udist == "gamma") {
+          c(paste0("Zmu_", colnames(muHvar)), paste0("Zu_",
+            colnames(uHvar)), paste0("Zv_", colnames(vHvar)),
+            "P", colnames(gHvar))
+          } else {
+          if (udist == "weibull") {
+            c(paste0("Zmu_", colnames(muHvar)), paste0("Zu_",
+            colnames(uHvar)), paste0("Zv_", colnames(vHvar)),
+            "k", colnames(gHvar))
+          } else {
+            if (udist == "tslaplace") {
+            c(paste0("Zmu_", colnames(muHvar)), paste0("Zu_",
+              colnames(uHvar)), paste0("Zv_", colnames(vHvar)),
+              "lambda", colnames(gHvar))
+            } else {
+            c(paste0("Zmu_", colnames(muHvar)), paste0("Zu_",
+              colnames(uHvar)), paste0("Zv_", colnames(vHvar)),
+              colnames(gHvar))
+            }
+          }
+          })
+        } else {
+          if (modelType == "mols93") {
+          ngZGvar <- dim(gHvar)[2]
+          c(colnames(Xvar), if (udist == "gamma") {
+            c(paste0("Zmu_", colnames(muHvar)), paste0("Zu_",
+            colnames(uHvar)), paste0("Zv_", colnames(vHvar)),
+            "P", colnames(gHvar[, -ngZGvar]))
+          } else {
+            if (udist == "weibull") {
+            c(paste0("Zmu_", colnames(muHvar)), paste0("Zu_",
+              colnames(uHvar)), paste0("Zv_", colnames(vHvar)),
+              "k", colnames(gHvar[, -ngZGvar]))
+            } else {
+            if (udist == "tslaplace") {
+              c(paste0("Zmu_", colnames(muHvar)),
+              paste0("Zu_", colnames(uHvar)), paste0("Zv_",
+                colnames(vHvar)), "lambda", colnames(gHvar[,
+                -ngZGvar]))
+            } else {
+              c(paste0("Zmu_", colnames(muHvar)),
+              paste0("Zu_", colnames(uHvar)), paste0("Zv_",
+                colnames(vHvar)), colnames(gHvar[,
+                -ngZGvar]))
+            }
+            }
+          })
+          }
+        }
       }
     }
   }
@@ -501,9 +574,11 @@ fName_mu_sfapanel <- function(Xvar, udist, muHvar, uHvar, vHvar,
 #' @param udist inefficiency distribution
 #' @param uHvar heteroscedasticity variables in u
 #' @param vHvar heteroscedasticity variables in v
+#' @param modelType type of panel model estimated
 #' @noRd
-fName_uv_sfapanel <- function(Xvar, udist, uHvar, vHvar, modelType) {
-  if (modelType == "pl81") {
+fName_uv_sfapanel <- function(Xvar, udist, uHvar, vHvar, modelType,
+  gHvar) {
+  if (modelType %in% c("pl81", "tfe")) {
     c(colnames(Xvar), if (udist == "gamma") {
       c(paste0("Zu_", colnames(uHvar)), paste0("Zv_", colnames(vHvar)),
         "P")
@@ -541,7 +616,7 @@ fName_uv_sfapanel <- function(Xvar, udist, uHvar, vHvar, modelType) {
         }
       })
     } else {
-      if (modelType %in% c("bc92b", "k90")) {
+      if (modelType %in% c("bc92b", "k90", "mbc92")) {
         c(colnames(Xvar), if (udist == "gamma") {
           c(paste0("Zu_", colnames(uHvar)), paste0("Zv_",
           colnames(vHvar)), "P", "eta1", "eta2")
@@ -559,6 +634,51 @@ fName_uv_sfapanel <- function(Xvar, udist, uHvar, vHvar, modelType) {
           }
           }
         })
+      } else {
+        if (modelType %in% c("cu00", "bc92c")) {
+          c(colnames(Xvar), if (udist == "gamma") {
+          c(paste0("Zu_", colnames(uHvar)), paste0("Zv_",
+            colnames(vHvar)), "P", colnames(gHvar))
+          } else {
+          if (udist == "weibull") {
+            c(paste0("Zu_", colnames(uHvar)), paste0("Zv_",
+            colnames(vHvar)), "k", colnames(gHvar))
+          } else {
+            if (udist == "tslaplace") {
+            c(paste0("Zu_", colnames(uHvar)), paste0("Zv_",
+              colnames(vHvar)), "lambda", colnames(gHvar))
+            } else {
+            c(paste0("Zu_", colnames(uHvar)), paste0("Zv_",
+              colnames(vHvar)), colnames(gHvar))
+            }
+          }
+          })
+        } else {
+          if (modelType == "mols93") {
+          ngZGvar <- dim(gHvar)[2]
+          c(colnames(Xvar), if (udist == "gamma") {
+            c(paste0("Zu_", colnames(uHvar)), paste0("Zv_",
+            colnames(vHvar)), "P", colnames(gHvar[,
+            -ngZGvar]))
+          } else {
+            if (udist == "weibull") {
+            c(paste0("Zu_", colnames(uHvar)), paste0("Zv_",
+              colnames(vHvar)), "k", colnames(gHvar[,
+              -ngZGvar]))
+            } else {
+            if (udist == "tslaplace") {
+              c(paste0("Zu_", colnames(uHvar)), paste0("Zv_",
+              colnames(vHvar)), "lambda", colnames(gHvar[,
+              -ngZGvar]))
+            } else {
+              c(paste0("Zu_", colnames(uHvar)), paste0("Zv_",
+              colnames(vHvar)), colnames(gHvar[,
+              -ngZGvar]))
+            }
+            }
+          })
+          }
+        }
       }
     }
   }
@@ -599,7 +719,7 @@ fName_gzisfcross <- function(Xvar, uHvar, vHvar, Zvar, nZHvar,
 #' @param uHvar heteroscedasticity variables in u
 #' @param vHvar heteroscedasticity variables in v
 #' @noRd
-fName_uvr_selectioncross <- function(Xvar, uHvar, vHvar) {
+fName_uvr_sfaselectioncross <- function(Xvar, uHvar, vHvar) {
   c(colnames(Xvar), c(paste0("Zu_", colnames(uHvar)), paste0("Zv_",
     colnames(vHvar)), "rho"))
 }
@@ -879,14 +999,27 @@ drawMat <- function(N, Nsim, simType, prime, burn, seed, antithetics) {
     if (simType == "ghalton") {
       idPrime <- which(list_primes == prime)
       set.seed(seed)
-      matDraw <- matrix(ghalton(n = Nsim * N, d = idPrime,
-        method = "generalized"), nrow = N, ncol = Nsim,
-        byrow = TRUE)
+      if (idPrime == 1) {
+        matDraw <- matrix(qrng::ghalton(n = Nsim * N,
+          d = idPrime, method = "generalized"), nrow = N,
+          ncol = Nsim, byrow = TRUE)
+      } else {
+        matDraw <- matrix(qrng::ghalton(n = Nsim * N,
+          d = idPrime, method = "generalized")[, idPrime],
+          nrow = N, ncol = Nsim, byrow = TRUE)
+      }
     } else {
       if (simType == "sobol") {
-        matDraw <- matrix(sobol(n = Nsim * N, dim = 1,
-          scrambling = 1, seed = seed), nrow = N, ncol = Nsim,
-          byrow = TRUE)
+        idPrime <- which(list_primes == prime)
+        if (idPrime == 1) {
+          matDraw <- matrix(randtoolbox::sobol(n = Nsim *
+          N, dim = idPrime, scrambling = 1, seed = seed),
+          nrow = N, ncol = Nsim, byrow = TRUE)
+        } else {
+          matDraw <- matrix(randtoolbox::sobol(n = Nsim *
+          N, dim = idPrime, scrambling = 1, seed = seed)[,
+          idPrime], nrow = N, ncol = Nsim, byrow = TRUE)
+        }
       } else {
         if (simType == "uniform") {
           set.seed(seed)
@@ -963,7 +1096,7 @@ vcovObj <- function(mleObj, hessianType, method, nParm) {
       invhess[lower.tri(invhess)] <- t(invhess)[lower.tri(invhess)]
       invhess <- (invhess + t(invhess))/2
     } else {
-      if (method %in% c("sparse", "trust")) {
+      if (method == "sparse") {
         invhess <- invHess_fun(hess = -mleObj$hessian)
       } else {
         invhess <- invHess_fun(hess = mleObj$hessian)
@@ -971,7 +1104,8 @@ vcovObj <- function(mleObj, hessianType, method, nParm) {
     }
   } else {
     if (hessianType == 2) {
-      if (method %in% c("bfgs", "bhhh", "nr", "cg", "nm")) {
+      if (method %in% c("bfgs", "bhhh", "nr", "cg", "nm",
+        "sann")) {
         invhess <- invHess_fun(hess = mleObj$hessian)
       } else {
         hess <- -crossprod(mleObj$gradL_OBS)
@@ -982,16 +1116,63 @@ vcovObj <- function(mleObj, hessianType, method, nParm) {
   invhess
 }
 
-# SFA + distribution ----------
+# SFA + distribution (cross section) ----------
 #' @param udist inefficiency distribution
 #' @noRd
-sfadist <- function(udist) {
+sfacrossdist <- function(udist) {
   switch(udist, tnormal = "Truncated-Normal Normal SF Model",
     hnormal = "Normal-Half Normal SF Model", exponential = "Exponential Normal SF Model",
     rayleigh = "Rayleigh Normal SF Model", uniform = "Uniform Normal SF Model",
     gamma = "Gamma Normal SF Model", lognormal = "Log-Normal Normal SF Model",
     weibull = "Weibull Normal SF Model", genexponential = "Generalized-Exponential Normal SF Model",
     tslaplace = "Truncated Skewed-Laplace Normal SF Model")
+}
+
+# SFA + distribution (panel data) ----------
+#' @param udist inefficiency distribution
+#' @noRd
+sfapaneldist <- function(udist) {
+  switch(udist, tnormal = "Truncated-Normal Normal Panel SF Model",
+    hnormal = "Normal-Half Normal Panel SF Model", exponential = "Exponential Normal Panel SF Model",
+    rayleigh = "Rayleigh Normal Panel SF Model", uniform = "Uniform Normal Panel SF Model",
+    gamma = "Gamma Normal Panel SF Model", lognormal = "Log-Normal Normal Panel SF Model",
+    weibull = "Weibull Normal Panel SF Model", genexponential = "Generalized-Exponential Normal Panel SF Model",
+    tslaplace = "Truncated Skewed-Laplace Normal Panel SF Model")
+}
+
+# SFA panel inefficiency specification ----------
+pineffSpe <- function(modelType) {
+  if (modelType == "bc92a") {
+    "g(zit) = exp(-eta * (t - T))"
+  } else {
+    if (modelType == "bc92b") {
+      "g(zit) = exp(-eta1 * (t - T) - eta2 * (t - T)^2)"
+    } else {
+      if (modelType == "bc92c") {
+        "g(zit) = exp(eta * gHvar)"
+      } else {
+        if (modelType == "kw05") {
+          "g(zit) = exp(eta * (t - t1))"
+        } else {
+          if (modelType == "cu00") {
+          "g(zit) = exp(-eta_i * (t - T))"
+          } else {
+          if (modelType == "k90") {
+            "g(zit) = (1 + exp(eta1 * t + eta2 * t^2))^(-1)"
+          } else {
+            if (modelType == "mbc92") {
+            "g(zit) = 1 + eta1 * (t - T) + eta2 * (t - T)^2"
+            } else {
+            if (modelType == "mols93") {
+              "g(zit) = exp(-eta_t * (t - T)): g(zit) = 1 for T"
+            }
+            }
+          }
+          }
+        }
+      }
+    }
+  }
 }
 
 # ZISF + distribution ----------
@@ -1042,9 +1223,9 @@ varuFun <- function(object, mu, P, lambda, k) {
     object$sigmauSq * (pi - 2)/pi
   } else {
     if (object$udist == "tnormal") {
-      a <- (pnorm(-mean(mu)/sqrt(object$sigmauSq)))^(-1)
-      mean(mu)^2 * a/2 * (1 - a/2) + a/2 * (pi - a)/pi *
-        object$sigmauSq
+      a <- dnorm(mean(mu)/sqrt(object$sigmauSq))/pnorm(mean(mu)/sqrt(object$sigmauSq))
+      object$sigmauSq * (1 - mean(mu)/sqrt(object$sigmauSq) *
+        a - a^2)
     } else {
       if (object$udist == "exponential") {
         object$sigmauSq
@@ -1109,12 +1290,7 @@ euFun <- function(object, mu, P, lambda, k) {
     sqrt(object$sigmauSq) * sqrt(2/pi)
   } else {
     if (object$udist == "tnormal") {
-      -exp(-mean(mu)^2/(2 * object$sigmauSq)) * (sqrt(pi) *
-        (sqrt(2) * mean(mu) * erfc(mean(mu)/(sqrt(2 *
-          object$sigmauSq))) - 2^(3/2) * mean(mu)) *
-        exp(mean(mu)^2/(2 * object$sigmauSq)) - 2 * sqrt(object$sigmauSq))/(sqrt(pi) *
-        (sqrt(2) * erf(mean(mu)/sqrt(2 * object$sigmauSq)) +
-          sqrt(2)))
+      mean(mu) + sqrt(object$sigmauSq) * dnorm(mean(mu)/sqrt(object$sigmauSq))/pnorm(mean(mu)/sqrt(object$sigmauSq))
     } else {
       if (object$udist == "exponential") {
         sqrt(object$sigmauSq)
@@ -1129,7 +1305,7 @@ euFun <- function(object, mu, P, lambda, k) {
             exp(mean(mu) + object$sigmauSq/2)
           } else {
             if (object$udist == "uniform") {
-            sqrt(12 * object$sigmauSq)/2
+            object$theta/2
             } else {
             if (object$udist == "genexponential") {
               3/2 * sqrt(object$sigmauSq)
@@ -1166,16 +1342,14 @@ eExpuFun <- function(object, mu, P, lambda, k) {
     2 * (1 - pnorm(sqrt(object$sigmauSq))) * exp(object$sigmauSq/2)
   } else {
     if (object$udist == "tnormal") {
-      -sqrt(pi) * (exp(object$sigmauSq/2) * erf((sqrt(2) *
-        object$sigmauSq - sqrt(2) * mean(mu))/(2 * sqrt(object$sigmauSq))) -
-        exp(object$sigmauSq/2))/(sqrt(pi) * (exp(mean(mu)) *
-        erf(mean(mu)/sqrt(2 * object$sigmauSq)) + exp(mean(mu))))
+      exp(-mean(mu) + 1/2 * object$sigmauSq) * pnorm(mean(mu)/sqrt(object$sigmauSq) -
+        sqrt(object$sigmauSq))/pnorm(mean(mu)/sqrt(object$sigmauSq))
     } else {
       if (object$udist == "exponential") {
         1/(1 + sqrt(object$sigmauSq))
       } else {
         if (object$udist == "gamma") {
-          ((1/sqrt(object$sigmauSq))/(1 + 1/sqrt(object$sigmauSq)))^P
+          (1 + sqrt(object$sigmauSq))^(-P)
         } else {
           if (object$udist == "lognormal") {
           integrate(fnExpULogNorm, lower = 0, upper = Inf,
@@ -1187,7 +1361,8 @@ eExpuFun <- function(object, mu, P, lambda, k) {
           } else {
             if (object$udist == "rayleigh") {
             1 - (exp(object$sigmauSq/2) * sqrt(2 *
-              pi) * sqrt(object$sigmauSq) * erfc(sqrt(object$sigmauSq)/sqrt(2)))/2
+              pi) * sqrt(object$sigmauSq) * (1 -
+              pnorm(sqrt(object$sigmauSq))))
             } else {
             if (object$udist == "genexponential") {
               2/((sqrt(object$sigmauSq) + 1) * (sqrt(object$sigmauSq) +
@@ -1347,7 +1522,7 @@ qchibarsq <- function(q, df = 1, mix = 0.5) {
 # D'Agostino normality test (fBasics) ----------
 #' @param x numeric vector of data values
 #' @noRd
-.skewness.test <- function(x) {
+skewness.test <- function(x) {
   n <- length(x)
   if (n < 8)
     stop("Sample size must be at least 8 for skewness test")
@@ -1368,7 +1543,7 @@ qchibarsq <- function(q, df = 1, mix = 0.5) {
   return(RVAL)
 }
 
-.kurtosis.test <- function(x) {
+kurtosis.test <- function(x) {
   n <- length(x)
   if (n < 20)
     stop("Sample size must be at least 20 for kurtosis test")
@@ -1390,7 +1565,7 @@ qchibarsq <- function(q, df = 1, mix = 0.5) {
   return(RVAL)
 }
 
-.omnibus.test <- function(x) {
+omnibus.test <- function(x) {
   n <- length(x)
   if (n < 20)
     stop("sample size must be at least 20 for omnibus test")
@@ -1427,9 +1602,9 @@ setClass("fHTEST", representation(call = "call", data = "list",
 dagoTest <- function(x) {
   x <- as.vector(x)
   call <- match.call()
-  test <- .omnibus.test(x)
-  skew <- .skewness.test(x)
-  kurt <- .kurtosis.test(x)
+  test <- omnibus.test(x)
+  skew <- skewness.test(x)
+  kurt <- kurtosis.test(x)
   test$data.name <- "ols residuals"
   PVAL <- c(test$p.value, skew$p.value, kurt$p.value)
   names(PVAL) <- c("Omnibus  Test", "Skewness Test", "Kurtosis Test")
