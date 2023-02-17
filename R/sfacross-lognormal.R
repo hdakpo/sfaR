@@ -82,18 +82,10 @@ cstlognorm <- function(olsObj, epsiRes, S, nmuZUvar, nuZUvar,
   dep_v <- 1/2 * log((epsiRes^2 - exp(varu) * (exp(varu) -
     1))^2)
   reg_hetu <- if (nuZUvar == 1) {
-    if (length(grep("Intercept", colnames(uHvar))) == 0) {
-      lm(dep_u ~ -1 + ., data = as.data.frame(uHvar))
-    } else {
-      lm(log(varu) ~ 1)
-    }
+    lm(log(varu) ~ 1)
   } else {
-    if (length(grep("Intercept", colnames(uHvar))) == 0) {
-      lm(dep_u ~ -1 + ., data = as.data.frame(uHvar))
-    } else {
-      lm(dep_u ~ ., data = as.data.frame(uHvar[, 2:nuZUvar,
-        drop = FALSE]))
-    }
+    lm(dep_u ~ ., data = as.data.frame(uHvar[, 2:nuZUvar,
+      drop = FALSE]))
   }
   if (any(is.na(reg_hetu$coefficients))) {
     stop("At least one of the OLS coefficients of 'uhet' is NA: ",
@@ -107,25 +99,11 @@ cstlognorm <- function(olsObj, epsiRes, S, nmuZUvar, nuZUvar,
     lm(dep_v ~ ., data = as.data.frame(vHvar[, 2:nvZVvar,
       drop = FALSE]))
   }
-  if (any(is.na(reg_hetv$coefficients))) {
-    stop("at least one of the OLS coefficients of 'vhet' is NA: ",
-      paste(colnames(vHvar)[is.na(reg_hetv$coefficients)],
-        collapse = ", "), ". This may be due to a singular matrix due to potential perfect multicollinearity",
-      call. = FALSE)
-  }
   reg_hetmu <- if (nmuZUvar == 1) {
-    if (length(grep("Intercept", colnames(muHvar))) == 0) {
-      lm(epsiRes ~ -1 + ., data = as.data.frame(muHvar))
-    } else {
-      lm(log(varmu) ~ 1)
-    }
+    lm(log(varmu) ~ 1)
   } else {
-    if (length(grep("Intercept", colnames(muHvar))) == 0) {
-      lm(epsiRes ~ -1 + ., data = as.data.frame(muHvar))
-    } else {
-      lm(epsiRes ~ ., data = as.data.frame(muHvar[, 2:nmuZUvar,
-        drop = FALSE]))
-    }
+    lm(epsiRes ~ ., data = as.data.frame(muHvar[, 2:nmuZUvar,
+      drop = FALSE]))
   }
   if (any(is.na(reg_hetmu$coefficients))) {
     stop("at least one of the OLS coefficients of 'muhet' is NA: ",
@@ -695,30 +673,18 @@ cmarglognorm_Eu <- function(object) {
     rhs = 3)
   mu <- as.numeric(crossprod(matrix(omega), t(muHvar)))
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
-  mu_mat <- kronecker(matrix(omega[if (length(grep("Intercept",
-    names(delta))) == 0)
-    1:object$nmuZUvar else 2:object$nmuZUvar], nrow = 1), matrix(exp(mu + exp(Wu)/2),
-    ncol = 1))
-  Wu_mat <- kronecker(matrix(delta[if (length(grep("Intercept",
-    names(delta))) == 0)
-    1:object$nuZUvar else 2:object$nuZUvar], nrow = 1), matrix(exp(mu + exp(Wu)/2 +
-    Wu)/2, ncol = 1))
-  idTRUE_mu <- (if (length(grep("Intercept", names(omega))) ==
-    0)
-    substring(names(omega), 5) else (substring(names(omega)[-1], 5))) %in% (if (length(grep("Intercept",
-    names(delta))) == 0)
-    substring(names(delta), 4) else substring(names(delta)[-1], 4))
-  idTRUE_Wu <- (if (length(grep("Intercept", names(delta))) ==
-    0)
-    substring(names(delta), 4) else substring(names(delta)[-1], 4)) %in% (if (length(grep("Intercept",
-    names(omega))) == 0)
-    substring(names(omega), 5) else substring(names(omega)[-1], 5))
+  mu_mat <- kronecker(matrix(omega[2:object$nmuZUvar], nrow = 1),
+    matrix(exp(mu + exp(Wu)/2), ncol = 1))
+  Wu_mat <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
+    matrix(exp(mu + exp(Wu)/2 + Wu)/2, ncol = 1))
+  idTRUE_mu <- substring(names(omega)[-1], 5) %in% substring(names(delta)[-1],
+    4)
+  idTRUE_Wu <- substring(names(delta)[-1], 4) %in% substring(names(omega)[-1],
+    5)
   margEff <- cbind(mu_mat[, idTRUE_mu] + Wu_mat[, idTRUE_Wu],
     mu_mat[, !idTRUE_mu], Wu_mat[, !idTRUE_Wu])
-  colnames(margEff) <- paste0("Eu_", c(if (length(grep("Intercept",
-    names(omega))) == 0) colnames(muHvar)[idTRUE_mu] else colnames(muHvar)[-1][idTRUE_mu],
-    if (length(grep("Intercept", names(omega))) == 0) colnames(muHvar)[!idTRUE_mu] else colnames(muHvar)[-1][!idTRUE_mu],
-    if (length(grep("Intercept", names(delta))) == 0) colnames(uHvar)[!idTRUE_Wu] else colnames(uHvar)[-1][!idTRUE_Wu]))
+  colnames(margEff) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
+    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
   return(data.frame(margEff))
 }
 
@@ -733,29 +699,17 @@ cmarglognorm_Vu <- function(object) {
     rhs = 3)
   mu <- as.numeric(crossprod(matrix(omega), t(muHvar)))
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
-  mu_mat <- kronecker(matrix(omega[if (length(grep("Intercept",
-    names(delta))) == 0)
-    1:object$nmuZUvar else 2:object$nmuZUvar], nrow = 1), matrix(2 * (exp(Wu) -
-    1) * exp(2 * mu + exp(Wu)), ncol = 1))
-  Wu_mat <- kronecker(matrix(delta[if (length(grep("Intercept",
-    names(delta))) == 0)
-    1:object$nuZUvar else 2:object$nuZUvar], nrow = 1), matrix(exp(Wu) * exp(2 *
-    mu + exp(Wu) + Wu), ncol = 1))
-  idTRUE_mu <- (if (length(grep("Intercept", names(omega))) ==
-    0)
-    substring(names(omega), 5) else (substring(names(omega)[-1], 5))) %in% (if (length(grep("Intercept",
-    names(delta))) == 0)
-    substring(names(delta), 4) else substring(names(delta)[-1], 4))
-  idTRUE_Wu <- (if (length(grep("Intercept", names(delta))) ==
-    0)
-    substring(names(delta), 4) else substring(names(delta)[-1], 4)) %in% (if (length(grep("Intercept",
-    names(omega))) == 0)
-    substring(names(omega), 5) else substring(names(omega)[-1], 5))
+  mu_mat <- kronecker(matrix(omega[2:object$nmuZUvar], nrow = 1),
+    matrix(2 * (exp(Wu) - 1) * exp(2 * mu + exp(Wu)), ncol = 1))
+  Wu_mat <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
+    matrix(exp(Wu) * exp(2 * mu + exp(Wu) + Wu), ncol = 1))
+  idTRUE_mu <- substring(names(omega)[-1], 5) %in% substring(names(delta)[-1],
+    4)
+  idTRUE_Wu <- substring(names(delta)[-1], 4) %in% substring(names(omega)[-1],
+    5)
   margEff <- cbind(mu_mat[, idTRUE_mu] + Wu_mat[, idTRUE_Wu],
     mu_mat[, !idTRUE_mu], Wu_mat[, !idTRUE_Wu])
-  colnames(margEff) <- paste0("Vu_", c(if (length(grep("Intercept",
-    names(omega))) == 0) colnames(muHvar)[idTRUE_mu] else colnames(muHvar)[-1][idTRUE_mu],
-    if (length(grep("Intercept", names(omega))) == 0) colnames(muHvar)[!idTRUE_mu] else colnames(muHvar)[-1][!idTRUE_mu],
-    if (length(grep("Intercept", names(delta))) == 0) colnames(uHvar)[!idTRUE_Wu] else colnames(uHvar)[-1][!idTRUE_Wu]))
+  colnames(margEff) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
+    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
   return(data.frame(margEff))
 }

@@ -77,18 +77,10 @@ cstgammanorm <- function(olsObj, epsiRes, S, nuZUvar, uHvar,
   dep_u <- 1/2 * log((epsiRes^2 - varv)^2)
   dep_v <- 1/2 * log((epsiRes^2 - varu)^2)
   reg_hetu <- if (nuZUvar == 1) {
-    if (length(grep("Intercept", colnames(uHvar))) == 0) {
-      lm(dep_u ~ -1 + ., data = as.data.frame(uHvar))
-    } else {
-      lm(log(varu) ~ 1)
-    }
+    lm(log(varu) ~ 1)
   } else {
-    if (length(grep("Intercept", colnames(uHvar))) == 0) {
-      lm(dep_u ~ -1 + ., data = as.data.frame(uHvar))
-    } else {
-      lm(dep_u ~ ., data = as.data.frame(uHvar[, 2:nuZUvar,
-        drop = FALSE]))
-    }
+    lm(dep_u ~ ., data = as.data.frame(uHvar[, 2:nuZUvar,
+      drop = FALSE]))
   }
   if (any(is.na(reg_hetu$coefficients))) {
     stop("At least one of the OLS coefficients of 'uhet' is NA: ",
@@ -97,18 +89,10 @@ cstgammanorm <- function(olsObj, epsiRes, S, nuZUvar, uHvar,
       call. = FALSE)
   }
   reg_hetv <- if (nvZVvar == 1) {
-    if (length(grep("Intercept", colnames(vHvar))) == 0) {
-      lm(dep_v ~ -1 + ., data = as.data.frame(vHvar))
-    } else {
-      lm(log(varv) ~ 1)
-    }
+    lm(log(varv) ~ 1)
   } else {
-    if (length(grep("Intercept", colnames(vHvar))) == 0) {
-      lm(dep_v ~ -1 + ., data = as.data.frame(vHvar))
-    } else {
-      lm(dep_v ~ ., data = as.data.frame(vHvar[, 2:nvZVvar,
-        drop = FALSE]))
-    }
+    lm(dep_v ~ ., data = as.data.frame(vHvar[, 2:nvZVvar,
+      drop = FALSE]))
   }
   if (any(is.na(reg_hetv$coefficients))) {
     stop("at least one of the OLS coefficients of 'vhet' is NA: ",
@@ -638,13 +622,9 @@ cmarggammanorm_Eu <- function(object) {
   uHvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 2)
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
-  margEff <- kronecker(matrix(delta[if (length(grep("Intercept",
-    names(delta))) == 0)
-    1:object$nuZUvar else 2:object$nuZUvar], nrow = 1), matrix(P/2 * exp(Wu/2),
-    ncol = 1))
-  colnames(margEff) <- if (length(grep("Intercept", names(delta))) ==
-    0)
-    paste0("Eu_", colnames(uHvar)) else paste0("Eu_", colnames(uHvar)[-1])
+  margEff <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
+    matrix(P/2 * exp(Wu/2), ncol = 1))
+  colnames(margEff) <- paste0("Eu_", colnames(uHvar)[-1])
   return(data.frame(margEff))
 }
 
@@ -656,11 +636,8 @@ cmarggammanorm_Vu <- function(object) {
   uHvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 2)
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
-  margEff <- kronecker(matrix(delta[if (length(grep("Intercept",
-    names(delta))) == 0)
-    1:object$nuZUvar else 2:object$nuZUvar], nrow = 1), matrix(P * exp(Wu), ncol = 1))
-  colnames(margEff) <- if (length(grep("Intercept", names(delta))) ==
-    0)
-    paste0("Vu_", colnames(uHvar)) else paste0("Vu_", colnames(uHvar)[-1])
+  margEff <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
+    matrix(P * exp(Wu), ncol = 1))
+  colnames(margEff) <- paste0("Vu_", colnames(uHvar)[-1])
   return(data.frame(margEff))
 }

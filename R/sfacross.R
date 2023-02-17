@@ -522,12 +522,12 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
   mc$drop.unused.levels <- TRUE
   formula <- interCheckMain(formula = formula, data = data)
   if (!missing(muhet)) {
-    muhet <- clhsCheck_mu(formula = muhet, scaling = scaling)
+    muhet <- clhsCheck_mu(formula = muhet)
   } else {
     muhet <- ~1
   }
   if (!missing(uhet)) {
-    uhet <- clhsCheck_u(formula = uhet, scaling = scaling)
+    uhet <- clhsCheck_u(formula = uhet)
   } else {
     uhet <- ~1
   }
