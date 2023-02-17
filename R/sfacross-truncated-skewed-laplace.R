@@ -73,10 +73,18 @@ csttslnorm <- function(olsObj, epsiRes, S, nuZUvar, uHvar, nvZVvar,
   dep_u <- 1/2 * log((epsiRes^2 - varv)^2)
   dep_v <- 1/2 * log((epsiRes^2 - varu)^2)
   reg_hetu <- if (nuZUvar == 1) {
-    lm(log(varu) ~ 1)
+    if (length(grep("Intercept", colnames(uHvar))) == 0) {
+      lm(dep_u ~ -1 + ., data = as.data.frame(uHvar))
+    } else {
+      lm(log(varu) ~ 1)
+    }
   } else {
-    lm(dep_u ~ ., data = as.data.frame(uHvar[, 2:nuZUvar,
-      drop = FALSE]))
+    if (length(grep("Intercept", colnames(uHvar))) == 0) {
+      lm(dep_u ~ -1 + ., data = as.data.frame(uHvar))
+    } else {
+      lm(dep_u ~ ., data = as.data.frame(uHvar[, 2:nuZUvar,
+        drop = FALSE]))
+    }
   }
   if (any(is.na(reg_hetu$coefficients)))
     stop("At least one of the OLS coefficients of 'uhet' is NA: ",
@@ -84,10 +92,18 @@ csttslnorm <- function(olsObj, epsiRes, S, nuZUvar, uHvar, nvZVvar,
         collapse = ", "), ". This may be due to a singular matrix due to potential perfect multicollinearity",
       call. = FALSE)
   reg_hetv <- if (nvZVvar == 1) {
-    lm(log(varv) ~ 1)
+    if (length(grep("Intercept", colnames(vHvar))) == 0) {
+      lm(dep_v ~ -1 + ., data = as.data.frame(vHvar))
+    } else {
+      lm(log(varv) ~ 1)
+    }
   } else {
-    lm(dep_v ~ ., data = as.data.frame(vHvar[, 2:nvZVvar,
-      drop = FALSE]))
+    if (length(grep("Intercept", colnames(vHvar))) == 0) {
+      lm(dep_v ~ -1 + ., data = as.data.frame(vHvar))
+    } else {
+      lm(dep_v ~ ., data = as.data.frame(vHvar[, 2:nvZVvar,
+        drop = FALSE]))
+    }
   }
   if (any(is.na(reg_hetv$coefficients)))
     stop("at least one of the OLS coefficients of 'vhet' is NA: ",
@@ -360,7 +376,7 @@ tslnormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       iterlim = itermax, reltol = tol, tol = tol, qac = qac),
     nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
     uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-    S = S, wHvar = wHvar), sr1 = trutOptim::trust.optim(x = startVal,
+    S = S, wHvar = wHvar), sr1 = trustOptim::trust.optim(x = startVal,
     fn = function(parm) -sum(ctslnormlike(parm, nXvar = nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
       vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar)),
@@ -369,7 +385,7 @@ tslnormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar)),
     method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
       stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
-      report.precision = 1L)), sparse = trutOptim::trust.optim(x = startVal,
+      report.precision = 1L)), sparse = trustOptim::trust.optim(x = startVal,
     fn = function(parm) -sum(ctslnormlike(parm, nXvar = nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
       vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar)),
@@ -509,10 +525,14 @@ cmargtslnorm_Eu <- function(object) {
   lambda <- object$mlParam[object$nXvar + object$nuZUvar +
     object$nvZVvar + 1]
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
-  margEff <- kronecker(matrix(delta[2:object$nuZUvar] * (1 +
-    4 * lambda + 2 * lambda^2)/((1 + lambda) * (1 + 2 * lambda)),
-    nrow = 1), matrix(exp(Wu/2), ncol = 1))
-  colnames(margEff) <- paste0("Eu_", colnames(uHvar)[-1])
+  margEff <- kronecker(matrix(delta[if (length(grep("Intercept",
+    names(delta))) == 0)
+    1:object$nuZUvar else 2:object$nuZUvar] * (1 + 4 * lambda + 2 * lambda^2)/((1 +
+    lambda) * (1 + 2 * lambda)), nrow = 1), matrix(exp(Wu/2),
+    ncol = 1))
+  colnames(margEff) <- if (length(grep("Intercept", names(delta))) ==
+    0)
+    paste0("Eu_", colnames(uHvar)) else paste0("Eu_", colnames(uHvar)[-1])
   return(data.frame(margEff))
 }
 
@@ -524,10 +544,13 @@ cmargtslnorm_Vu <- function(object) {
   lambda <- object$mlParam[object$nXvar + object$nuZUvar +
     object$nvZVvar + 1]
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
-  margEff <- kronecker(matrix(delta[2:object$nuZUvar] * (1 +
-    8 * lambda + 16 * lambda^2 + 12 * lambda^3 + 4 * lambda^4)/((1 +
-    lambda)^2 * (1 + 2 * lambda)^2), nrow = 1), matrix(exp(Wu),
-    ncol = 1))
-  colnames(margEff) <- paste0("Vu_", colnames(uHvar)[-1])
+  margEff <- kronecker(matrix(delta[if (length(grep("Intercept",
+    names(delta))) == 0)
+    1:object$nuZUvar else 2:object$nuZUvar] * (1 + 8 * lambda + 16 * lambda^2 +
+    12 * lambda^3 + 4 * lambda^4)/((1 + lambda)^2 * (1 +
+    2 * lambda)^2), nrow = 1), matrix(exp(Wu), ncol = 1))
+  colnames(margEff) <- if (length(grep("Intercept", names(delta))) ==
+    0)
+    paste0("Vu_", colnames(uHvar)) else paste0("Vu_", colnames(uHvar)[-1])
   return(data.frame(margEff))
 }

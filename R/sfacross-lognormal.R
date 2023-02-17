@@ -82,10 +82,18 @@ cstlognorm <- function(olsObj, epsiRes, S, nmuZUvar, nuZUvar,
   dep_v <- 1/2 * log((epsiRes^2 - exp(varu) * (exp(varu) -
     1))^2)
   reg_hetu <- if (nuZUvar == 1) {
-    lm(log(varu) ~ 1)
+    if (length(grep("Intercept", colnames(uHvar))) == 0) {
+      lm(dep_u ~ -1 + ., data = as.data.frame(uHvar))
+    } else {
+      lm(log(varu) ~ 1)
+    }
   } else {
-    lm(dep_u ~ ., data = as.data.frame(uHvar[, 2:nuZUvar,
-      drop = FALSE]))
+    if (length(grep("Intercept", colnames(uHvar))) == 0) {
+      lm(dep_u ~ -1 + ., data = as.data.frame(uHvar))
+    } else {
+      lm(dep_u ~ ., data = as.data.frame(uHvar[, 2:nuZUvar,
+        drop = FALSE]))
+    }
   }
   if (any(is.na(reg_hetu$coefficients))) {
     stop("At least one of the OLS coefficients of 'uhet' is NA: ",
@@ -106,10 +114,18 @@ cstlognorm <- function(olsObj, epsiRes, S, nmuZUvar, nuZUvar,
       call. = FALSE)
   }
   reg_hetmu <- if (nmuZUvar == 1) {
-    lm(epsiRes ~ 1)
+    if (length(grep("Intercept", colnames(muHvar))) == 0) {
+      lm(epsiRes ~ -1 + ., data = as.data.frame(muHvar))
+    } else {
+      lm(log(varmu) ~ 1)
+    }
   } else {
-    lm(epsiRes ~ ., data = as.data.frame(muHvar[, 2:nmuZUvar,
-      drop = FALSE]))
+    if (length(grep("Intercept", colnames(muHvar))) == 0) {
+      lm(epsiRes ~ -1 + ., data = as.data.frame(muHvar))
+    } else {
+      lm(epsiRes ~ ., data = as.data.frame(muHvar[, 2:nmuZUvar,
+        drop = FALSE]))
+    }
   }
   if (any(is.na(reg_hetmu$coefficients))) {
     stop("at least one of the OLS coefficients of 'muhet' is NA: ",
@@ -442,7 +458,7 @@ lognormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
     nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
     nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
     vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
-    FiMat = FiMat, wHvar = wHvar), sr1 = trutOptim::trust.optim(x = startVal,
+    FiMat = FiMat, wHvar = wHvar), sr1 = trustOptim::trust.optim(x = startVal,
     fn = function(parm) -sum(clognormlike(parm, nXvar = nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
       muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
@@ -453,7 +469,7 @@ lognormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       Xvar = Xvar, S = S, N = N, FiMat = FiMat, wHvar = wHvar)),
     method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
       stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
-      report.precision = 1L)), sparse = trutOptim::trust.optim(x = startVal,
+      report.precision = 1L)), sparse = trustOptim::trust.optim(x = startVal,
     fn = function(parm) -sum(clognormlike(parm, nXvar = nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
       muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
@@ -558,7 +574,7 @@ fnExpULogNorm <- function(u, sigma, mu) {
 }
 
 # fn conditional inefficiencies ----------
-#' function to estimate unconditional efficiency (Battese and Coelli style)
+#' function to estimate conditional inefficiency
 #' @param u inefficiency variable over which integration will be done
 #' @param sigmaU standard error of the weibull distribution
 #' @param sigmaV standard error of the two-sided error component
@@ -573,7 +589,7 @@ fnCondEffLogNorm <- function(u, sigmaU, sigmaV, mu, epsilon,
 }
 
 # fn conditional efficiencies ----------
-#' function to estimate unconditional efficiency (Battese and Coelli style)
+#' function to estimate conditional efficiency (Battese and Coelli style)
 #' @param u inefficiency variable over which integration will be done
 #' @param sigmaU standard error of the weibull distribution
 #' @param sigmaV standard error of the two-sided error component
@@ -588,37 +604,7 @@ fnCondBCEffLogNorm <- function(u, sigmaU, sigmaV, mu, epsilon,
 }
 
 # fn reciproccal conditional efficiencies ----------
-#' function to estimate unconditional efficiency (Battese and Coelli style)
-#' @param u inefficiency variable over which integration will be done
-#' @param sigmaU standard error of the weibull distribution
-#' @param sigmaV standard error of the two-sided error component
-#' @param mu location parameter
-#' @param epsilon composite noise
-#' @param S integer for cost/prod estimation
-#' @noRd
-fnCondBCreciprocalEffLogNorm <- function(u, sigmaU, sigmaV, mu,
-  epsilon, S) {
-  exp(u)/u * 1/(sigmaU * sigmaV) * dnorm((log(u) - mu)/sigmaU) *
-    dnorm((epsilon + S * u)/sigmaV)
-}
-
-# fn to solve for conditional efficiencies ----------
-#' function to estimate unconditional efficiency (Battese and Coelli style)
-#' @param u inefficiency variable over which integration will be done
-#' @param sigmaU standard error of the weibull distribution
-#' @param sigmaV standard error of the two-sided error component
-#' @param mu location parameter
-#' @param epsilon composite noise
-#' @param S integer for cost/prod estimation
-#' @noRd
-fnCondBCEffLogNorm <- function(u, sigmaU, sigmaV, mu, epsilon,
-  S) {
-  exp(-u)/u * 1/(sigmaU * sigmaV) * dnorm((log(u) - mu)/sigmaU) *
-    dnorm((epsilon + S * u)/sigmaV)
-}
-
-# fn to solve for conditional inefficiencies ----------
-#' function to estimate unconditional efficiency (Battese and Coelli style)
+#' function to estimate conditional efficiency (Battese and Coelli style)
 #' @param u inefficiency variable over which integration will be done
 #' @param sigmaU standard error of the weibull distribution
 #' @param sigmaV standard error of the two-sided error component
@@ -709,18 +695,30 @@ cmarglognorm_Eu <- function(object) {
     rhs = 3)
   mu <- as.numeric(crossprod(matrix(omega), t(muHvar)))
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
-  mu_mat <- kronecker(matrix(omega[2:object$nmuZUvar], nrow = 1),
-    matrix(exp(mu + exp(Wu)/2), ncol = 1))
-  Wu_mat <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
-    matrix(exp(mu + exp(Wu)/2 + Wu)/2, ncol = 1))
-  idTRUE_mu <- substring(names(omega)[-1], 5) %in% substring(names(delta)[-1],
-    4)
-  idTRUE_Wu <- substring(names(delta)[-1], 4) %in% substring(names(omega)[-1],
-    5)
+  mu_mat <- kronecker(matrix(omega[if (length(grep("Intercept",
+    names(delta))) == 0)
+    1:object$nmuZUvar else 2:object$nmuZUvar], nrow = 1), matrix(exp(mu + exp(Wu)/2),
+    ncol = 1))
+  Wu_mat <- kronecker(matrix(delta[if (length(grep("Intercept",
+    names(delta))) == 0)
+    1:object$nuZUvar else 2:object$nuZUvar], nrow = 1), matrix(exp(mu + exp(Wu)/2 +
+    Wu)/2, ncol = 1))
+  idTRUE_mu <- (if (length(grep("Intercept", names(omega))) ==
+    0)
+    substring(names(omega), 5) else (substring(names(omega)[-1], 5))) %in% (if (length(grep("Intercept",
+    names(delta))) == 0)
+    substring(names(delta), 4) else substring(names(delta)[-1], 4))
+  idTRUE_Wu <- (if (length(grep("Intercept", names(delta))) ==
+    0)
+    substring(names(delta), 4) else substring(names(delta)[-1], 4)) %in% (if (length(grep("Intercept",
+    names(omega))) == 0)
+    substring(names(omega), 5) else substring(names(omega)[-1], 5))
   margEff <- cbind(mu_mat[, idTRUE_mu] + Wu_mat[, idTRUE_Wu],
     mu_mat[, !idTRUE_mu], Wu_mat[, !idTRUE_Wu])
-  colnames(margEff) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+  colnames(margEff) <- paste0("Eu_", c(if (length(grep("Intercept",
+    names(omega))) == 0) colnames(muHvar)[idTRUE_mu] else colnames(muHvar)[-1][idTRUE_mu],
+    if (length(grep("Intercept", names(omega))) == 0) colnames(muHvar)[!idTRUE_mu] else colnames(muHvar)[-1][!idTRUE_mu],
+    if (length(grep("Intercept", names(delta))) == 0) colnames(uHvar)[!idTRUE_Wu] else colnames(uHvar)[-1][!idTRUE_Wu]))
   return(data.frame(margEff))
 }
 
@@ -735,17 +733,29 @@ cmarglognorm_Vu <- function(object) {
     rhs = 3)
   mu <- as.numeric(crossprod(matrix(omega), t(muHvar)))
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
-  mu_mat <- kronecker(matrix(omega[2:object$nmuZUvar], nrow = 1),
-    matrix(2 * (exp(Wu) - 1) * exp(2 * mu + exp(Wu)), ncol = 1))
-  Wu_mat <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
-    matrix(exp(Wu) * exp(2 * mu + exp(Wu) + Wu), ncol = 1))
-  idTRUE_mu <- substring(names(omega)[-1], 5) %in% substring(names(delta)[-1],
-    4)
-  idTRUE_Wu <- substring(names(delta)[-1], 4) %in% substring(names(omega)[-1],
-    5)
+  mu_mat <- kronecker(matrix(omega[if (length(grep("Intercept",
+    names(delta))) == 0)
+    1:object$nmuZUvar else 2:object$nmuZUvar], nrow = 1), matrix(2 * (exp(Wu) -
+    1) * exp(2 * mu + exp(Wu)), ncol = 1))
+  Wu_mat <- kronecker(matrix(delta[if (length(grep("Intercept",
+    names(delta))) == 0)
+    1:object$nuZUvar else 2:object$nuZUvar], nrow = 1), matrix(exp(Wu) * exp(2 *
+    mu + exp(Wu) + Wu), ncol = 1))
+  idTRUE_mu <- (if (length(grep("Intercept", names(omega))) ==
+    0)
+    substring(names(omega), 5) else (substring(names(omega)[-1], 5))) %in% (if (length(grep("Intercept",
+    names(delta))) == 0)
+    substring(names(delta), 4) else substring(names(delta)[-1], 4))
+  idTRUE_Wu <- (if (length(grep("Intercept", names(delta))) ==
+    0)
+    substring(names(delta), 4) else substring(names(delta)[-1], 4)) %in% (if (length(grep("Intercept",
+    names(omega))) == 0)
+    substring(names(omega), 5) else substring(names(omega)[-1], 5))
   margEff <- cbind(mu_mat[, idTRUE_mu] + Wu_mat[, idTRUE_Wu],
     mu_mat[, !idTRUE_mu], Wu_mat[, !idTRUE_Wu])
-  colnames(margEff) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
-    colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
+  colnames(margEff) <- paste0("Vu_", c(if (length(grep("Intercept",
+    names(omega))) == 0) colnames(muHvar)[idTRUE_mu] else colnames(muHvar)[-1][idTRUE_mu],
+    if (length(grep("Intercept", names(omega))) == 0) colnames(muHvar)[!idTRUE_mu] else colnames(muHvar)[-1][!idTRUE_mu],
+    if (length(grep("Intercept", names(delta))) == 0) colnames(uHvar)[!idTRUE_Wu] else colnames(uHvar)[-1][!idTRUE_Wu]))
   return(data.frame(margEff))
 }
