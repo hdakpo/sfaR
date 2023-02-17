@@ -789,7 +789,8 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
     if (dim(Xvar)[2] == 1) {
       lm(Yvar ~ 1)
     } else {
-      lm(Yvar ~ ., data = as.data.frame(Xvar[, -1]), weights = wHvar)
+      lm(Yvar ~ ., data = as.data.frame(Xvar[, -1, drop = FALSE]),
+        weights = wHvar)
     }
   } else {
     lm(Yvar ~ -1 + ., data = as.data.frame(Xvar), weights = wHvar)
@@ -815,6 +816,9 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
     weights = wHvar)
   dataTable <- cbind(dataTable, olsResiduals = residuals(olsRes),
     olsFitted = fitted(olsRes))
+  # possibility to have duplicated columns if ID or TIME
+  # appears in ols in the case of panel data
+  dataTable <- dataTable[!duplicated(as.list(dataTable))]
   olsSkew <- skewness(dataTable[["olsResiduals"]])
   olsM3Okay <- if (S * olsSkew < 0) {
     "Residuals have the expected skeweness"
@@ -833,7 +837,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
   m2 <- mean((dataTable[["olsResiduals"]] - mean(dataTable[["olsResiduals"]]))^2)
   m3 <- mean((dataTable[["olsResiduals"]] - mean(dataTable[["olsResiduals"]]))^3)
   CoelliM3Test <- c(z = m3/sqrt(6 * m2^3/N), p.value = 2 *
-                      pnorm(-abs(m3/sqrt(6 * m2^3/N))))
+    pnorm(-abs(m3/sqrt(6 * m2^3/N))))
   AgostinoTest <- dagoTest(dataTable[["olsResiduals"]])
   class(AgostinoTest) <- "dagoTest"
   # Step 2: MLE arguments -------
