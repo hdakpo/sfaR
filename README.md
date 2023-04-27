@@ -7,8 +7,11 @@
 
 [![CodeFactor](https://www.codefactor.io/repository/github/hdakpo/sfaR/badge)](https://www.codefactor.io/repository/github/hdakpo/sfaR)
 [![R-CMD-check](https://github.com/hdakpo/sfaR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/hdakpo/sfaR/actions/workflows/R-CMD-check.yaml)
-<!-- [![CRAN status](https://www.r-pkg.org/badges/version/sfaR)](https://CRAN.R-project.org/package=psfaR) -->
-<!-- [![Downloads](https://cranlogs.r-pkg.org/badges/fsfaR)](https://CRAN.R-project.org/package=sfaR) -->
+[![CRAN
+status](https://www.r-pkg.org/badges/version/sfaR)](https://CRAN.R-project.org/package=sfaR)
+[![](https://img.shields.io/badge/devel%20version-1.0.0-darkred.svg)](https://github.com/hdakpo/sfaR)
+[![Downloads](https://cranlogs.r-pkg.org/badges/sfaR)](https://CRAN.R-project.org/package=sfaR)
+[![](https://img.shields.io/github/languages/code-size/hdakpo/sfaR.svg)](https://github.com/hdakpo/sfaR)
 <!-- badges: end -->
 
 *sfaR* provides a set of tools (maximum likelihood and maximum simulated
