@@ -4,6 +4,11 @@
 # sfaR: Stochastic Frontier Analysis Routines
 
 <!-- badges: start -->
+
+[![CodeFactor](https://www.codefactor.io/repository/github/hdakpo/sfaR/badge)](https://www.codefactor.io/repository/github/hdakpo/sfaR)
+<!-- [![R build status](https://github.com/hdakpo/sfaR/workflows/R-CMD-check/badge.svg)](https://github.com/hdakpo/sfaR/actions) -->
+<!-- [![CRAN status](https://www.r-pkg.org/badges/version/sfaR)](https://CRAN.R-project.org/package=psfaR) -->
+<!-- [![Downloads](https://cranlogs.r-pkg.org/badges/fsfaR)](https://CRAN.R-project.org/package=sfaR) -->
 <!-- badges: end -->
 
 *sfaR* provides a set of tools (maximum likelihood and maximum simulated
@@ -11,30 +16,29 @@ likelihood) for various specifications of stochastic frontier analysis.
 
 Three categories of models are available in *sfaR*:
 
--   **Classic Stochastic Frontier Model**: This model allows the
-    estimation of the frontier for a cross-sectional or pooled data.
-    Basically we have
+- **Classic Stochastic Frontier Model**: This model allows the
+  estimation of the frontier for a cross-sectional or pooled data.
+  Basically we have
 
 ![eq
 1](https://latex.codecogs.com/gif.latex?y_i%20%3D%20%5Cmathbf%7Bx_i%27%7D%5Cboldsymbol%7B%5Cbeta%7D%20+%20v_i%20-%20Su_i)
 
-<!-- $$y_i = \mathbf{x_i'}\boldsymbol{\beta} + v_i - Su_i$$ -->
+$$y_i = \mathbf{x_i'}\boldsymbol{\beta} + v_i - Su_i$$
 
-where *S* = 1 for production function and *S* =  − 1 for cost function.
-*v* follows a normal distribution 𝒩(0,*σ*<sub>*v*</sub><sup>2</sup>).
-For *u* ten different distributions are available. These distributions
-include:
+where $S = 1$ for production function and $S = -1$ for cost function.
+$v$ follows a normal distribution $\mathcal{N}(0, \sigma_v^2)$. For $u$
+ten different distributions are available. These distributions include:
 
--   Half-Normal
--   Truncated Normal
--   Exponential
--   Rayleigh
--   Gamma
--   Generalized Exponential
--   Lognormal
--   Truncated Skewed Laplace
--   Uniform
--   Weibull
+- Half-Normal
+- Truncated Normal
+- Exponential
+- Rayleigh
+- Gamma
+- Generalized Exponential
+- Lognormal
+- Truncated Skewed Laplace
+- Uniform
+- Weibull
 
 In the case of the Gamma, lognormal and Weibull distributions, maximum
 simulated likelihood is used with the possibility of four specific
@@ -49,21 +53,20 @@ estimated.
 
 The main function for this class of model is `sfacross`.
 
--   **Latent Class Stochastic Frontier Model** (LCM): This model
-    accounts for technological heterogeneity by splitting the
-    observations into a maximum number of five classes. The
-    classification operates based on a logit functional form that can be
-    specified using some covariates (namely, the separating variables
-    allowing the separation of observations in several classes). Only
-    the half normal distribution is available for the one-sided error
-    term. Heteroscedasticity in both error terms is possible. The choice
-    of the number of classes can be guided by several information
-    criteria (i.e. AIC, BIC or HQIC).
+- **Latent Class Stochastic Frontier Model** (LCM): This model accounts
+  for technological heterogeneity by splitting the observations into a
+  maximum number of five classes. The classification operates based on a
+  logit functional form that can be specified using some covariates
+  (namely, the separating variables allowing the separation of
+  observations in several classes). Only the half normal distribution is
+  available for the one-sided error term. Heteroscedasticity in both
+  error terms is possible. The choice of the number of classes can be
+  guided by several information criteria (i.e. AIC, BIC or HQIC).
 
--   **Sample Selection Correction Stochastic Frontier Model**: This
-    model solves the selection bias due to the correlation between the
-    two-sided errors terms in both the selection and the frontier
-    equations, in the case of cross-sectional or pooled data.
+- **Sample Selection Correction Stochastic Frontier Model**: This model
+  solves the selection bias due to the correlation between the two-sided
+  errors terms in both the selection and the frontier equations, in the
+  case of cross-sectional or pooled data.
 
 An important features of *sfaR* is to provide eleven different
 optimization algorithms. For complex problem, several algorithms can be
@@ -93,7 +96,8 @@ features of *sfaR*.
 ``` r
 library(sfaR)
 #> * Please cite the 'sfaR' package as:
-#>   Dakpo KH., Desjeux Y., and Latruffe L. (2022). sfaR: Stochastic Frontier Analysis Routines. R package version 1.0.0.
+#>   Dakpo KH., Desjeux Y., Henningsen A., and Latruffe L. (2023). sfaR: Stochastic Frontier Analysis Routines. R package version 1.0.0.
+#> 
 #> See also: citation("sfaR")
 #> 
 #> * For any questions, suggestions, or comments on the 'sfaR' package, please make use of Tracker facilities at:

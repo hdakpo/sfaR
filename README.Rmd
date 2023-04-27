@@ -16,6 +16,10 @@ knitr::opts_chunk$set(
 # sfaR: Stochastic Frontier Analysis Routines
 
 <!-- badges: start -->
+[![CodeFactor](https://www.codefactor.io/repository/github/hdakpo/sfaR/badge)](https://www.codefactor.io/repository/github/hdakpo/sfaR)
+<!-- [![R build status](https://github.com/hdakpo/sfaR/workflows/R-CMD-check/badge.svg)](https://github.com/hdakpo/sfaR/actions) -->
+<!-- [![CRAN status](https://www.r-pkg.org/badges/version/sfaR)](https://CRAN.R-project.org/package=psfaR) -->
+<!-- [![Downloads](https://cranlogs.r-pkg.org/badges/fsfaR)](https://CRAN.R-project.org/package=sfaR) -->
 <!-- badges: end -->
 
 *sfaR* provides a set of tools (maximum likelihood and
@@ -30,7 +34,7 @@ the frontier for a cross-sectional or pooled data. Basically we have
 ![eq 1](https://latex.codecogs.com/gif.latex?y_i%20%3D%20%5Cmathbf%7Bx_i%27%7D%5Cboldsymbol%7B%5Cbeta%7D%20&plus;%20v_i%20-%20Su_i)
 
 
-<!-- $$y_i = \mathbf{x_i'}\boldsymbol{\beta} + v_i - Su_i$$ -->
+$$y_i = \mathbf{x_i'}\boldsymbol{\beta} + v_i - Su_i$$
 
 where $S = 1$ for production function and $S = -1$ for cost function. $v$ follows a normal distribution $\mathcal{N}(0, \sigma_v^2)$. For $u$ ten different distributions are available. These distributions include:
  
