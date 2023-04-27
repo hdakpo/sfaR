@@ -16,12 +16,10 @@ likelihood) for various specifications of stochastic frontier analysis.
 
 Three categories of models are available in *sfaR*:
 
-- **Classic Stochastic Frontier Model**: This model allows the
-  estimation of the frontier for a cross-sectional or pooled data.
-  Basically we have
+1.  **Classic Stochastic Frontier Model**
 
-![eq
-1](https://latex.codecogs.com/gif.latex?y_i%20%3D%20%5Cmathbf%7Bx_i%27%7D%5Cboldsymbol%7B%5Cbeta%7D%20+%20v_i%20-%20Su_i)
+This model allows the estimation of the frontier for a cross-sectional
+or pooled data. Basically we have
 
 $$y_i = \mathbf{x_i'}\boldsymbol{\beta} + v_i - Su_i$$
 
@@ -53,20 +51,23 @@ estimated.
 
 The main function for this class of model is `sfacross`.
 
-- **Latent Class Stochastic Frontier Model** (LCM): This model accounts
-  for technological heterogeneity by splitting the observations into a
-  maximum number of five classes. The classification operates based on a
-  logit functional form that can be specified using some covariates
-  (namely, the separating variables allowing the separation of
-  observations in several classes). Only the half normal distribution is
-  available for the one-sided error term. Heteroscedasticity in both
-  error terms is possible. The choice of the number of classes can be
-  guided by several information criteria (i.e. AIC, BIC or HQIC).
+2.  **Latent Class Stochastic Frontier Model**
 
-- **Sample Selection Correction Stochastic Frontier Model**: This model
-  solves the selection bias due to the correlation between the two-sided
-  errors terms in both the selection and the frontier equations, in the
-  case of cross-sectional or pooled data.
+This model accounts for technological heterogeneity by splitting the
+observations into a maximum number of five classes. The classification
+operates based on a logit functional form that can be specified using
+some covariates (namely, the separating variables allowing the
+separation of observations in several classes). Only the half normal
+distribution is available for the one-sided error term.
+Heteroscedasticity in both error terms is possible. The choice of the
+number of classes can be guided by several information criteria
+(i.e. AIC, BIC or HQIC).
+
+3.  **Sample Selection Correction Stochastic Frontier Model**
+
+This model solves the selection bias due to the correlation between the
+two-sided errors terms in both the selection and the frontier equations,
+in the case of cross-sectional or pooled data.
 
 An important features of *sfaR* is to provide eleven different
 optimization algorithms. For complex problem, several algorithms can be
