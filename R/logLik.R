@@ -6,27 +6,22 @@
 
 #------------------------------------------------------------------------------#
 # Log-likelihood extraction                                                    #
-# Models: -Standard Stochastic Frontier Analysis                               #
-#         -Latent Class Stochastic Frontier Analysis                           #
-#         -Sample selection correction                                         #
-#         -Zero inefficiency stochastic frontier                               #
-#         -Contaminated noise stochastic frontier                              #
-#         -Multi-Modal Inefficiency Stochastic Frontier Analysis               #
+# Models: + Cross sectional & Pooled data                                      #
+#           -Stochastic Frontier Analysis                                      #
+#           -Latent Class Stochastic Frontier Analysis                         #
+#           -Sample selection correction for Stochastic Frontier Model         #
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
 
 #' Extract log-likelihood value of stochastic frontier models
 #'
-#' \code{\link{logLik}} extracts the log-likelihood value(s) from classic or
-#' latent class stochastic frontier models estimated with 
-#' \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{misfcross}}, 
-#' \code{\link{sfacross}}, \code{\link{sfaselectioncross}} or 
-#' \code{\link{zisfcross}}.
+#' \code{\link{logLik}} extracts the log-likelihood value(s) from stochastic 
+#' frontier models estimated with \code{\link{lcmcross}}, \code{\link{sfacross}}, 
+#' or \code{\link{sfaselectioncross}}.
 #'
 #' @param object A stochastic frontier model returned
-#' by \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{misfcross}}, 
-#' \code{\link{sfacross}}, \code{\link{sfaselectioncross}} or 
-#' \code{\link{zisfcross}}.
+#' by \code{\link{lcmcross}}, \code{\link{sfacross}}, or  
+#' \code{\link{sfaselectioncross}}.
 #' @param individual Logical. If \code{FALSE} (default), the sum of all
 #' observations' log-likelihood values is returned. If \code{TRUE}, a vector of
 #' each observation's log-likelihood value is returned.
@@ -44,23 +39,14 @@
 #'
 # @author K Hervé Dakpo
 #'
-#' @seealso \code{\link{cnsfcross}}, for the contaminated noise stochastic 
-#' frontier analysis model fitting function.
-#'
-#' \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
-#' model fitting function.
-#' 
-#' \code{\link{misfcross}}, for the multi-modal inefficiency stochastic frontier 
-#' analysis model fitting function.
+#' @seealso \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
+#' model fitting function using cross-sectional or pooled data.
 #' 
 #' \code{\link{sfacross}}, for the stochastic frontier analysis model
-#' fitting function.
+#' fitting function using cross-sectional or pooled data.
 #' 
 #' \code{\link{sfaselectioncross}} for sample selection in stochastic frontier 
-#' model fitting function.
-#' 
-#' \code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
-#' fitting function.
+#' model fitting function using cross-sectional or pooled data.
 #'
 #' @keywords methods likelihood
 #'
@@ -104,7 +90,7 @@ logLik.sfacross <- function(object, individual = FALSE, ...) {
   }
 }
 
-# log likelihood extraction for lcmcross ----------
+# log likelihood (LL) extraction for lcmcross ----------
 #' @rdname logLik
 #' @aliases logLik.lcmcross
 #' @export
@@ -127,82 +113,12 @@ logLik.lcmcross <- function(object, individual = FALSE, ...) {
   }
 }
 
-# log likelihood extraction for sfaselectioncross
-# ----------
+# LL extraction for sfaselectioncross ----------
 #' @rdname logLik
 #' @aliases logLik.sfaselectioncross
 #' @export
 logLik.sfaselectioncross <- function(object, individual = FALSE,
   ...) {
-  if (length(individual) != 1 || !is.logical(individual[1]))
-    stop("argument 'individual' must be a single logical value",
-      call. = FALSE)
-  if (individual) {
-    LL <- list()
-    LL[["logLik"]] <- object$dataTable$logL_OBS
-    LL[["Nobs"]] <- object$Nobs
-    LL[["df"]] <- object$nParm
-    return(LL)
-  } else {
-    LL <- object$mlLoglik
-    attributes(LL)$nobs <- object$Nobs
-    attributes(LL)$df <- object$nParm
-    class(LL) <- "logLik"
-    return(LL)
-  }
-}
-
-# log likelihood extraction for zisfcross ----------
-#' @rdname logLik
-#' @aliases logLik.zisfcross
-#' @export
-logLik.zisfcross <- function(object, individual = FALSE, ...) {
-  if (length(individual) != 1 || !is.logical(individual[1]))
-    stop("argument 'individual' must be a single logical value",
-      call. = FALSE)
-  if (individual) {
-    LL <- list()
-    LL[["logLik"]] <- object$dataTable$logL_OBS
-    LL[["Nobs"]] <- object$Nobs
-    LL[["df"]] <- object$nParm
-    return(LL)
-  } else {
-    LL <- object$mlLoglik
-    attributes(LL)$nobs <- object$Nobs
-    attributes(LL)$df <- object$nParm
-    class(LL) <- "logLik"
-    return(LL)
-  }
-}
-
-# log likelihood extraction for cnsfcross ----------
-#' @rdname logLik
-#' @aliases logLik.cnsfcross
-#' @export
-logLik.cnsfcross <- function(object, individual = FALSE, ...) {
-  if (length(individual) != 1 || !is.logical(individual[1]))
-    stop("argument 'individual' must be a single logical value",
-      call. = FALSE)
-  if (individual) {
-    LL <- list()
-    LL[["logLik"]] <- object$dataTable$logL_OBS
-    LL[["Nobs"]] <- object$Nobs
-    LL[["df"]] <- object$nParm
-    return(LL)
-  } else {
-    LL <- object$mlLoglik
-    attributes(LL)$nobs <- object$Nobs
-    attributes(LL)$df <- object$nParm
-    class(LL) <- "logLik"
-    return(LL)
-  }
-}
-
-# log likelihood extraction for misfcross ----------
-#' @rdname logLik
-#' @aliases logLik.misfcross
-#' @export
-logLik.misfcross <- function(object, individual = FALSE, ...) {
   if (length(individual) != 1 || !is.logical(individual[1]))
     stop("argument 'individual' must be a single logical value",
       call. = FALSE)

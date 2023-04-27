@@ -100,7 +100,7 @@ cstlognorm <- function(olsObj, epsiRes, S, nmuZUvar, nuZUvar,
       drop = FALSE]))
   }
   reg_hetmu <- if (nmuZUvar == 1) {
-    lm(log(varmu) ~ 1)
+    lm(epsiRes ~ 1)
   } else {
     lm(epsiRes ~ ., data = as.data.frame(muHvar[, 2:nmuZUvar,
       drop = FALSE]))

@@ -5,9 +5,6 @@
 \alias{marginal.sfacross}
 \alias{marginal.lcmcross}
 \alias{marginal.sfaselectioncross}
-\alias{marginal.zisfcross}
-\alias{marginal.cnsfcross}
-\alias{marginal.misfcross}
 \title{Marginal effects of the inefficiency drivers in stochastic frontier models}
 \usage{
 \method{marginal}{sfacross}(object, newData = NULL, ...)
@@ -15,18 +12,11 @@
 \method{marginal}{lcmcross}(object, newData = NULL, ...)
 
 \method{marginal}{sfaselectioncross}(object, newData = NULL, ...)
-
-\method{marginal}{zisfcross}(object, newData = NULL, ...)
-
-\method{marginal}{cnsfcross}(object, newData = NULL, ...)
-
-\method{marginal}{misfcross}(object, newData = NULL, ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{misfcross}},
-\code{\link{sfacross}}, \code{\link{sfaselectioncross}} or
-\code{\link{zisfcross}}.}
+by \code{\link{lcmcross}}, \code{\link{sfacross}}, or
+\code{\link{sfaselectioncross}}.}
 
 \item{newData}{Optional data frame that is used to calculate the marginal
 effect of \eqn{Z} variables on inefficiency. If NULL (the default), the
@@ -41,17 +31,13 @@ effects of the \eqn{Z_u} variables on the expected inefficiency (each
 variable has the prefix \code{'Eu_'}) and on the variance of the
 inefficiency (each variable has the prefix \code{'Vu_'}) is returned.
 
-In the case of the contaminated noise stochastic frontier (CNSF), or latent
-class frontier model (LCM) or the zero inefficiency frontier model (ZISF),
-each variable terminates with \code{'_c#'} where \code{'#'} is the class number
-.
+In the case of the latent class stochastic frontier (LCM), each variable
+terminates with \code{'_c#'} where \code{'#'} is the class number.
 }
 \description{
-This function returns marginal effects of the inefficiency drivers from
-classic or latent class stochastic frontier models estimated with
-\code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{misfcross}},
-\code{\link{sfacross}}, \code{\link{sfaselectioncross}} or
-\code{\link{zisfcross}}.
+This function returns marginal effects of the inefficiency drivers from stochastic
+frontier models estimated with \code{\link{lcmcross}}, \code{\link{sfacross}},
+or \code{\link{sfaselectioncross}}.
 }
 \details{
 \code{\link{marginal}} operates in the presence of exogenous
@@ -59,9 +45,9 @@ variables that explain inefficiency, namely the inefficiency drivers
 (\eqn{uhet = ~ Z_u} or \eqn{muhet = ~ Z_{mu}}).
 
 Two components are computed for each variable: the marginal effects on the
-expected inefficiency (\eqn{\frac{\partial E[u]}{\partial Z_{(m)u}}}) and
+expected inefficiency (\eqn{\frac{\partial E[u]}{\partial Z_{mu}}}) and
 the marginal effects on the variance of inefficiency (\eqn{\frac{\partial
-V[u]}{\partial Z_{(m)u}}}).
+V[u]}{\partial Z_{mu}}}).
 
 The model also allows the Wang (2002) parametrization of \eqn{\mu} and
 \eqn{\sigma_u^2} by the same vector of exogenous variables. This double
@@ -71,7 +57,7 @@ inefficiency and its drivers.
 \examples{
 
 ## Using data on fossil fuel fired steam electric power generation plants in
-the U.S.
+# the U.S.
 # Translog SFA (cost function) truncated normal with scaling property
 tl_u_ts <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
 log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
@@ -95,23 +81,14 @@ effects of a stochastic frontier model. \emph{Journal of Productivity
 Analysis}, \bold{18}:241--253.
 }
 \seealso{
-\code{\link{cnsfcross}}, for the contaminated noise stochastic
-frontier analysis model fitting function.
-
 \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
-model fitting function.
-
-\code{\link{misfcross}}, for the multi-modal inefficiency stochastic frontier
-analysis model fitting function.
+model fitting function using cross-sectional or pooled data.
 
 \code{\link{sfacross}}, for the stochastic frontier analysis model
-fitting function.
+fitting function using cross-sectional or pooled data.
 
 \code{\link{sfaselectioncross}} for sample selection in stochastic frontier
-model fitting function.
-
-\code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
-fitting function.
+model fitting function using cross-sectional or pooled data.
 }
 \keyword{marginal}
 \keyword{methods}

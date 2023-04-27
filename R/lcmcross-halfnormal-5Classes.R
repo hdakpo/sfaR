@@ -2216,8 +2216,8 @@ LCM5ChnormAlgOpt <- function(start, olsParam, dataTable, S, wHvar,
 }
 
 # Posterior probabilities and efficiencies ----------
-#' post. prob. and efficiencies for lcm 5 classes halfnormal-normal distribution
-#' @param object object of class sfacross
+#' post. prob. and efficiencies for lcmcross 5 classes halfnormal-normal distribution
+#' @param object object of class lcmcross
 #' @param level level for confidence interval
 #' @noRd
 cLCM5Chalfnormeff <- function(object, level) {
@@ -2439,8 +2439,8 @@ cLCM5Chalfnormeff <- function(object, level) {
 }
 
 # Marginal effects on inefficiencies ----------
-#' marginal effects for for lcm 5 classes halfnormal-normal distribution
-#' @param object object of class sfacross
+#' marginal effects for for lcmcross 5 classes halfnormal-normal distribution
+#' @param object object of class lcmcross
 #' @noRd
 cmargLCM5Chalfnorm_Eu <- function(object) {
   beta1 <- object$mlParam[1:(object$nXvar)]
@@ -2589,13 +2589,17 @@ cmargLCM5Chalfnorm_Eu <- function(object) {
     nrow = 1), matrix(exp(Wu5/2) * dnorm(0), ncol = 1))
   colnames(margEff_c5) <- paste0("Eu_", colnames(uHvar)[-1],
     "_c5")
-  margEff_c <- ifelse(Group_c == 1, margEff_c1, ifelse(Group_c ==
-    2, margEff_c2, ifelse(Group_c == 3, margEff_c3, ifelse(Group_c ==
-    4, margEff_c4, margEff_c5))))
+  margEff_c <- matrix(nrow = nrow(margEff_c1), ncol = ncol(margEff_c1))
+  for (c in 1:ncol(margEff_c1)) {
+    margEff_c[, c] <- ifelse(Group_c == 1, margEff_c1[, c],
+      ifelse(Group_c == 2, margEff_c2[, c], ifelse(Group_c ==
+        3, margEff_c3[, c], ifelse(Group_c == 4, margEff_c4[,
+        c], margEff_c5[, c]))))
+  }
   colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
     "_c")
-  margEff <- data.frame(margEff_c, margEff_c1, margEff_c2, margEff_c3,
-    margEff_c4, margEff_c5)
+  margEff <- data.frame(margEff_c, margEff_c1, margEff_c2,
+    margEff_c3, margEff_c4, margEff_c5)
   return(margEff)
 }
 
@@ -2751,12 +2755,16 @@ cmargLCM5Chalfnorm_Vu <- function(object) {
     ncol = 1))
   colnames(margEff_c5) <- paste0("Vu_", colnames(uHvar)[-1],
     "_c5")
-  margEff_c <- ifelse(Group_c == 1, margEff_c1, ifelse(Group_c ==
-    2, margEff_c2, ifelse(Group_c == 3, margEff_c3, ifelse(Group_c ==
-    4, margEff_c4, margEff_c5))))
+  margEff_c <- matrix(nrow = nrow(margEff_c1), ncol = ncol(margEff_c1))
+  for (c in 1:ncol(margEff_c1)) {
+    margEff_c[, c] <- ifelse(Group_c == 1, margEff_c1[, c],
+      ifelse(Group_c == 2, margEff_c2[, c], ifelse(Group_c ==
+        3, margEff_c3[, c], ifelse(Group_c == 4, margEff_c4[,
+        c], margEff_c5[, c]))))
+  }
   colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
     "_c")
-  margEff <- data.frame(margEff_c, margEff_c1, margEff_c2, margEff_c3,
-    margEff_c4, margEff_c5)
+  margEff <- data.frame(margEff_c, margEff_c1, margEff_c2,
+    margEff_c3, margEff_c4, margEff_c5)
   return(margEff)
 }

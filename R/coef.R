@@ -6,37 +6,30 @@
 
 #------------------------------------------------------------------------------#
 # Coefficients extraction                                                      #
-# Models: -Standard Stochastic Frontier Analysis                               #
-#         -Latent Class Stochastic Frontier Analysis                           #
-#         -Sample selection correction                                         #
-#         -Zero inefficiency stochastic frontier                               #
-#         -Contaminated noise stochastic frontier                              #
-#         -Multi-Modal Inefficiency Stochastic Frontier Analysis               #
+# Models: + Cross sectional & Pooled data                                      #
+#           -Stochastic Frontier Analysis                                      #
+#           -Latent Class Stochastic Frontier Analysis                         #
+#           -Sample selection correction for Stochastic Frontier Model         #
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
 
 #' Extract coefficients of stochastic frontier models
 #' 
 #' @description
-#' From an object of class \code{'summary.cnsfcross'}, \code{'summary.lcmcross'},
-#' \code{'summary.misfcross'}, \code{'summary.sfacross'}, 
-#' \code{'summary.sfaselectioncross'} or \code{'summary.zisfcross'}, 
+#' From an object of class \code{'summary.lcmcross'},
+#' \code{'summary.sfacross'}, or \code{'summary.sfaselectioncross'},
 #' \code{\link{coef}} extracts the coefficients, 
 #' their standard errors, z-values, and (asymptotic) P-values.
 #'
-#' From on object of class \code{'cnsfcross'}, \code{'lcmcross'}, 
-#' \code{'misfcross'}, \code{'sfacross'}, \code{'sfaselectioncross'} or 
-#' \code{'zisfcross'}, it extracts only the estimated coefficients.
+#' From on object of class \code{'lcmcross'}, \code{'sfacross'}, or 
+#' \code{'sfaselectioncross'}, it extracts only the estimated coefficients.
 #'
 #' @name coef
 #'
-#' @param object A stochastic frontier model returned
-#' by \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{misfcross}}, 
-#' \code{\link{sfacross}}, \code{\link{sfaselectioncross}} or 
-#' \code{\link{zisfcross}}, or an object of class \code{'summary.cnsfcross'}, 
-#' \code{'summary.lcmcross'}, \code{'summary.misfcross'}, 
-#' \code{'summary.sfacross'}, \code{'summary.sfaselectioncross'} or 
-#' \code{'summary.zisfcross'} .
+#' @param object A stochastic frontier model returned by \code{\link{lcmcross}}, 
+#' \code{\link{sfacross}}, or \code{\link{sfaselectioncross}}, or an object of 
+#' class \code{'summary.lcmcross'}, \code{'summary.sfacross'}, 
+#' or \code{'summary.sfaselectioncross'}.
 #' @param extraPar Logical (default = \code{FALSE}). If \code{TRUE}, additional
 #' parameters are returned:
 #'
@@ -44,9 +37,9 @@
 #'
 #' \code{lambdaSq} = \code{sigmauSq}/\code{sigmavSq}
 #'
-#' \code{sigmauSq} = \eqn{\exp{(Wu)}} = \eqn{\exp{(\delta Z_u)}}
+#' \code{sigmauSq} = \eqn{\exp{(Wu)}} = \eqn{\exp{(\bm{\delta}' \mathbf{Z}_u)}}
 #'
-#' \code{sigmavSq} = \eqn{\exp{(Wv)}} = \eqn{\exp{(\phi Z_v)}}
+#' \code{sigmavSq} = \eqn{\exp{(Wv)}} = \eqn{\exp{(\bm{\phi}' \mathbf{Z}_v)}}
 #'
 #' \code{sigma} = \code{sigmaSq}^0.5
 #'
@@ -59,39 +52,29 @@
 #' \code{gamma} = \code{sigmauSq}/(\code{sigmauSq} + \code{sigmavSq})
 #' @param ... Currently ignored.
 #'
-#' @return For objects of class \code{'summary.cnsfcross'},
-#' \code{'summary.lcmcross'},  \code{'summary.sfacross'}, 
-#' \code{'summary.sfaselectioncross'} or \code{'summary.zisfcross'}, 
-#' \code{\link{coef}} returns a matrix with four columns. Namely, the estimated
-#' coefficients, their standard errors, z-values, and (asymptotic) P-values.
+#' @return For objects of class \code{'summary.lcmcross'}, 
+#' \code{'summary.sfacross'}, or \code{'summary.sfaselectioncross'}, 
+#' \code{\link{coef}} returns a matrix with four columns. Namely, the 
+#' estimated coefficients, their standard errors, z-values, 
+#' and (asymptotic) P-values.
 #'
-#' For objects of class \code{'cnsfcross'}, \code{'lcmcross'}, 
-#' \code{'sfacross'}, \code{'sfaselectioncross'} or \code{'zisfcross'},
-#' \code{\link{coef}} returns a numeric vector of the estimated coefficients.
-#' If \code{extraPar = TRUE}, additional parameters, detailed in the section
-#' \sQuote{Arguments}, are also returned. In the case of object of class
-#' \code{'lcmcross'}, each additional parameter terminates with \code{'#'} that
-#' represents the class number.
+#' For objects of class \code{'lcmcross'}, \code{'sfacross'}, or 
+#' \code{'sfaselectioncross'}, \code{\link{coef}} returns a numeric vector of the 
+#' estimated coefficients. If \code{extraPar = TRUE}, additional parameters, 
+#' detailed in the section \sQuote{Arguments}, are also returned. In the case 
+#' of object of class \code{'lcmcross'}, each additional 
+#' parameter terminates with \code{'#'} that represents the class number.
 #'
 # @author K Hervé Dakpo
 #'
-#' @seealso \code{\link{cnsfcross}}, for the contaminated noise stochastic 
-#' frontier analysis model fitting function.
-#'
-#' \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
-#' model fitting function.
-#' 
-#' \code{\link{misfcross}}, for the multi-modal inefficiency stochastic frontier 
-#' analysis model fitting function.
+#' @seealso \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
+#' model fitting function using cross-sectional or pooled data.
 #' 
 #' \code{\link{sfacross}}, for the stochastic frontier analysis model
-#' fitting function.
+#' fitting function using cross-sectional or pooled data.
 #' 
 #' \code{\link{sfaselectioncross}} for sample selection in stochastic frontier 
-#' model fitting function.
-#' 
-#' \code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
-#' fitting function.
+#' model fitting function using cross-sectional or pooled data.
 #'
 #' @keywords methods coefficients
 #'
@@ -407,497 +390,5 @@ coef.sfaselectioncross <- function(object, extraPar = FALSE,
 #' @aliases coef.summary.sfaselectioncross
 #' @export
 coef.summary.sfaselectioncross <- function(object, ...) {
-  object$mlRes
-}
-
-# coefficients from zisfcross ----------
-#' @rdname coef
-#' @aliases coef.zisfcross
-#' @export
-coef.zisfcross <- function(object, extraPar = FALSE, ...) {
-  if (length(extraPar) != 1 || !is.logical(extraPar[1]))
-    stop("argument 'extraPar' must be a single logical value",
-      call. = FALSE)
-  cRes <- object$mlParam
-  if (extraPar) {
-    if (object$sigmavType == "common") {
-      if (object$udist == "tnormal") {
-        delta <- object$mlParam[(object$nXvar + object$nmuZUvar +
-          1):(object$nXvar + object$nmuZUvar + object$nuZUvar)]
-        phi <- object$mlParam[(object$nXvar + object$nmuZUvar +
-          object$nuZUvar + 1):(object$nXvar + object$nmuZUvar +
-          object$nuZUvar + object$nvZVvar)]
-        uHvar <- model.matrix(object$formula, data = object$dataTable,
-          rhs = 3)
-        vHvar <- model.matrix(object$formula, data = object$dataTable,
-          rhs = 4)
-        Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
-        Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
-      } else {
-        if (object$udist == "lognormal") {
-          delta <- object$mlParam[(object$nXvar + object$nmuZUvar +
-          1):(object$nXvar + object$nmuZUvar + object$nuZUvar)]
-          phi <- object$mlParam[(object$nXvar + object$nmuZUvar +
-          object$nuZUvar + 1):(object$nXvar + object$nmuZUvar +
-          object$nuZUvar + object$nvZVvar)]
-          uHvar <- model.matrix(object$formula, data = object$dataTable,
-          rhs = 3)
-          vHvar <- model.matrix(object$formula, data = object$dataTable,
-          rhs = 4)
-          Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
-          Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
-        } else {
-          delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
-          object$nuZUvar)]
-          phi <- object$mlParam[(object$nXvar + object$nuZUvar +
-          1):(object$nXvar + object$nuZUvar + object$nvZVvar)]
-          uHvar <- model.matrix(object$formula, data = object$dataTable,
-          rhs = 2)
-          vHvar <- model.matrix(object$formula, data = object$dataTable,
-          rhs = 3)
-          Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
-          Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
-        }
-      }
-      if (object$udist == "lognormal" || object$udist ==
-        "tnormal") {
-        if (object$nuZUvar > 1 || object$nvZVvar > 1 ||
-          object$nmuZUvar > 1)
-          cat("Variances averaged over observations     \n\n")
-      } else {
-        if (object$nuZUvar > 1 || object$nvZVvar > 1)
-          cat("Variances averaged over observations     \n\n")
-      }
-      GROUPS <- select(efficiencies.zisfcross(object = object),
-        "Group_c") %>%
-        pull()
-      cRes <- c(cRes, sigmaSq1 = mean(exp(Wu[GROUPS ==
-        1])) + mean(exp(Wv[GROUPS == 1])), sigmaSq2 = mean(exp(Wv[GROUPS ==
-        2])), lambdaSq1 = mean(exp(Wu[GROUPS == 1]))/mean(exp(Wv[GROUPS ==
-        1])), lambdaSq2 = 0, sigmauSq1 = mean(exp(Wu[GROUPS ==
-        1])), sigmauSq2 = 0, sigmavSq1 = mean(exp(Wv[GROUPS ==
-        1])), sigmavSq2 = mean(exp(Wv[GROUPS == 2])),
-        sigma1 = sqrt(mean(exp(Wu[GROUPS == 1])) + mean(exp(Wv[GROUPS ==
-          1]))), sigma2 = sqrt(mean(exp(Wv[GROUPS ==
-          2]))), lambda1 = sqrt(mean(exp(Wu[GROUPS ==
-          1]))/mean(exp(Wv[GROUPS == 1]))), lambda2 = 0,
-        sigmau1 = sqrt(mean(exp(Wu[GROUPS == 1]))), sigmau2 = 0,
-        sigmav1 = sqrt(mean(exp(Wv[GROUPS == 1]))), sigmav2 = sqrt(mean(exp(Wv[GROUPS ==
-          2]))), gamma1 = mean(exp(Wu[GROUPS == 1]))/(mean(exp(Wu[GROUPS ==
-          1])) + mean(exp(Wv[GROUPS == 1]))), gamma2 = 0)
-    } else {
-      if (object$sigmavType == "different") {
-        if (object$udist == "tnormal") {
-          delta <- object$mlParam[(object$nXvar + object$nmuZUvar +
-          1):(object$nXvar + object$nmuZUvar + object$nuZUvar)]
-          phi1 <- object$mlParam[(object$nXvar + object$nmuZUvar +
-          object$nuZUvar + 1):(object$nXvar + object$nmuZUvar +
-          object$nuZUvar + object$nvZVvar)]
-          phi2 <- object$mlParam[(object$nXvar + object$nmuZUvar +
-          object$nuZUvar + object$nvZVvar + 1):(object$nXvar +
-          object$nmuZUvar + object$nuZUvar + 2 * object$nvZVvar)]
-          uHvar <- model.matrix(object$formula, data = object$dataTable,
-          rhs = 3)
-          vHvar <- model.matrix(object$formula, data = object$dataTable,
-          rhs = 4)
-          Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
-          Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
-          Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
-        } else {
-          if (object$udist == "lognormal") {
-          delta <- object$mlParam[(object$nXvar + object$nmuZUvar +
-            1):(object$nXvar + object$nmuZUvar + object$nuZUvar)]
-          phi1 <- object$mlParam[(object$nXvar + object$nmuZUvar +
-            object$nuZUvar + 1):(object$nXvar + object$nmuZUvar +
-            object$nuZUvar + object$nvZVvar)]
-          phi2 <- object$mlParam[(object$nXvar + object$nmuZUvar +
-            object$nuZUvar + object$nvZVvar + 1):(object$nXvar +
-            object$nmuZUvar + object$nuZUvar + 2 *
-            object$nvZVvar)]
-          uHvar <- model.matrix(object$formula, data = object$dataTable,
-            rhs = 3)
-          vHvar <- model.matrix(object$formula, data = object$dataTable,
-            rhs = 4)
-          Wu <- as.numeric(crossprod(matrix(delta),
-            t(uHvar)))
-          Wv1 <- as.numeric(crossprod(matrix(phi1),
-            t(vHvar)))
-          Wv2 <- as.numeric(crossprod(matrix(phi2),
-            t(vHvar)))
-          } else {
-          delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
-            object$nuZUvar)]
-          phi1 <- object$mlParam[(object$nXvar + object$nmuZUvar +
-            object$nuZUvar + 1):(object$nXvar + object$nmuZUvar +
-            object$nuZUvar + object$nvZVvar)]
-          phi2 <- object$mlParam[(object$nXvar + object$nmuZUvar +
-            object$nuZUvar + object$nvZVvar + 1):(object$nXvar +
-            object$nmuZUvar + object$nuZUvar + 2 *
-            object$nvZVvar)]
-          uHvar <- model.matrix(object$formula, data = object$dataTable,
-            rhs = 2)
-          vHvar <- model.matrix(object$formula, data = object$dataTable,
-            rhs = 3)
-          Wu <- as.numeric(crossprod(matrix(delta),
-            t(uHvar)))
-          Wv1 <- as.numeric(crossprod(matrix(phi1),
-            t(vHvar)))
-          Wv2 <- as.numeric(crossprod(matrix(phi2),
-            t(vHvar)))
-          }
-        }
-        if (object$udist == "lognormal" || object$udist ==
-          "tnormal") {
-          if (object$nuZUvar > 1 || object$nvZVvar >
-          1 || object$nmuZUvar > 1)
-          cat("Variances averaged over observations     \n\n")
-        } else {
-          if (object$nuZUvar > 1 || object$nvZVvar >
-          1)
-          cat("Variances averaged over observations     \n\n")
-        }
-        GROUPS <- select(efficiencies.zisfcross(object = object),
-          "Group_c") %>%
-          pull()
-        cRes <- c(cRes, sigmaSq1 = mean(exp(Wu[GROUPS ==
-          1])) + mean(exp(Wv1[GROUPS == 1])), sigmaSq2 = mean(exp(Wv2[GROUPS ==
-          2])), lambdaSq1 = mean(exp(Wu[GROUPS == 1]))/mean(exp(Wv1[GROUPS ==
-          1])), lambdaSq2 = 0, sigmauSq1 = mean(exp(Wu[GROUPS ==
-          1])), sigmauSq2 = 0, sigmavSq1 = mean(exp(Wv1[GROUPS ==
-          1])), sigmavSq2 = mean(exp(Wv2[GROUPS == 2])),
-          sigma1 = sqrt(mean(exp(Wu[GROUPS == 1])) +
-          mean(exp(Wv1[GROUPS == 1]))), sigma2 = sqrt(mean(exp(Wv2[GROUPS ==
-          2]))), lambda1 = sqrt(mean(exp(Wu[GROUPS ==
-          1]))/mean(exp(Wv1[GROUPS == 1]))), lambda2 = 0,
-          sigmau1 = sqrt(mean(exp(Wu[GROUPS == 1]))),
-          sigmau2 = 0, sigmav1 = sqrt(mean(exp(Wv1[GROUPS ==
-          1]))), sigmav2 = sqrt(mean(exp(Wv2[GROUPS ==
-          2]))), gamma1 = mean(exp(Wu[GROUPS == 1]))/(mean(exp(Wu[GROUPS ==
-          1])) + mean(exp(Wv1[GROUPS == 1]))), gamma2 = 0)
-      }
-    }
-  }
-  return(cRes)
-}
-
-# coefficients from summary.zisfcross ----------
-#' @rdname coef
-#' @aliases coef.summary.zisfcross
-#' @export
-coef.summary.zisfcross <- function(object, ...) {
-  object$mlRes
-}
-
-# coefficients from cnsfcross ----------
-#' @rdname coef
-#' @aliases coef.cnsfcross
-#' @export
-coef.cnsfcross <- function(object, extraPar = FALSE, ...) {
-  if (length(extraPar) != 1 || !is.logical(extraPar[1]))
-    stop("argument 'extraPar' must be a single logical value",
-      call. = FALSE)
-  cRes <- object$mlParam
-  if (extraPar) {
-    if (object$sigmauType == "common") {
-      if (object$udist == "tnormal") {
-        delta <- object$mlParam[(object$nXvar + object$nmuZUvar +
-          1):(object$nXvar + object$nmuZUvar + object$nuZUvar)]
-        phi1 <- object$mlParam[(object$nXvar + object$nmuZUvar +
-          object$nuZUvar + 1):(object$nXvar + object$nmuZUvar +
-          object$nuZUvar + object$nvZVvar)]
-        phi2 <- object$mlParam[(object$nXvar + object$nmuZUvar +
-          object$nuZUvar + object$nvZVvar + 1):(object$nXvar +
-          object$nmuZUvar + object$nuZUvar + 2 * object$nvZVvar)]
-        uHvar <- model.matrix(object$formula, data = object$dataTable,
-          rhs = 3)
-        vHvar <- model.matrix(object$formula, data = object$dataTable,
-          rhs = 4)
-        Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
-        Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
-        Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
-      } else {
-        if (object$udist == "lognormal") {
-          delta <- object$mlParam[(object$nXvar + object$nmuZUvar +
-          1):(object$nXvar + object$nmuZUvar + object$nuZUvar)]
-          phi1 <- object$mlParam[(object$nXvar + object$nmuZUvar +
-          object$nuZUvar + 1):(object$nXvar + object$nmuZUvar +
-          object$nuZUvar + object$nvZVvar)]
-          phi2 <- object$mlParam[(object$nXvar + object$nmuZUvar +
-          object$nuZUvar + object$nvZVvar + 1):(object$nXvar +
-          object$nmuZUvar + object$nuZUvar + 2 * object$nvZVvar)]
-          uHvar <- model.matrix(object$formula, data = object$dataTable,
-          rhs = 3)
-          vHvar <- model.matrix(object$formula, data = object$dataTable,
-          rhs = 4)
-          Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
-          Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
-          Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
-        } else {
-          delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
-          object$nuZUvar)]
-          phi1 <- object$mlParam[(object$nXvar + object$nuZUvar +
-          1):(object$nXvar + object$nuZUvar + object$nvZVvar)]
-          phi2 <- object$mlParam[(object$nXvar + object$nuZUvar +
-          object$nvZVvar + 1):(object$nXvar + object$nuZUvar +
-          2 * object$nvZVvar)]
-          uHvar <- model.matrix(object$formula, data = object$dataTable,
-          rhs = 2)
-          vHvar <- model.matrix(object$formula, data = object$dataTable,
-          rhs = 3)
-          Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
-          Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
-          Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
-        }
-      }
-      if (object$udist == "lognormal" || object$udist ==
-        "tnormal") {
-        if (object$nuZUvar > 1 || object$nvZVvar > 1 ||
-          object$nmuZUvar > 1)
-          cat("Variances averaged over observations     \n\n")
-      } else {
-        if (object$nuZUvar > 1 || object$nvZVvar > 1)
-          cat("Variances averaged over observations     \n\n")
-      }
-      GROUPS <- select(efficiencies.cnsfcross(object = object),
-        "Group_c") %>%
-        pull()
-      cRes <- c(cRes, sigmaSq1 = mean(exp(Wu[GROUPS ==
-        1])) + mean(exp(Wv1[GROUPS == 1])), sigmaSq2 = mean(exp(Wu[GROUPS ==
-        1])) + mean(exp(Wv2[GROUPS == 1])), lambdaSq1 = mean(exp(Wu[GROUPS ==
-        1]))/mean(exp(Wv1[GROUPS == 1])), lambdaSq2 = mean(exp(Wu[GROUPS ==
-        1]))/mean(exp(Wv2[GROUPS == 1])), sigmauSq = mean(exp(Wu[GROUPS ==
-        1])), sigmavSq1 = mean(exp(Wv1[GROUPS == 1])),
-        sigmavSq2 = mean(exp(Wv2[GROUPS == 2])), sigma1 = sqrt(mean(exp(Wu[GROUPS ==
-          1])) + mean(exp(Wv1[GROUPS == 1]))), sigma2 = sqrt(mean(exp(Wu[GROUPS ==
-          1])) + mean(exp(Wv2[GROUPS == 1]))), lambda1 = sqrt(mean(exp(Wu[GROUPS ==
-          1]))/mean(exp(Wv1[GROUPS == 1]))), lambda2 = sqrt(mean(exp(Wu[GROUPS ==
-          1]))/mean(exp(Wv2[GROUPS == 1]))), sigmau = sqrt(mean(exp(Wu[GROUPS ==
-          1]))), sigmav1 = sqrt(mean(exp(Wv1[GROUPS ==
-          1]))), sigmav2 = sqrt(mean(exp(Wv2[GROUPS ==
-          2]))), gamma1 = mean(exp(Wu[GROUPS == 1]))/(mean(exp(Wu[GROUPS ==
-          1])) + mean(exp(Wv1[GROUPS == 1]))), gamma2 = mean(exp(Wu[GROUPS ==
-          1]))/(mean(exp(Wu[GROUPS == 1])) + mean(exp(Wv2[GROUPS ==
-          1]))))
-    } else {
-      if (object$sigmauType == "different") {
-        if (object$udist == "tnormal") {
-          delta1 <- object$mlParam[(object$nXvar + object$nmuZUvar +
-          1):(object$nXvar + object$nmuZUvar + object$nuZUvar)]
-          delta2 <- object$mlParam[(object$nXvar + object$nmuZUvar +
-          object$nuZUvar + 1):(object$nXvar + object$nmuZUvar +
-          2 * object$nuZUvar)]
-          phi1 <- object$mlParam[(object$nXvar + object$nmuZUvar +
-          2 * object$nuZUvar + 1):(object$nXvar + object$nmuZUvar +
-          2 * object$nuZUvar + object$nvZVvar)]
-          phi2 <- object$mlParam[(object$nXvar + object$nmuZUvar +
-          2 * object$nuZUvar + object$nvZVvar + 1):(object$nXvar +
-          object$nmuZUvar + 2 * object$nuZUvar + 2 *
-          object$nvZVvar)]
-          uHvar <- model.matrix(object$formula, data = object$dataTable,
-          rhs = 3)
-          vHvar <- model.matrix(object$formula, data = object$dataTable,
-          rhs = 4)
-          Wu1 <- as.numeric(crossprod(matrix(delta1),
-          t(uHvar)))
-          Wu2 <- as.numeric(crossprod(matrix(delta2),
-          t(uHvar)))
-          Wv1 <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
-          Wv2 <- as.numeric(crossprod(matrix(phi2), t(vHvar)))
-        } else {
-          if (object$udist == "lognormal") {
-          delta1 <- object$mlParam[(object$nXvar +
-            object$nmuZUvar + 1):(object$nXvar + object$nmuZUvar +
-            object$nuZUvar)]
-          delta2 <- object$mlParam[(object$nXvar +
-            object$nmuZUvar + object$nuZUvar + 1):(object$nXvar +
-            object$nmuZUvar + 2 * object$nuZUvar)]
-          phi1 <- object$mlParam[(object$nXvar + object$nmuZUvar +
-            2 * object$nuZUvar + 1):(object$nXvar +
-            object$nmuZUvar + 2 * object$nuZUvar +
-            object$nvZVvar)]
-          phi2 <- object$mlParam[(object$nXvar + object$nmuZUvar +
-            2 * object$nuZUvar + object$nvZVvar + 1):(object$nXvar +
-            object$nmuZUvar + 2 * object$nuZUvar +
-            2 * object$nvZVvar)]
-          uHvar <- model.matrix(object$formula, data = object$dataTable,
-            rhs = 3)
-          vHvar <- model.matrix(object$formula, data = object$dataTable,
-            rhs = 4)
-          Wu1 <- as.numeric(crossprod(matrix(delta1),
-            t(uHvar)))
-          Wu2 <- as.numeric(crossprod(matrix(delta2),
-            t(uHvar)))
-          Wv1 <- as.numeric(crossprod(matrix(phi1),
-            t(vHvar)))
-          Wv2 <- as.numeric(crossprod(matrix(phi2),
-            t(vHvar)))
-          } else {
-          delta1 <- object$mlParam[(object$nXvar +
-            1):(object$nXvar + object$nuZUvar)]
-          delta2 <- object$mlParam[(object$nXvar +
-            object$nuZUvar + 1):(object$nXvar + 2 *
-            object$nuZUvar)]
-          phi1 <- object$mlParam[(object$nXvar + 2 *
-            object$nuZUvar + 1):(object$nXvar + 2 *
-            object$nuZUvar + object$nvZVvar)]
-          phi2 <- object$mlParam[(object$nXvar + object$nuZUvar +
-            object$nvZVvar + 1):(object$nXvar + object$nuZUvar +
-            2 * object$nvZVvar)]
-          uHvar <- model.matrix(object$formula, data = object$dataTable,
-            rhs = 2)
-          vHvar <- model.matrix(object$formula, data = object$dataTable,
-            rhs = 3)
-          Wu1 <- as.numeric(crossprod(matrix(delta1),
-            t(uHvar)))
-          Wu2 <- as.numeric(crossprod(matrix(delta2),
-            t(uHvar)))
-          Wv1 <- as.numeric(crossprod(matrix(phi1),
-            t(vHvar)))
-          Wv2 <- as.numeric(crossprod(matrix(phi2),
-            t(vHvar)))
-          }
-        }
-        if (object$udist == "lognormal" || object$udist ==
-          "tnormal") {
-          if (object$nuZUvar > 1 || object$nvZVvar >
-          1 || object$nmuZUvar > 1)
-          cat("Variances averaged over observations     \n\n")
-        } else {
-          if (object$nuZUvar > 1 || object$nvZVvar >
-          1)
-          cat("Variances averaged over observations     \n\n")
-        }
-        GROUPS <- select(efficiencies.cnsfcross(object = object),
-          "Group_c") %>%
-          pull()
-        cRes <- c(cRes, sigmaSq1 = mean(exp(Wu1[GROUPS ==
-          1])) + mean(exp(Wv1[GROUPS == 1])), sigmaSq2 = mean(exp(Wu2[GROUPS ==
-          1])) + mean(exp(Wv2[GROUPS == 1])), lambdaSq1 = mean(exp(Wu1[GROUPS ==
-          1]))/mean(exp(Wv1[GROUPS == 1])), lambdaSq2 = mean(exp(Wu2[GROUPS ==
-          1]))/mean(exp(Wv2[GROUPS == 1])), sigmauSq1 = mean(exp(Wu1[GROUPS ==
-          1])), sigmauSq2 = mean(exp(Wu2[GROUPS == 1])),
-          sigmavSq1 = mean(exp(Wv1[GROUPS == 1])), sigmavSq2 = mean(exp(Wv2[GROUPS ==
-          2])), sigma1 = sqrt(mean(exp(Wu1[GROUPS ==
-          1])) + mean(exp(Wv1[GROUPS == 1]))), sigma2 = sqrt(mean(exp(Wu2[GROUPS ==
-          1])) + mean(exp(Wv2[GROUPS == 1]))), lambda1 = sqrt(mean(exp(Wu1[GROUPS ==
-          1]))/mean(exp(Wv1[GROUPS == 1]))), lambda2 = sqrt(mean(exp(Wu2[GROUPS ==
-          1]))/mean(exp(Wv2[GROUPS == 1]))), sigmau1 = sqrt(mean(exp(Wu1[GROUPS ==
-          1]))), sigmau2 = sqrt(mean(exp(Wu2[GROUPS ==
-          1]))), sigmav1 = sqrt(mean(exp(Wv1[GROUPS ==
-          1]))), sigmav2 = sqrt(mean(exp(Wv2[GROUPS ==
-          2]))), gamma1 = mean(exp(Wu1[GROUPS == 1]))/(mean(exp(Wu1[GROUPS ==
-          1])) + mean(exp(Wv1[GROUPS == 1]))), gamma2 = mean(exp(Wu2[GROUPS ==
-          1]))/(mean(exp(Wu2[GROUPS == 1])) + mean(exp(Wv2[GROUPS ==
-          1]))))
-      }
-    }
-  }
-  return(cRes)
-}
-
-# coefficients from summary.cnsfcross ----------
-#' @rdname coef
-#' @aliases coef.summary.cnsfcross
-#' @export
-coef.summary.cnsfcross <- function(object, ...) {
-  object$mlRes
-}
-
-# coefficients from misfcross ----------
-#' @rdname coef
-#' @aliases coef.misfcross
-#' @export
-coef.misfcross <- function(object, extraPar = FALSE, ...) {
-  if (length(extraPar) != 1 || !is.logical(extraPar[1]))
-    stop("argument 'extraPar' must be a single logical value",
-      call. = FALSE)
-  cRes <- object$mlParam
-  if (extraPar) {
-    if (object$udist == "tnormal") {
-      delta1 <- object$mlParam[(object$nXvar + object$nmuZUvar +
-        1):(object$nXvar + object$nmuZUvar + object$nuZUvar)]
-      delta2 <- object$mlParam[(object$nXvar + object$nmuZUvar +
-        object$nuZUvar + 1):(object$nXvar + object$nmuZUvar +
-        2 * object$nuZUvar)]
-      phi <- object$mlParam[(object$nXvar + object$nmuZUvar +
-        2 * object$nuZUvar + 1):(object$nXvar + object$nmuZUvar +
-        2 * object$nuZUvar + object$nvZVvar)]
-      uHvar <- model.matrix(object$formula, data = object$dataTable,
-        rhs = 3)
-      vHvar <- model.matrix(object$formula, data = object$dataTable,
-        rhs = 4)
-      Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
-      Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
-      Wv <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
-    } else {
-      if (object$udist == "lognormal") {
-        delta1 <- object$mlParam[(object$nXvar + object$nmuZUvar +
-          1):(object$nXvar + object$nmuZUvar + object$nuZUvar)]
-        delta2 <- object$mlParam[(object$nXvar + object$nmuZUvar +
-          object$nuZUvar + 1):(object$nXvar + object$nmuZUvar +
-          2 * object$nuZUvar)]
-        phi <- object$mlParam[(object$nXvar + object$nmuZUvar +
-          2 * object$nuZUvar + 1):(object$nXvar + object$nmuZUvar +
-          2 * object$nuZUvar + object$nvZVvar)]
-        uHvar <- model.matrix(object$formula, data = object$dataTable,
-          rhs = 3)
-        vHvar <- model.matrix(object$formula, data = object$dataTable,
-          rhs = 4)
-        Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
-        Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
-        Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
-      } else {
-        delta1 <- object$mlParam[(object$nXvar + 1):(object$nXvar +
-          object$nuZUvar)]
-        delta2 <- object$mlParam[(object$nXvar + object$nuZUvar +
-          1):(object$nXvar + 2 * object$nuZUvar)]
-        phi <- object$mlParam[(object$nXvar + 2 * object$nuZUvar +
-          1):(object$nXvar + 2 * object$nuZUvar + object$nvZVvar)]
-        uHvar <- model.matrix(object$formula, data = object$dataTable,
-          rhs = 2)
-        vHvar <- model.matrix(object$formula, data = object$dataTable,
-          rhs = 3)
-        Wu1 <- as.numeric(crossprod(matrix(delta1), t(uHvar)))
-        Wu2 <- as.numeric(crossprod(matrix(delta2), t(uHvar)))
-        Wv <- as.numeric(crossprod(matrix(phi1), t(vHvar)))
-      }
-    }
-    if (object$udist == "lognormal" || object$udist == "tnormal") {
-      if (object$nuZUvar > 1 || object$nvZVvar > 1 || object$nmuZUvar >
-        1)
-        cat("Variances averaged over observations     \n\n")
-    } else {
-      if (object$nuZUvar > 1 || object$nvZVvar > 1)
-        cat("Variances averaged over observations     \n\n")
-    }
-    GROUPS <- select(efficiencies.misfcross(object = object),
-      "Group_c") %>%
-      pull()
-    cRes <- c(cRes, sigmaSq1 = mean(exp(Wu1[GROUPS == 1])) +
-      mean(exp(Wv[GROUPS == 1])), sigmaSq2 = mean(exp(Wu2[GROUPS ==
-      1])) + mean(exp(Wv[GROUPS == 1])), lambdaSq1 = mean(exp(Wu1[GROUPS ==
-      1]))/mean(exp(Wv[GROUPS == 1])), lambdaSq2 = mean(exp(Wu2[GROUPS ==
-      1]))/mean(exp(Wv[GROUPS == 1])), sigmauSq1 = mean(exp(Wu1[GROUPS ==
-      1])), sigmauSq2 = mean(exp(Wu2[GROUPS == 1])), sigmavSq1 = mean(exp(Wv[GROUPS ==
-      1])), sigmavSq2 = mean(exp(Wv[GROUPS == 2])), sigma1 = sqrt(mean(exp(Wu1[GROUPS ==
-      1])) + mean(exp(Wv[GROUPS == 1]))), sigma2 = sqrt(mean(exp(Wu2[GROUPS ==
-      1])) + mean(exp(Wv[GROUPS == 1]))), lambda1 = sqrt(mean(exp(Wu1[GROUPS ==
-      1]))/mean(exp(Wv[GROUPS == 1]))), lambda2 = sqrt(mean(exp(Wu2[GROUPS ==
-      1]))/mean(exp(Wv[GROUPS == 1]))), sigmau1 = sqrt(mean(exp(Wu1[GROUPS ==
-      1]))), sigmau2 = sqrt(mean(exp(Wu2[GROUPS == 1]))),
-      sigmav1 = sqrt(mean(exp(Wv[GROUPS == 1]))), sigmav2 = sqrt(mean(exp(Wv[GROUPS ==
-        2]))), gamma1 = mean(exp(Wu1[GROUPS == 1]))/(mean(exp(Wu1[GROUPS ==
-        1])) + mean(exp(Wv[GROUPS == 1]))), gamma2 = mean(exp(Wu2[GROUPS ==
-        1]))/(mean(exp(Wu2[GROUPS == 1])) + mean(exp(Wv[GROUPS ==
-        1]))))
-  }
-  return(cRes)
-}
-
-# coefficients from summary.misfcross ----------
-#' @rdname coef
-#' @aliases coef.summary.misfcross
-#' @export
-coef.summary.misfcross <- function(object, ...) {
   object$mlRes
 }

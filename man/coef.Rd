@@ -8,12 +8,6 @@
 \alias{coef.summary.lcmcross}
 \alias{coef.sfaselectioncross}
 \alias{coef.summary.sfaselectioncross}
-\alias{coef.zisfcross}
-\alias{coef.summary.zisfcross}
-\alias{coef.cnsfcross}
-\alias{coef.summary.cnsfcross}
-\alias{coef.misfcross}
-\alias{coef.summary.misfcross}
 \title{Extract coefficients of stochastic frontier models}
 \usage{
 \method{coef}{sfacross}(object, extraPar = FALSE, ...)
@@ -27,27 +21,12 @@
 \method{coef}{sfaselectioncross}(object, extraPar = FALSE, ...)
 
 \method{coef}{summary.sfaselectioncross}(object, ...)
-
-\method{coef}{zisfcross}(object, extraPar = FALSE, ...)
-
-\method{coef}{summary.zisfcross}(object, ...)
-
-\method{coef}{cnsfcross}(object, extraPar = FALSE, ...)
-
-\method{coef}{summary.cnsfcross}(object, ...)
-
-\method{coef}{misfcross}(object, extraPar = FALSE, ...)
-
-\method{coef}{summary.misfcross}(object, ...)
 }
 \arguments{
-\item{object}{A stochastic frontier model returned
-by \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{misfcross}},
-\code{\link{sfacross}}, \code{\link{sfaselectioncross}} or
-\code{\link{zisfcross}}, or an object of class \code{'summary.cnsfcross'},
-\code{'summary.lcmcross'}, \code{'summary.misfcross'},
-\code{'summary.sfacross'}, \code{'summary.sfaselectioncross'} or
-\code{'summary.zisfcross'} .}
+\item{object}{A stochastic frontier model returned by \code{\link{lcmcross}},
+\code{\link{sfacross}}, or \code{\link{sfaselectioncross}}, or an object of
+class \code{'summary.lcmcross'}, \code{'summary.sfacross'},
+or \code{'summary.sfaselectioncross'}.}
 
 \item{extraPar}{Logical (default = \code{FALSE}). If \code{TRUE}, additional
 parameters are returned:
@@ -56,9 +35,9 @@ parameters are returned:
 
 \code{lambdaSq} = \code{sigmauSq}/\code{sigmavSq}
 
-\code{sigmauSq} = \eqn{\exp{(Wu)}} = \eqn{\exp{(\delta Z_u)}}
+\code{sigmauSq} = \eqn{\exp{(Wu)}} = \eqn{\exp{(\bm{\delta}' \mathbf{Z}_u)}}
 
-\code{sigmavSq} = \eqn{\exp{(Wv)}} = \eqn{\exp{(\phi Z_v)}}
+\code{sigmavSq} = \eqn{\exp{(Wv)}} = \eqn{\exp{(\bm{\phi}' \mathbf{Z}_v)}}
 
 \code{sigma} = \code{sigmaSq}^0.5
 
@@ -73,30 +52,27 @@ parameters are returned:
 \item{...}{Currently ignored.}
 }
 \value{
-For objects of class \code{'summary.cnsfcross'},
-\code{'summary.lcmcross'},  \code{'summary.sfacross'},
-\code{'summary.sfaselectioncross'} or \code{'summary.zisfcross'},
-\code{\link{coef}} returns a matrix with four columns. Namely, the estimated
-coefficients, their standard errors, z-values, and (asymptotic) P-values.
+For objects of class \code{'summary.lcmcross'},
+\code{'summary.sfacross'}, or \code{'summary.sfaselectioncross'},
+\code{\link{coef}} returns a matrix with four columns. Namely, the
+estimated coefficients, their standard errors, z-values,
+and (asymptotic) P-values.
 
-For objects of class \code{'cnsfcross'}, \code{'lcmcross'},
-\code{'sfacross'}, \code{'sfaselectioncross'} or \code{'zisfcross'},
-\code{\link{coef}} returns a numeric vector of the estimated coefficients.
-If \code{extraPar = TRUE}, additional parameters, detailed in the section
-\sQuote{Arguments}, are also returned. In the case of object of class
-\code{'lcmcross'}, each additional parameter terminates with \code{'#'} that
-represents the class number.
+For objects of class \code{'lcmcross'}, \code{'sfacross'}, or
+\code{'sfaselectioncross'}, \code{\link{coef}} returns a numeric vector of the
+estimated coefficients. If \code{extraPar = TRUE}, additional parameters,
+detailed in the section \sQuote{Arguments}, are also returned. In the case
+of object of class \code{'lcmcross'}, each additional
+parameter terminates with \code{'#'} that represents the class number.
 }
 \description{
-From an object of class \code{'summary.cnsfcross'}, \code{'summary.lcmcross'},
-\code{'summary.misfcross'}, \code{'summary.sfacross'},
-\code{'summary.sfaselectioncross'} or \code{'summary.zisfcross'},
+From an object of class \code{'summary.lcmcross'},
+\code{'summary.sfacross'}, or \code{'summary.sfaselectioncross'},
 \code{\link{coef}} extracts the coefficients,
 their standard errors, z-values, and (asymptotic) P-values.
 
-From on object of class \code{'cnsfcross'}, \code{'lcmcross'},
-\code{'misfcross'}, \code{'sfacross'}, \code{'sfaselectioncross'} or
-\code{'zisfcross'}, it extracts only the estimated coefficients.
+From on object of class \code{'lcmcross'}, \code{'sfacross'}, or
+\code{'sfaselectioncross'}, it extracts only the estimated coefficients.
 }
 \examples{
 
@@ -112,23 +88,14 @@ coef(summary(tl_u_ts))
 
 }
 \seealso{
-\code{\link{cnsfcross}}, for the contaminated noise stochastic
-frontier analysis model fitting function.
-
 \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
-model fitting function.
-
-\code{\link{misfcross}}, for the multi-modal inefficiency stochastic frontier
-analysis model fitting function.
+model fitting function using cross-sectional or pooled data.
 
 \code{\link{sfacross}}, for the stochastic frontier analysis model
-fitting function.
+fitting function using cross-sectional or pooled data.
 
 \code{\link{sfaselectioncross}} for sample selection in stochastic frontier
-model fitting function.
-
-\code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
-fitting function.
+model fitting function using cross-sectional or pooled data.
 }
 \keyword{coefficients}
 \keyword{methods}

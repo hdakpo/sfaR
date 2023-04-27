@@ -60,7 +60,6 @@ cLCMhalfnormlike2C <- function(parm, nXvar, nuZUvar, nvZVvar,
   ifelse(L <= 0, return(NA), return(wHvar * log(L)))
 }
 
-
 # starting value for the log-likelihood ----------
 #' starting values for lcm 2 classes halfnormal-normal distribution
 #' @param olsObj OLS object
@@ -764,8 +763,8 @@ LCM2ChnormAlgOpt <- function(start, olsParam, dataTable, S, wHvar,
 }
 
 # Posterior probabilities and efficiencies ----------
-#' post. prob. and efficiencies for lcm 2 classes halfnormal-normal distribution
-#' @param object object of class sfacross
+#' post. prob. and efficiencies for lcmcross 2 classes halfnormal-normal distribution
+#' @param object object of class lcmcross
 #' @param level level for confidence interval
 #' @noRd
 cLCM2Chalfnormeff <- function(object, level) {
@@ -860,8 +859,8 @@ cLCM2Chalfnormeff <- function(object, level) {
 }
 
 # Marginal effects on inefficiencies ----------
-#' marginal effects for for lcm 2 classes halfnormal-normal distribution
-#' @param object object of class sfacross
+#' marginal effects for for lcmcross 2 classes halfnormal-normal distribution
+#' @param object object of class lcmcross
 #' @noRd
 cmargLCM2Chalfnorm_Eu <- function(object) {
   beta1 <- object$mlParam[1:(object$nXvar)]
@@ -919,11 +918,14 @@ cmargLCM2Chalfnorm_Eu <- function(object) {
     nrow = 1), matrix(exp(Wu2/2) * dnorm(0), ncol = 1))
   colnames(margEff_c2) <- paste0("Eu_", colnames(uHvar)[-1],
     "_c2")
-  margEff_c <- ifelse(Group_c == 1, margEff_c1, margEff_c2)
+  margEff_c <- matrix(nrow = nrow(margEff_c1), ncol = ncol(margEff_c1))
+  for (c in 1:ncol(margEff_c1)) {
+    margEff_c[, c] <- ifelse(Group_c == 1, margEff_c1[, c],
+      margEff_c2[, c])
+  }
   colnames(margEff_c) <- paste0("Eu_", colnames(uHvar)[-1],
     "_c")
-  margEff <- data.frame(as_tibble(margEff_c), as_tibble(margEff_c1),
-    as_tibble(margEff_c2))
+  margEff <- data.frame(margEff_c, margEff_c1, margEff_c2)
   return(margEff)
 }
 
@@ -985,10 +987,13 @@ cmargLCM2Chalfnorm_Vu <- function(object) {
     ncol = 1))
   colnames(margEff_c2) <- paste0("Vu_", colnames(uHvar)[-1],
     "_c2")
-  margEff_c <- ifelse(Group_c == 1, margEff_c1, margEff_c2)
+  margEff_c <- matrix(nrow = nrow(margEff_c1), ncol = ncol(margEff_c1))
+  for (c in 1:ncol(margEff_c1)) {
+    margEff_c[, c] <- ifelse(Group_c == 1, margEff_c1[, c],
+      margEff_c2[, c])
+  }
   colnames(margEff_c) <- paste0("Vu_", colnames(uHvar)[-1],
     "_c")
-  margEff <- data.frame(as_tibble(margEff_c), as_tibble(margEff_c1),
-    as_tibble(margEff_c2))
+  margEff <- data.frame(margEff_c, margEff_c1, margEff_c2)
   return(margEff)
 }

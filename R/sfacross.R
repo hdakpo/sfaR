@@ -481,7 +481,7 @@
 #'
 #' ## Using data on Philippine rice producers
 #' # Cobb Douglas (production function) generalized exponential, and Weibull 
-#' distributions
+#' # distributions
 #'
 #' cb_p_ge <- sfacross(formula = log(PROD) ~ log(AREA) + log(LABOR) + log(NPK) +
 #' log(OTHER), udist = 'genexponential', data = ricephil, S = 1, method = 'bfgs')
@@ -543,7 +543,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
     data <- environment(formula)
   }
   mc$formula <- formula
-  mc$na.action <- na.pass
+  mc$na.action <- na.pass # see sfaselectioncross: na.omit
   mc[[1L]] <- quote(model.frame)
   mc <- eval(mc, parent.frame())
   validObs <- rowSums(is.na(mc) | is.infinite.data.frame(mc)) ==

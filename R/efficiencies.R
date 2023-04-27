@@ -6,22 +6,18 @@
 
 #------------------------------------------------------------------------------#
 # Efficiency/Inefficiency estimation                                           #
-# Models: -Standard Stochastic Frontier Analysis                               #
-#         -Latent Class Stochastic Frontier Analysis                           #
-#         -Sample selection correction                                         #
-#         -Zero inefficiency stochastic frontier                               #
-#         -Contaminated noise stochastic frontier                              #
-#         -Multi-Modal Inefficiency Stochastic Frontier Analysis               #
-#         -Generalized Zero Inefficiency Stochastic Frontier Analysis          #
+# Models: + Cross sectional & Pooled data                                      #
+#           -Stochastic Frontier Analysis                                      #
+#           -Latent Class Stochastic Frontier Analysis                         #
+#           -Sample selection correction for Stochastic Frontier Model         #
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
 
 #' Compute conditional (in-)efficiency estimates of stochastic frontier models
 #'
 #' \code{\link{efficiencies}} returns (in-)efficiency estimates of models 
-#' estimated with \code{\link{cnsfcross}}, \code{\link{gzisfcross}}, 
-#' \code{\link{lcmcross}}, \code{\link{misfcross}}, \code{\link{sfacross}}, 
-#' \code{\link{sfaselectioncross}}, or \code{\link{zisfcross}}.
+#' estimated with \code{\link{lcmcross}}, \code{\link{sfacross}}, or 
+#' \code{\link{sfaselectioncross}}.
 #' 
 #' @name efficiencies
 #'
@@ -110,9 +106,8 @@
 #' \leq\exp{\left(-LB_i\right)}}
 #'
 #' @param object A stochastic frontier model returned
-#' by \code{\link{cnsfcross}}, \code{\link{gzisfcross}}, \code{\link{lcmcross}}, 
-#' \code{\link{misfcross}}, \code{\link{sfacross}}, 
-#' \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.
+#' by \code{\link{lcmcross}}, \code{\link{sfacross}}, or 
+#' \code{\link{sfaselectioncross}}.
 #' @param level A number between between 0 and 0.9999 used for the computation
 #' of (in-)efficiency confidence intervals (defaut = \code{0.95}). Only used
 #' when \code{udist} = \code{'hnormal'}, \code{'exponential'}, \code{'tnormal'}
@@ -127,9 +122,7 @@
 #' These are ordered in the same way as the corresponding observations in the
 #' dataset used for the estimation.
 #' 
-#' \bold{- For object of class \code{'cnsfcross'}, or \code{'gzisfcross'}, 
-#' \code{'lcmcross'}, or \code{'misfcross'}, or \code{'zisfcross'} the following 
-#' elements are returned:}
+#' \bold{- For object of class \code{'lcmcross'} the following elements are returned:}
 #'
 #' \item{Group_c}{Most probable class for each observation.}
 #'
@@ -144,16 +137,13 @@
 #' posterior probability.}
 #' 
 #' \item{teJLMS_c}{\eqn{\exp{(-E[u_c|\epsilon_c])}}. Only when, in the function
-#' \link{cnsfcross}, or \link{gzisfcross}, or \link{lcmcross}, or 
-#' \link{zisfcross}, \code{logDepVar = TRUE}.}
+#' \link{lcmcross} \code{logDepVar = TRUE}.}
 #' 
-#' \item{teBC_c}{\eqn{E\left[\exp{(-u_c)}|\epsilon_c\right]}. Only when, in the
-#'  function \link{cnsfcross}, or \link{gzisfcross}, or \link{lcmcross}, or 
-#'  \link{zisfcross}, \code{logDepVar = TRUE}.}
+#' \item{teBC_c}{\eqn{E\left[\exp{(-u_c)}|\epsilon_c\right]}. Only when, in the 
+#' function \link{lcmcross} \code{logDepVar = TRUE}.}
 #' 
 #' \item{teBC_reciprocal_c}{\eqn{E\left[\exp{(u_c)}|\epsilon_c\right]}. Only 
-#' when, in the function \link{cnsfcross}, or \link{gzisfcross}, or 
-#' \link{lcmcross}, or \link{zisfcross}, \code{logDepVar = TRUE}.}
+#' when, in the function \link{lcmcross} \code{logDepVar = TRUE}.}
 #'
 #' \item{PosteriorProb_c#}{Posterior probability of class #.}
 #'
@@ -164,15 +154,13 @@
 #' 
 #' \item{teBC_c#}{Conditional efficiency 
 #' (\eqn{E\left[\exp{(-u_c)}|\epsilon_c\right]}) associated to class #, 
-#' regardless of \code{Group_c}. Only when, in the function \link{cnsfcross},
-#' or \link{gzisfcross}, or \link{lcmcross}, or \link{zisfcross}, 
-#' \code{logDepVar = TRUE}.}
+#' regardless of \code{Group_c}. Only when, in the function
+#' \link{lcmcross} \code{logDepVar = TRUE}.}
 #' 
 #' \item{teBC_reciprocal_c#}{Reciprocal conditional efficiency 
 #' (\eqn{E\left[\exp{(u_c)}|\epsilon_c\right]}) associated to class #, 
-#' regardless of \code{Group_c}. Only when, in the function \link{cnsfcross}, 
-#' or \link{gzisfcross}, or \link{lcmcross}, or \link{zisfcross}, 
-#' \code{logDepVar = TRUE}.}
+#' regardless of \code{Group_c}. Only when, in the function
+#' \link{lcmcross} \code{logDepVar = TRUE}.}
 #'
 #' \item{ineff_c#}{Conditional inefficiency (\code{u_c}) for observations in
 #' class # only.}
@@ -253,26 +241,14 @@
 #'
 # @author K Hervé Dakpo
 #'
-#' @seealso \code{\link{cnsfcross}}, for the contaminated noise stochastic 
-#' frontier analysis model fitting function.
-#' 
-#' \code{\link{gzisfcross}}, for the generalized zero inefficiency stochastic 
-#' frontier analysis model fitting function.
-#'
-#' \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
-#' model fitting function.
-#' 
-#' \code{\link{misfcross}}, for the multi-modal inefficiency stochastic frontier 
-#' analysis model fitting function.
+#' @seealso \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
+#' model fitting function using cross-sectional or pooled data.
 #' 
 #' \code{\link{sfacross}}, for the stochastic frontier analysis model
-#' fitting function.
+#' fitting function using cross-sectional or pooled data.
 #' 
 #' \code{\link{sfaselectioncross}} for sample selection in stochastic frontier 
-#' model fitting function.
-#' 
-#' \code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
-#' fitting function.
+#' model fitting function using cross-sectional or pooled data.
 #'
 #' @references Battese, G.E., and T.J. Coelli. 1988. Prediction of firm-level
 #' technical efficiencies with a generalized frontier production function and
@@ -431,353 +407,5 @@ efficiencies.sfaselectioncross <- function(object, level = 0.95,
     object$Nobs <- dim(newData)[1]
   }
   EffRes <- chalfnormeff_ss(object = object, level = level)
-  return(data.frame(EffRes))
-}
-
-# conditional efficiencies zisfcross ----------
-#' @rdname efficiencies
-#' @aliases efficiencies.zisfcross
-#' @export
-efficiencies.zisfcross <- function(object, level = 0.95, newData = NULL,
-  ...) {
-  if (level < 0 || level > 0.9999) {
-    stop("'level' must be between 0 and 0.9999", call. = FALSE)
-  }
-  if (!is.null(newData)) {
-    if (!is.data.frame(newData)) {
-      stop("argument 'newData' must be of class data.frame")
-    }
-    object$dataTable <- newData
-    object$Nobs <- dim(newData)[1]
-  }
-  if (object$sigmavType == "common") {
-    if (object$udist == "hnormal") {
-      EffRes <- eval(parse(text = paste0("czisfhalfnormeff_",
-        object$linkF, "(object = object, level = level)")))
-    } else {
-      if (object$udist == "exponential") {
-        eval(parse(text = paste0("czisfexponormeff_",
-          object$linkF, "(object = object, level = level)")))
-      } else {
-        if (object$udist == "gamma") {
-          eval(parse(text = paste0("czisfgammanormeff_",
-          object$linkF, "(object = object, level = level)")))
-        } else {
-          if (object$udist == "rayleigh") {
-          eval(parse(text = paste0("czisfraynormeff_",
-            object$linkF, "(object = object, level = level)")))
-          } else {
-          if (object$udist == "uniform") {
-            eval(parse(text = paste0("czisfuninormeff_",
-            object$linkF, "(object = object, level = level)")))
-          } else {
-            if (object$udist == "tnormal") {
-            eval(parse(text = paste0("czisftruncnormeff_",
-              object$linkF, "(object = object, level = level)")))
-            } else {
-            if (object$udist == "lognormal") {
-              eval(parse(text = paste0("czisflognormeff_",
-              object$linkF, "(object = object, level = level)")))
-            } else {
-              if (object$udist == "genexponential") {
-              eval(parse(text = paste0("czisfgenexponormeff_",
-                object$linkF, "(object = object, level = level)")))
-              } else {
-              if (object$udist == "tslaplace") {
-                eval(parse(text = paste0("czisftslnormeff_",
-                object$linkF, "(object = object, level = level)")))
-              } else {
-                if (object$udist == "weibull") {
-                eval(parse(text = paste0("czisfweibullnormeff_",
-                  object$linkF, "(object = object, level = level)")))
-                }
-              }
-              }
-            }
-            }
-          }
-          }
-        }
-      }
-    }
-  } else {
-    if (object$sigmavType == "different") {
-      if (object$udist == "hnormal") {
-        EffRes <- eval(parse(text = paste0("cmnsfhalfnormeff_",
-          object$linkF, "(object = object, level = level)")))
-      } else {
-        if (object$udist == "exponential") {
-          eval(parse(text = paste0("cmnsfexponormeff_",
-          object$linkF, "(object = object, level = level)")))
-        } else {
-          if (object$udist == "gamma") {
-          eval(parse(text = paste0("cmnsfgammanormeff_",
-            object$linkF, "(object = object, level = level)")))
-          } else {
-          if (object$udist == "rayleigh") {
-            eval(parse(text = paste0("cmnsfraynormeff_",
-            object$linkF, "(object = object, level = level)")))
-          } else {
-            if (object$udist == "uniform") {
-            eval(parse(text = paste0("cmnsfuninormeff_",
-              object$linkF, "(object = object, level = level)")))
-            } else {
-            if (object$udist == "tnormal") {
-              eval(parse(text = paste0("cmnsftruncnormeff_",
-              object$linkF, "(object = object, level = level)")))
-            } else {
-              if (object$udist == "lognormal") {
-              eval(parse(text = paste0("cmnsflognormeff_",
-                object$linkF, "(object = object, level = level)")))
-              } else {
-              if (object$udist == "genexponential") {
-                eval(parse(text = paste0("cmnsfgenexponormeff_",
-                object$linkF, "(object = object, level = level)")))
-              } else {
-                if (object$udist == "tslaplace") {
-                eval(parse(text = paste0("cmnsftslnormeff_",
-                  object$linkF, "(object = object, level = level)")))
-                } else {
-                if (object$udist == "weibull") {
-                  eval(parse(text = paste0("cmnsfweibullnormeff_",
-                  object$linkF, "(object = object, level = level)")))
-                }
-                }
-              }
-              }
-            }
-            }
-          }
-          }
-        }
-      }
-    }
-  }
-  return(data.frame(EffRes))
-}
-
-# conditional efficiencies cnsfcross ----------
-#' @rdname efficiencies
-#' @aliases efficiencies.cnsfcross
-#' @export
-efficiencies.cnsfcross <- function(object, level = 0.95, newData = NULL,
-  ...) {
-  if (level < 0 || level > 0.9999) {
-    stop("'level' must be between 0 and 0.9999", call. = FALSE)
-  }
-  if (!is.null(newData)) {
-    if (!is.data.frame(newData)) {
-      stop("argument 'newData' must be of class data.frame")
-    }
-    object$dataTable <- newData
-    object$Nobs <- dim(newData)[1]
-  }
-  if (object$sigmauType == "common") {
-    if (object$udist == "hnormal") {
-      EffRes <- eval(parse(text = paste0("ccnsfhalfnormeff_",
-        object$linkF, "(object = object, level = level)")))
-    } else {
-      if (object$udist == "exponential") {
-        eval(parse(text = paste0("ccnsfexponormeff_",
-          object$linkF, "(object = object, level = level)")))
-      } else {
-        if (object$udist == "gamma") {
-          eval(parse(text = paste0("ccnsfgammanormeff_",
-          object$linkF, "(object = object, level = level)")))
-        } else {
-          if (object$udist == "rayleigh") {
-          eval(parse(text = paste0("ccnsfraynormeff_",
-            object$linkF, "(object = object, level = level)")))
-          } else {
-          if (object$udist == "uniform") {
-            eval(parse(text = paste0("ccnsfuninormeff_",
-            object$linkF, "(object = object, level = level)")))
-          } else {
-            if (object$udist == "tnormal") {
-            eval(parse(text = paste0("ccnsftruncnormeff_",
-              object$linkF, "(object = object, level = level)")))
-            } else {
-            if (object$udist == "lognormal") {
-              eval(parse(text = paste0("ccnsflognormeff_",
-              object$linkF, "(object = object, level = level)")))
-            } else {
-              if (object$udist == "genexponential") {
-              eval(parse(text = paste0("ccnsfgenexponormeff_",
-                object$linkF, "(object = object, level = level)")))
-              } else {
-              if (object$udist == "tslaplace") {
-                eval(parse(text = paste0("ccnsftslnormeff_",
-                object$linkF, "(object = object, level = level)")))
-              } else {
-                if (object$udist == "weibull") {
-                eval(parse(text = paste0("ccnsfweibullnormeff_",
-                  object$linkF, "(object = object, level = level)")))
-                }
-              }
-              }
-            }
-            }
-          }
-          }
-        }
-      }
-    }
-  } else {
-    if (object$sigmauType == "different") {
-      if (object$udist == "hnormal") {
-        EffRes <- eval(parse(text = paste0("cmcesfhalfnormeff_",
-          object$linkF, "(object = object, level = level)")))
-      } else {
-        if (object$udist == "exponential") {
-          eval(parse(text = paste0("cmcesfexponormeff_",
-          object$linkF, "(object = object, level = level)")))
-        } else {
-          if (object$udist == "gamma") {
-          eval(parse(text = paste0("cmcesfgammanormeff_",
-            object$linkF, "(object = object, level = level)")))
-          } else {
-          if (object$udist == "rayleigh") {
-            eval(parse(text = paste0("cmcesfraynormeff_",
-            object$linkF, "(object = object, level = level)")))
-          } else {
-            if (object$udist == "uniform") {
-            eval(parse(text = paste0("cmcesfuninormeff_",
-              object$linkF, "(object = object, level = level)")))
-            } else {
-            if (object$udist == "tnormal") {
-              eval(parse(text = paste0("cmcesftruncnormeff_",
-              object$linkF, "(object = object, level = level)")))
-            } else {
-              if (object$udist == "lognormal") {
-              eval(parse(text = paste0("cmcesflognormeff_",
-                object$linkF, "(object = object, level = level)")))
-              } else {
-              if (object$udist == "genexponential") {
-                eval(parse(text = paste0("cmcesfgenexponormeff_",
-                object$linkF, "(object = object, level = level)")))
-              } else {
-                if (object$udist == "tslaplace") {
-                eval(parse(text = paste0("cmcesftslnormeff_",
-                  object$linkF, "(object = object, level = level)")))
-                } else {
-                if (object$udist == "weibull") {
-                  eval(parse(text = paste0("cmcesfweibullnormeff_",
-                  object$linkF, "(object = object, level = level)")))
-                }
-                }
-              }
-              }
-            }
-            }
-          }
-          }
-        }
-      }
-    }
-  }
-  return(data.frame(EffRes))
-}
-
-# conditional efficiencies misfcross ----------
-#' @rdname efficiencies
-#' @aliases efficiencies.misfcross
-#' @export
-efficiencies.misfcross <- function(object, level = 0.95, newData = NULL,
-  ...) {
-  if (level < 0 || level > 0.9999) {
-    stop("'level' must be between 0 and 0.9999", call. = FALSE)
-  }
-  if (!is.null(newData)) {
-    if (!is.data.frame(newData)) {
-      stop("argument 'newData' must be of class data.frame")
-    }
-    object$dataTable <- newData
-    object$Nobs <- dim(newData)[1]
-  }
-  if (object$udist == "hnormal") {
-    EffRes <- eval(parse(text = paste0("cmisfhalfnormeff_",
-      object$linkF, "(object = object, level = level)")))
-  } else {
-    if (object$udist == "exponential") {
-      eval(parse(text = paste0("cmisfexponormeff_", object$linkF,
-        "(object = object, level = level)")))
-    } else {
-      if (object$udist == "gamma") {
-        eval(parse(text = paste0("cmisfgammanormeff_",
-          object$linkF, "(object = object, level = level)")))
-      } else {
-        if (object$udist == "rayleigh") {
-          eval(parse(text = paste0("cmisfraynormeff_",
-          object$linkF, "(object = object, level = level)")))
-        } else {
-          if (object$udist == "uniform") {
-          eval(parse(text = paste0("cmisfuninormeff_",
-            object$linkF, "(object = object, level = level)")))
-          } else {
-          if (object$udist == "tnormal") {
-            eval(parse(text = paste0("cmisftruncnormeff_",
-            object$linkF, "(object = object, level = level)")))
-          } else {
-            if (object$udist == "lognormal") {
-            eval(parse(text = paste0("cmisflognormeff_",
-              object$linkF, "(object = object, level = level)")))
-            } else {
-            if (object$udist == "genexponential") {
-              eval(parse(text = paste0("cmisfgenexponormeff_",
-              object$linkF, "(object = object, level = level)")))
-            } else {
-              if (object$udist == "tslaplace") {
-              eval(parse(text = paste0("cmisftslnormeff_",
-                object$linkF, "(object = object, level = level)")))
-              } else {
-              if (object$udist == "weibull") {
-                eval(parse(text = paste0("cmisfweibullnormeff_",
-                object$linkF, "(object = object, level = level)")))
-              }
-              }
-            }
-            }
-          }
-          }
-        }
-      }
-    }
-  }
-  return(data.frame(EffRes))
-}
-
-# conditional efficiencies gzisfcross ----------
-#' @rdname efficiencies
-#' @aliases efficiencies.gzisfcross
-#' @export
-efficiencies.gzisfcross <- function(object, level = 0.95, newData = NULL,
-  ...) {
-  if (level < 0 || level > 0.9999) {
-    stop("'level' must be between 0 and 0.9999", call. = FALSE)
-  }
-  if (!is.null(newData)) {
-    if (!is.data.frame(newData)) {
-      stop("argument 'newData' must be of class data.frame")
-    }
-    object$dataTable <- newData
-    object$Nobs <- dim(newData)[1]
-  }
-  if (object$nClasses == 2) {
-    EffRes <- cGZISF2Chalfnormeff(object = object, level = level)
-  } else {
-    if (object$nClasses == 3) {
-      EffRes <- cGZISF3Chalfnormeff(object = object, level = level)
-    } else {
-      if (object$nClasses == 4) {
-        EffRes <- cGZISF4Chalfnormeff(object = object,
-          level = level)
-      } else {
-        if (object$nClasses == 5) {
-          EffRes <- cGZISF5Chalfnormeff(object = object,
-          level = level)
-        }
-      }
-    }
-  }
   return(data.frame(EffRes))
 }

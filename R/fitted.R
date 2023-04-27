@@ -6,27 +6,22 @@
 
 #------------------------------------------------------------------------------#
 # Fitted values of models                                                      #
-# Models: -Standard Stochastic Frontier Analysis                               #
-#         -Latent Class Stochastic Frontier Analysis                           #
-#         -Sample selection correction                                         #
-#         -Zero inefficiency stochastic frontier                               #
-#         -Contaminated noise stochastic frontier                              #
-#         -Multi-Modal Inefficiency Stochastic Frontier Analysis               #
+# Models: + Cross sectional & Pooled data                                      #
+#           -Stochastic Frontier Analysis                                      #
+#           -Latent Class Stochastic Frontier Analysis                         #
+#           -Sample selection correction for Stochastic Frontier Model         #
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
 
 #' Extract fitted values of stochastic frontier models
 #'
-#' \code{\link{fitted}} returns the fitted frontier values from classic or
-#' latent class stochastic frontier models estimated with
-#' \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{misfcross}}, 
-#' \code{\link{sfacross}}, \code{\link{sfaselectioncross}} or 
-#' \code{\link{zisfcross}}.
+#' \code{\link{fitted}} returns the fitted frontier values from stochastic 
+#' frontier models estimated with \code{\link{lcmcross}}, \code{\link{sfacross}}, 
+#' or \code{\link{sfaselectioncross}}.
 #'
 #' @param object A stochastic frontier model returned
-#' by \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{misfcross}}, 
-#' \code{\link{sfacross}}, \code{\link{sfaselectioncross}} or 
-#' \code{\link{zisfcross}}.
+#' by \code{\link{lcmcross}}, \code{\link{sfacross}}, or 
+#' \code{\link{sfaselectioncross}}.
 #' @param ... Currently ignored.
 #'
 #' @name fitted
@@ -35,32 +30,22 @@
 #' containing the fitted values for each class is returned where each variable 
 #' terminates with \code{'_c#'}, \code{'#'} being the class number.
 #' 
-#' In the case of an object of class \code{'cnsfcross'}, \code{'misfcross'},
-#' \code{'sfacross'}, \code{'sfaselectioncross'} or \code{'zisfcross'}, 
-#' a vector of fitted values is returned.
+#' In the case of an object of class \code{'sfacross'}, or 
+#' \code{'sfaselectioncross'}, a vector of fitted values is returned.
 #'
 #' @note The fitted values are ordered in the same way as the corresponding
 #' observations in the dataset used for the estimation.
 #' 
 # @author K Hervé Dakpo
-#' 
-#' @seealso \code{\link{cnsfcross}}, for the contaminated noise stochastic 
-#' frontier analysis model fitting function.
 #'
-#' \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
-#' model fitting function.
-#' 
-#' \code{\link{misfcross}}, for the multi-modal inefficiency stochastic frontier 
-#' analysis model fitting function.
-#' 
+#' @seealso \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
+#' model fitting function using cross-sectional or pooled data.
+#'
 #' \code{\link{sfacross}}, for the stochastic frontier analysis model
-#' fitting function.
+#' fitting function using cross-sectional or pooled data.
 #' 
 #' \code{\link{sfaselectioncross}} for sample selection in stochastic frontier 
-#' model fitting function.
-#' 
-#' \code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
-#' fitting function.
+#' model fitting function using cross-sectional or pooled data.
 #'
 #' @keywords methods fitted
 #'
@@ -112,29 +97,5 @@ fitted.lcmcross <- function(object, ...) {
 #' @aliases fitted.sfaselectioncross
 #' @export
 fitted.sfaselectioncross <- function(object, ...) {
-  object$dataTable$mlFitted
-}
-
-# fitted values for zisfcross ----------
-#' @rdname fitted
-#' @aliases fitted.zisfcross
-#' @export
-fitted.zisfcross <- function(object, ...) {
-  object$dataTable$mlFitted
-}
-
-# fitted values for cnsfcross ----------
-#' @rdname fitted
-#' @aliases fitted.cnsfcross
-#' @export
-fitted.cnsfcross <- function(object, ...) {
-  object$dataTable$mlFitted
-}
-
-# fitted values for misfcross ----------
-#' @rdname fitted
-#' @aliases fitted.misfcross
-#' @export
-fitted.misfcross <- function(object, ...) {
   object$dataTable$mlFitted
 }

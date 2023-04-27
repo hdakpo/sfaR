@@ -5,9 +5,6 @@
 \alias{efficiencies.sfacross}
 \alias{efficiencies.lcmcross}
 \alias{efficiencies.sfaselectioncross}
-\alias{efficiencies.zisfcross}
-\alias{efficiencies.cnsfcross}
-\alias{efficiencies.misfcross}
 \title{Compute conditional (in-)efficiency estimates of stochastic frontier models}
 \usage{
 \method{efficiencies}{sfacross}(object, level = 0.95, newData = NULL, ...)
@@ -15,18 +12,11 @@
 \method{efficiencies}{lcmcross}(object, level = 0.95, newData = NULL, ...)
 
 \method{efficiencies}{sfaselectioncross}(object, level = 0.95, newData = NULL, ...)
-
-\method{efficiencies}{zisfcross}(object, level = 0.95, newData = NULL, ...)
-
-\method{efficiencies}{cnsfcross}(object, level = 0.95, newData = NULL, ...)
-
-\method{efficiencies}{misfcross}(object, level = 0.95, newData = NULL, ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{misfcross}},
-\code{\link{sfacross}}, \code{\link{sfaselectioncross}} or
-\code{\link{zisfcross}}.}
+by \code{\link{lcmcross}}, \code{\link{sfacross}}, or
+\code{\link{sfaselectioncross}}.}
 
 \item{level}{A number between between 0 and 0.9999 used for the computation
 of (in-)efficiency confidence intervals (defaut = \code{0.95}). Only used
@@ -45,32 +35,28 @@ A data frame that contains individual (in-)efficiency estimates.
 These are ordered in the same way as the corresponding observations in the
 dataset used for the estimation.
 
-\bold{- For object of class \code{'cnsfcross'}, or \code{'lcmcross'}, or
-\code{'misfcross'}, or \code{'zisfcross'} the following elements are
-returned:}
+\bold{- For object of class \code{'lcmcross'} the following elements are returned:}
 
 \item{Group_c}{Most probable class for each observation.}
 
 \item{PosteriorProb_c}{Highest posterior probability.}
 
 \item{odRatio}{Posterior odds ratio
-\eqn{R_i = \frac{Post. Prob. Class 2}{Post. Prob. Class 1}}. Only for object
-of class \code{'zisfcross'}}.
+\eqn{R_i = \frac{Post. Prob. Class 2}{Post. Prob. Class 1}}. The odds ratio
+can give an idea on how likely a decision making unit is to being fully
+efficient.Only for object of class \code{'zisfcross'}.}
 
 \item{u_c}{Conditional inefficiency of the most probable class given the
 posterior probability.}
 
 \item{teJLMS_c}{\eqn{\exp{(-E[u_c|\epsilon_c])}}. Only when, in the function
-\link{cnsfcross}, or \link{lcmcross}, or \link{zisfcross},
-\code{logDepVar = TRUE}.}
+\link{lcmcross} \code{logDepVar = TRUE}.}
 
 \item{teBC_c}{\eqn{E\left[\exp{(-u_c)}|\epsilon_c\right]}. Only when, in the
-function \link{cnsfcross}, or \link{lcmcross}, or \link{zisfcross},
-\code{logDepVar = TRUE}.}
+function \link{lcmcross} \code{logDepVar = TRUE}.}
 
 \item{teBC_reciprocal_c}{\eqn{E\left[\exp{(u_c)}|\epsilon_c\right]}. Only
-when, in the function \link{cnsfcross}, or \link{lcmcross}, or
-\link{zisfcross}, \code{logDepVar = TRUE}.}
+when, in the function \link{lcmcross} \code{logDepVar = TRUE}.}
 
 \item{PosteriorProb_c#}{Posterior probability of class #.}
 
@@ -81,13 +67,13 @@ when, in the function \link{cnsfcross}, or \link{lcmcross}, or
 
 \item{teBC_c#}{Conditional efficiency
 (\eqn{E\left[\exp{(-u_c)}|\epsilon_c\right]}) associated to class #,
-regardless of \code{Group_c}. Only when, in the function \link{cnsfcross},
-or \link{lcmcross}, or \link{zisfcross}, \code{logDepVar = TRUE}.}
+regardless of \code{Group_c}. Only when, in the function
+\link{lcmcross} \code{logDepVar = TRUE}.}
 
 \item{teBC_reciprocal_c#}{Reciprocal conditional efficiency
 (\eqn{E\left[\exp{(u_c)}|\epsilon_c\right]}) associated to class #,
-regardless of \code{Group_c}. Only when, in the function \link{cnsfcross},
-or \link{lcmcross}, or \link{zisfcross}, \code{logDepVar = TRUE}.}
+regardless of \code{Group_c}. Only when, in the function
+\link{lcmcross} \code{logDepVar = TRUE}.}
 
 \item{ineff_c#}{Conditional inefficiency (\code{u_c}) for observations in
 class # only.}
@@ -97,6 +83,8 @@ class # only.}
 
 \item{ReffBC_c#}{Reciprocal conditional efficiency (\code{teBC_reciprocal_c})
 for observations in class # only.}
+
+\item{theta_c#}{In the case \code{udist = 'uniform'}. \eqn{u \in [0, \theta_{c\#}]}.}
 
 \bold{- For object of class \code{'sfacross'} or \code{'sfaselectioncross'}
 the following elements are returned:}
@@ -161,12 +149,13 @@ efficiency. Only when, in the function \link{sfacross}, or
 \code{udist = 'hnormal'}, \code{'exponential'}, \code{'tnormal'},
 or \code{'uniform'}. For object of class \code{'sfaselectioncross'}, only
 the \code{'hnormal'} distribution is available.}
+
+\item{theta}{In the case \code{udist = 'uniform'}. \eqn{u \in [0, \theta]}.}
 }
 \description{
 \code{\link{efficiencies}} returns (in-)efficiency estimates of models
-estimated with \code{\link{cnsfcross}}, \code{\link{lcmcross}},
-\code{\link{misfcross}}, \code{\link{sfacross}},
-\code{\link{sfaselectioncross}}, or \code{\link{zisfcross}}.
+estimated with \code{\link{lcmcross}}, \code{\link{sfacross}}, or
+\code{\link{sfaselectioncross}}.
 }
 \details{
 The conditional inefficiency is obtained following
@@ -182,100 +171,76 @@ of \code{\link{lcmcross}} or \code{\link{sfacross}}):
 
 \itemize{ \item The conditional inefficiency is }
 
-\Sexpr[results=rd, stage=build]{
-katex::math_to_rd('E\\\\left\\\\lbrack u_i|\\\epsilon_i\\\\right
-\\\\rbrack=\\\mu_{i\\\ast} + \\\sigma_\\\ast\\\frac{\\\phi
-\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)}{
-\\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)}')
-}
+\deqn{E\left\lbrack u_i|\epsilon_i\right
+\rbrack=\mu_{i\ast} + \sigma_\ast\frac{\phi
+\left(\frac{\mu_{i\ast}}{\sigma_\ast}\right)}{
+\Phi\left(\frac{\mu_{i\ast}}{\sigma_\ast}\right)}}
 
 where
 
-\Sexpr[results=rd, stage=build]{
-katex::math_to_rd('\\\mu_{i\\\ast}=\\\frac{-S\\\epsilon_i\\\sigma_u^2}{
-\\\sigma_u^2 + \\\sigma_v^2}')
-}
+\deqn{\mu_{i\ast}=\frac{-S\epsilon_i\sigma_u^2}{ \sigma_u^2 + \sigma_v^2}}
 
 and
 
-\Sexpr[results=rd, stage=build]{
-katex::math_to_rd('\\\sigma_\\\ast^2 = \\\frac{\\\sigma_u^2 \\\sigma_v^2}{
-\\\sigma_u^2 + \\\sigma_v^2}')
-}
+\deqn{\sigma_\ast^2 = \frac{\sigma_u^2 \sigma_v^2}{\sigma_u^2 + \sigma_v^2}}
 
 \itemize{ \item The Battese and Coelli (1988) conditional efficiency is
 obtained by: }
 
-\Sexpr[results=rd, stage=build]{
-katex::math_to_rd('E\\\\left\\\\lbrack\\\exp{\\\\left(-u_i\\\\right)}
-|\\\\epsilon_i\\\\right\\\\rbrack = \\\exp{\\\\left(-\\\mu_{i\\\ast}+
-\\\frac{1}{2}\\\sigma_\\\ast^2\\\\right)}\\\frac{\\\Phi\\\\left(
-\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}-\\\sigma_\\\ast\\\\right)}{
-\\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\right)}')
-}
+\deqn{E\left\lbrack\exp{\left(-u_i\right)}
+|\epsilon_i\right\rbrack = \exp{\left(-\mu_{i\ast}+
+\frac{1}{2}\sigma_\ast^2\right)}\frac{\Phi\left(
+\frac{\mu_{i\ast}}{\sigma_\ast}-\sigma_\ast\right)}{
+\Phi\left(\frac{\mu_{i\ast}}{\sigma_\ast}\right)}}
 
 \itemize{ \item The reciprocal of the Battese and Coelli (1988) conditional
 efficiency is obtained by: }
 
-\Sexpr[results=rd, stage=build]{
-katex::math_to_rd('E\\\\left\\\\lbrack\\\exp{\\\\left(u_i\\\\right)}
-|\\\epsilon_i\\\\right\\\\rbrack = \\\exp{\\\\left(\\\mu_{i\\\ast}+
-\\\frac{1}{2}\\\sigma_\\\ast^2\\\\right)} \\\frac{\\\Phi\\\\left(
-\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}+\\\sigma_\\\ast\\\\right)}{
-\\\Phi\\\\left(\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)}')
-}
+\deqn{E\left\lbrack\exp{\left(u_i\right)}
+|\epsilon_i\right\rbrack = \exp{\left(\mu_{i\ast}+
+\frac{1}{2}\sigma_\ast^2\right)} \frac{\Phi\left(
+\frac{\mu_{i\ast}}{\sigma_\ast}+\sigma_\ast\right)}{
+\Phi\left(\frac{\mu_{i\ast}}{\sigma_\ast}\right)}}
 
 \itemize{ \item The conditional mode is computed using: }
 
-\Sexpr[results=rd, stage=build]{
-katex::math_to_rd('M\\\\left\\\\lbrack u_i|\\\epsilon_i\\\\right
-\\\\rbrack= \\\mu_{i\\\ast} \\\quad \\\hbox{For} \\\quad
-\\\mu_{i\\\ast} > 0')
-}
+\deqn{M\left\lbrack u_i|\epsilon_i\right
+\rbrack= \mu_{i\ast} \quad \hbox{For} \quad 
+\mu_{i\ast} > 0}
 
 and
 
-\Sexpr[results=rd, stage=build]{
-katex::math_to_rd('M\\\\left\\\\lbrack u_i|\\\epsilon_i\\\\right
-\\\\rbrack= 0 \\\quad \\\hbox{For} \\\quad \\\mu_{i\\\ast} \\\\leq 0')
-}
+\deqn{M\left\lbrack u_i|\epsilon_i\right
+\rbrack= 0 \quad \hbox{For} \quad \mu_{i\ast} \leq 0}
 
 \itemize{ \item The confidence intervals are obtained with: }
 
-\Sexpr[results=rd, stage=build]{
-katex::math_to_rd('\\\mu_{i\\\ast} + I_L\\\sigma_\\\ast \\\\leq
-E\\\\left\\\\lbrack u_i|\\\epsilon_i\\\\right\\\\rbrack \\\\leq
-\\\mu_{i\\\ast} + I_U\\\sigma_\\\ast')
-}
+\deqn{\mu_{i\ast} + I_L\sigma_\ast \leq 
+E\left\lbrack u_i|\epsilon_i\right\rbrack \leq 
+\mu_{i\ast} + I_U\sigma_\ast }
 
 with \eqn{LB_i = \mu_{i*} + I_L\sigma_*} and
 \eqn{UB_i = \mu_{i*} + I_U\sigma_*}
 
 and
 
-\Sexpr[results=rd, stage=build]{
-katex::math_to_rd('I_L = \\\Phi^{-1}\\\\left\\\\lbrace 1 -
-\\\\left(1-\\\frac{\\\alpha}{2}\\\\right)\\\\left\\\\lbrack 1-
-\\\Phi\\\\left(-\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)
-\\\\right\\\\rbrack\\\\right\\\\rbrace')
-}
+\deqn{I_L = \Phi^{-1}\left\lbrace 1 -
+\left(1-\frac{\alpha}{2}\right)\left\lbrack 1-
+\Phi\left(-\frac{\mu_{i\ast}}{\sigma_\ast}\right)
+\right\rbrack\right\rbrace }
 
 and
 
-\Sexpr[results=rd, stage=build]{
-katex::math_to_rd('I_U = \\\Phi^{-1}\\\\left\\\\lbrace 1-
-\\\frac{\\\alpha}{2}\\\\left\\\\lbrack 1-\\\Phi
-\\\\left(-\\\frac{\\\mu_{i\\\ast}}{\\\sigma_\\\ast}\\\\right)
-\\\\right\\\\rbrack\\\\right\\\\rbrace')
-}
+\deqn{I_U = \Phi^{-1}\left\lbrace 1-
+\frac{\alpha}{2}\left\lbrack 1-\Phi
+\left(-\frac{\mu_{i\ast}}{\sigma_\ast}\right)
+\right\rbrack\right\rbrace}
 
 Thus
 
-\Sexpr[results=rd, stage=build]{
-katex::math_to_rd('\\\exp{\\\\left(-UB_i\\\\right)} \\\\leq E\\\\left
-\\\\lbrack\\\exp{\\\\left(-u_i\\\\right)}|\\\epsilon_i\\\\right\\\\rbrack
-\\\\leq\\\exp{\\\\left(-LB_i\\\\right)}')
-}
+\deqn{\exp{\left(-UB_i\right)} \leq E\left
+\lbrack\exp{\left(-u_i\right)}|\epsilon_i\right\rbrack 
+\leq\exp{\left(-LB_i\right)}}
 }
 \examples{
 
@@ -314,23 +279,14 @@ Nguyen, N.B. 2010. Estimation of technical efficiency in stochastic frontier
 analysis. PhD Dissertation, Bowling Green State University, August.
 }
 \seealso{
-\code{\link{cnsfcross}}, for the contaminated noise stochastic
-frontier analysis model fitting function.
-
 \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
-model fitting function.
-
-\code{\link{misfcross}}, for the multi-modal inefficiency stochastic frontier
-analysis model fitting function.
+model fitting function using cross-sectional or pooled data.
 
 \code{\link{sfacross}}, for the stochastic frontier analysis model
-fitting function.
+fitting function using cross-sectional or pooled data.
 
 \code{\link{sfaselectioncross}} for sample selection in stochastic frontier
-model fitting function.
-
-\code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
-fitting function.
+model fitting function using cross-sectional or pooled data.
 }
 \keyword{efficiencies}
 \keyword{methods}

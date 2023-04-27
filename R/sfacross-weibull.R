@@ -623,7 +623,7 @@ cweibullnormeff <- function(object, level) {
 #' marginal impact on efficiencies for weibull-normal distribution
 #' @param object object of class sfacross
 #' @noRd
-cmargweibull_Eu <- function(object) {
+cmargweibullnorm_Eu <- function(object) {
   delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
   k <- object$mlParam[object$nXvar + object$nuZUvar + object$nvZVvar +
@@ -637,7 +637,7 @@ cmargweibull_Eu <- function(object) {
   return(data.frame(margEff))
 }
 
-cmargweibull_Vu <- function(object) {
+cmargweibullnorm_Vu <- function(object) {
   delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
   k <- object$mlParam[object$nXvar + object$nuZUvar + object$nvZVvar +

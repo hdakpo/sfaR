@@ -9,12 +9,12 @@
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
 
-#' Latent class stochastic frontier using cross-section data
+#' Latent class stochastic frontier using cross-sectional data
 #'
 #' @description
 #' \code{\link{lcmcross}} is a symbolic formula based function for the
 #' estimation of the latent class stochastic frontier model (LCM) in the case
-#' of cross-sectional or pooled cross-section data. The model is estimated
+#' of cross-sectional or pooled cross-sectional data. The model is estimated
 #' using maximum likelihood (ML). See Orea and Kumbhakar (2004), Parmeter and
 #' Kumbhakar (2014, p282).
 #'
@@ -423,7 +423,7 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
   mc$drop.unused.levels <- TRUE
   formula <- interCheckMain(formula = formula, data = data)
   if (!missing(uhet)) {
-    uhet <- clhsCheck_u(formula = uhet, scaling = FALSE)
+    uhet <- clhsCheck_u(formula = uhet)
   } else {
     uhet <- ~1
   }
@@ -459,6 +459,11 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
   if (N == 0L) {
     stop("0 (non-NA) cases", call. = FALSE)
   }
+  # if subset is non-missing and there NA, force data to
+  # change
+  data <- data[row.names(data) %in% attr(mc, "row.names"),
+    ]
+  data <- data[validObs, ]
   wHvar <- as.vector(model.weights(mc))
   if (length(wscale) != 1 || !is.logical(wscale[1])) {
     stop("argument 'wscale' must be a single logical value",
@@ -622,17 +627,18 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
   }
   names(olsRes$coefficients) <- colnames(Xvar)
   olsParam <- c(olsRes$coefficients)
-  obs_subset <- row.names(data) %in% attributes(mc)[["row.names"]]
   if (inherits(data, "pdata.frame")) {
-    dataTable <- data[obs_subset, names(index(data))][validObs,
-      ]
+    dataTable <- data[, names(index(data))][validObs, ]
   } else {
     dataTable <- data.frame(IdObs = c(1:sum(validObs)))
   }
-  dataTable <- cbind(dataTable, data[obs_subset, all.vars(terms(formula))][validObs,
+  dataTable <- cbind(dataTable, data[, all.vars(terms(formula))][validObs,
     ], weights = wHvar)
   dataTable <- cbind(dataTable, olsResiduals = residuals(olsRes),
     olsFitted = fitted(olsRes))
+  # possibility to have duplicated columns if ID or TIME
+  # appears in ols in the case of panel data
+  dataTable <- dataTable[!duplicated(as.list(dataTable))]
   olsSkew <- skewness(dataTable[["olsResiduals"]])
   if (S * olsSkew > 0) {
     warning("The residuals of the OLS are", if (S == 1) {
@@ -656,7 +662,7 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
   mleList <- tryCatch(switch(as.character(lcmClasses), `2` = do.call(LCM2ChnormAlgOpt,
     FunArgs), `3` = do.call(LCM3ChnormAlgOpt, FunArgs), `4` = do.call(LCM4ChnormAlgOpt,
     FunArgs), `5` = do.call(LCM5ChnormAlgOpt, FunArgs)),
-    error = function(e) e)
+    error = function(e) print(e))
   if (inherits(mleList, "error")) {
     stop("The current error occurs during optimization:\n",
       mleList$message, call. = FALSE)
@@ -670,7 +676,7 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
       gradient = mleList$mleObj$gradient)
   } else {
     if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
-      list(type = mleList$mleObj$type, nIter = mleList$mleObj$iterations,
+      list(type = substr(mleList$mleObj$type, 1, 27), nIter = mleList$mleObj$iterations,
         status = mleList$mleObj$message, mleLoglik = mleList$mleObj$maximum,
         gradient = mleList$mleObj$gradient)
     } else {
@@ -703,9 +709,12 @@ lcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
     }
   })
   # quick renaming -------
-  names(mleList$startVal) <- fName_lcmcross(Xvar = Xvar, uHvar = uHvar,
-    vHvar = vHvar, Zvar = Zvar, nZHvar = nZHvar, lcmClasses = lcmClasses)
-  names(mleList$mlParam) <- names(mleList$startVal)
+  if (!is.null(start)) {
+    names(mleList$startVal) <- fName_lcmcross(Xvar = Xvar,
+      uHvar = uHvar, vHvar = vHvar, Zvar = Zvar, nZHvar = nZHvar,
+      lcmClasses = lcmClasses)
+    names(mleList$mlParam) <- names(mleList$startVal)
+  }
   rownames(mleList$invHessian) <- colnames(mleList$invHessian) <- names(mleList$mlParam)
   names(mleList$gradient) <- names(mleList$mlParam)
   colnames(mleList$mleObj$gradL_OBS) <- names(mleList$mlParam)

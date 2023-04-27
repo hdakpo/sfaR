@@ -11,76 +11,35 @@ maximum simulated likelihood - MSL) for various specifications of stochastic
 frontier analysis (SFA).
 }
 \details{
-Five categories of important functions are available: \code{\link{cnsfcross}},
-\code{\link{lcmcross}}, \code{\link{sfacross}},
-\code{\link{sfaselectioncross}}, and \code{\link{zisfcross}}, which estimate
-different types of frontiers and offer eleven alternative optimization
-algorithms (i.e. "bfgs", "bhhh", "nr", "nm", "cg", "sann", "ucminf", "mla",
-"sr1", "sparse", "nlminb").
+Three categories of important functions are available: \code{\link{lcmcross}},
+\code{\link{sfacross}}, \code{\link{sfaselectioncross}},
+which estimate different types of frontiers and offer eleven alternative
+optimization algorithms (i.e., "bfgs", "bhhh", "nr", "nm", "cg", "sann",
+"ucminf", "mla", "sr1", "sparse", "nlminb").
 }
-\section{cnsfcross}{
- \code{\link{cnsfcross}} the contaminated noise stochastic
-frontier (CNSF) allows for the possibility of outliers in the two-sided error
-term. The model splits the observations into two groups with different
-variance for the two-sided error term. The probability of belonging to one
-of these classes is based on either a logit, probit, cauchit or cloglog
-functional form that can be specified using some covariates. As in the case
-of \code{\link{sfacross}} ten different distributions for the one-sided error
-term are implemented. These distributions include the exponential, the Gamma,
-the generalized exponential, the half normal, the lognormal, the truncated
-normal, the truncated skewed Laplace, the Rayleigh, the uniform and the
-Weibull distributions. In the case of the Gamma, lognormal and Weibull
-distributions, maximum simulated likelihood (MSL) is used with the
-possibility of four specific distributions to construct the draws: Halton,
-Generalized Halton, Sobol and uniform. Heteroscedasticity in both error
-terms can be implemented, in addition to heterogeneity in the truncated mean
-parameter in the case of the truncated normal and lognormal distributions.
-Two variants of the CNSF are available: one that allows common one-sided
-error term variance for both classes and the other one that allows different
-one-sided error term variances between the two aforementionned classes.
-}
-
 \section{lcmcross}{
  \code{\link{lcmcross}} estimates latent class stochastic
-frontier models (LCM), which accounts for technological heterogeneity by
-splitting the observations into a maximum number of five classes. The
-classification operates based on a logit functional form that can be
-specified using some covariates (namely, the separating variables allowing
-the separation of observations in several classes). Only the half normal
-distribution is available for the one-sided error term. Heteroscedasticity
-in both error terms is possible. The choice of the number of classes can be
-guided by several information criteria (i.e. AIC, BIC or HQIC).
-}
-
-\section{misfcross}{
- \code{\link{misfcross}} the multi-modal inefficiency
-stochastic frontier (MISF) allows for mixture distribution in the one-sided
-error term. The model splits the observations into two groups with different
-variance for the one-sided error term. The probability of belonging to one
-of these classes is based on either a logit, probit, cauchit or cloglog
-functional form that can be specified using some covariates. As in the case
-of \code{\link{sfacross}} ten different distributions for the one-sided error
-term are implemented. These distributions include the exponential, the Gamma,
-the generalized exponential, the half normal, the lognormal, the truncated
-normal, the truncated skewed Laplace, the Rayleigh, the uniform and the
-Weibull distributions. In the case of the Gamma, lognormal and Weibull
-distributions, maximum simulated likelihood (MSL) is used with the
-possibility of four specific distributions to construct the draws: Halton,
-Generalized Halton, Sobol and uniform. Heteroscedasticity in both error
-terms can be implemented, in addition to heterogeneity in the truncated mean
-parameter in the case of the truncated normal and lognormal distributions.
+frontier models (LCM) for cross-sectional or pooled data. It accounts for
+technological heterogeneity by splitting the observations into a maximum
+number of five classes. The classification operates based on a logit
+functional form that can be specified using some covariates (namely, the
+separating variables allowing the separation of observations in several
+classes). Only the half normal distribution is available for the one-sided
+error term. Heteroscedasticity in both error terms is possible. The choice of
+the number of classes can be guided by several information criteria (i.e.,
+AIC, BIC, or HQIC).
 }
 
 \section{sfacross}{
  \code{\link{sfacross}} estimates the basic stochastic
-frontier analysis (SFA) for cross-sectional data and allows for ten
+frontier analysis (SFA) for cross-sectional or pooled data and allows for ten
 different distributions for the one-sided error term. These distributions
-include the exponential, the Gamma, the generalized exponential,
+include the exponential, the gamma, the generalized exponential,
 the half normal, the lognormal, the truncated normal, the truncated skewed
-Laplace, the Rayleigh, the uniform and the Weibull distributions.
-In the case of the Gamma, lognormal and Weibull distributions, maximum
+laplace, the rayleigh, the uniform, and the weibull distributions.
+In the case of the gamma, lognormal, and weibull distributions, maximum
 simulated likelihood (MSL) is used with the possibility of four specific
-distributions to construct the draws: Halton, Generalized Halton, Sobol and
+distributions to construct the draws: halton, generalized halton, sobol and
 uniform. Heteroscedasticity in both error terms can be implemented, in
 addition to heterogeneity in the truncated mean parameter in the case of the
 truncated normal and lognormal distributions. In addition, in the case of the
@@ -89,38 +48,15 @@ truncated normal distribution, the scaling property can be estimated.
 
 \section{sfaselectioncross}{
  \code{\link{sfaselectioncross}} estimates the
-frontier for cross-sectional data in the presence of sample selection.
+frontier for cross-sectional or pooled data in the presence of sample selection.
 The model solves the selection bias due to the correlation between the
 two-sided errors terms in both the selection and the frontier equations.
 The likelihood can be estimated using five different
-possibilities: Gauss-Kronrod quadrature, adaptive integration over hypercubes
-(hcubature and pcubature), Gauss-Hermite quadrature, and
+possibilities: gauss-kronrod quadrature, adaptive integration over hypercubes
+(hcubature and pcubature), gauss-hermite quadrature, and
 maximum simulated likelihood. Only the half normal
 distribution is available for the one-sided error term. Heteroscedasticity
 in both error terms is possible.
-}
-
-\section{zisfcross}{
- \code{\link{zisfcross}} relaxes the assumption that all
-firms are inefficient (zero inefficiency stochastic frontier - ZISF).
-The model splits the observations into two groups:
-one efficient and the other inefficient. The probability of belonging to one
-of these classes is based on either a logit, probit, cauchit or cloglog
-functional form that can be specified using some covariates. As in the case
-of \code{\link{sfacross}} ten different distributions for the one-sided error
-term are implemented. These distributions include the exponential, the Gamma,
-the generalized exponential, the half normal, the lognormal, the truncated
-normal, the truncated skewed Laplace, the Rayleigh, the uniform and the
-Weibull distributions. In the case of the Gamma, lognormal and Weibull
-distributions, maximum simulated likelihood (MSL) is used with the
-possibility of four specific distributions to construct the draws: Halton,
-Generalized Halton, Sobol and uniform. Heteroscedasticity in both error
-terms can be implemented, in addition to heterogeneity in the truncated mean
-parameter in the case of the truncated normal and lognormal distributions.
-Two variants of the ZISF are available: one that allows common two-sided
-error term variance for both classes (inefficient vs efficient) and the other
-one that allows different two-sided error term variances between the two
-aforementionned classes.
 }
 
 \section{Bugreport}{
@@ -129,5 +65,5 @@ aforementionned classes.
 }
 
 \author{
-K Hervé Dakpo, Yann Desjeux, Laure Latruffe, and Arne Henningsen
+K Hervé Dakpo, Yann Desjeux, Arne Henningsen and Laure Latruffe
 }

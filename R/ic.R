@@ -6,21 +6,18 @@
 
 #------------------------------------------------------------------------------#
 # Information Criteria extraction                                              #
-# Models: -Standard Stochastic Frontier Analysis                               #
-#         -Latent Class Stochastic Frontier Analysis                           #
-#         -Sample selection correction                                         #
-#         -Zero inefficiency stochastic frontier                               #
-#         -Contaminated noise stochastic frontier                              #
-#         -Multi-Modal Inefficiency Stochastic Frontier Analysis               #
+# Models: + Cross sectional & Pooled data                                      #
+#           -Stochastic Frontier Analysis                                      #
+#           -Latent Class Stochastic Frontier Analysis                         #
+#           -Sample selection correction for Stochastic Frontier Model         #
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
 
 #' Extract information criteria of stochastic frontier models
 #'
-#' \code{\link{ic}} returns information criterion from classic or latent class
-#' stochastic frontier models estimated with \code{\link{cnsfcross}},
-#' \code{\link{lcmcross}}, \code{\link{misfcross}}, \code{\link{sfacross}}, 
-#' \code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.
+#' \code{\link{ic}} returns information criterion from stochastic 
+#' frontier models estimated with \code{\link{lcmcross}}, \code{\link{sfacross}}, 
+#' or \code{\link{sfaselectioncross}}..
 #'
 #' The different information criteria are computed as follows: \itemize{ \item
 #' AIC: \eqn{-2 \log{LL} + 2 * K} \item BIC: \eqn{-2 \log{LL} + \log{N} * K}
@@ -31,9 +28,8 @@
 #' @name ic
 #'
 #' @param object A stochastic frontier model returned
-#' by \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{misfcross}}, 
-#' \code{\link{sfacross}}, \code{\link{sfaselectioncross}} or 
-#' \code{\link{zisfcross}}.
+#' by \code{\link{lcmcross}}, \code{\link{sfacross}}, or 
+#'  \code{\link{sfaselectioncross}}.
 #' @param IC Character string. Information criterion measure. Three criteria
 #' are available: \itemize{ \item \code{'AIC'} for Akaike information criterion
 #' (default) \item \code{'BIC'} for Bayesian information criterion \item
@@ -45,23 +41,14 @@
 #'
 # @author K Hervé Dakpo
 #'
-#' @seealso \code{\link{cnsfcross}}, for the contaminated noise stochastic 
-#' frontier analysis model fitting function.
-#'
-#' \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
-#' model fitting function.
-#' 
-#' \code{\link{misfcross}}, for the multi-modal inefficiency stochastic frontier 
-#' analysis model fitting function.
+#' @seealso \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
+#' model fitting function using cross-sectional or pooled data.
 #' 
 #' \code{\link{sfacross}}, for the stochastic frontier analysis model
-#' fitting function.
+#' fitting function using cross-sectional or pooled data.
 #' 
 #' \code{\link{sfaselectioncross}} for sample selection in stochastic frontier 
-#' model fitting function.
-#' 
-#' \code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
-#' fitting function.
+#' model fitting function using cross-sectional or pooled data.
 #'
 #' @keywords methods AIC BIC HQIC
 #'
@@ -128,78 +115,6 @@ ic.lcmcross <- function(object, IC = "AIC", ...) {
 #' @aliases ic.sfaselectioncross
 #' @export
 ic.sfaselectioncross <- function(object, IC = "AIC", ...) {
-  if (!(IC %in% c("AIC", "BIC", "HQIC"))) {
-    stop("Unknown information criteria: ", paste(IC), call. = FALSE)
-  }
-  if (IC == "AIC") {
-    obj <- -2 * object$mlLoglik + 2 * object$nParm
-  } else {
-    if (IC == "BIC") {
-      obj <- -2 * object$mlLoglik + log(object$Nobs) *
-        object$nParm
-    } else {
-      if (IC == "HQIC") {
-        obj <- -2 * object$mlLoglik + 2 * log(log(object$Nobs)) *
-          object$nParm
-      }
-    }
-  }
-  message(IC, ": ", prettyNum(obj), sep = "")
-}
-
-# information criteria for zisfcross ----------
-#' @rdname ic
-#' @aliases ic.zisfcross
-#' @export
-ic.zisfcross <- function(object, IC = "AIC", ...) {
-  if (!(IC %in% c("AIC", "BIC", "HQIC"))) {
-    stop("Unknown information criteria: ", paste(IC), call. = FALSE)
-  }
-  if (IC == "AIC") {
-    obj <- -2 * object$mlLoglik + 2 * object$nParm
-  } else {
-    if (IC == "BIC") {
-      obj <- -2 * object$mlLoglik + log(object$Nobs) *
-        object$nParm
-    } else {
-      if (IC == "HQIC") {
-        obj <- -2 * object$mlLoglik + 2 * log(log(object$Nobs)) *
-          object$nParm
-      }
-    }
-  }
-  message(IC, ": ", prettyNum(obj), sep = "")
-}
-
-# information criteria for cnsfcross ----------
-#' @rdname ic
-#' @aliases ic.cnsfcross
-#' @export
-ic.cnsfcross <- function(object, IC = "AIC", ...) {
-  if (!(IC %in% c("AIC", "BIC", "HQIC"))) {
-    stop("Unknown information criteria: ", paste(IC), call. = FALSE)
-  }
-  if (IC == "AIC") {
-    obj <- -2 * object$mlLoglik + 2 * object$nParm
-  } else {
-    if (IC == "BIC") {
-      obj <- -2 * object$mlLoglik + log(object$Nobs) *
-        object$nParm
-    } else {
-      if (IC == "HQIC") {
-        obj <- -2 * object$mlLoglik + 2 * log(log(object$Nobs)) *
-          object$nParm
-      }
-    }
-  }
-  message(IC, ": ", prettyNum(obj), sep = "")
-}
-
-# information criteria for misfcross ----------
-#' @rdname ic
-#' @aliases ic.misfcross
-#' @export
-ic.misfcross <- function(object, IC = "AIC", ...) {
   if (!(IC %in% c("AIC", "BIC", "HQIC"))) {
     stop("Unknown information criteria: ", paste(IC), call. = FALSE)
   }

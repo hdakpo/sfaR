@@ -8,12 +8,6 @@
 \alias{print.summary.lcmcross}
 \alias{summary.sfaselectioncross}
 \alias{print.summary.sfaselectioncross}
-\alias{summary.zisfcross}
-\alias{print.summary.zisfcross}
-\alias{summary.cnsfcross}
-\alias{print.summary.cnsfcross}
-\alias{summary.misfcross}
-\alias{print.summary.misfcross}
 \title{Summary of results for stochastic frontier models}
 \usage{
 \method{summary}{sfacross}(object, grad = FALSE, ci = FALSE, ...)
@@ -27,27 +21,12 @@
 \method{summary}{sfaselectioncross}(object, grad = FALSE, ci = FALSE, ...)
 
 \method{print}{summary.sfaselectioncross}(x, digits = max(3, getOption("digits") - 2), ...)
-
-\method{summary}{zisfcross}(object, grad = FALSE, ci = FALSE, ...)
-
-\method{print}{summary.zisfcross}(x, digits = max(3, getOption("digits") - 2), ...)
-
-\method{summary}{cnsfcross}(object, grad = FALSE, ci = FALSE, ...)
-
-\method{print}{summary.cnsfcross}(x, digits = max(3, getOption("digits") - 2), ...)
-
-\method{summary}{misfcross}(object, grad = FALSE, ci = FALSE, ...)
-
-\method{print}{summary.misfcross}(x, digits = max(3, getOption("digits") - 2), ...)
 }
 \arguments{
-\item{object}{An object of either class \code{'cnsfcross'} returned by the
-function \code{\link{cnsfcross}}, or class \code{'lcmcross'} returned by the
-function \code{\link{lcmcross}}, or \code{misfcross'} returned by
-\code{\link{cnsfcross}}, or \code{'sfacross'} returned by the
+\item{object}{An object of either class \code{'lcmcross'} returned by the
+function \code{\link{lcmcross}}, or \code{'sfacross'} returned by the
 function \code{\link{sfacross}}, or class \code{'sfaselectioncross'} returned
-by the function \code{\link{sfaselectioncross}}, or class \code{'zisfcross'}
-returned by the function \code{\link{zisfcross}}.}
+by the function \code{\link{sfaselectioncross}}.}
 
 \item{grad}{Logical. Default = \code{FALSE}. If \code{TRUE}, the gradient
 for the maximum likelihood (ML) estimates of the different parameters is
@@ -59,21 +38,16 @@ returned.}
 
 \item{...}{Currently ignored.}
 
-\item{x}{An object of either class \code{'summary.cnsfcross'},
-\code{'summary.lcmcross'}, \code{'summary.misfcross'},
-\code{'summary.sfacross'}, \code{'summary.sfaselectioncross'} or
-\code{'summary.zisfcross'}.}
+\item{x}{An object of either class \code{'summary.lcmcross'}, \code{'summary.sfacross'},
+or \code{'summary.sfaselectioncross'}.}
 
 \item{digits}{Numeric. Number of digits displayed in values.}
 }
 \value{
 The \code{\link{summary}} method returns a list of class
-\code{'summary.cnsfcross'}, \code{'summary.lcmcross'},
-\code{'summary.misfcross'}, \code{'summary.sfacross'},
-\code{'summary.sfaselectioncross'}, \code{'summary.zisfcross'} that contains
-the same elements as an object returned by \code{\link{cnsfcross}},
-\code{\link{lcmcross}},  \code{\link{misfcross}}, \code{\link{sfacross}},
-\code{\link{sfaselectioncross}} or \code{\link{zisfcross}} with the
+\code{'summary.lcmcross'}, \code{'summary.sfacross'}, or \code{'summary.sfaselectioncross'}
+that contains the same elements as an object returned by \code{\link{lcmcross}},
+\code{\link{sfacross}}, or \code{\link{sfaselectioncross}} with the
 following additional elements:
 
 \item{AIC}{Akaike information criterion.}
@@ -93,7 +67,7 @@ error term (\eqn{\sigma_u^2}).}
 \item{Varu}{For \code{object} of class \code{'sfacross'} or
 \code{'sfaselectioncross'}. Variance of the one-sided error term.}
 
-\item{THETA}{For \code{object} of class \code{'sfacross'} with \code{'udist
+\item{theta}{For \code{object} of class \code{'sfacross'} with \code{'udist
 = uniform'}.  \eqn{\Theta} value in the case the uniform distribution is
 defined as: \eqn{u_i \in [0, \Theta]}.}
 
@@ -122,9 +96,8 @@ statistics of the difference between the stochastic frontier and the OLS.}
 }
 \description{
 Create and print summary results for stochastic frontier models returned by
-\code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{misfcross}},
-\code{\link{sfacross}}, \code{\link{sfaselectioncross}} or
-\code{\link{zisfcross}}.
+\code{\link{lcmcross}}, \code{\link{sfacross}}, or
+\code{\link{sfaselectioncross}}.
 }
 \examples{
 
@@ -139,23 +112,14 @@ summary(tl_u_ts, grad = TRUE, ci = TRUE)
 
 }
 \seealso{
-\code{\link{cnsfcross}}, for the contaminated noise stochastic
-frontier analysis model fitting function.
-
 \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
-model fitting function.
-
-\code{\link{misfcross}}, for the multi-modal inefficiency stochastic frontier
-analysis model fitting function.
+model fitting function for cross-sectional or pooled data.
 
 \code{\link{sfacross}}, for the stochastic frontier analysis model
-fitting function.
+fitting function for cross-sectional or pooled data.
 
 \code{\link{sfaselectioncross}} for sample selection in stochastic frontier
-model fitting function.
-
-\code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
-fitting function.
+model fitting function for cross-sectional or pooled data.
 
 \code{\link[=print.sfacross]{print}} for printing \code{sfacross} object.
 

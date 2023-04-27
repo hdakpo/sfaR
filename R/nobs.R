@@ -6,12 +6,10 @@
 
 #------------------------------------------------------------------------------#
 # Variance - Covariance Matrix of estimates                                    #
-# Models: -Standard Stochastic Frontier Analysis                               #
-#         -Latent Class Stochastic Frontier Analysis                           #
-#         -Sample selection correction                                         #
-#         -Zero inefficiency stochastic frontier                               #
-#         -Contaminated noise stochastic frontier                              #
-#         -Multi-Modal Inefficiency Stochastic Frontier Analysis               #
+# Models: + Cross sectional & Pooled data                                      #
+#           -Stochastic Frontier Analysis                                      #
+#           -Latent Class Stochastic Frontier Analysis                         #
+#           -Sample selection correction for Stochastic Frontier Model         #
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
 
@@ -30,32 +28,22 @@
 #'
 #' @name nobs
 #' 
-#' @param object a  `cnsfcross`, `lcmcross`, `misfcross`, `sfacross`, 
-#' `sfaselectioncross` or `zisfcross` object for which the number of total 
-#' observations is to be extracted,
-#' @param \dots further arguments.
+#' @param object a `lcmcross`, `sfacross`, or `sfaselectioncross`
+#' object for which the number of total observations is to be extracted,
+#' @param \dots Currently ignored.
 #' 
 #' @return A single number, normally an integer.
 #' 
 # @author K Hervé Dakpo
 #' 
-#' @seealso \code{\link{cnsfcross}}, for the contaminated noise stochastic 
-#' frontier analysis model fitting function.
-#'
-#' \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
-#' model fitting function.
-#' 
-#' \code{\link{misfcross}}, for the multi-modal inefficiency stochastic frontier 
-#' analysis model fitting function.
+#' @seealso \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
+#' model fitting function using cross-sectional or pooled data.
 #' 
 #' \code{\link{sfacross}}, for the stochastic frontier analysis model
-#' fitting function.
+#' fitting function using cross-sectional or pooled data.
 #' 
 #' \code{\link{sfaselectioncross}} for sample selection in stochastic frontier 
-#' model fitting function.
-#' 
-#' \code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
-#' fitting function.
+#' model fitting function using cross-sectional or pooled data.
 #'
 #' @keywords attribute
 #' 
@@ -72,12 +60,12 @@
 #' 
 #' @aliases nobs.sfacross
 #' @export
-# Extract number of observations for sfacros ----------
+# Extract number of observations for sfacross ----------
 nobs.sfacross <- function(object, ...) {
   return(object$Nobs)
 }
 
-# Extract number of observations for lcmcros ----------
+# Extract number of observations for lcmcross ----------
 #' @rdname nobs
 #' @aliases nobs.lcmcross
 #' @export
@@ -85,34 +73,10 @@ nobs.lcmcross <- function(object, ...) {
   return(object$Nobs)
 }
 
-# Extract number of observations for sfaselectioncros ----------
+# Extract number of observations for sfaselectioncross ----------
 #' @rdname nobs
 #' @aliases nobs.sfaselectioncross
 #' @export
 nobs.sfaselectioncross <- function(object, ...) {
-  return(object$Nobs)
-}
-
-# Extract number of observations for zisfcros ----------
-#' @rdname nobs
-#' @aliases nobs.zisfcross
-#' @export
-nobs.zisfcross <- function(object, ...) {
-  return(object$Nobs)
-}
-
-# Extract number of observations for cnsfcros ----------
-#' @rdname nobs
-#' @aliases nobs.cnsfcross
-#' @export
-nobs.cnsfcross <- function(object, ...) {
-  return(object$Nobs)
-}
-
-# Extract number of observations for misfcros ----------
-#' @rdname nobs
-#' @aliases nobs.misfcross
-#' @export
-nobs.misfcross <- function(object, ...) {
   return(object$Nobs)
 }

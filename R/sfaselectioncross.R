@@ -14,7 +14,7 @@
 #' @description
 #' \code{\link{sfaselectioncross}} is a symbolic formula based function for the
 #' estimation of the stochastic frontier model in the presence of sample
-#' selection. The model accommodates cross-section or pooled cross-section data. 
+#' selection. The model accommodates cross-sectional or pooled cross-sectional data. 
 #' The model can be estimated using different quadrature approaches or 
 #' maximum simulated likelihood (MSL). See Greene (2010).
 #'
@@ -34,7 +34,7 @@
 #' @param vhet A one-part formula to consider heteroscedasticity in the
 #' two-sided error variance (see section \sQuote{Details}).
 #' @param modelType Character string. Model used to solve the selection bias. Only the 
-#' model discussed in Greene (2010) is available.
+#' model discussed in Greene (2010) is currently available.
 #' @param logDepVar Logical. Informs whether the dependent variable is logged
 #' (\code{TRUE}) or not (\code{FALSE}). Default = \code{TRUE}.
 #' @param data The data frame containing the data.
@@ -84,7 +84,7 @@
 #' \code{\link[cubature:pcubature]{pcubature}}), \code{ghermite} for Gauss-Hermite
 #' quadrature (see \code{\link[fastGHQuad:gaussHermiteData]{gaussHermiteData}}), and
 #' \code{msl} for maximum simulated likelihood. Default \code{kronrod}.
-#' @param Nsub Integer. Number of subdivisions used for quadrature approaches. 
+#' @param Nsub Integer. Number of subdivisions/nodes used for quadrature approaches. 
 #' Default \code{Nsub = 100}.
 #' @param uBound Numeric. Upper bound for the inefficiency component when solving
 #' integrals using quadrature approaches except Gauss-Hermite for which the upper
@@ -94,7 +94,7 @@
 #' \code{simType = 'ghalton'}, Generalized-Halton draws are used for MSL. If
 #' \code{simType = 'sobol'}, Sobol draws are used for MSL. If \code{simType =
 #' 'uniform'}, uniform draws are used for MSL. (see section \sQuote{Details}).
-#' @param Nsim Number of draws for MSL.
+#' @param Nsim Number of draws for MSL (default 100).
 #' @param prime Prime number considered for Halton and Generalized-Halton
 #' draws. Default = \code{2}.
 #' @param burn Number of the first observations discarded in the case of Halton
@@ -139,9 +139,10 @@
 #' 
 #' where 
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('y_{1i}^*=\\\mathbf{Z_{si}^{\\\prime}} \\\bm{\\\gamma} + w_i, \\\quad w_i \\\sim \\\mathcal{N}(0, 1)')
-#' } 
+#' \deqn{
+#' y_{1i}^*=\mathbf{Z}_{si}^{\prime} \mathbf{\gamma} + w_i, \quad 
+#' w_i \sim \mathcal{N}(0, 1)
+#' }
 #' 
 #' and
 #' 
@@ -155,72 +156,97 @@
 #'
 #' where 
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('y_{2i}^*=\\\mathbf{x_{i}^{\\\prime}} \\\bm{\\\beta} + v_i - Su_i, \\\quad v_i = \\\sigma_vV_i \\\quad \\\wedge \\\quad V_i \\\sim \\\mathcal{N}(0, 1), \\\quad u_i = \\\sigma_u|U_i| \\\quad \\\wedge \\\quad U_i \\\sim \\\mathcal{N}(0, 1)')
+#' \deqn{
+#' y_{2i}^*=\mathbf{x_{i}^{\prime}} \mathbf{\beta} + v_i - Su_i, \quad 
+#' v_i = \sigma_vV_i \quad \wedge \quad V_i \sim \mathcal{N}(0, 1), \quad 
+#' u_i = \sigma_u|U_i| \quad \wedge \quad U_i \sim \mathcal{N}(0, 1)
 #' }
 #' 
-#' \eqn{y_{1i}} describes the selection equation while \eqn{y_{2i}} represents the frontier equation. The selection
-#' bias emerges from the correlation between the two symmetric random components \eqn{v_i} and \eqn{w_i} with
+#' \eqn{y_{1i}} describes the selection equation while \eqn{y_{2i}} represents 
+#' the frontier equation. The selection bias emerges from the correlation 
+#' between the two symmetric random components \eqn{v_i} and \eqn{w_i}:
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('(v_i, w_i) \\\sim \\\mathcal{N}_2\\\\left\\\\lbrack(0,0), (1, \\\rho \\\sigma_v, \\\sigma_v^2) \\\\right\\\\rbrack')
+#' \deqn{
+#' (v_i, w_i) \sim \mathcal{N}_2\left\lbrack(0,0), (1, \rho \sigma_v, \sigma_v^2) \right\rbrack
 #' }
 #' 
 #' Conditionaly on \eqn{|U_i|}, the probability associated to each observation is
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('Pr \\\\left\\\\lbrack y_{1i}^* \\\\leq 0 \\\\right\\\\rbrack^{1-y_{1i}} \\\cdot \\\\left\\\\lbrace f(y_{2i}|y_{1i}^* > 0) \\\times Pr\\\\left\\\\lbrack y_{1i}^* > 0\\\\right\\\\rbrack \\\\right\\\\rbrace^{y_{1i}}')
+#' 
+#' \deqn{
+#' Pr \left\lbrack y_{1i}^* \leq 0 \right\rbrack^{1-y_{1i}} \cdot \left\lbrace 
+#' f(y_{2i}|y_{1i}^* > 0) \times Pr\left\lbrack y_{1i}^* > 0 
+#' \right\rbrack \right\rbrace^{y_{1i}}
 #' }
 #' 
 #' Using the conditional probability formula
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('P\\\\left(A\\\cap B\\\\right) = P(A) \\\cdot P(B|A) = P(B) \\\cdot P(A|B)')
+#' \deqn{
+#' P\left(A\cap B\right) = P(A) \cdot P(B|A) = P(B) \cdot P(A|B)
 #' }
 #' 
 #' Therefore
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('f(y_{2i}|y_{1i}^* \\\geq 0) \\\cdot Pr\\\\left\\\\lbrack y_{1i}^* \\\geq 0\\\\right\\\\rbrack = f(y_{2i}) \\\cdot Pr(y_{1i}^* \\\geq 0|y_{2i})')
+#' \deqn{
+#' f(y_{2i}|y_{1i}^* \geq 0) \cdot Pr\left\lbrack y_{1i}^* \geq 0\right\rbrack = 
+#' f(y_{2i}) \cdot Pr(y_{1i}^* \geq 0|y_{2i})
 #' }
 #' 
 #' Using the properties of a bivariate normal distribution, we have
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('y_{i1}^* | y_{i2} \\\sim N\\\\left(\\\mathbf{Z_{si}^{\\\prime}} \\\bm{\\\gamma}+\\\frac{\\\rho}{\\\sigma_v}v_i, 1-\\\rho^2\\\\right)')
+#' \deqn{
+#' y_{i1}^* | y_{i2} \sim N\left(\mathbf{Z_{si}^{\prime}} \bm{\gamma}+\frac{\rho}{
+#' \sigma_v}v_i, 1-\rho^2\right)
 #' }
 #' 
 #' Hence conditionally on \eqn{|U_i|}, we have
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('f(y_{2i}|y_{1i}^* \\\geq 0) \\\cdot Pr\\\\left\\\\lbrack y_{1i}^* \\\geq 0\\\\right\\\\rbrack = \\\frac{1}{\\\sigma_v}\\\phi\\\\left(\\\frac{v_i}{\\\sigma_v}\\\\right)\\\Phi\\\\left(\\\frac{\\\mathbf{Z_{si}^{\\\prime}} \\\bm{\\\gamma}+\\\frac{\\\rho}{\\\sigma_v}v_i}{\\\sqrt{1-\\\rho^2}}\\\\right)')
+#' \deqn{
+#' f(y_{2i}|y_{1i}^* \geq 0) \cdot Pr\left\lbrack y_{1i}^* \geq 0\right\rbrack = 
+#' \frac{1}{\sigma_v}\phi\left(\frac{v_i}{\sigma_v}\right)\Phi\left(\frac{
+#' \mathbf{Z_{si}^{\prime}} \bm{\gamma}+\frac{\rho}{\sigma_v}v_i}{
+#' \sqrt{1-\rho^2}}\right)
 #' }
 #' 
 #' The conditional likelihood is equal to
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('L_i\\\big||U_i| = \\\Phi(-\\\mathbf{Z_{si}^{\\\prime}} \\\bm{\\\gamma})^{1-y_{1i}} \\\times \\\\left\\\\lbrace \\\frac{1}{\\\sigma_v}\\\phi\\\\left(\\\frac{y_{2i}-\\\mathbf{x_{i}^{\\\prime}} \\\bm{\\\beta} + S\\\sigma_u|U_i|}{\\\sigma_v}\\\\right)\\\Phi\\\\left(\\\frac{\\\mathbf{Z_{si}^{\\\prime}} \\\bm{\\\gamma}+\\\frac{\\\rho}{\\\sigma_v}\\\\left(y_{2i}-\\\mathbf{x_{i}^{\\\prime}} \\\bm{\\\beta} + S\\\sigma_u|U_i|\\\\right)}{\\\sqrt{1-\\\rho^2}}\\\\right) \\\\right\\\\rbrace ^{y_{1i}}') 
+#' \deqn{
+#' L_i\big||U_i| = \Phi(-\mathbf{Z_{si}^{\prime}} \bm{\gamma})^{1-y_{1i}} \times 
+#' \left\lbrace \frac{1}{\sigma_v}\phi\left(\frac{y_{2i}-\mathbf{x_{i}^{\prime}} 
+#' \bm{\beta} + S\sigma_u|U_i|}{\sigma_v}\right)\Phi\left(\frac{
+#' \mathbf{Z_{si}^{\prime}} \bm{\gamma}+\frac{\rho}{\sigma_v}\left(y_{2i}-
+#' \mathbf{x_{i}^{\prime}} \bm{\beta} + S\sigma_u|U_i|\right)}{\sqrt{1-\rho^2}}
+#' \right) \right\rbrace ^{y_{1i}}
 #' }
 #' 
 #' Since the non-selected observations do not bring any additional information, thus 
 #' the conditional likelihood to be considered is
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('L_i\\\big||U_i| = \\\frac{1}{\\\sigma_v}\\\phi\\\\left(\\\frac{y_{2i}-\\\mathbf{x_{i}^{\\\prime}} \\\bm{\\\beta} + S\\\sigma_u|U_i|}{\\\sigma_v}\\\\right) \\\Phi\\\\left(\\\frac{\\\mathbf{Z_{si}^{\\\prime}} \\\bm{\\\gamma}+\\\frac{\\\rho}{\\\sigma_v}\\\\left(y_{2i}-\\\mathbf{x_{i}^{\\\prime}} \\\bm{\\\beta} + S\\\sigma_u|U_i|\\\\right)}{\\\sqrt{1-\\\rho^2}}\\\\right) ') 
+#' \deqn{
+#' L_i\big||U_i| = \frac{1}{\sigma_v}\phi\left(\frac{y_{2i}-\mathbf{x_{i}^{\prime}} 
+#' \bm{\beta} + S\sigma_u|U_i|}{\sigma_v}\right) \Phi\left(\frac{\mathbf{Z_{si}^{\prime}} 
+#' \bm{\gamma}+\frac{\rho}{\sigma_v}\left(y_{2i}-\mathbf{x_{i}^{\prime}} \bm{\beta} + 
+#' S\sigma_u|U_i|\right)}{\sqrt{1-\rho^2}}\right) 
 #' }
 #' 
 #' The unconditional likelihood is obtained by integrating \eqn{|U_i|} out of the conditional likelihood. Thus
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('L_i\\ = \\\int_{|U_i|} \\\frac{1}{\\\sigma_v}\\\phi\\\\left(\\\frac{y_{2i}-\\\mathbf{x_{i}^{\\\prime}} \\\bm{\\\beta} + S\\\sigma_u|U_i|}{\\\sigma_v}\\\\right) \\\Phi\\\\left(\\\frac{\\\mathbf{Z_{si}^{\\\prime}} \\\bm{\\\gamma}+ \\\frac{\\\rho}{\\\sigma_v}\\\\left(y_{2i}-\\\mathbf{x_{i}^{\\\prime}} \\\bm{\\\beta} + S\\\sigma_u|U_i|\\\\right)}{\\\sqrt{1-\\\rho^2}}\\\\right)p\\\\left(|U_i|\\\\right)d|U_i| ') 
+#' \deqn{
+#' L_i\\ = \int_{|U_i|} \frac{1}{\sigma_v}\phi\left(\frac{y_{2i}-\mathbf{x_{i}^{\prime}} 
+#' \bm{\beta} + S\sigma_u|U_i|}{\sigma_v}\right) \Phi\left(\frac{\mathbf{Z_{si}^{\prime}} 
+#' \bm{\gamma}+ \frac{\rho}{\sigma_v}\left(y_{2i}-\mathbf{x_{i}^{\prime}} \bm{\beta} + 
+#' S\sigma_u|U_i|\right)}{\sqrt{1-\rho^2}}\right)p\left(|U_i|\right)d|U_i|
 #' }
 #' 
 #' To simplifiy the estimation, the likelihood can be estimated using a two-step approach.
 #' In the first step, the probit model can be run and estimate of \eqn{\gamma} can be obtained.
 #' Then, in the second step, the following model is estimated:
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('L_i\\ = \\\int_{|U_i|} \\\frac{1}{\\\sigma_v}\\\phi\\\\left(\\\frac{y_{2i}-\\\mathbf{x_{i}^{\\\prime}} \\\bm{\\\beta} + S\\\sigma_u|U_i|}{\\\sigma_v}\\\\right) \\\Phi\\\\left(\\\frac{a_i + \\\frac{\\\rho}{\\\sigma_v}\\\\left(y_{2i}-\\\mathbf{x_{i}^{\\\prime}} \\\bm{\\\beta} + S\\\sigma_u|U_i|\\\\right)}{\\\sqrt{1-\\\rho^2}}\\\\right)p\\\\left(|U_i|\\\\right)d|U_i| ') 
+#' \deqn{
+#' L_i\\ = \int_{|U_i|} \frac{1}{\sigma_v}\phi\left(\frac{y_{2i}-\mathbf{x_{i}^{\prime}} 
+#' \bm{\beta} + S\sigma_u|U_i|}{\sigma_v}\right) \Phi\left(\frac{a_i + 
+#' \frac{\rho}{\sigma_v}\left(y_{2i}-\mathbf{x_{i}^{\prime}} \bm{\beta} + 
+#' S\sigma_u|U_i|\right)}{\sqrt{1-\rho^2}}\right)p\left(|U_i|\right)d|U_i| 
 #' }
 #' 
 #' where \eqn{a_i = \mathbf{Z_{si}^{\prime}} \hat{\bm{\gamma}}}. This likelihood can be estimated using 
@@ -233,8 +259,8 @@
 #' When option \code{weights} is specified and \code{wscale = TRUE}, the weights
 #' is scaled as 
 #' 
-#' \Sexpr[results=rd, stage=build]{
-#' katex::math_to_rd('new_{weights} = sample_{size} \\\times \\\frac{old_{weights}}{\\\sum(old_{weights})}')
+#' \deqn{
+#' new_{weights} = sample_{size} \times \frac{old_{weights}}{\sum(old_{weights})}
 #' }
 #' 
 #' For difficult problems, non-gradient methods (e.g. \code{nm} or \code{sann}) can be 
@@ -506,7 +532,7 @@ sfaselectioncross <- function(selectionF, frontierF, uhet, vhet,
   modelType = "greene10", logDepVar = TRUE, data, subset, weights,
   wscale = TRUE, S = 1L, udist = "hnormal", start = NULL, method = "bfgs",
   hessianType = 2L, lType = "kronrod", Nsub = 100, uBound = Inf,
-  simType = "halton", Nsim = 300, prime = 2L, burn = 10, antithetics = FALSE,
+  simType = "halton", Nsim = 100, prime = 2L, burn = 10, antithetics = FALSE,
   seed = 12345, itermax = 2000, printInfo = FALSE, intol = 1e-06,
   tol = 1e-12, gradtol = 1e-06, stepmax = 0.1, qac = "marquardt") {
   # u distribution check -------
@@ -586,7 +612,7 @@ sfaselectioncross <- function(selectionF, frontierF, uhet, vhet,
     names(mc), nomatch = 0L)
   mc_F <- mc[c(1L, m_F)]
   mc_F$drop.unused.levels <- TRUE
-  frontierF <- interCheckMain(formula = frontierF)
+  frontierF <- interCheckMain(formula = frontierF, data = data)
   ## Generate required datasets -------
   names(mc_F)[2] <- "formula"
   mc_F$na.action <- na.omit
@@ -602,7 +628,7 @@ sfaselectioncross <- function(selectionF, frontierF, uhet, vhet,
   }
   wHvar <- wProbit[Yvar_S == 1]
   if (!missing(uhet)) {
-    uhet <- clhsCheck_u(formula = uhet, scaling = FALSE)
+    uhet <- clhsCheck_u(formula = uhet)
   } else {
     uhet <- ~1
   }
@@ -611,7 +637,7 @@ sfaselectioncross <- function(selectionF, frontierF, uhet, vhet,
   } else {
     vhet <- ~1
   }
-  formula <- formDist_selectioncross(udist = udist, formula = frontierF,
+  formula <- formDist_sfaselectioncross(udist = udist, formula = frontierF,
     uhet = uhet, vhet = vhet)
   mtuH <- delete.response(terms(formula, data = data, rhs = 2))
   uHvar <- model.matrix(mtuH, mc_F)[Yvar_S == 1, , drop = FALSE]
@@ -649,7 +675,7 @@ sfaselectioncross <- function(selectionF, frontierF, uhet, vhet,
   # Check algorithms -------
   method <- tolower(method)
   if (!(method %in% c("ucminf", "bfgs", "bhhh", "nr", "nm",
-    "sr1", "mla", "sparse", "nlminb"))) {
+    "cg", "sann", "sr1", "mla", "sparse", "nlminb"))) {
     stop("Unknown or non-available optimization algorithm: ",
       paste(method), call. = FALSE)
   }
@@ -802,7 +828,6 @@ sfaselectioncross <- function(selectionF, frontierF, uhet, vhet,
   dataTable$PROBIT_PREDICTIONS <- as.numeric(crossprod(matrix(probitParam),
     t(Xvar_S)))
   dataTable$IMR <- dnorm(dataTable[["PROBIT_PREDICTIONS"]])/pnorm(dataTable[["PROBIT_PREDICTIONS"]])
-  dataTable$selectDum <- Yvar_S
   ols2step <- if (colnames(Xvar_F)[1] == "(Intercept)") {
     if (dim(Xvar_F)[2] == 1) {
       lm(Yvar_F ~ 1)
@@ -822,6 +847,7 @@ sfaselectioncross <- function(selectionF, frontierF, uhet, vhet,
    due to potential perfect multicollinearity",
       call. = FALSE)
   }
+  names(ols2step$coefficients) <- colnames(Xvar_F)
   ols2stepParam <- ols2step$coefficients
   ols2stepSigmasq <- summary(ols2step)$sigma^2
   ols2stepStder <- sqrt(diag(vcov(ols2step)))
@@ -830,6 +856,9 @@ sfaselectioncross <- function(selectionF, frontierF, uhet, vhet,
   dataTable$ols2stepResiduals[Yvar_S == 1] <- residuals(ols2step)
   dataTable$ols2stepFitted <- NA
   dataTable$ols2stepFitted[Yvar_S == 1] <- fitted(ols2step)
+  # possibility to have duplicated columns if ID or TIME
+  # appears in ols in the case of panel data
+  dataTable <- dataTable[!duplicated(as.list(dataTable))]
   ## skewness is run on the 2step model -------
   ols2stepSkew <- skewness(dataTable[["ols2stepResiduals"]][Yvar_S ==
     1])
@@ -942,7 +971,7 @@ sfaselectioncross <- function(selectionF, frontierF, uhet, vhet,
     }
   })
   # quick renaming -------
-  names(mleList$startVal) <- fName_uvr_selectioncross(Xvar = Xvar_F,
+  names(mleList$startVal) <- fName_uvr_sfaselectioncross(Xvar = Xvar_F,
     uHvar = uHvar, vHvar = vHvar)
   names(mleList$mlParam) <- names(mleList$startVal)
   rownames(mleList$invHessian) <- colnames(mleList$invHessian) <- names(mleList$mlParam)
@@ -1049,19 +1078,19 @@ bread.sfaselectioncross <- function(x, ...) {
     return(x$invHessian * x$Nobs)
   } else {
     cat("Computing Analytical Hessian \n")
-    Yvar <- model.response(model.frame(x$formula, data = x$dataTable[x$dataTable$selectDum ==
+    Yvar <- model.response(model.frame(x$formula, data = x$dataTable[x$dataTable[all.vars(x$selectionF)[1]] ==
       1, ]))
-    Xvar <- model.matrix(x$formula, rhs = 1, data = x$dataTable[x$dataTable$selectDum ==
+    Xvar <- model.matrix(x$formula, rhs = 1, data = x$dataTable[x$dataTable[all.vars(x$selectionF)[1]] ==
       1, ])
-    uHvar <- model.matrix(x$formula, rhs = 2, data = x$dataTable[x$dataTable$selectDum ==
+    uHvar <- model.matrix(x$formula, rhs = 2, data = x$dataTable[x$dataTable[all.vars(x$selectionF)[1]] ==
       1, ])
-    vHvar <- model.matrix(x$formula, rhs = 3, data = x$dataTable[x$dataTable$selectDum ==
+    vHvar <- model.matrix(x$formula, rhs = 3, data = x$dataTable[x$dataTable[all.vars(x$selectionF)[1]] ==
       1, ])
     if (x$lType == "kronrod") {
       hessAnalytical <- chesshalfnormlike_ss_GK(x$mlParam,
         nXvar = ncol(Xvar), nuZUvar = ncol(uHvar), nvZVvar = ncol(vHvar),
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-        wHvar = x$dataTable$weights, S = x$S, PREDICTIONS = x$dataTable[["PROBIT_PREDICTIONS"]][x$dataTable$selectDum ==
+        wHvar = x$dataTable$weights, S = x$S, PREDICTIONS = x$dataTable[["PROBIT_PREDICTIONS"]][x$dataTable[all.vars(x$selectionF)[1]] ==
           1], uBound = x$uBound, subdivisions = x$Nsub,
         intol = x$intol)
     } else {
@@ -1069,8 +1098,8 @@ bread.sfaselectioncross <- function(x, ...) {
         hessAnalytical <- chesshalfnormlike_ss_HCUB(x$mlParam,
           nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
           nvZVvar = ncol(vHvar), uHvar = uHvar, vHvar = vHvar,
-          Yvar = Yvar, Xvar = Xvar, wHvar = x$dataTable$weights[x$dataTable$selectDum ==
-          1], S = x$S, PREDICTIONS = x$dataTable[["PROBIT_PREDICTIONS"]][x$dataTable$selectDum ==
+          Yvar = Yvar, Xvar = Xvar, wHvar = x$dataTable$weights[x$dataTable[all.vars(x$selectionF)[1]] ==
+          1], S = x$S, PREDICTIONS = x$dataTable[["PROBIT_PREDICTIONS"]][x$dataTable[all.vars(x$selectionF)[1]] ==
           1], uBound = x$uBound, subdivisions = x$Nsub,
           intol = x$intol)
       } else {
@@ -1078,8 +1107,8 @@ bread.sfaselectioncross <- function(x, ...) {
           hessAnalytical <- chesshalfnormlike_ss_PCUB(x$mlParam,
           nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
           nvZVvar = ncol(vHvar), uHvar = uHvar, vHvar = vHvar,
-          Yvar = Yvar, Xvar = Xvar, wHvar = x$dataTable$weights[x$dataTable$selectDum ==
-            1], S = x$S, PREDICTIONS = x$dataTable[["PROBIT_PREDICTIONS"]][x$dataTable$selectDum ==
+          Yvar = Yvar, Xvar = Xvar, wHvar = x$dataTable$weights[x$dataTable[all.vars(x$selectionF)[1]] ==
+            1], S = x$S, PREDICTIONS = x$dataTable[["PROBIT_PREDICTIONS"]][x$dataTable[all.vars(x$selectionF)[1]] ==
             1], uBound = x$uBound, subdivisions = x$Nsub,
           intol = x$intol)
         } else {
@@ -1087,8 +1116,8 @@ bread.sfaselectioncross <- function(x, ...) {
           hessAnalytical <- chesshalfnormlike_ss_GH(x$mlParam,
             nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
             nvZVvar = ncol(vHvar), uHvar = uHvar, vHvar = vHvar,
-            Yvar = Yvar, Xvar = Xvar, wHvar = x$dataTable$weights[x$dataTable$selectDum ==
-            1], S = x$S, PREDICTIONS = x$dataTable[["PROBIT_PREDICTIONS"]][x$dataTable$selectDum ==
+            Yvar = Yvar, Xvar = Xvar, wHvar = x$dataTable$weights[x$dataTable[all.vars(x$selectionF)[1]] ==
+            1], S = x$S, PREDICTIONS = x$dataTable[["PROBIT_PREDICTIONS"]][x$dataTable[all.vars(x$selectionF)[1]] ==
             1], gH = x$gHermiteData, N = x$Nobs)
           } else {
           if (x$lType == "msl") {
@@ -1096,8 +1125,8 @@ bread.sfaselectioncross <- function(x, ...) {
             nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
             nvZVvar = ncol(vHvar), uHvar = uHvar,
             vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-            wHvar = x$dataTable$weights[x$dataTable$selectDum ==
-              1], S = x$S, PREDICTIONS = x$dataTable[["PROBIT_PREDICTIONS"]][x$dataTable$selectDum ==
+            wHvar = x$dataTable$weights[x$dataTable[all.vars(x$selectionF)[1]] ==
+              1], S = x$S, PREDICTIONS = x$dataTable[["PROBIT_PREDICTIONS"]][x$dataTable[all.vars(x$selectionF)[1]] ==
               1], FiMat = x$FiMat, N = x$Nobs)
           }
           }

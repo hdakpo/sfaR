@@ -5,9 +5,6 @@
 \alias{residuals.sfacross}
 \alias{residuals.lcmcross}
 \alias{residuals.sfaselectioncross}
-\alias{residuals.zisfcross}
-\alias{residuals.cnsfcross}
-\alias{residuals.misfcross}
 \title{Extract residuals of stochastic frontier models}
 \usage{
 \method{residuals}{sfacross}(object, ...)
@@ -15,37 +12,28 @@
 \method{residuals}{lcmcross}(object, ...)
 
 \method{residuals}{sfaselectioncross}(object, ...)
-
-\method{residuals}{zisfcross}(object, ...)
-
-\method{residuals}{cnsfcross}(object, ...)
-
-\method{residuals}{misfcross}(object, ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{cnsfcross}}, \code{\link{lcmcross}}, \code{\link{cnsfcross}},
-\code{\link{sfacross}}, \code{\link{sfaselectioncross}} or
-\code{\link{zisfcross}}.}
+by \code{\link{lcmcross}}, \code{\link{sfacross}}, or
+\code{\link{sfaselectioncross}}.}
 
-\item{...}{Currently ignored.}
+\item{\dots}{Currently ignored.}
 }
 \value{
-When the \code{object} is of class \code{'lcmcross'},
+When the \code{object} is of \code{'lcmcross'},
 \code{\link{residuals}} returns a data frame containing the residuals values
 for each latent class, where each variable terminates with \code{'_c#'},
 \code{'#'} being the class number.
 
-When the \code{object} is of class \code{'cnsfcross'},
-\code{'misfcross'}, \code{'sfacross'}, \code{'sfaselectioncross'} or
-\code{'zisfcross'}, \code{\link{residuals}} returns a vector of residuals
-values.
+When the \code{object} is of class \code{'sfacross'}, or
+\code{'sfaselectioncross'}, \code{\link{residuals}} returns a vector of
+residuals values.
 }
 \description{
-This function returns the residuals' values from classic or latent class
-stochastic frontier models estimated with \code{\link{cnsfcross}},
-\code{\link{lcmcross}}, \code{\link{misfcross}}, \code{\link{sfacross}},
-\code{\link{sfaselectioncross}} or \code{\link{zisfcross}}.
+This function returns the residuals' values from stochastic frontier models
+estimated with \code{\link{lcmcross}}, \code{\link{sfacross}}, or
+\code{\link{sfaselectioncross}}.
 }
 \note{
 The residuals values are ordered in the same way as the corresponding
@@ -72,23 +60,14 @@ head(resid.cb_2c_h)
 
 }
 \seealso{
-\code{\link{cnsfcross}}, for the contaminated noise stochastic
-frontier analysis model fitting function.
-
 \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
-model fitting function.
-
-\code{\link{misfcross}}, for the multi-modal inefficiency stochastic frontier
-analysis model fitting function.
+model fitting function using cross-sectional or pooled data.
 
 \code{\link{sfacross}}, for the stochastic frontier analysis model
-fitting function.
+fitting function using cross-sectional or pooled data.
 
 \code{\link{sfaselectioncross}} for sample selection in stochastic frontier
-model fitting function.
-
-\code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
-fitting function.
+model fitting function using cross-sectional or pooled data.
 }
 \keyword{methods}
 \keyword{residuals}

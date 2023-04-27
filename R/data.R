@@ -12,6 +12,7 @@
 #         -Data on Swiss railways                                              #
 #         -Data on U.S. electricity generating plants                          #
 #         -Data on world production                                            #
+#         -Data on Norwegian dairy farms                                       #
 # Data type: Cross sectional data & Panel data                                 #
 #------------------------------------------------------------------------------#
 
@@ -232,3 +233,36 @@ NULL
 #' str(worldprod)
 #' summary(worldprod)
 NULL
+
+#' Data on Norwegian Dairy Farms
+#'
+#' This dataset contains nine years (1998-2006) of information on Norwegian dairy
+#' farms
+#' 
+#' @name dairynorway
+#' @docType data
+#' @format A data frame with 2727 observations on the following 23 variables.
+#' \describe{ \item{farmid}{Farm identification.} \item{year}{Year
+#' identification.} \item{y1}{Milk sold (1000 liters).} \item{y2}{Meat (1000 NOK)} 
+#' \item{y3}{Support payments (1000 NOK).} \item{y4}{Other outputs (1000 NOK).} 
+#' \item{p1}{Milk price (NOK/liter).} \item{p2}{Meat price (cattle index).} 
+#' \item{p3}{Support payments price (CP index).} \item{p4}{Other outputs price index.} 
+#' \item{x1}{Land (decare (daa) = 0.1 ha).} \item{x2}{Labour (1000 hours).} 
+#' \item{x3}{Purchase feed (1000 NOK).} \item{x4}{Other variable costs (1000 NOK).} 
+#' \item{x5}{Cattle capital (1000 NOK).} \item{x6}{Other capital (1000 NOK).} 
+#' \item{w1}{Land price (NOK/daa).} \item{w2}{Labour price (NOK/hour).}, 
+#' \item{w3}{Feed price index.} \item{w4}{Other variable cost index.} 
+#' \item{w5}{Cattle capital rent.} \item{w6}{Other capital rent and depreciation.} 
+#' \item{tc}{Total cost.}}
+#' @references Kumbhakar, S.C., H.J. Wang, and A. Horncastle. 2014. \emph{A
+#' Practitioner's Guide to Stochastic Frontier Analysis Using Stata}. Cambridge
+#' University Press.
+#' @source
+#' \url{https://sites.google.com/site/sfbook2014/home/for-stata-v12-v13-v14}
+#' @keywords datasets
+#' @examples
+#'
+#' str(dairynorway)
+#' summary(dairynorway)
+NULL
+

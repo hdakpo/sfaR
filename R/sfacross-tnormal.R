@@ -98,7 +98,7 @@ csttruncnorm <- function(olsObj, epsiRes, S, nmuZUvar, nuZUvar,
         collapse = ", "), ". This may be due to a singular matrix due to potential perfect multicollinearity",
       call. = FALSE)
   reg_hetmu <- if (nmuZUvar == 1) {
-    lm(log(varmu) ~ 1)
+    lm(epsiRes ~ 1)
   } else {
     lm(epsiRes ~ ., data = as.data.frame(muHvar[, 2:nmuZUvar,
       drop = FALSE]))

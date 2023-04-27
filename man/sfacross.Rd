@@ -5,7 +5,7 @@
 \alias{print.sfacross}
 \alias{bread.sfacross}
 \alias{estfun.sfacross}
-\title{Stochastic frontier estimation using cross-section data}
+\title{Stochastic frontier estimation using cross-sectional data}
 \usage{
 sfacross(
   formula,
@@ -98,7 +98,7 @@ Default = \code{FALSE}. (see section \sQuote{Details}).}
 \item{start}{Numeric vector. Optional starting values for the maximum
 likelihood (ML) estimation.}
 
-\item{method}{Optimization algorithm used for the estimation.  Default =
+\item{method}{Optimization algorithm used for the estimation. Default =
 \code{'bfgs'}. 11 algorithms are available: \itemize{ \item \code{'bfgs'},
 for Broyden-Fletcher-Goldfarb-Shanno (see
 \code{\link[maxLik:maxBFGS]{maxBFGS}}) \item \code{'bhhh'}, for
@@ -130,7 +130,7 @@ Halton draws are used for maximum simulated likelihood (MSL). If
 \code{simType = 'sobol'}, Sobol draws are used for MSL. If \code{simType =
 'uniform'}, uniform draws are used for MSL. (see section \sQuote{Details}).}
 
-\item{Nsim}{Number of draws for MSL.}
+\item{Nsim}{Number of draws for MSL. Default 100.}
 
 \item{prime}{Prime number considered for Halton and Generalized-Halton
 draws. Default = \code{2}.}
@@ -282,7 +282,7 @@ M(S)L estimation.}
 \description{
 \code{\link{sfacross}} is a symbolic formula-based function for the
 estimation of stochastic frontier models in the case of cross-sectional or
-pooled cross-section data, using maximum (simulated) likelihood - M(S)L.
+pooled cross-sectional data, using maximum (simulated) likelihood - M(S)L.
 
 The function accounts for heteroscedasticity in both one-sided and two-sided
 error terms as in Reifschneider and Stevenson (1991), Caudill and Ford
@@ -290,26 +290,23 @@ error terms as in Reifschneider and Stevenson (1991), Caudill and Ford
 heterogeneity in the mean of the pre-truncated distribution as in Kumbhakar
 \emph{et al.} (1991), Huang and Liu (1994) and Battese and Coelli (1995).
 
-Ten distributions are possible for the one-sided error term and nine
+Ten distributions are possible for the one-sided error term and eleven
 optimization algorithms are available.
 
 The truncated normal - normal distribution with scaling property as in Wang
 and Schmidt (2002) is also implemented.
 }
 \details{
-The stochastic frontier model is defined as:
+The stochastic frontier model for the cross-sectional data is defined as:
 
-\Sexpr[results=rd, stage=build]{
-katex::math_to_rd("y_i = \\\alpha + \\\mathbf{x_i^{\\\prime}}\\\bm{\\\beta} +
-v_i - Su_i")
-}
+\deqn{y_i = \alpha + \mathbf{x_i^{\prime}}\bm{\beta} + v_i - Su_i}
 
-\Sexpr[results=rd, stage=build]{
-katex::math_to_rd("\\\epsilon_i = v_i -Su_i")
-}
+with
 
-where \eqn{i} is the observation, \eqn{j} is the class, \eqn{y} is the
-output (cost, revenue, profit), \eqn{x} is the vector of main explanatory
+\deqn{\epsilon_i = v_i -Su_i}
+
+where \eqn{i} is the observation, \eqn{y} is the
+output (cost, revenue, profit), \eqn{\mathbf{x}} is the vector of main explanatory
 variables (inputs and other control variables), \eqn{u} is the one-sided
 error term with variance \eqn{\sigma_{u}^2}, and \eqn{v} is the two-sided
 error term with variance \eqn{\sigma_{v}^2}.
@@ -328,39 +325,33 @@ counterpart of one (\code{1-draw}).
 To account for heteroscedasticity in the variance parameters of the error
 terms, a single part (right) formula can also be specified. To impose the
 positivity to these parameters, the variances are modelled as:
-\eqn{\sigma^2_u = \exp{(\delta'Z_u)}} or \eqn{\sigma^2_v =
-\exp{(\phi'Z_v)}}, where \eqn{Z_u} and \eqn{Z_v} are the heteroscedasticity
-variables (inefficiency drivers in the case of \eqn{Z_u}) and \eqn{\delta}
-and \eqn{\phi} the coefficients.  In the case of heterogeneity in the
-truncated mean \eqn{\mu}, it is modelled as \eqn{\mu=\omega'Z_{\mu}}. The
+\eqn{\sigma^2_u = \exp{(\bm{\delta}'\mathbf{Z}_u)}} or \eqn{\sigma^2_v =
+\exp{(\bm{\phi}'\mathbf{Z}_v)}}, where \eqn{\mathbf{Z}_u} and \eqn{\mathbf{Z}_v} are the heteroscedasticity
+variables (inefficiency drivers in the case of \eqn{\mathbf{Z}_u}) and \eqn{\bm{\delta}}
+and \eqn{\bm{\phi}} the coefficients. In the case of heterogeneity in the
+truncated mean \eqn{\mu}, it is modelled as \eqn{\mu=\bm{\omega}'\mathbf{Z}_{\mu}}. The
 scaling property can be applied for the truncated normal distribution:
-\eqn{u \sim h(Z_u, \delta)u} where \eqn{u} follows a truncated normal
+\eqn{u \sim h(\mathbf{Z}_u, \delta)u} where \eqn{u} follows a truncated normal
 distribution \eqn{N^+(\tau, \exp{(cu)})}.
 
 In the case of the truncated normal distribution, the convolution of
 \eqn{u_i} and \eqn{v_i} is:
 
-\Sexpr[results=rd, stage=build]{
-katex::math_to_rd("f(\\\epsilon_i)=\\\frac{1}{\\\sqrt{\\\\sigma_u^2 +
-\\\sigma_v^2}}\\\phi\\\\left(\\\frac{S\\\epsilon_i + \\\mu}{\\\sqrt{
-\\\sigma_u^2 + \\\sigma_v^2}}\\\\right)\\\Phi\\\\left(\\\frac{
-\\\mu_{i*}}{\\\sigma_*}\\\\right)\\\Big/\\\Phi\\\\left(\\\frac{
-\\\mu}{\\\sigma_u}\\\\right)")
-}
+\deqn{f(\epsilon_i)=\frac{1}{\sqrt{\sigma_u^2 + 
+\sigma_v^2}}\phi\left(\frac{S\epsilon_i + \mu}{\sqrt{
+\sigma_u^2 + \sigma_v^2}}\right)\Phi\left(\frac{
+\mu_{i*}}{\sigma_*}\right)\Big/\Phi\left(\frac{
+\mu}{\sigma_u}\right)}
 
 where
 
-\Sexpr[results=rd, stage=build]{
-katex::math_to_rd("\\\mu_{i*}=\\\frac{\\\mu\\\sigma_v^2 -
-S\\\epsilon_i\\\sigma_u^2}{\\\sigma_u^2 + \\\sigma_v^2}")
-}
+\deqn{\mu_{i*}=\frac{\mu\\\sigma_v^2 - 
+S\epsilon_i\sigma_u^2}{\sigma_u^2 + \sigma_v^2}}
 
 and
 
-\Sexpr[results=rd, stage=build]{
-katex::math_to_rd("\\\sigma_*^2 = \\\frac{\\\sigma_u^2
-\\\sigma_v^2}{\\\sigma_u^2 + \\\sigma_v^2}")
-}
+\deqn{\sigma_*^2 = \frac{\sigma_u^2 
+\sigma_v^2}{\sigma_u^2 + \sigma_v^2}}
 
 In the case of the half normal distribution the convolution is obtained by
 setting \eqn{\mu=0}.
@@ -369,10 +360,8 @@ setting \eqn{\mu=0}.
 When option \code{weights} is specified and \code{wscale = TRUE}, the weights
 is scaled as
 
-\Sexpr[results=rd, stage=build]{
-katex::math_to_rd('new_{weights} = sample_{size} \\\times
-\\\frac{old_{weights}}{\\\sum(old_{weights})}')
-}
+\deqn{new_{weights} = sample_{size} \times 
+\frac{old_{weights}}{\sum(old_{weights})}}
 
 For difficult problems, non-gradient methods (e.g. \code{nm} or \code{sann})
 can be used to warm start the optimization and zoom in the neighborhood of
@@ -428,7 +417,7 @@ summary(tl_u_ts)
 
 ## Using data on Philippine rice producers
 # Cobb Douglas (production function) generalized exponential, and Weibull 
-distributions
+# distributions
 
 cb_p_ge <- sfacross(formula = log(PROD) ~ log(AREA) + log(LABOR) + log(NPK) +
 log(OTHER), udist = 'genexponential', data = ricephil, S = 1, method = 'bfgs')

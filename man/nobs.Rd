@@ -5,9 +5,6 @@
 \alias{nobs.sfacross}
 \alias{nobs.lcmcross}
 \alias{nobs.sfaselectioncross}
-\alias{nobs.zisfcross}
-\alias{nobs.cnsfcross}
-\alias{nobs.misfcross}
 \title{Extract Total Number of Observations Used in frontier models}
 \usage{
 \method{nobs}{sfacross}(object, ...)
@@ -15,19 +12,12 @@
 \method{nobs}{lcmcross}(object, ...)
 
 \method{nobs}{sfaselectioncross}(object, ...)
-
-\method{nobs}{zisfcross}(object, ...)
-
-\method{nobs}{cnsfcross}(object, ...)
-
-\method{nobs}{misfcross}(object, ...)
 }
 \arguments{
-\item{object}{a  \code{cnsfcross}, \code{lcmcross}, \code{misfcross}, \code{sfacross},
-\code{sfaselectioncross} or \code{zisfcross} object for which the number of total
-observations is to be extracted,}
+\item{object}{a \code{lcmcross}, \code{sfacross}, or \code{sfaselectioncross}
+object for which the number of total observations is to be extracted,}
 
-\item{\dots}{further arguments.}
+\item{\dots}{Currently ignored.}
 }
 \value{
 A single number, normally an integer.
@@ -58,22 +48,13 @@ nobs(tl_u_h)
 
 }
 \seealso{
-\code{\link{cnsfcross}}, for the contaminated noise stochastic
-frontier analysis model fitting function.
-
 \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
-model fitting function.
-
-\code{\link{misfcross}}, for the multi-modal inefficiency stochastic frontier
-analysis model fitting function.
+model fitting function using cross-sectional or pooled data.
 
 \code{\link{sfacross}}, for the stochastic frontier analysis model
-fitting function.
+fitting function using cross-sectional or pooled data.
 
 \code{\link{sfaselectioncross}} for sample selection in stochastic frontier
-model fitting function.
-
-\code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
-fitting function.
+model fitting function using cross-sectional or pooled data.
 }
 \keyword{attribute}
