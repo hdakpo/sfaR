@@ -6,7 +6,7 @@
 <!-- badges: start -->
 
 [![CodeFactor](https://www.codefactor.io/repository/github/hdakpo/sfaR/badge)](https://www.codefactor.io/repository/github/hdakpo/sfaR)
-<!-- [![R build status](https://github.com/hdakpo/sfaR/workflows/R-CMD-check/badge.svg)](https://github.com/hdakpo/sfaR/actions) -->
+[![R-CMD-check](https://github.com/hdakpo/sfaR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/hdakpo/sfaR/actions/workflows/R-CMD-check.yaml)
 <!-- [![CRAN status](https://www.r-pkg.org/badges/version/sfaR)](https://CRAN.R-project.org/package=psfaR) -->
 <!-- [![Downloads](https://cranlogs.r-pkg.org/badges/fsfaR)](https://CRAN.R-project.org/package=sfaR) -->
 <!-- badges: end -->
@@ -39,17 +39,14 @@ ten different distributions are available. These distributions include:
 - Weibull
 
 In the case of the Gamma, lognormal and Weibull distributions, maximum
-simulated likelihood is used with the possibility of four specific
-distributions to construct the draws: Halton, Generalized Halton, Sobol
-and uniform.
+simulated likelihood is used with the possibility of four possibilities
+to construct the draws: Halton, Generalized Halton, Sobol and uniform.
 
 Heteroscedasticity in both error terms can be implemented, in addition
 to heterogeneity in the truncated mean parameter in the case of the
 truncated normal and lognormal distributions. In addition, in the case
 of the truncated normal distribution, the scaling property can be
-estimated.
-
-The main function for this class of model is `sfacross`.
+estimated. The main function for this class of model is `sfacross`.
 
 2.  **Latent Class Stochastic Frontier Model**
 
@@ -61,13 +58,15 @@ separation of observations in several classes). Only the half normal
 distribution is available for the one-sided error term.
 Heteroscedasticity in both error terms is possible. The choice of the
 number of classes can be guided by several information criteria
-(i.e. AIC, BIC or HQIC).
+(i.e. AIC, BIC or HQIC). The main function for this class of model is
+`lcmcross`.
 
 3.  **Sample Selection Correction Stochastic Frontier Model**
 
 This model solves the selection bias due to the correlation between the
 two-sided errors terms in both the selection and the frontier equations,
-in the case of cross-sectional or pooled data.
+in the case of cross-sectional or pooled data. The main function for
+this class of model is `sfaselectioncross`.
 
 An important features of *sfaR* is to provide eleven different
 optimization algorithms. For complex problem, several algorithms can be
