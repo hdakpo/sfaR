@@ -3,11 +3,11 @@ vers <- sprintf("R package version %s", meta$Version)
 
 citHeader("To cite the 'sfaR' package in publications please use:")
 
-citEntry(entry="Manual",
+bibentry(bibtype = "Manual",
          title = "{sfaR}: Stochastic Frontier Analysis Routines.",
-         author = personList(as.person("K Hervé Dakpo"),
-            as.person("Yann Desjeux"),
-            as.person("Laure Latruffe")),
+         author = c( person( "K Hervé", "Dakpo" ),
+            person( "Yann", "Desjeux" ),
+            person( "Laure", "Latruffe" ) ),
          year = year,
          note = vers,
          url = "https://CRAN.R-project.org/package=sfaR/",
