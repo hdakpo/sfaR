@@ -1,6 +1,6 @@
 
-R version 4.1.2 (2021-11-01) -- "Bird Hippie"
-Copyright (C) 2021 The R Foundation for Statistical Computing
+R version 4.3.0 (2023-04-21) -- "Already Tomorrow"
+Copyright (C) 2023 The R Foundation for Statistical Computing
 Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -17,7 +17,8 @@ Type 'q()' to quit R.
 
 > library( "sfaR" )
 * Please cite the 'sfaR' package as:
-  Dakpo KH., Desjeux Y., and Latruffe L. (2022). sfaR: Stochastic Frontier Analysis Routines. R package version 1.0.0.
+  Dakpo KH., Desjeux Y., Henningsen A., and Latruffe L. (2023). sfaR: Stochastic Frontier Analysis Routines. R package version 1.0.0.
+
 See also: citation("sfaR")
 
 * For any questions, suggestions, or comments on the 'sfaR' package, please make use of Tracker facilities at:
@@ -175,4 +176,4 @@ teBC_reciprocal 1.014   1.038  1.063 1.194   1.121 4.638
 > 
 > proc.time()
    user  system elapsed 
-  2.825   0.095   2.905 
+  2.230   0.075   2.296 
