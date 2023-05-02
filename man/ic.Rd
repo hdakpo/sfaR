@@ -32,7 +32,7 @@ are available: \itemize{ \item \code{'AIC'} for Akaike information criterion
 \description{
 \code{\link{ic}} returns information criterion from stochastic
 frontier models estimated with \code{\link{lcmcross}}, \code{\link{sfacross}},
-or \code{\link{sfaselectioncross}}..
+or \code{\link{sfaselectioncross}}.
 }
 \details{
 The different information criteria are computed as follows: \itemize{ \item

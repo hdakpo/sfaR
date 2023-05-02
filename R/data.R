@@ -6,17 +6,17 @@
 
 #------------------------------------------------------------------------------#
 # data list                                                                    #
-#         -Data on Spanish Dairy Farms                                         #
+#         -Data on Spanish dairy farms                                         #
 #         -Data on U.S. electric power generation                              #
 #         -Data on rice production in the Philippines                          #
-#         -Data on Swiss railways                                              #
+#         -Data on Swiss railway companies                                              #
 #         -Data on U.S. electricity generating plants                          #
 #         -Data on world production                                            #
 #         -Data on Norwegian dairy farms                                       #
 # Data type: Cross sectional data & Panel data                                 #
 #------------------------------------------------------------------------------#
 
-#' Data on Spanish Dairy Farms
+#' Data on Spanish dairy farms
 #'
 #' This dataset contains six years of observations on 247 dairy farms in
 #' northern Spain, drawn from 1993-1998. The original data consist in the farm
@@ -130,7 +130,7 @@ NULL
 #' summary(ricephil)
 NULL
 
-#' Data on Swiss railways
+#' Data on Swiss railway companies
 #'
 #' This dataset is an unbalanced panel of 50 Swiss railway companies over the
 #' period 1985-1997.
@@ -216,7 +216,7 @@ NULL
 #' \describe{ \item{country}{Country name.} \item{code}{Country
 #' identification.} \item{yr}{Year identification.} \item{y}{GDP in 1987 U.S.
 #' dollars.} \item{k}{Physical capital stock in 1987 U.S. dollars.}
-#' \item{l}{Labor (number of individuals in the workforce between the ages of
+#' \item{l}{Labor (number of individuals in the workforce between the age of
 #' 15 and 64).} \item{h}{Human capital-adjusted labor.} \item{ly}{Log of
 #' \code{y}.} \item{lk}{Log of \code{k}.} \item{ll}{Log of \code{l}.}
 #' \item{lh}{Log of \code{h}.} \item{initStat}{Log of the initial capital to
@@ -234,23 +234,23 @@ NULL
 #' summary(worldprod)
 NULL
 
-#' Data on Norwegian Dairy Farms
+#' Data on Norwegian dairy farms
 #'
 #' This dataset contains nine years (1998-2006) of information on Norwegian dairy
-#' farms
+#' farms.
 #' 
 #' @name dairynorway
 #' @docType data
-#' @format A data frame with 2727 observations on the following 23 variables.
+#' @format A data frame with 2,727 observations on the following 23 variables.
 #' \describe{ \item{farmid}{Farm identification.} \item{year}{Year
-#' identification.} \item{y1}{Milk sold (1000 liters).} \item{y2}{Meat (1000 NOK)} 
+#' identification.} \item{y1}{Milk sold (1000 liters).} \item{y2}{Meat (1000 NOK).} 
 #' \item{y3}{Support payments (1000 NOK).} \item{y4}{Other outputs (1000 NOK).} 
 #' \item{p1}{Milk price (NOK/liter).} \item{p2}{Meat price (cattle index).} 
 #' \item{p3}{Support payments price (CP index).} \item{p4}{Other outputs price index.} 
 #' \item{x1}{Land (decare (daa) = 0.1 ha).} \item{x2}{Labour (1000 hours).} 
 #' \item{x3}{Purchase feed (1000 NOK).} \item{x4}{Other variable costs (1000 NOK).} 
 #' \item{x5}{Cattle capital (1000 NOK).} \item{x6}{Other capital (1000 NOK).} 
-#' \item{w1}{Land price (NOK/daa).} \item{w2}{Labour price (NOK/hour).}, 
+#' \item{w1}{Land price (NOK/daa).} \item{w2}{Labour price (NOK/hour).} 
 #' \item{w3}{Feed price index.} \item{w4}{Other variable cost index.} 
 #' \item{w5}{Cattle capital rent.} \item{w6}{Other capital rent and depreciation.} 
 #' \item{tc}{Total cost.}}

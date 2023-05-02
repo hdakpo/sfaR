@@ -47,7 +47,7 @@
 #' log-likelihood. Should be \code{NULL} or numeric vector with positive values. 
 #' When \code{NULL}, a numeric vector of 1 is used.
 #' @param wscale Logical. When \code{weights} is not \code{NULL}, a scaling 
-#' transformation is used such that the the \code{weights} sums to the sample 
+#' transformation is used such that the \code{weights} sum to the sample 
 #' size. Default \code{TRUE}. When \code{FALSE} no scaling is used.
 #' @param S If \code{S = 1} (default), a production (profit) frontier is
 #' estimated: \eqn{\epsilon_i = v_i-u_i}. If \code{S = -1}, a cost frontier is
@@ -81,7 +81,7 @@
 #' \item \code{'cg'}, for Conjugate Gradient 
 #' (see \code{\link[maxLik:maxCG]{maxCG}}) \item \code{'sann'}, for Simulated 
 #' Annealing (see \code{\link[maxLik:maxSANN]{maxSANN}}) \item \code{'ucminf'}, 
-#' implements a quasi-Newton type with BFGS updating of the inverse Hessian and 
+#' for a quasi-Newton type optimisation with BFGS updating of the inverse Hessian and 
 #' soft line search with a trust region type monitoring of the input to the line 
 #' search algorithm (see \code{\link[ucminf:ucminf]{ucminf}})
 #' \item \code{'mla'}, for general-purpose optimization based on
@@ -192,15 +192,15 @@
 #' 
 #' \code{sfacross} allows for the maximization of weighted log-likelihood.
 #' When option \code{weights} is specified and \code{wscale = TRUE}, the weights
-#' is scaled as 
+#' are scaled as: 
 #' 
 #' \deqn{new_{weights} = sample_{size} \times 
 #' \frac{old_{weights}}{\sum(old_{weights})}}
 #' 
-#' For difficult problems, non-gradient methods (e.g. \code{nm} or \code{sann}) 
+#' For complex problems, non-gradient methods (e.g. \code{nm} or \code{sann}) 
 #' can be used to warm start the optimization and zoom in the neighborhood of 
-#' the solution. Then a gradient-based methods is recommanded in the second 
-#' step. In the case of \code{sann}, we recommand to significantly increase the
+#' the solution. Then a gradient-based methods is recommended in the second 
+#' step. In the case of \code{sann}, we recommend to significantly increase the
 #'  iteration limit (e.g. \code{itermax = 20000}). The Conjugate Gradient 
 #'  (\code{cg}) can also be used in the first stage.
 #' 
@@ -456,7 +456,7 @@
 #'
 #' @examples
 #'
-#' ## Using data on fossil fuel fired steam electric power generation plants in U.S.
+#' ## Using data on fossil fuel fired steam electric power generation plants in the U.S.
 #' # Translog (cost function) half normal with heteroscedasticity
 #' tl_u_h <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
 #' log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +

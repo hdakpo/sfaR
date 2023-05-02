@@ -44,7 +44,7 @@ dataset used for the estimation.
 \item{odRatio}{Posterior odds ratio
 \eqn{R_i = \frac{Post. Prob. Class 2}{Post. Prob. Class 1}}. The odds ratio
 can give an idea on how likely a decision making unit is to being fully
-efficient.Only for object of class \code{'zisfcross'}.}
+efficient. Only for object of class \code{'zisfcross'}.}
 
 \item{u_c}{Conditional inefficiency of the most probable class given the
 posterior probability.}
@@ -169,7 +169,7 @@ In the case of the half normal distribution for the one-sided error term,
 the formulae are as follows (for notations, see the \sQuote{Details} section
 of \code{\link{lcmcross}} or \code{\link{sfacross}}):
 
-\itemize{ \item The conditional inefficiency is }
+\itemize{ \item The conditional inefficiency is: }
 
 \deqn{E\left\lbrack u_i|\epsilon_i\right
 \rbrack=\mu_{i\ast} + \sigma_\ast\frac{\phi
@@ -185,7 +185,7 @@ and
 \deqn{\sigma_\ast^2 = \frac{\sigma_u^2 \sigma_v^2}{\sigma_u^2 + \sigma_v^2}}
 
 \itemize{ \item The Battese and Coelli (1988) conditional efficiency is
-obtained by: }
+obtained with: }
 
 \deqn{E\left\lbrack\exp{\left(-u_i\right)}
 |\epsilon_i\right\rbrack = \exp{\left(-\mu_{i\ast}+
@@ -194,7 +194,7 @@ obtained by: }
 \Phi\left(\frac{\mu_{i\ast}}{\sigma_\ast}\right)}}
 
 \itemize{ \item The reciprocal of the Battese and Coelli (1988) conditional
-efficiency is obtained by: }
+efficiency is obtained with: }
 
 \deqn{E\left\lbrack\exp{\left(u_i\right)}
 |\epsilon_i\right\rbrack = \exp{\left(\mu_{i\ast}+

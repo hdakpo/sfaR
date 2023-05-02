@@ -25,8 +25,8 @@
 \arguments{
 \item{object}{A stochastic frontier model returned by \code{\link{lcmcross}},
 \code{\link{sfacross}}, or \code{\link{sfaselectioncross}}, or an object of
-class \code{'summary.lcmcross'}, \code{'summary.sfacross'},
-or \code{'summary.sfaselectioncross'}.}
+class \code{'summary.lcmcross'}, \code{'summary.sfacross'}, or\cr
+\code{'summary.sfaselectioncross'}.}
 
 \item{extraPar}{Logical (default = \code{FALSE}). If \code{TRUE}, additional
 parameters are returned:
@@ -63,7 +63,7 @@ For objects of class \code{'lcmcross'}, \code{'sfacross'}, or
 estimated coefficients. If \code{extraPar = TRUE}, additional parameters,
 detailed in the section \sQuote{Arguments}, are also returned. In the case
 of object of class \code{'lcmcross'}, each additional
-parameter terminates with \code{'#'} that represents the class number.
+parameter ends with \code{'#'} that represents the class number.
 }
 \description{
 From an object of class \code{'summary.lcmcross'},

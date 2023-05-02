@@ -28,7 +28,7 @@
 #'
 #' @return In the case of an object of class \code{'lcmcross'}, a data frame 
 #' containing the fitted values for each class is returned where each variable 
-#' terminates with \code{'_c#'}, \code{'#'} being the class number.
+#' ends with \code{'_c#'}, \code{'#'} being the class number.
 #' 
 #' In the case of an object of class \code{'sfacross'}, or 
 #' \code{'sfaselectioncross'}, a vector of fitted values is returned.
@@ -51,7 +51,7 @@
 #'
 #' @examples
 #'
-#' ## Using data on eighty-two countries production (DGP)
+#' ## Using data on eighty-two countries production (GDP)
 #' # LCM Cobb Douglas (production function) half normal distribution
 #' cb_2c_h <- lcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal', 
 #' data = worldprod)

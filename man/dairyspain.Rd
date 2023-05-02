@@ -3,7 +3,7 @@
 \docType{data}
 \name{dairyspain}
 \alias{dairyspain}
-\title{Data on Spanish Dairy Farms}
+\title{Data on Spanish dairy farms}
 \format{
 A data frame with 1,482 observations on the following 29 variables.
 \describe{ \item{FARM}{Farm identification.} \item{AGEF}{Age of the farmer.}

@@ -26,18 +26,19 @@
 #' @param grad Logical. Default = \code{FALSE}. If \code{TRUE}, the gradient
 #' for the maximum likelihood (ML) estimates of the different parameters is
 #' returned.
-#' @param ci Logical. Default = \code{FALSE}. If \code{TRUE}, the 95\%
+#' @param ci Logical. Default = \code{FALSE}. If \code{TRUE}, the 95%
 #' confidence interval for the different parameters (OLS and ML estimates) is
 #' returned.
 #' @param ... Currently ignored.
-#' @param x An object of either class \code{'summary.lcmcross'}, \code{'summary.sfacross'}, 
-#' or \code{'summary.sfaselectioncross'}.
+#' @param x An object of either class \code{'summary.lcmcross'}, \code{'summary.sfacross'}, or\cr
+#' \code{'summary.sfaselectioncross'}.
 #' @param digits Numeric. Number of digits displayed in values.
 #'
 #' @name summary
 #'
 #' @return The \code{\link{summary}} method returns a list of class
-#' \code{'summary.lcmcross'}, \code{'summary.sfacross'}, or \code{'summary.sfaselectioncross'} 
+#' \code{'summary.lcmcross'}, \code{'summary.sfacross'}, or\cr
+#' \code{'summary.sfaselectioncross'} 
 #' that contains the same elements as an object returned by \code{\link{lcmcross}}, 
 #' \code{\link{sfacross}}, or \code{\link{sfaselectioncross}} with the 
 #' following additional elements:
@@ -64,10 +65,12 @@
 #' defined as: \eqn{u_i \in [0, \Theta]}.}
 #'
 #' \item{Eu}{For \code{object} of class \code{'sfacross'} or 
-#' \code{'sfaselectioncross'}. Expected unconditional inefficiency.}
+#' \code{'sfaselectioncross'}. Expected unconditional inefficiency
+#' (\eqn{E[u]}).}
 #'
 #' \item{Expu}{For \code{object} of class \code{'sfacross'} or 
-#' \code{'sfaselectioncross'}. Expected unconditional efficiency.}
+#' \code{'sfaselectioncross'}. Expected unconditional efficiency 
+#' (\eqn{E[\exp(u)]}).}
 #'
 #' \item{olsRes}{For \code{object} of class \code{'sfacross'}. Matrix of OLS
 #' estimates, their standard errors, t-values, P-values, and when \code{ci =

@@ -47,10 +47,10 @@
 #' @return \code{\link{marginal}} returns a data frame containing the marginal
 #' effects of the \eqn{Z_u} variables on the expected inefficiency (each
 #' variable has the prefix \code{'Eu_'}) and on the variance of the
-#' inefficiency (each variable has the prefix \code{'Vu_'}) is returned.
+#' inefficiency (each variable has the prefix \code{'Vu_'}).
 #'
 #' In the case of the latent class stochastic frontier (LCM), each variable 
-#' terminates with \code{'_c#'} where \code{'#'} is the class number.
+#' ends with \code{'_c#'} where \code{'#'} is the class number.
 #' 
 # @author K Hervé Dakpo
 #'
@@ -71,8 +71,7 @@
 #'
 #' @examples
 #'
-#' ## Using data on fossil fuel fired steam electric power generation plants in
-#' # the U.S.
+#' ## Using data on fossil fuel fired steam electric power generation plants in the U.S.
 #' # Translog SFA (cost function) truncated normal with scaling property
 #' tl_u_ts <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
 #' log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
@@ -82,7 +81,7 @@
 #' marg.tl_u_ts <- marginal(tl_u_ts)
 #' summary(marg.tl_u_ts)
 #'
-#' ## Using data on eighty-two countries production (DGP)
+#' ## Using data on eighty-two countries production (GDP)
 #' # LCM Cobb Douglas (production function) half normal distribution
 #' cb_2c_h <- lcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal',
 #'     data = worldprod, uhet = ~ initStat + h, S = 1, method = 'mla')

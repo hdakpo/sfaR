@@ -3,7 +3,7 @@
 \docType{data}
 \name{swissrailways}
 \alias{swissrailways}
-\title{Data on Swiss railways}
+\title{Data on Swiss railway companies}
 \format{
 A data frame with 605 observations on the following 42 variables.
 \describe{ \item{ID}{Firm identification.} \item{YEAR}{Year identification.}

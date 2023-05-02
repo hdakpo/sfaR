@@ -17,7 +17,7 @@
 #'
 #' \code{\link{ic}} returns information criterion from stochastic 
 #' frontier models estimated with \code{\link{lcmcross}}, \code{\link{sfacross}}, 
-#' or \code{\link{sfaselectioncross}}..
+#' or \code{\link{sfaselectioncross}}.
 #'
 #' The different information criteria are computed as follows: \itemize{ \item
 #' AIC: \eqn{-2 \log{LL} + 2 * K} \item BIC: \eqn{-2 \log{LL} + \log{N} * K}
