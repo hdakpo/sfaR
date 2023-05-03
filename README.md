@@ -10,6 +10,7 @@
 [![CRAN
 status](https://www.r-pkg.org/badges/version/sfaR)](https://CRAN.R-project.org/package=sfaR)
 [![](https://img.shields.io/badge/devel%20version-1.0.0-darkred.svg)](https://github.com/hdakpo/sfaR)
+[![](https://img.shields.io/badge/license-GPL-blue)](https://github.com/hdakpo/sfaR)
 [![Downloads](https://cranlogs.r-pkg.org/badges/sfaR)](https://CRAN.R-project.org/package=sfaR)
 [![](https://img.shields.io/github/languages/code-size/hdakpo/sfaR.svg)](https://github.com/hdakpo/sfaR)
 <!-- badges: end -->
@@ -105,5 +106,33 @@ library(sfaR)
 #> 
 #> * For any questions, suggestions, or comments on the 'sfaR' package, please make use of Tracker facilities at:
 #>   https://github.com/hdakpo/sfaR/issues
-## basic example code
+## basic examples code
+
+## let's estimate the classic frontier for different distributions using 
+## the utility dataset, which contains data on fossil fuel fired 
+## steam electric power generation plants in the United States
+hlf <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
+ log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+ I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+ udist = 'hnormal', uhet = ~ regu, data = utility, S = -1, method = 'bfgs')
+
+trnorm <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
+ log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+ I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+ udist = 'tnormal', muhet = ~ regu, data = utility, S = -1, method = 'bfgs')
+
+tscal <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
+ log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+ I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+ udist = 'tnormal', muhet = ~ regu, uhet = ~ regu, data = utility, 
+ S = -1, method = 'bfgs', scaling = TRUE)
+
+expo <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
+ log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+ I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+ udist = 'exponential', uhet = ~ regu, data = utility, S = -1, method = 'bfgs')
 ```
+
+Outputs of estimation can be exported using the *texreg* package. For
+instance, using the command `screenreg(list(hlf, trnorm, tscal, expo))`
+yields the following output:

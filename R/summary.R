@@ -650,10 +650,15 @@ print.summary.sfacross <- function(x, digits = max(3, getOption("digits") -
       3), collapse = ""), "99%:", formatC(qchibarsq(0.99,
     df = x$df), digits = digits, format = "f"), "\n")
   cat("Coelli (1995) skewness test on OLS residuals\n")
-  cat("M3T                            = ", paste0(rep(" ",
-    lengthSum - 2 - nchar("M3T                            = ") -
+  cat("M3T: z                         = ", paste0(rep(" ",
+    lengthSum - 2 - nchar("M3T: z                         = ") -
       nchar(formatC(x$CoelliM3Test[1], digits = digits,
         format = "f"))), collapse = ""), formatC(x$CoelliM3Test[1],
+    digits = digits, format = "f"), "\n")
+  cat("M3T: p.value                   = ", paste0(rep(" ",
+    lengthSum - 2 - nchar("M3T: p.value                   = ") -
+      nchar(formatC(x$CoelliM3Test[2], digits = digits,
+        format = "f"))), collapse = ""), formatC(x$CoelliM3Test[2],
     digits = digits, format = "f"), "\n")
   cat("Final maximum likelihood estimates \n")
   cat(paste0(rep("-", lengthSum), collapse = ""), "\n")

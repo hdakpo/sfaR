@@ -36,8 +36,8 @@ frontier analysis (SFA) for cross-sectional or pooled data and allows for ten
 different distributions for the one-sided error term. These distributions
 include the exponential, the gamma, the generalized exponential,
 the half normal, the lognormal, the truncated normal, the truncated skewed
-laplace, the rayleigh, the uniform, and the weibull distributions.
-In the case of the gamma, lognormal, and weibull distributions, maximum
+Laplace, the Rayleigh, the uniform, and the Weibull distributions.
+In the case of the gamma, lognormal, and Weibull distributions, maximum
 simulated likelihood (MSL) is used with the possibility of four specific
 distributions to construct the draws: halton, generalized halton, sobol and
 uniform. Heteroscedasticity in both error terms can be implemented, in

@@ -503,7 +503,7 @@ modelType = 'greene10', method = 'bfgs',
 logDepVar = TRUE, data = as.data.frame(data),
 S = 1L, udist = 'hnormal', lType = 'kronrod', Nsub = 100, uBound = Inf,
 simType = 'halton', Nsim = 300, prime = 2L, burn = 10, antithetics = FALSE,
-seed = 12345, itermax = 2000, printInfo = TRUE)
+seed = 12345, itermax = 2000, printInfo = FALSE)
 
 summary(selecRes1)
 
@@ -514,7 +514,7 @@ modelType = 'greene10', method = 'bfgs',
 logDepVar = TRUE, data = as.data.frame(data),
 S = 1L, udist = 'hnormal', lType = 'msl', Nsub = 100, uBound = Inf,
 simType = 'halton', Nsim = 300, prime = 2L, burn = 10, antithetics = FALSE,
-seed = 12345, itermax = 2000, printInfo = TRUE)
+seed = 12345, itermax = 2000, printInfo = FALSE)
 
 summary(selecRes2)
 

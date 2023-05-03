@@ -39,7 +39,8 @@ Imports:
     fastGHQuad,
     stats,
     sandwich,
-    plm
+    plm,
+    texreg
 URL: https://github.com/hdakpo/sfaR
 Suggests: 
     lmtest

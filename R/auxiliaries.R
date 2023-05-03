@@ -895,3 +895,69 @@ setMethod("show", "dagoTest", function(object) {
     }
   }
 })
+
+# results extraction for texreg ------
+#' @method extract sfacross
+#' @param model object returns by sfacross
+#' @export
+#' @noRd
+extract.sfacross <- function(model) {
+  co <- coef.sfacross(model)
+  names <- names(co)
+  se <- sqrt(diag(model$invHessian))
+  pval <- 2 * pnorm(-abs(co/se))
+  gof <- c(-2 * model$mlLoglik + 2 * model$nParm, -2 * model$mlLoglik +
+    log(model$Nobs) * model$nParm, model$mlLoglik, model$Nobs)
+  gof.names <- c("AIC", "BIC", "log-likelihood", "Num. obs.")
+  tr <- createTexreg(coef.names = names, coef = co, se = se,
+    pvalues = pval, gof.names = gof.names, gof = gof, gof.decimal = c(TRUE,
+      TRUE, TRUE, FALSE), model.name = if (model$udist ==
+      "tnormal" && model$scaling == TRUE)
+      "trunc. scal." else model$udist)
+  return(tr)
+}
+
+setMethod("extract", signature = className("sfacross", "sfaR"),
+  definition = extract.sfacross)
+
+#' @method extract lcmcross
+#' @param model object returns by lcmcross
+#' @export
+#' @noRd
+extract.lcmcross <- function(model) {
+  co <- coef.lcmcross(model)
+  names <- names(co)
+  se <- sqrt(diag(model$invHessian))
+  pval <- 2 * pnorm(-abs(co/se))
+  gof <- c(-2 * model$mlLoglik + 2 * model$nParm, -2 * model$mlLoglik +
+    log(model$Nobs) * model$nParm, model$mlLoglik, model$Nobs)
+  gof.names <- c("AIC", "BIC", "log-likelihood", "Num. obs.")
+  tr <- createTexreg(coef.names = names, coef = co, se = se,
+    pvalues = pval, gof.names = gof.names, gof = gof, gof.decimal = c(TRUE,
+      TRUE, TRUE, FALSE), model.name = model$udist)
+  return(tr)
+}
+
+setMethod("extract", signature = className("lcmcross", "sfaR"),
+  definition = extract.lcmcross)
+
+#' @method extract sfaselectioncross
+#' @param model object returns by sfaselectioncross
+#' @export
+#' @noRd
+extract.sfaselectioncross <- function(model) {
+  co <- coef.sfaselectioncross(model)
+  names <- names(co)
+  se <- sqrt(diag(model$invHessian))
+  pval <- 2 * pnorm(-abs(co/se))
+  gof <- c(-2 * model$mlLoglik + 2 * model$nParm, -2 * model$mlLoglik +
+    log(model$Nobs) * model$nParm, model$mlLoglik, model$Nobs)
+  gof.names <- c("AIC", "BIC", "log-likelihood", "Num. obs.")
+  tr <- createTexreg(coef.names = names, coef = co, se = se,
+    pvalues = pval, gof.names = gof.names, gof = gof, gof.decimal = c(TRUE,
+      TRUE, TRUE, FALSE), model.name = model$udist)
+  return(tr)
+}
+
+setMethod("extract", signature = className("sfaselectioncross",
+  "sfaR"), definition = extract.sfaselectioncross)
