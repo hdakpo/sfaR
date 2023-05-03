@@ -135,7 +135,7 @@ expo <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
 
 Outputs of estimation can be exported using the *texreg* package. For
 instance, using the command `screenreg(list(hlf, trnorm, tscal, expo))`
-yields the following output:
+yields the following output
 
 ![sfacross](https://user-images.githubusercontent.com/29732089/235988357-90a74e12-7695-47ae-8b29-3591ca221bcd.png)
 
@@ -150,3 +150,50 @@ lcm2c2 <- lcmcross(formula = ly ~ lk + ll + yr, uhet = ~initStat,
 #> Initialization: SFA + halfnormal - normal distributions...
 #> LCM 2 Classes Estimation...
 ```
+
+The command `screenreg(list(lcm2c1, lcm2c2))` generates the following
+
+![lcmcross](https://user-images.githubusercontent.com/29732089/235991360-9b26b732-2a97-43b1-8ee1-d7f59147d4f1.png)
+
+``` r
+## The following simulation is used for the sample selection
+ N <- 2000  # sample size
+ set.seed(12345)
+ z1 <- rnorm(N)
+ z2 <- rnorm(N)
+ v1 <- rnorm(N)
+ v2 <- rnorm(N)
+ e1 <- v1
+ e2 <- 0.7071 * (v1 + v2)
+ ds <- z1 + z2 + e1
+ d <- ifelse(ds > 0, 1, 0)
+ u <- abs(rnorm(N))
+ x1 <- rnorm(N)
+ x2 <- rnorm(N)
+ y <- x1 + x2 + e2 - u
+ data <- cbind(y = y, x1 = x1, x2 = x2, z1 = z1, z2 = z2, d = d)
+ 
+ ## Estimation using quadrature (Gauss-Kronrod)
+ 
+ selecRes1 <- sfaselectioncross(selectionF = d ~ z1 + z2, frontierF = y ~ x1 + x2, 
+ modelType = 'greene10', method = 'bfgs',
+ logDepVar = TRUE, data = as.data.frame(data),
+ S = 1L, udist = 'hnormal', lType = 'kronrod', Nsub = 100, uBound = Inf,
+ simType = 'halton', Nsim = 300, prime = 2L, burn = 10, antithetics = FALSE,
+ seed = 12345, itermax = 2000, printInfo = FALSE)
+#> First step probit model...
+#> Second step Frontier model...
+ 
+ ## Estimation using quadrature (Gauss-Hermite)
+ 
+ selecRes2 <- sfaselectioncross(selectionF = d ~ z1 + z2, frontierF = y ~ x1 + x2, 
+ modelType = 'greene10', method = 'bfgs',
+ logDepVar = TRUE, data = as.data.frame(data),
+ S = 1L, udist = 'hnormal', lType = 'ghermite', Nsub = 100, uBound = Inf,
+ simType = 'halton', Nsim = 300, prime = 2L, burn = 10, antithetics = FALSE,
+ seed = 12345, itermax = 2000, printInfo = FALSE)
+#> First step probit model...
+#> Second step Frontier model...
+```
+
+The command `screenreg(list(selecRes1, selecRes2))`

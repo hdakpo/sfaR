@@ -934,7 +934,8 @@ extract.lcmcross <- function(model) {
   gof.names <- c("AIC", "BIC", "log-likelihood", "Num. obs.")
   tr <- createTexreg(coef.names = names, coef = co, se = se,
     pvalues = pval, gof.names = gof.names, gof = gof, gof.decimal = c(TRUE,
-      TRUE, TRUE, FALSE), model.name = model$udist)
+      TRUE, TRUE, FALSE), model.name = paste0(model$nClasses,
+      " Classes"))
   return(tr)
 }
 
@@ -955,7 +956,7 @@ extract.sfaselectioncross <- function(model) {
   gof.names <- c("AIC", "BIC", "log-likelihood", "Num. obs.")
   tr <- createTexreg(coef.names = names, coef = co, se = se,
     pvalues = pval, gof.names = gof.names, gof = gof, gof.decimal = c(TRUE,
-      TRUE, TRUE, FALSE), model.name = model$udist)
+      TRUE, TRUE, FALSE), model.name = model$lType)
   return(tr)
 }
 
