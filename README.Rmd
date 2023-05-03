@@ -147,3 +147,4 @@ lcm2c2 <- lcmcross(formula = ly ~ lk + ll + yr, uhet = ~initStat,
  data = worldprod)
 ```
 
+![lcmcross](https://user-images.githubusercontent.com/29732089/235991360-9b26b732-2a97-43b1-8ee1-d7f59147d4f1.png)
