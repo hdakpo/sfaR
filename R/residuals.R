@@ -28,7 +28,7 @@
 #'
 #' @return When the \code{object} is of \code{'lcmcross'}, 
 #' \code{\link{residuals}} returns a data frame containing the residuals values 
-#' for each latent class, where each variable terminates with \code{'_c#'}, 
+#' for each latent class, where each variable ends with \code{'_c#'}, 
 #' \code{'#'} being the class number.
 #' 
 #' When the \code{object} is of class \code{'sfacross'}, or 
@@ -63,7 +63,7 @@
 #' resid.tl_u_ts <- residuals(tl_u_ts)
 #' head(resid.tl_u_ts)
 #'
-#' ## Using data on eighty-two countries production (DGP)
+#' ## Using data on eighty-two countries production (GDP)
 #' # LCM Cobb Douglas (production function) half normal distribution
 #' cb_2c_h <- lcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal', 
 #' data = worldprod, S = 1)

@@ -9,7 +9,7 @@ A data frame with 2,296 observations on the following 12 variables.
 \describe{ \item{country}{Country name.} \item{code}{Country
 identification.} \item{yr}{Year identification.} \item{y}{GDP in 1987 U.S.
 dollars.} \item{k}{Physical capital stock in 1987 U.S. dollars.}
-\item{l}{Labor (number of individuals in the workforce between the ages of
+\item{l}{Labor (number of individuals in the workforce between the age of
 15 and 64).} \item{h}{Human capital-adjusted labor.} \item{ly}{Log of
 \code{y}.} \item{lk}{Log of \code{k}.} \item{ll}{Log of \code{l}.}
 \item{lh}{Log of \code{h}.} \item{initStat}{Log of the initial capital to

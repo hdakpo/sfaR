@@ -66,7 +66,7 @@ log-likelihood. Should be \code{NULL} or numeric vector with positive values.
 When \code{NULL}, a numeric vector of 1 is used.}
 
 \item{wscale}{Logical. When \code{weights} is not \code{NULL}, a scaling
-transformation is used such that the the \code{weights} sums to the sample
+transformation is used such that the \code{weights} sums to the sample
 size. Default \code{TRUE}. When \code{FALSE} no scaling is used.}
 
 \item{S}{If \code{S = 1} (default), a production (profit) frontier is
@@ -117,7 +117,7 @@ Berndt-Hall-Hall-Hausman (see \code{\link[maxLik:maxBHHH]{maxBHHH}}) \item
 \item \code{'cg'}, for Conjugate Gradient
 (see \code{\link[maxLik:maxCG]{maxCG}}) \item \code{'sann'}, for Simulated
 Annealing (see \code{\link[maxLik:maxSANN]{maxSANN}})
-\item \code{'ucminf'}, implements a quasi-Newton type with BFGS updating of
+\item \code{'ucminf'}, for a quasi-Newton type optimization with BFGS updating of
 the inverse Hessian and soft line search with a trust region type monitoring
 of the input to the line search algorithm
 (see \code{\link[ucminf:ucminf]{ucminf}})
@@ -311,7 +311,7 @@ over the \eqn{J} classes:
 
 \deqn{P(i) = \sum_{m=1}^{J}\pi(i,m)P(i|m)}
 
-The number of classes can be retained based on information criterion (see
+The number of classes to retain can be based on information criterion (see
 for instance \code{\link[=ic.lcmcross]{ic}}).
 
 Class assignment is based on the largest posterior probability. This
@@ -332,15 +332,15 @@ supports the half-normal distribution for the one-sided error term.
 
 \code{lcmcross} allows for the maximization of weighted log-likelihood.
 When option \code{weights} is specified and \code{wscale = TRUE}, the weights
-is scaled as
+are scaled as:
 
 \deqn{new_{weights} = sample_{size} \times 
 \frac{old_{weights}}{\sum(old_{weights})}}
 
-For difficult problems, non-gradient methods (e.g. \code{nm} or
+For complex problems, non-gradient methods (e.g. \code{nm} or
 \code{sann}) can be used to warm start the optimization and zoom in the
-neighborhood of the solution. Then a gradient-based methods is recommanded
-in the second step. In the case of \code{sann}, we recommand to significantly
+neighborhood of the solution. Then a gradient-based methods is recommended
+in the second step. In the case of \code{sann}, we recommend to significantly
 increase the iteration limit (e.g. \code{itermax = 20000}). The Conjugate
 Gradient (\code{cg}) can also be used in the first stage.
 
@@ -367,7 +367,7 @@ permanent (not fixed over time).
 }
 \examples{
 
-## Using data on eighty-two countries production (DGP)
+## Using data on eighty-two countries production (GDP)
 # LCM Cobb Douglas (production function) half normal distribution
 # Intercept and initStat used as separating variables
 cb_2c_h1 <- lcmcross(formula = ly ~ lk + ll + yr, thet = ~initStat, 
@@ -377,8 +377,8 @@ summary(cb_2c_h1)
 # summary of the initial ML model
 summary(cb_2c_h1$InitHalf)
 
-# Only the intercept is used as the separating variable and only variable
-# initStat is used as inefficiency driver
+# Only the intercept is used as the separating variable
+# and only variable initStat is used as inefficiency driver
 cb_2c_h3 <- lcmcross(formula = ly ~ lk + ll + yr, uhet = ~initStat, 
 data = worldprod)
 summary(cb_2c_h3)

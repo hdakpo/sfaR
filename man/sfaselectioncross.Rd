@@ -5,7 +5,7 @@
 \alias{print.sfaselectioncross}
 \alias{bread.sfaselectioncross}
 \alias{estfun.sfaselectioncross}
-\title{Sample Selection in Stochastic frontier estimation using cross-section data}
+\title{Sample selection in stochastic frontier estimation using cross-section data}
 \usage{
 sfaselectioncross(
   selectionF,
@@ -74,7 +74,7 @@ Should be \code{NULL} or numeric vector with positive values. When \code{NULL},
 a numeric vector of 1 is used.}
 
 \item{wscale}{Logical. When \code{weights} is not \code{NULL}, a scaling transformation
-is used such that the the \code{weights} sums to the sample size. Default \code{TRUE}.
+is used such that the \code{weights} sum to the sample size. Default \code{TRUE}.
 When \code{FALSE} no scaling is used.}
 
 \item{S}{If \code{S = 1} (default), a production (profit) frontier is
@@ -97,7 +97,7 @@ Berndt-Hall-Hall-Hausman (see \code{\link[maxLik:maxBHHH]{maxBHHH}}) \item
 \item \code{'nm'}, for Nelder-Mead (see \code{\link[maxLik:maxNM]{maxNM}})
 \item \code{'cg'}, for Conjugate Gradient (see \code{\link[maxLik:maxCG]{maxCG}})
 \item \code{'sann'}, for Simulated Annealing (see \code{\link[maxLik:maxSANN]{maxSANN}})
-\item \code{'ucminf'}, implements a quasi-Newton type with BFGS updating of the
+\item \code{'ucminf'}, for a quasi-Newton type optimization with BFGS updating of the
 inverse Hessian and soft line search with a trust region type monitoring of
 the input to the line search algorithm (see \code{\link[ucminf:ucminf]{ucminf}})
 \item \code{'mla'}, for general-purpose optimization based on
@@ -110,10 +110,10 @@ regions and sparse Hessian (see \code{\link[trustOptim:trust.optim]{trust.optim}
 
 \item{hessianType}{Integer. If \code{1}, analytic Hessian is
 returned. If \code{2}, bhhh Hessian is estimated (\eqn{g'g}). bhhh hessian is
-estimated by default as the estimation is conducted in two step.}
+estimated by default as the estimation is conducted in two steps.}
 
-\item{lType}{Specify the way the likelihood is estimated. Five possibilities are
-available to the user: \code{kronrod} for Gauss-Kronrod quadrature
+\item{lType}{Specifies the way the likelihood is estimated. Five possibilities are
+available: \code{kronrod} for Gauss-Kronrod quadrature
 (see \code{\link[stats:integrate]{integrate}}), \code{hcubature} and
 \code{pcubature} for adaptive integration over hypercubes
 (see \code{\link[cubature:hcubature]{hcubature}} and
@@ -218,11 +218,11 @@ two-sided error term.}
 
 \item{dataTable}{A data frame (tibble format) containing information on data
 used for optimization along with residuals and fitted values of the OLS and
-M(S)L estimations, and the individual observation log-likelihood. When \code{weights}
-is specified an additional variable is also provided in \code{dataTable}.}
+M(S)L estimations, and the individual observation log-likelihood. When argument \code{weights}
+is specified, an additional variable is provided in \code{dataTable}.}
 
 \item{lpmObj}{Linear probability model used for initializing the first step
-probit model}
+probit model.}
 
 \item{probitObj}{Probit model. Object of class \code{'maxLik'} and \code{'maxim'}.}
 
@@ -315,7 +315,7 @@ two-sided error terms, as in Reifschneider and Stevenson (1991), Caudill and
 Ford (1993), Caudill \emph{et al.} (1995) and Hadri (1999).
 }
 \details{
-The current model is an extension of Heckman(1976, 1979) sample selection model to
+The current model is an extension of Heckman (1976, 1979) sample selection model to
 nonlinear models particularly stochastic frontier model. The model has first been discussed in
 Greene (2010), and an application can be found in Dakpo et al. (2021). Practically, we have:
 
@@ -353,14 +353,14 @@ u_i = \sigma_u|U_i| \quad \wedge \quad U_i \sim \mathcal{N}(0, 1)
 }
 
 \eqn{y_{1i}} describes the selection equation while \eqn{y_{2i}} represents
-the frontier equation. The selection bias emerges from the correlation
+the frontier equation. The selection bias arises from the correlation
 between the two symmetric random components \eqn{v_i} and \eqn{w_i}:
 
 \deqn{
 (v_i, w_i) \sim \mathcal{N}_2\left\lbrack(0,0), (1, \rho \sigma_v, \sigma_v^2) \right\rbrack
 }
 
-Conditionaly on \eqn{|U_i|}, the probability associated to each observation is
+Conditionaly on \eqn{|U_i|}, the probability associated to each observation is:
 
 \deqn{
 Pr \left\lbrack y_{1i}^* \leq 0 \right\rbrack^{1-y_{1i}} \cdot \left\lbrace 
@@ -368,27 +368,27 @@ f(y_{2i}|y_{1i}^* > 0) \times Pr\left\lbrack y_{1i}^* > 0
 \right\rbrack \right\rbrace^{y_{1i}}
 }
 
-Using the conditional probability formula
+Using the conditional probability formula:
 
 \deqn{
 P\left(A\cap B\right) = P(A) \cdot P(B|A) = P(B) \cdot P(A|B)
 }
 
-Therefore
+Therefore:
 
 \deqn{
 f(y_{2i}|y_{1i}^* \geq 0) \cdot Pr\left\lbrack y_{1i}^* \geq 0\right\rbrack = 
 f(y_{2i}) \cdot Pr(y_{1i}^* \geq 0|y_{2i})
 }
 
-Using the properties of a bivariate normal distribution, we have
+Using the properties of a bivariate normal distribution, we have:
 
 \deqn{
 y_{i1}^* | y_{i2} \sim N\left(\mathbf{Z_{si}^{\prime}} \bm{\gamma}+\frac{\rho}{
 \sigma_v}v_i, 1-\rho^2\right)
 }
 
-Hence conditionally on \eqn{|U_i|}, we have
+Hence conditionally on \eqn{|U_i|}, we have:
 
 \deqn{
 f(y_{2i}|y_{1i}^* \geq 0) \cdot Pr\left\lbrack y_{1i}^* \geq 0\right\rbrack = 
@@ -397,7 +397,7 @@ f(y_{2i}|y_{1i}^* \geq 0) \cdot Pr\left\lbrack y_{1i}^* \geq 0\right\rbrack =
 \sqrt{1-\rho^2}}\right)
 }
 
-The conditional likelihood is equal to
+The conditional likelihood is equal to:
 
 \deqn{
 L_i\big||U_i| = \Phi(-\mathbf{Z_{si}^{\prime}} \bm{\gamma})^{1-y_{1i}} \times 
@@ -408,8 +408,8 @@ L_i\big||U_i| = \Phi(-\mathbf{Z_{si}^{\prime}} \bm{\gamma})^{1-y_{1i}} \times
 \right) \right\rbrace ^{y_{1i}}
 }
 
-Since the non-selected observations do not bring any additional information, thus
-the conditional likelihood to be considered is
+Since the non-selected observations bring no additional information,
+the conditional likelihood to be considered is:
 
 \deqn{
 L_i\big||U_i| = \frac{1}{\sigma_v}\phi\left(\frac{y_{2i}-\mathbf{x_{i}^{\prime}} 
@@ -446,16 +446,16 @@ the asymptotic standard errors for the parameter estimators.
 
 \code{sfaselectioncross} allows for the maximization of weighted log-likelihood.
 When option \code{weights} is specified and \code{wscale = TRUE}, the weights
-is scaled as
+are scaled as:
 
 \deqn{
 new_{weights} = sample_{size} \times \frac{old_{weights}}{\sum(old_{weights})}
 }
 
-For difficult problems, non-gradient methods (e.g. \code{nm} or \code{sann}) can be
+For complex problems, non-gradient methods (e.g. \code{nm} or \code{sann}) can be
 used to warm start the optimization and zoom in the neighborhood of the
-solution. Then a gradient-based methods is recommanded in the second step. In the case
-of \code{sann}, we recommand to significantly increase the iteration limit
+solution. Then a gradient-based methods is recommended in the second step. In the case
+of \code{sann}, we recommend to significantly increase the iteration limit
 (e.g. \code{itermax = 20000}). The Conjugate Gradient (\code{cg}) can also be used
 in the first stage.
 
@@ -541,7 +541,7 @@ Empirical results for the distributions of \eqn{b_2} and \eqn{\sqrt{b_1}}.
 Dakpo, K. H., Latruffe, L., Desjeux, Y., Jeanneaux, P., 2021.
 Modeling heterogeneous technologies in the presence of sample selection:
 The case of dairy farms and the adoption of agri-environmental schemes in France.
-\emph{Agricultural Economics}. n/a.
+\emph{Agricultural Economics}.
 
 Greene, W., 2010. A stochastic frontier model with correction
 for sample selection. \emph{Journal of Productivity Analysis}. \bold{34}, 15--24.

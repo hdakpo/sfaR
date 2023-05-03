@@ -92,13 +92,13 @@
 #'  
 #' sandwich::vcovCL(cb_s_h)
 #'  
-#' # Coefficients and standard error can be obtained using lmtest package
+#' # Coefficients and standard errors can be obtained using lmtest package
 #'  
 #' requireNamespace('lmtest', quietly = TRUE)
 #'  
 #' lmtest::coeftest(cb_s_h, vcov. = sandwich::vcovCL)
 #'  
-#' # Clustered Standard errors
+#' # Clustered standard errors
 #'  
 #' lmtest::coeftest(cb_s_h, vcov. = sandwich::vcovCL, cluster = ~ FARM)
 #'  
@@ -106,15 +106,15 @@
 #'  
 #' lmtest::coeftest(cb_s_h, vcov. = sandwich::vcovCL, cluster = ~ FARM + YEAR)
 #'  
-#' # BHHH standard errors can also be obtained using
+#' # BHHH standard errors
 #'  
 #' lmtest::coeftest(cb_s_h, vcov. = sandwich::vcovOPG)
 #'  
-#' # Adjusted BHHH standard errors is obtained by
+#' # Adjusted BHHH standard errors
 #'  
 #' lmtest::coeftest(cb_s_h, vcov. = sandwich::vcovOPG, adjust = TRUE)
 #'
-#' ## Using data on eighty-two countries production (DGP)
+#' ## Using data on eighty-two countries production (GDG)
 #' # LCM Cobb Douglas (production function) half normal distribution
 #' cb_2c_h <- lcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal',
 #' data = worldprod, uhet = ~ initStat, S = 1)
