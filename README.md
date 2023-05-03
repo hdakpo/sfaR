@@ -136,3 +136,17 @@ expo <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
 Outputs of estimation can be exported using the *texreg* package. For
 instance, using the command `screenreg(list(hlf, trnorm, tscal, expo))`
 yields the following output:
+
+![sfacross](https://user-images.githubusercontent.com/29732089/235988357-90a74e12-7695-47ae-8b29-3591ca221bcd.png)
+
+``` r
+## For the latent class stochastic frontier we have:
+lcm2c1 <- lcmcross(formula = ly ~ lk + ll + yr, thet = ~initStat, 
+ data = worldprod)
+#> Initialization: SFA + halfnormal - normal distributions...
+#> LCM 2 Classes Estimation...
+lcm2c2 <- lcmcross(formula = ly ~ lk + ll + yr, uhet = ~initStat, 
+ data = worldprod)
+#> Initialization: SFA + halfnormal - normal distributions...
+#> LCM 2 Classes Estimation...
+```

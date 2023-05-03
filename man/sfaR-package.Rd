@@ -11,7 +11,7 @@ maximum simulated likelihood - MSL) for various specifications of stochastic
 frontier analysis (SFA).
 }
 \details{
-Three categories of main functions are available: \code{\link{lcmcross}},
+Three categories of important functions are available: \code{\link{lcmcross}},
 \code{\link{sfacross}}, \code{\link{sfaselectioncross}},
 which estimate different types of frontiers and offer eleven alternative
 optimization algorithms (i.e., "bfgs", "bhhh", "nr", "nm", "cg", "sann",
@@ -50,7 +50,7 @@ truncated normal distribution, the scaling property can be estimated.
  \code{\link{sfaselectioncross}} estimates the
 frontier for cross-sectional or pooled data in the presence of sample selection.
 The model solves the selection bias due to the correlation between the
-two-sided error terms in both the selection and the frontier equations.
+two-sided errors terms in both the selection and the frontier equations.
 The likelihood can be estimated using five different
 possibilities: gauss-kronrod quadrature, adaptive integration over hypercubes
 (hcubature and pcubature), gauss-hermite quadrature, and
