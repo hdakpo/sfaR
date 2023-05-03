@@ -137,5 +137,4 @@ Outputs of estimation can be exported using the *texreg* package. For instance,
 using the command `screenreg(list(hlf, trnorm, tscal, expo))` yields the following 
 output:
 
-
-
+![sfacross](https://user-images.githubusercontent.com/29732089/235988357-90a74e12-7695-47ae-8b29-3591ca221bcd.png)
