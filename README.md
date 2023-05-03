@@ -197,3 +197,5 @@ The command `screenreg(list(lcm2c1, lcm2c2))` generates the following
 ```
 
 The command `screenreg(list(selecRes1, selecRes2))`
+
+![selectioncross](https://user-images.githubusercontent.com/29732089/236043261-af06f359-bbfc-46e0-8bde-2951cc80813c.png)
