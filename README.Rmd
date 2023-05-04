@@ -193,4 +193,5 @@ The command `screenreg(list(selecRes1, selecRes2))`
 
 ![selectioncross](https://user-images.githubusercontent.com/29732089/236043261-af06f359-bbfc-46e0-8bde-2951cc80813c.png)
 
+![lcmcross](https://user-images.githubusercontent.com/29732089/236163537-dc12e886-84c2-49d4-a943-9d61cfb82000.png)
 
