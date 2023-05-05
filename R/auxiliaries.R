@@ -136,7 +136,7 @@ formDist_sfacross <- function(udist, formula, muhet, uhet, vhet) {
 #' @param vhet heteroscedasticity in v
 #' @param thet separating variables for LCM
 #' @noRd
-formDist_lcmcross <- function(formula, uhet, vhet, thet) {
+formDist_sfalcmcross <- function(formula, uhet, vhet, thet) {
   formula <- as.Formula(formula, uhet, vhet, thet)
   return(formula)
 }
@@ -226,7 +226,7 @@ fName_uv_sfacross <- function(Xvar, udist, uHvar, vHvar) {
 #' @param nZHvar number of separating variables in LCM
 #' @param lcmClasses number of classes in LCM
 #' @noRd
-fName_lcmcross <- function(Xvar, uHvar, vHvar, Zvar, nZHvar,
+fName_sfalcmcross <- function(Xvar, uHvar, vHvar, Zvar, nZHvar,
   lcmClasses) {
   c(rep(c(colnames(Xvar), paste0("Zu_", colnames(uHvar)), paste0("Zv_",
     colnames(vHvar))), lcmClasses), paste0(rep(paste0("Cl",
@@ -422,7 +422,7 @@ sfacrossdist <- function(udist) {
 }
 
 # variance of u ----------
-#' @param object object from sfacross/lcmcross ...
+#' @param object object from sfacross/sfalcmcross ...
 #' @param mu mu in truncated normal and log-normal distribution
 #' @param P Shape parameter in gamma distribution
 #' @param lambda parameter in truncated skewed laplace distribution
@@ -479,20 +479,26 @@ varuFun <- function(object, mu, P, lambda, k) {
 
 # expected value of u ----------
 #' @param x vector for error function
-#' @param object object from sfacross/lcmcross ...
+#' @param object object from sfacross/sfalcmcross ...
 #' @param mu mu in truncated normal and log-normal distribution
 #' @param P Shape parameter in gamma distribution
 #' @param lambda parameter in truncated skewed laplace distribution
 #' @param k parameter in weibull distribution
 #' @noRd
+# Error function (pracma)
 erf <- function(x) {
   # 2*pnorm(sqrt(2)*x)-1 # or
   pchisq(2 * x^2, 1) * sign(x)
 }
-
+# Complementary error function (pracma)
 erfc <- function(x) {
   # 1 - erf(x)
   2 * pnorm(-sqrt(2) * x)
+}
+# Inverse error function (pracma)
+erfinv  <- function(x) {
+  x[abs(x) > 1] <- NA
+  sqrt(qchisq(abs(x),1)/2) * sign(x)
 }
 
 euFun <- function(object, mu, P, lambda, k) {
@@ -541,7 +547,7 @@ euFun <- function(object, mu, P, lambda, k) {
 }
 
 # expected value of E(exp(-u)) ----------
-#' @param object object from sfacross/lcmcross ...
+#' @param object object from sfacross/sfalcmcross ...
 #' @param mu mu in truncated normal and log-normal distribution
 #' @param P Shape parameter in gamma distribution
 #' @param lambda parameter in truncated skewed laplace distribution
@@ -830,25 +836,25 @@ dagoTest <- function(x) {
 }
 
 # S3methods ----------
-#' @param object sfacross, lcmcross, selectioncross ... objects
+#' @param object sfacross, sfalcmcross, selectioncross ... objects
 #' @noRd
 efficiencies <- function(object, ...) {
   UseMethod("efficiencies", object)
 }
 
-#' @param object sfacross, lcmcross, selectioncross ... objects
+#' @param object sfacross, sfalcmcross, selectioncross ... objects
 #' @noRd
 ic <- function(object, ...) {
   UseMethod("ic", object)
 }
 
-#' @param object sfacross, lcmcross, selectioncross ... objects
+#' @param object sfacross, sfalcmcross, selectioncross ... objects
 #' @noRd
 marginal <- function(object, ...) {
   UseMethod("marginal", object)
 }
 
-# #' @param object sfacross, lcmcross, selectioncross ...
+# #' @param object sfacross, sfalcmcross, selectioncross ...
 # objects #' @noRd nobs <- function(x, ...) {
 # UseMethod('nobs', x) }
 
@@ -895,70 +901,3 @@ setMethod("show", "dagoTest", function(object) {
     }
   }
 })
-
-# results extraction for texreg ------
-#' @method extract sfacross
-#' @param model object returns by sfacross
-#' @export
-#' @noRd
-extract.sfacross <- function(model) {
-  co <- coef.sfacross(model)
-  names <- names(co)
-  se <- sqrt(diag(model$invHessian))
-  pval <- 2 * pnorm(-abs(co/se))
-  gof <- c(-2 * model$mlLoglik + 2 * model$nParm, -2 * model$mlLoglik +
-    log(model$Nobs) * model$nParm, model$mlLoglik, model$Nobs)
-  gof.names <- c("AIC", "BIC", "log-likelihood", "Num. obs.")
-  tr <- createTexreg(coef.names = names, coef = co, se = se,
-    pvalues = pval, gof.names = gof.names, gof = gof, gof.decimal = c(TRUE,
-      TRUE, TRUE, FALSE), model.name = if (model$udist ==
-      "tnormal" && model$scaling == TRUE)
-      "trunc. scal." else model$udist)
-  return(tr)
-}
-
-setMethod("extract", signature = className("sfacross", "sfaR"),
-  definition = extract.sfacross)
-
-#' @method extract lcmcross
-#' @param model object returns by lcmcross
-#' @export
-#' @noRd
-extract.lcmcross <- function(model) {
-  co <- coef.lcmcross(model)
-  names <- names(co)
-  se <- sqrt(diag(model$invHessian))
-  pval <- 2 * pnorm(-abs(co/se))
-  gof <- c(-2 * model$mlLoglik + 2 * model$nParm, -2 * model$mlLoglik +
-    log(model$Nobs) * model$nParm, model$mlLoglik, model$Nobs)
-  gof.names <- c("AIC", "BIC", "log-likelihood", "Num. obs.")
-  tr <- createTexreg(coef.names = names, coef = co, se = se,
-    pvalues = pval, gof.names = gof.names, gof = gof, gof.decimal = c(TRUE,
-      TRUE, TRUE, FALSE), model.name = paste0(model$nClasses,
-      " Classes"))
-  return(tr)
-}
-
-setMethod("extract", signature = className("lcmcross", "sfaR"),
-  definition = extract.lcmcross)
-
-#' @method extract sfaselectioncross
-#' @param model object returns by sfaselectioncross
-#' @export
-#' @noRd
-extract.sfaselectioncross <- function(model) {
-  co <- coef.sfaselectioncross(model)
-  names <- names(co)
-  se <- sqrt(diag(model$invHessian))
-  pval <- 2 * pnorm(-abs(co/se))
-  gof <- c(-2 * model$mlLoglik + 2 * model$nParm, -2 * model$mlLoglik +
-    log(model$Nobs) * model$nParm, model$mlLoglik, model$Nobs)
-  gof.names <- c("AIC", "BIC", "log-likelihood", "Num. obs.")
-  tr <- createTexreg(coef.names = names, coef = co, se = se,
-    pvalues = pval, gof.names = gof.names, gof = gof, gof.decimal = c(TRUE,
-      TRUE, TRUE, FALSE), model.name = model$lType)
-  return(tr)
-}
-
-setMethod("extract", signature = className("sfaselectioncross",
-  "sfaR"), definition = extract.sfaselectioncross)

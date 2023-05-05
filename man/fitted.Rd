@@ -3,34 +3,34 @@
 \name{fitted}
 \alias{fitted}
 \alias{fitted.sfacross}
-\alias{fitted.lcmcross}
+\alias{fitted.sfalcmcross}
 \alias{fitted.sfaselectioncross}
 \title{Extract fitted values of stochastic frontier models}
 \usage{
 \method{fitted}{sfacross}(object, ...)
 
-\method{fitted}{lcmcross}(object, ...)
+\method{fitted}{sfalcmcross}(object, ...)
 
 \method{fitted}{sfaselectioncross}(object, ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{lcmcross}}, \code{\link{sfacross}}, or
+by \code{\link{sfacross}}, \code{\link{sfalcmcross}}, or
 \code{\link{sfaselectioncross}}.}
 
 \item{...}{Currently ignored.}
 }
 \value{
-In the case of an object of class \code{'lcmcross'}, a data frame
-containing the fitted values for each class is returned where each variable
-ends with \code{'_c#'}, \code{'#'} being the class number.
-
 In the case of an object of class \code{'sfacross'}, or
 \code{'sfaselectioncross'}, a vector of fitted values is returned.
+
+In the case of an object of class \code{'sfalcmcross'}, a data frame
+containing the fitted values for each class is returned where each variable
+ends with \code{'_c#'}, \code{'#'} being the class number.
 }
 \description{
 \code{\link{fitted}} returns the fitted frontier values from stochastic
-frontier models estimated with \code{\link{lcmcross}}, \code{\link{sfacross}},
+frontier models estimated with \code{\link{sfacross}}, \code{\link{sfalcmcross}},
 or \code{\link{sfaselectioncross}}.
 }
 \note{
@@ -39,20 +39,22 @@ observations in the dataset used for the estimation.
 }
 \examples{
 
+\dontrun{
 ## Using data on eighty-two countries production (GDP)
 # LCM Cobb Douglas (production function) half normal distribution
-cb_2c_h <- lcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal', 
+cb_2c_h <- sfalcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal', 
 data = worldprod)
 fit.cb_2c_h <- fitted(cb_2c_h)
 head(fit.cb_2c_h)
+}
 
 }
 \seealso{
-\code{\link{lcmcross}}, for the latent class stochastic frontier analysis
-model fitting function using cross-sectional or pooled data.
-
 \code{\link{sfacross}}, for the stochastic frontier analysis model
 fitting function using cross-sectional or pooled data.
+
+\code{\link{sfalcmcross}}, for the latent class stochastic frontier analysis
+model fitting function using cross-sectional or pooled data.
 
 \code{\link{sfaselectioncross}} for sample selection in stochastic frontier
 model fitting function using cross-sectional or pooled data.

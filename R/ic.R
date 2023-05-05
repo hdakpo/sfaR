@@ -16,7 +16,7 @@
 #' Extract information criteria of stochastic frontier models
 #'
 #' \code{\link{ic}} returns information criterion from stochastic 
-#' frontier models estimated with \code{\link{lcmcross}}, \code{\link{sfacross}}, 
+#' frontier models estimated with \code{\link{sfacross}}, \code{\link{sfalcmcross}}, 
 #' or \code{\link{sfaselectioncross}}.
 #'
 #' The different information criteria are computed as follows: \itemize{ \item
@@ -28,12 +28,12 @@
 #' @name ic
 #'
 #' @param object A stochastic frontier model returned
-#' by \code{\link{lcmcross}}, \code{\link{sfacross}}, or 
+#' by \code{\link{sfacross}}, \code{\link{sfalcmcross}}, or 
 #'  \code{\link{sfaselectioncross}}.
 #' @param IC Character string. Information criterion measure. Three criteria
 #' are available: \itemize{ \item \code{'AIC'} for Akaike information criterion
 #' (default) \item \code{'BIC'} for Bayesian information criterion \item
-#' \code{'HQIC'} for Hannan-Quinn information criterion }
+#' \code{'HQIC'} for Hannan-Quinn information criterion }.
 #' @param ... Currently ignored.
 #'
 #' @return \code{\link{ic}} returns the value of the information criterion
@@ -41,11 +41,11 @@
 #'
 # @author K Hervé Dakpo
 #'
-#' @seealso \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
-#' model fitting function using cross-sectional or pooled data.
-#' 
-#' \code{\link{sfacross}}, for the stochastic frontier analysis model
+#' @seealso \code{\link{sfacross}}, for the stochastic frontier analysis model
 #' fitting function using cross-sectional or pooled data.
+#' 
+#' \code{\link{sfalcmcross}}, for the latent class stochastic frontier analysis
+#' model fitting function using cross-sectional or pooled data.
 #' 
 #' \code{\link{sfaselectioncross}} for sample selection in stochastic frontier 
 #' model fitting function using cross-sectional or pooled data.
@@ -54,13 +54,15 @@
 #'
 #' @examples
 #'
+#' \dontrun{
 #' ## Using data on Swiss railway
 #' # LCM (cost function) half normal distribution
-#' cb_2c_u <- lcmcross(formula = LNCT ~ LNQ2 + LNQ3 + LNNET + LNPK + LNPL,
+#' cb_2c_u <- sfalcmcross(formula = LNCT ~ LNQ2 + LNQ3 + LNNET + LNPK + LNPL,
 #' udist = 'hnormal', uhet = ~ 1, data = swissrailways, S = -1, method='ucminf')
 #' ic(cb_2c_u)
 #' ic(cb_2c_u, IC = 'BIC')
 #' ic(cb_2c_u, IC = 'HQIC')
+#' }
 #'
 #' @aliases ic.sfacross
 #' @export
@@ -86,11 +88,11 @@ ic.sfacross <- function(object, IC = "AIC", ...) {
   message(IC, ": ", prettyNum(obj), sep = "")
 }
 
-# information criteria for lcmcross ----------
+# information criteria for sfalcmcross ----------
 #' @rdname ic
-#' @aliases ic.lcmcross
+#' @aliases ic.sfalcmcross
 #' @export
-ic.lcmcross <- function(object, IC = "AIC", ...) {
+ic.sfalcmcross <- function(object, IC = "AIC", ...) {
   if (!(IC %in% c("AIC", "BIC", "HQIC"))) {
     stop("Unknown information criteria: ", paste(IC), call. = FALSE)
   }

@@ -3,36 +3,36 @@
 \name{residuals}
 \alias{residuals}
 \alias{residuals.sfacross}
-\alias{residuals.lcmcross}
+\alias{residuals.sfalcmcross}
 \alias{residuals.sfaselectioncross}
 \title{Extract residuals of stochastic frontier models}
 \usage{
 \method{residuals}{sfacross}(object, ...)
 
-\method{residuals}{lcmcross}(object, ...)
+\method{residuals}{sfalcmcross}(object, ...)
 
 \method{residuals}{sfaselectioncross}(object, ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{lcmcross}}, \code{\link{sfacross}}, or
+by \code{\link{sfacross}}, \code{\link{sfalcmcross}}, or
 \code{\link{sfaselectioncross}}.}
 
 \item{\dots}{Currently ignored.}
 }
 \value{
-When the \code{object} is of \code{'lcmcross'},
-\code{\link{residuals}} returns a data frame containing the residuals values
-for each latent class, where each variable ends with \code{'_c#'},
-\code{'#'} being the class number.
-
 When the \code{object} is of class \code{'sfacross'}, or
 \code{'sfaselectioncross'}, \code{\link{residuals}} returns a vector of
 residuals values.
+
+When the \code{object} is of \code{'sfalcmcross'},
+\code{\link{residuals}} returns a data frame containing the residuals values
+for each latent class, where each variable ends with \code{'_c#'},
+\code{'#'} being the class number.
 }
 \description{
 This function returns the residuals' values from stochastic frontier models
-estimated with \code{\link{lcmcross}}, \code{\link{sfacross}}, or
+estimated with \code{\link{sfacross}}, \code{\link{sfalcmcross}}, or
 \code{\link{sfaselectioncross}}.
 }
 \note{
@@ -41,6 +41,7 @@ observations in the dataset used for the estimation.
 }
 \examples{
 
+\dontrun{
 ## Using data on fossil fuel fired steam electric power generation plants in the U.S.
 # Translog SFA (cost function) truncated normal with scaling property
 tl_u_ts <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
@@ -53,18 +54,19 @@ head(resid.tl_u_ts)
 
 ## Using data on eighty-two countries production (GDP)
 # LCM Cobb Douglas (production function) half normal distribution
-cb_2c_h <- lcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal', 
+cb_2c_h <- sfalcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal', 
 data = worldprod, S = 1)
 resid.cb_2c_h <- residuals(cb_2c_h)
 head(resid.cb_2c_h)
+}
 
 }
 \seealso{
-\code{\link{lcmcross}}, for the latent class stochastic frontier analysis
-model fitting function using cross-sectional or pooled data.
-
 \code{\link{sfacross}}, for the stochastic frontier analysis model
 fitting function using cross-sectional or pooled data.
+
+\code{\link{sfalcmcross}}, for the latent class stochastic frontier analysis
+model fitting function using cross-sectional or pooled data.
 
 \code{\link{sfaselectioncross}} for sample selection in stochastic frontier
 model fitting function using cross-sectional or pooled data.

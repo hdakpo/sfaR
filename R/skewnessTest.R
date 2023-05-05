@@ -41,7 +41,8 @@
 #' @keywords methods
 #'
 #' @examples
-#'
+#' 
+#' \dontrun{
 #' ## Using data on fossil fuel fired steam electric power generation plants in the U.S.
 #' # Translog SFA (cost function) truncated normal with scaling property
 #' tl_u_ts <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
@@ -51,6 +52,7 @@
 #' scaling = TRUE, method = 'mla')
 #' skewnessTest(tl_u_ts)
 #' skewnessTest(tl_u_ts, test = 'coelli')
+#' }
 #'
 #' @export
 skewnessTest <- function(object, test = "agostino") {

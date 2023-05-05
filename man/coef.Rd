@@ -4,8 +4,8 @@
 \alias{coef}
 \alias{coef.sfacross}
 \alias{coef.summary.sfacross}
-\alias{coef.lcmcross}
-\alias{coef.summary.lcmcross}
+\alias{coef.sfalcmcross}
+\alias{coef.summary.sfalcmcross}
 \alias{coef.sfaselectioncross}
 \alias{coef.summary.sfaselectioncross}
 \title{Extract coefficients of stochastic frontier models}
@@ -14,18 +14,18 @@
 
 \method{coef}{summary.sfacross}(object, ...)
 
-\method{coef}{lcmcross}(object, extraPar = FALSE, ...)
+\method{coef}{sfalcmcross}(object, extraPar = FALSE, ...)
 
-\method{coef}{summary.lcmcross}(object, ...)
+\method{coef}{summary.sfalcmcross}(object, ...)
 
 \method{coef}{sfaselectioncross}(object, extraPar = FALSE, ...)
 
 \method{coef}{summary.sfaselectioncross}(object, ...)
 }
 \arguments{
-\item{object}{A stochastic frontier model returned by \code{\link{lcmcross}},
-\code{\link{sfacross}}, or \code{\link{sfaselectioncross}}, or an object of
-class \code{'summary.lcmcross'}, \code{'summary.sfacross'}, or\cr
+\item{object}{A stochastic frontier model returned by \code{\link{sfacross}},
+\code{\link{sfalcmcross}}, or \code{\link{sfaselectioncross}}, or an object of
+class \code{'summary.sfacross'}, \code{'summary.sfalcmcross'}, or\cr
 \code{'summary.sfaselectioncross'}.}
 
 \item{extraPar}{Logical (default = \code{FALSE}). If \code{TRUE}, additional
@@ -52,30 +52,31 @@ parameters are returned:
 \item{...}{Currently ignored.}
 }
 \value{
-For objects of class \code{'summary.lcmcross'},
-\code{'summary.sfacross'}, or \code{'summary.sfaselectioncross'},
+For objects of class \code{'summary.sfacross'},
+\code{'summary.sfalcmcross'}, or \code{'summary.sfaselectioncross'},
 \code{\link{coef}} returns a matrix with four columns. Namely, the
 estimated coefficients, their standard errors, z-values,
 and (asymptotic) P-values.
 
-For objects of class \code{'lcmcross'}, \code{'sfacross'}, or
+For objects of class \code{'sfacross'}, \code{'sfalcmcross'}, or
 \code{'sfaselectioncross'}, \code{\link{coef}} returns a numeric vector of the
 estimated coefficients. If \code{extraPar = TRUE}, additional parameters,
 detailed in the section \sQuote{Arguments}, are also returned. In the case
-of object of class \code{'lcmcross'}, each additional
+of object of class \code{'sfalcmcross'}, each additional
 parameter ends with \code{'#'} that represents the class number.
 }
 \description{
-From an object of class \code{'summary.lcmcross'},
-\code{'summary.sfacross'}, or \code{'summary.sfaselectioncross'},
+From an object of class \code{'summary.sfacross'},
+\code{'summary.sfalcmcross'}, or \code{'summary.sfaselectioncross'},
 \code{\link{coef}} extracts the coefficients,
 their standard errors, z-values, and (asymptotic) P-values.
 
-From on object of class \code{'lcmcross'}, \code{'sfacross'}, or
+From on object of class \code{'sfacross'}, \code{'sfalcmcross'}, or
 \code{'sfaselectioncross'}, it extracts only the estimated coefficients.
 }
 \examples{
 
+\dontrun{
 ## Using data on fossil fuel fired steam electric power generation plants in the U.S.
 # Translog SFA (cost function) truncated normal with scaling property
 tl_u_ts <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
@@ -85,14 +86,15 @@ udist = 'tnormal', muhet = ~ regu, uhet = ~ regu, data = utility, S = -1,
 scaling = TRUE, method = 'mla')
 coef(tl_u_ts, extraPar = TRUE)
 coef(summary(tl_u_ts))
+}
 
 }
 \seealso{
-\code{\link{lcmcross}}, for the latent class stochastic frontier analysis
-model fitting function using cross-sectional or pooled data.
-
 \code{\link{sfacross}}, for the stochastic frontier analysis model
 fitting function using cross-sectional or pooled data.
+
+\code{\link{sfalcmcross}}, for the latent class stochastic frontier analysis
+model fitting function using cross-sectional or pooled data.
 
 \code{\link{sfaselectioncross}} for sample selection in stochastic frontier
 model fitting function using cross-sectional or pooled data.

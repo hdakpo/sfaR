@@ -16,7 +16,7 @@
 #' Marginal effects of the inefficiency drivers in stochastic frontier models
 #'
 #' This function returns marginal effects of the inefficiency drivers from stochastic 
-#' frontier models estimated with \code{\link{lcmcross}}, \code{\link{sfacross}}, 
+#' frontier models estimated with \code{\link{sfacross}}, \code{\link{sfalcmcross}}, 
 #' or \code{\link{sfaselectioncross}}.
 #'
 #' @details \code{\link{marginal}} operates in the presence of exogenous 
@@ -34,7 +34,7 @@
 #' inefficiency and its drivers.
 #'
 #' @param object A stochastic frontier model returned
-#' by \code{\link{lcmcross}}, \code{\link{sfacross}}, or 
+#' by \code{\link{sfacross}}, \code{\link{sfalcmcross}}, or 
 #' \code{\link{sfaselectioncross}}.
 #' @param newData Optional data frame that is used to calculate the marginal 
 #' effect of \eqn{Z} variables on inefficiency. If NULL (the default), the 
@@ -54,11 +54,11 @@
 #' 
 # @author K Hervé Dakpo
 #'
-#' @seealso \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
-#' model fitting function using cross-sectional or pooled data.
-#' 
-#' \code{\link{sfacross}}, for the stochastic frontier analysis model
+#' @seealso \code{\link{sfacross}}, for the stochastic frontier analysis model
 #' fitting function using cross-sectional or pooled data.
+#' 
+#' \code{\link{sfalcmcross}}, for the latent class stochastic frontier analysis
+#' model fitting function using cross-sectional or pooled data.
 #' 
 #' \code{\link{sfaselectioncross}} for sample selection in stochastic frontier 
 #' model fitting function using cross-sectional or pooled data.
@@ -71,6 +71,7 @@
 #'
 #' @examples
 #'
+#' \dontrun{
 #' ## Using data on fossil fuel fired steam electric power generation plants in the U.S.
 #' # Translog SFA (cost function) truncated normal with scaling property
 #' tl_u_ts <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
@@ -83,10 +84,11 @@
 #'
 #' ## Using data on eighty-two countries production (GDP)
 #' # LCM Cobb Douglas (production function) half normal distribution
-#' cb_2c_h <- lcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal',
+#' cb_2c_h <- sfalcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal',
 #'     data = worldprod, uhet = ~ initStat + h, S = 1, method = 'mla')
 #'   marg.cb_2c_h <- marginal(cb_2c_h)
 #'   summary(marg.cb_2c_h)
+#'   }
 #'
 #' @aliases marginal.sfacross
 #' @export
@@ -211,14 +213,14 @@ marginal.sfacross <- function(object, newData = NULL, ...) {
       }
     }
   }
-  return(data.frame(EffMarg))
+  return(EffMarg)
 }
 
-# marginal effects computation lcmcross ----------
+# marginal effects computation sfalcmcross ----------
 #' @rdname marginal
-#' @aliases marginal.lcmcross
+#' @aliases marginal.sfalcmcross
 #' @export
-marginal.lcmcross <- function(object, newData = NULL, ...) {
+marginal.sfalcmcross <- function(object, newData = NULL, ...) {
   if (!is.null(newData)) {
     if (!is.data.frame(newData)) {
       stop("argument 'newData' must be of class data.frame")
@@ -250,7 +252,7 @@ marginal.lcmcross <- function(object, newData = NULL, ...) {
       }
     }
   }
-  return(data.frame(EffMarg))
+  return(EffMarg)
 }
 
 # marginal effects computation sfaselectioncross ----------
@@ -273,5 +275,5 @@ marginal.sfaselectioncross <- function(object, newData = NULL,
     EffMarg <- data.frame(cbind(cmarghalfnorm_Eu_ss(object = object),
       cmarghalfnorm_Vu_ss(object = object)))
   }
-  return(data.frame(EffMarg))
+  return(EffMarg)
 }

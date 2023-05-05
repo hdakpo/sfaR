@@ -63,7 +63,7 @@ distribution is available for the one-sided error term.
 Heteroscedasticity in both error terms is possible. The choice of the
 number of classes can be guided by several information criteria
 (i.e. AIC, BIC or HQIC). The main function for this class of model is
-`lcmcross`.
+`sfalcmcross`.
 
 3.  **Sample Selection Correction Stochastic Frontier Model**
 
@@ -141,11 +141,11 @@ yields the following output
 
 ``` r
 ## For the latent class stochastic frontier we have:
-lcm2c1 <- lcmcross(formula = ly ~ lk + ll + yr, thet = ~initStat, 
+lcm2c1 <- sfalcmcross(formula = ly ~ lk + ll + yr, thet = ~initStat, 
  data = worldprod)
 #> Initialization: SFA + halfnormal - normal distributions...
 #> LCM 2 Classes Estimation...
-lcm2c2 <- lcmcross(formula = ly ~ lk + ll + yr, uhet = ~initStat, 
+lcm2c2 <- sfalcmcross(formula = ly ~ lk + ll + yr, uhet = ~initStat, 
  data = worldprod)
 #> Initialization: SFA + halfnormal - normal distributions...
 #> LCM 2 Classes Estimation...
@@ -153,7 +153,7 @@ lcm2c2 <- lcmcross(formula = ly ~ lk + ll + yr, uhet = ~initStat,
 
 The command `screenreg(list(lcm2c1, lcm2c2))` generates the following
 
-![lcmcross](https://user-images.githubusercontent.com/29732089/235991360-9b26b732-2a97-43b1-8ee1-d7f59147d4f1.png)
+![sfalcmcross](https://user-images.githubusercontent.com/29732089/236163537-dc12e886-84c2-49d4-a943-9d61cfb82000.png)
 
 ``` r
 ## The following simulation is used for the sample selection

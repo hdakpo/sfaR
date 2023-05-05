@@ -16,31 +16,31 @@
 #' Summary of results for stochastic frontier models
 #'
 #' Create and print summary results for stochastic frontier models returned by 
-#' \code{\link{lcmcross}}, \code{\link{sfacross}}, or 
+#' \code{\link{sfacross}}, \code{\link{sfalcmcross}}, or 
 #' \code{\link{sfaselectioncross}}.
 #'
-#' @param object An object of either class \code{'lcmcross'} returned by the
-#' function \code{\link{lcmcross}}, or \code{'sfacross'} returned by the
-#' function \code{\link{sfacross}}, or class \code{'sfaselectioncross'} returned 
+#' @param object An object of either class \code{'sfacross'} returned by the
+#' function \code{\link{sfacross}}, or \code{'sfalcmcross'} returned by the
+#' function \code{\link{sfalcmcross}}, or class \code{'sfaselectioncross'} returned 
 #' by the function \code{\link{sfaselectioncross}}.
 #' @param grad Logical. Default = \code{FALSE}. If \code{TRUE}, the gradient
 #' for the maximum likelihood (ML) estimates of the different parameters is
 #' returned.
 #' @param ci Logical. Default = \code{FALSE}. If \code{TRUE}, the 95%
-#' confidence interval for the different parameters (OLS and ML estimates) is
+#' confidence interval for the different parameters (OLS or/and ML estimates) is
 #' returned.
 #' @param ... Currently ignored.
-#' @param x An object of either class \code{'summary.lcmcross'}, \code{'summary.sfacross'}, or\cr
+#' @param x An object of either class \code{'summary.sfacross'}, \code{'summary.sfalcmcross'}, or\cr
 #' \code{'summary.sfaselectioncross'}.
 #' @param digits Numeric. Number of digits displayed in values.
 #'
 #' @name summary
 #'
 #' @return The \code{\link{summary}} method returns a list of class
-#' \code{'summary.lcmcross'}, \code{'summary.sfacross'}, or\cr
+#' \code{'summary.sfacross'}, \code{'summary.sfalcmcross'}, or\cr
 #' \code{'summary.sfaselectioncross'} 
-#' that contains the same elements as an object returned by \code{\link{lcmcross}}, 
-#' \code{\link{sfacross}}, or \code{\link{sfaselectioncross}} with the 
+#' that contains the same elements as an object returned by \code{\link{sfacross}}, 
+#' \code{\link{sfalcmcross}}, or \code{\link{sfaselectioncross}} with the 
 #' following additional elements:
 #'
 #' \item{AIC}{Akaike information criterion.}
@@ -91,11 +91,11 @@
 #' 
 # @author K Hervé Dakpo
 #' 
-#' @seealso \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
-#' model fitting function for cross-sectional or pooled data.
-#' 
-#' \code{\link{sfacross}}, for the stochastic frontier analysis model
+#' @seealso \code{\link{sfacross}}, for the stochastic frontier analysis model
 #' fitting function for cross-sectional or pooled data.
+#' 
+#' \code{\link{sfalcmcross}}, for the latent class stochastic frontier analysis
+#' model fitting function for cross-sectional or pooled data.
 #' 
 #' \code{\link{sfaselectioncross}} for sample selection in stochastic frontier 
 #' model fitting function for cross-sectional or pooled data.
@@ -877,11 +877,11 @@ print.summary.sfacross <- function(x, digits = max(3, getOption("digits") -
   invisible(x)
 }
 
-# summary for lcmcross ----------
+# summary for sfalcmcross ----------
 #' @rdname summary
-#' @aliases summary.lcmcross
+#' @aliases summary.sfalcmcross
 #' @export
-summary.lcmcross <- function(object, grad = FALSE, ci = FALSE,
+summary.sfalcmcross <- function(object, grad = FALSE, ci = FALSE,
   ...) {
   if (length(grad) != 1 || !is.logical(grad[1])) {
     stop("argument 'grad' must be a single logical value",
@@ -948,15 +948,15 @@ summary.lcmcross <- function(object, grad = FALSE, ci = FALSE,
   object$df <- object$nParm - object$nClasses * object$nXvar -
     object$nClasses * object$nvZVvar - object$nZHvar * (object$nClasses -
     1)
-  class(object) <- "summary.lcmcross"
+  class(object) <- "summary.sfalcmcross"
   return(object)
 }
 
-# print summary for lcmcross ----------
+# print summary for sfalcmcross ----------
 #' @rdname summary
-#' @aliases print.summary.lcmcross
+#' @aliases print.summary.sfalcmcross
 #' @export
-print.summary.lcmcross <- function(x, digits = max(3, getOption("digits") -
+print.summary.sfalcmcross <- function(x, digits = max(3, getOption("digits") -
   2), ...) {
   mlRes <- x$mlRes
   if (dim(mlRes)[2] == 4) {

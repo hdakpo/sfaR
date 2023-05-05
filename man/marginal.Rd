@@ -3,19 +3,19 @@
 \name{marginal}
 \alias{marginal}
 \alias{marginal.sfacross}
-\alias{marginal.lcmcross}
+\alias{marginal.sfalcmcross}
 \alias{marginal.sfaselectioncross}
 \title{Marginal effects of the inefficiency drivers in stochastic frontier models}
 \usage{
 \method{marginal}{sfacross}(object, newData = NULL, ...)
 
-\method{marginal}{lcmcross}(object, newData = NULL, ...)
+\method{marginal}{sfalcmcross}(object, newData = NULL, ...)
 
 \method{marginal}{sfaselectioncross}(object, newData = NULL, ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{lcmcross}}, \code{\link{sfacross}}, or
+by \code{\link{sfacross}}, \code{\link{sfalcmcross}}, or
 \code{\link{sfaselectioncross}}.}
 
 \item{newData}{Optional data frame that is used to calculate the marginal
@@ -36,7 +36,7 @@ ends with \code{'_c#'} where \code{'#'} is the class number.
 }
 \description{
 This function returns marginal effects of the inefficiency drivers from stochastic
-frontier models estimated with \code{\link{lcmcross}}, \code{\link{sfacross}},
+frontier models estimated with \code{\link{sfacross}}, \code{\link{sfalcmcross}},
 or \code{\link{sfaselectioncross}}.
 }
 \details{
@@ -56,6 +56,7 @@ inefficiency and its drivers.
 }
 \examples{
 
+\dontrun{
 ## Using data on fossil fuel fired steam electric power generation plants in the U.S.
 # Translog SFA (cost function) truncated normal with scaling property
 tl_u_ts <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
@@ -68,10 +69,11 @@ summary(marg.tl_u_ts)
 
 ## Using data on eighty-two countries production (GDP)
 # LCM Cobb Douglas (production function) half normal distribution
-cb_2c_h <- lcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal',
+cb_2c_h <- sfalcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal',
     data = worldprod, uhet = ~ initStat + h, S = 1, method = 'mla')
   marg.cb_2c_h <- marginal(cb_2c_h)
   summary(marg.cb_2c_h)
+  }
 
 }
 \references{
@@ -80,11 +82,11 @@ effects of a stochastic frontier model. \emph{Journal of Productivity
 Analysis}, \bold{18}:241--253.
 }
 \seealso{
-\code{\link{lcmcross}}, for the latent class stochastic frontier analysis
-model fitting function using cross-sectional or pooled data.
-
 \code{\link{sfacross}}, for the stochastic frontier analysis model
 fitting function using cross-sectional or pooled data.
+
+\code{\link{sfalcmcross}}, for the latent class stochastic frontier analysis
+model fitting function using cross-sectional or pooled data.
 
 \code{\link{sfaselectioncross}} for sample selection in stochastic frontier
 model fitting function using cross-sectional or pooled data.

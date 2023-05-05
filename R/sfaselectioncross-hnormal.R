@@ -154,7 +154,7 @@ chalfnormlike_ss_MSL <- function(parm, nXvar, nuZUvar, nvZVvar,
   if (rho <= -1 || rho >= 1)
     return(NA)
   Fi <- numeric(N)
-  for (i in 1:N) {
+  for (i in seq_along(1:N)) {
     Fi[i] <- mean(dnorm((epsilon[i] + S * exp(Wu[i]/2) *
       qnorm(1/2 + 1/2 * FiMat[i, ]))/exp(Wv[i]/2)) * pnorm((rho *
       (epsilon[i] + S * exp(Wu[i]/2) * qnorm(1/2 + 1/2 *
@@ -228,7 +228,7 @@ csthalfnorm_ss <- function(olsObj, epsiRes, S, nuZUvar, uHvar,
   if (abs(rho) >= 1) {
     if (abs(olsObj[length(olsObj)] < 1)) {
       rho <- olsObj[length(olsObj)]
-    } else{
+    } else {
       rho <- sign(rho) * 0.99
     }
   }
@@ -711,17 +711,17 @@ cgradhalfnormlike_ss_MSL <- function(parm, nXvar, nuZUvar, nvZVvar,
   F15 <- sweep(F14 * F6 * F3, MARGIN = 1, STATS = ewvsqr2/sqrho,
     FUN = "*")
   gx <- matrix(nrow = N, ncol = nXvar)
-  for (k in 1:nXvar) {
+  for (k in seq_along(1:nXvar)) {
     gx[, k] <- apply(sweep(F8, MARGIN = 1, STATS = Xvar[,
       k], FUN = "*"), 1, sum)/sumF
   }
   gu <- matrix(nrow = N, ncol = nuZUvar)
-  for (k in 1:nuZUvar) {
+  for (k in seq_along(1:nuZUvar)) {
     gu[, k] <- apply(sweep(S * F11, MARGIN = 1, STATS = uHvar[,
       k], FUN = "*"), 1, sum)/sumF
   }
   gv <- matrix(nrow = N, ncol = nvZVvar)
-  for (k in 1:nvZVvar) {
+  for (k in seq_along(1:nvZVvar)) {
     gv[, k] <- apply(sweep(F13, MARGIN = 1, STATS = vHvar[,
       k], FUN = "*"), 1, sum)/sumF
   }
@@ -2307,7 +2307,7 @@ chesshalfnormlike_ss_MSL <- function(parm, nXvar, nuZUvar, nvZVvar,
   HU1 <- list()
   HUV1 <- list()
   HV1 <- list()
-  for (r in 1:Q) {
+  for (r in seq_along(1:Q)) {
     HX1[[r]] <- crossprod(sweep(Xvar, MARGIN = 1, STATS = wHvar *
       F20[, r]/sumF, FUN = "*"), Xvar)
     HXU1[[r]] <- crossprod(sweep(Xvar, MARGIN = 1, STATS = wHvar *
@@ -2323,7 +2323,7 @@ chesshalfnormlike_ss_MSL <- function(parm, nXvar, nuZUvar, nvZVvar,
   }
   X1 <- matrix(nrow = N, ncol = nXvar)
   X2 <- matrix(nrow = N, ncol = nXvar)
-  for (k in 1:nXvar) {
+  for (k in seq_along(1:nXvar)) {
     X1[, k] <- apply(sweep(F8, MARGIN = 1, STATS = Xvar[,
       k], FUN = "*"), 1, sum)/sumF
     X2[, k] <- apply(sweep(F28, MARGIN = 1, STATS = Xvar[,
@@ -2331,7 +2331,7 @@ chesshalfnormlike_ss_MSL <- function(parm, nXvar, nuZUvar, nvZVvar,
   }
   ZU1 <- matrix(nrow = N, ncol = nuZUvar)
   ZU2 <- matrix(nrow = N, ncol = nuZUvar)
-  for (k in 1:nuZUvar) {
+  for (k in seq_along(1:nuZUvar)) {
     ZU1[, k] <- apply(sweep(S * F11, MARGIN = 1, STATS = uHvar[,
       k], FUN = "*"), 1, sum)/sumF
     ZU2[, k] <- apply(sweep(S * F36, MARGIN = 1, STATS = uHvar[,
@@ -2339,7 +2339,7 @@ chesshalfnormlike_ss_MSL <- function(parm, nXvar, nuZUvar, nvZVvar,
   }
   ZV1 <- matrix(nrow = N, ncol = nvZVvar)
   ZV2 <- matrix(nrow = N, ncol = nvZVvar)
-  for (k in 1:nvZVvar) {
+  for (k in seq_along(1:nvZVvar)) {
     ZV1[, k] <- apply(sweep(F13, MARGIN = 1, STATS = vHvar[,
       k], FUN = "*"), 1, sum)/sumF
     ZV2[, k] <- apply(sweep(F44, MARGIN = 1, STATS = vHvar[,
@@ -2397,7 +2397,8 @@ chesshalfnormlike_ss_MSL <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param vHvar matrix of Zv variables
 #' @param Yvar vector of dependent variable
 #' @param Xvar matrix of main variables
-#' @param selectDum selection variable for first step probit model
+# @param selectDum selection variable for first step probit
+# model
 #' @param wHvar vector of weights (weighted likelihood)
 #' @param S integer for cost/prod estimation
 #' @param method algorithm for solver
@@ -2487,37 +2488,37 @@ halfnormAlgOpt_ss_GK <- function(start, olsParam, dataTable,
       "dgCMatrix"), method = "Sparse", control = list(maxit = itermax,
       cgtol = gradtol, stop.trust.radius = tol, prec = tol,
       report.level = if (printInfo) 2 else 0, report.precision = 1L,
-      preconditioner = 1L)), mla = marqLevAlg::mla(b = startVal, fn = function(parm) -sum(chalfnormlike_ss_GK(parm,
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-    wHvar = wHvar, S = S, PREDICTIONS = PREDICTIONS, uBound = uBound,
-    subdivisions = subdivisions, intol = intol)), gr = function(parm) -colSums(cgradhalfnormlike_ss_GK(parm,
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-    wHvar = wHvar, S = S, PREDICTIONS = PREDICTIONS, uBound = uBound,
-    subdivisions = subdivisions, intol = intol)), hess = function(parm) -chesshalfnormlike_ss_GK(parm,
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-    wHvar = wHvar, S = S, PREDICTIONS = PREDICTIONS, uBound = uBound,
-    subdivisions = subdivisions, intol = intol), print.info = printInfo,
-    maxiter = itermax, epsa = gradtol, epsb = gradtol), nlminb = nlminb(start = startVal,
-    objective = function(parm) -sum(chalfnormlike_ss_GK(parm,
+      preconditioner = 1L)), mla = marqLevAlg::mla(b = startVal,
+    fn = function(parm) -sum(chalfnormlike_ss_GK(parm, nXvar = nXvar,
+      nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar,
+      S = S, PREDICTIONS = PREDICTIONS, uBound = uBound,
+      subdivisions = subdivisions, intol = intol)), gr = function(parm) -colSums(cgradhalfnormlike_ss_GK(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       wHvar = wHvar, S = S, PREDICTIONS = PREDICTIONS,
       uBound = uBound, subdivisions = subdivisions, intol = intol)),
-    gradient = function(parm) -colSums(cgradhalfnormlike_ss_GK(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      wHvar = wHvar, S = S, PREDICTIONS = PREDICTIONS,
-      uBound = uBound, subdivisions = subdivisions, intol = intol)),
-    hessian = function(parm) -chesshalfnormlike_ss_GK(parm,
+    hess = function(parm) -chesshalfnormlike_ss_GK(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       wHvar = wHvar, S = S, PREDICTIONS = PREDICTIONS,
       uBound = uBound, subdivisions = subdivisions, intol = intol),
-    control = list(iter.max = itermax, trace = if (printInfo) 1 else 0,
-      eval.max = itermax, rel.tol = tol, x.tol = tol)))
+    print.info = printInfo, maxiter = itermax, epsa = gradtol,
+    epsb = gradtol), nlminb = nlminb(start = startVal, objective = function(parm) -sum(chalfnormlike_ss_GK(parm,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    wHvar = wHvar, S = S, PREDICTIONS = PREDICTIONS, uBound = uBound,
+    subdivisions = subdivisions, intol = intol)), gradient = function(parm) -colSums(cgradhalfnormlike_ss_GK(parm,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    wHvar = wHvar, S = S, PREDICTIONS = PREDICTIONS, uBound = uBound,
+    subdivisions = subdivisions, intol = intol)), hessian = function(parm) -chesshalfnormlike_ss_GK(parm,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    wHvar = wHvar, S = S, PREDICTIONS = PREDICTIONS, uBound = uBound,
+    subdivisions = subdivisions, intol = intol), control = list(iter.max = itermax,
+    trace = if (printInfo) 1 else 0, eval.max = itermax,
+    rel.tol = tol, x.tol = tol)))
   if (method %in% c("ucminf", "nlminb")) {
     mleObj$gradient <- colSums(cgradhalfnormlike_ss_GK(mleObj$par,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
@@ -2645,37 +2646,38 @@ halfnormAlgOpt_ss_HCUB <- function(start, olsParam, dataTable,
       "dgCMatrix"), method = "Sparse", control = list(maxit = itermax,
       cgtol = gradtol, stop.trust.radius = tol, prec = tol,
       report.level = if (printInfo) 2 else 0, report.precision = 1L,
-      preconditioner = 1L)), mla = marqLevAlg::mla(b = startVal, fn = function(parm) -sum(chalfnormlike_ss_HCUB(parm,
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-    wHvar = wHvar, S = S, PREDICTIONS = PREDICTIONS, uBound = uBound,
-    subdivisions = subdivisions, intol = intol)), gr = function(parm) -colSums(cgradhalfnormlike_ss_HCUB(parm,
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-    wHvar = wHvar, S = S, PREDICTIONS = PREDICTIONS, uBound = uBound,
-    subdivisions = subdivisions, intol = intol)), hess = function(parm) -chesshalfnormlike_ss_HCUB(parm,
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-    wHvar = wHvar, S = S, PREDICTIONS = PREDICTIONS, uBound = uBound,
-    subdivisions = subdivisions, intol = intol), print.info = printInfo,
-    maxiter = itermax, epsa = gradtol, epsb = gradtol), nlminb = nlminb(start = startVal,
-    objective = function(parm) -sum(chalfnormlike_ss_HCUB(parm,
+      preconditioner = 1L)), mla = marqLevAlg::mla(b = startVal,
+    fn = function(parm) -sum(chalfnormlike_ss_HCUB(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       wHvar = wHvar, S = S, PREDICTIONS = PREDICTIONS,
       uBound = uBound, subdivisions = subdivisions, intol = intol)),
-    gradient = function(parm) -colSums(cgradhalfnormlike_ss_HCUB(parm,
+    gr = function(parm) -colSums(cgradhalfnormlike_ss_HCUB(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       wHvar = wHvar, S = S, PREDICTIONS = PREDICTIONS,
       uBound = uBound, subdivisions = subdivisions, intol = intol)),
-    hessian = function(parm) -chesshalfnormlike_ss_HCUB(parm,
+    hess = function(parm) -chesshalfnormlike_ss_HCUB(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       wHvar = wHvar, S = S, PREDICTIONS = PREDICTIONS,
       uBound = uBound, subdivisions = subdivisions, intol = intol),
-    control = list(iter.max = itermax, trace = if (printInfo) 1 else 0,
-      eval.max = itermax, rel.tol = tol, x.tol = tol)))
+    print.info = printInfo, maxiter = itermax, epsa = gradtol,
+    epsb = gradtol), nlminb = nlminb(start = startVal, objective = function(parm) -sum(chalfnormlike_ss_HCUB(parm,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    wHvar = wHvar, S = S, PREDICTIONS = PREDICTIONS, uBound = uBound,
+    subdivisions = subdivisions, intol = intol)), gradient = function(parm) -colSums(cgradhalfnormlike_ss_HCUB(parm,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    wHvar = wHvar, S = S, PREDICTIONS = PREDICTIONS, uBound = uBound,
+    subdivisions = subdivisions, intol = intol)), hessian = function(parm) -chesshalfnormlike_ss_HCUB(parm,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    wHvar = wHvar, S = S, PREDICTIONS = PREDICTIONS, uBound = uBound,
+    subdivisions = subdivisions, intol = intol), control = list(iter.max = itermax,
+    trace = if (printInfo) 1 else 0, eval.max = itermax,
+    rel.tol = tol, x.tol = tol)))
   if (method %in% c("ucminf", "nlminb")) {
     mleObj$gradient <- colSums(cgradhalfnormlike_ss_HCUB(mleObj$par,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
@@ -2803,37 +2805,38 @@ halfnormAlgOpt_ss_PCUB <- function(start, olsParam, dataTable,
       "dgCMatrix"), method = "Sparse", control = list(maxit = itermax,
       cgtol = gradtol, stop.trust.radius = tol, prec = tol,
       report.level = if (printInfo) 2 else 0, report.precision = 1L,
-      preconditioner = 1L)), mla = marqLevAlg::mla(b = startVal, fn = function(parm) -sum(chalfnormlike_ss_PCUB(parm,
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-    wHvar = wHvar, S = S, PREDICTIONS = PREDICTIONS, uBound = uBound,
-    subdivisions = subdivisions, intol = intol)), gr = function(parm) -colSums(cgradhalfnormlike_ss_PCUB(parm,
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-    wHvar = wHvar, S = S, PREDICTIONS = PREDICTIONS, uBound = uBound,
-    subdivisions = subdivisions, intol = intol)), hess = function(parm) -chesshalfnormlike_ss_PCUB(parm,
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-    wHvar = wHvar, S = S, PREDICTIONS = PREDICTIONS, uBound = uBound,
-    subdivisions = subdivisions, intol = intol), print.info = printInfo,
-    maxiter = itermax, epsa = gradtol, epsb = gradtol), nlminb = nlminb(start = startVal,
-    objective = function(parm) -sum(chalfnormlike_ss_PCUB(parm,
+      preconditioner = 1L)), mla = marqLevAlg::mla(b = startVal,
+    fn = function(parm) -sum(chalfnormlike_ss_PCUB(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       wHvar = wHvar, S = S, PREDICTIONS = PREDICTIONS,
       uBound = uBound, subdivisions = subdivisions, intol = intol)),
-    gradient = function(parm) -colSums(cgradhalfnormlike_ss_PCUB(parm,
+    gr = function(parm) -colSums(cgradhalfnormlike_ss_PCUB(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       wHvar = wHvar, S = S, PREDICTIONS = PREDICTIONS,
       uBound = uBound, subdivisions = subdivisions, intol = intol)),
-    hessian = function(parm) -chesshalfnormlike_ss_PCUB(parm,
+    hess = function(parm) -chesshalfnormlike_ss_PCUB(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       wHvar = wHvar, S = S, PREDICTIONS = PREDICTIONS,
       uBound = uBound, subdivisions = subdivisions, intol = intol),
-    control = list(iter.max = itermax, trace = if (printInfo) 1 else 0,
-      eval.max = itermax, rel.tol = tol, x.tol = tol)))
+    print.info = printInfo, maxiter = itermax, epsa = gradtol,
+    epsb = gradtol), nlminb = nlminb(start = startVal, objective = function(parm) -sum(chalfnormlike_ss_PCUB(parm,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    wHvar = wHvar, S = S, PREDICTIONS = PREDICTIONS, uBound = uBound,
+    subdivisions = subdivisions, intol = intol)), gradient = function(parm) -colSums(cgradhalfnormlike_ss_PCUB(parm,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    wHvar = wHvar, S = S, PREDICTIONS = PREDICTIONS, uBound = uBound,
+    subdivisions = subdivisions, intol = intol)), hessian = function(parm) -chesshalfnormlike_ss_PCUB(parm,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    wHvar = wHvar, S = S, PREDICTIONS = PREDICTIONS, uBound = uBound,
+    subdivisions = subdivisions, intol = intol), control = list(iter.max = itermax,
+    trace = if (printInfo) 1 else 0, eval.max = itermax,
+    rel.tol = tol, x.tol = tol)))
   if (method %in% c("ucminf", "nlminb")) {
     mleObj$gradient <- colSums(cgradhalfnormlike_ss_PCUB(mleObj$par,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
@@ -3180,41 +3183,44 @@ halfnormAlgOpt_ss_MSL <- function(start, olsParam, dataTable,
 # Conditional efficiencies estimation ----------
 #' efficiencies for halfnormal-normal distribution + selection bias
 #' @param object object of class selectioncross
+#' @param etype way (in)efficiency is computed: jlms bayes csn
 #' @param level level for confidence interval
 #' @noRd
-chalfnormeff_ss <- function(object, level) {
+chalfnormeff_ss <- function(object, etype, level) {
   beta <- object$mlParam[1:(object$nXvar)]
   delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
   phi <- object$mlParam[(object$nXvar + object$nuZUvar + 1):(object$nXvar +
     object$nuZUvar + object$nvZVvar)]
-  Xvar <- model.matrix(object$formula, data = object$dataTable[object$dataTable$selectDum ==
+  Xvar <- model.matrix(object$formula, data = object$dataTable[object$dataTable[all.vars(object$selectionF)[1]] ==
     1, ], rhs = 1)
-  uHvar <- model.matrix(object$formula, data = object$dataTable[object$dataTable$selectDum ==
+  uHvar <- model.matrix(object$formula, data = object$dataTable[object$dataTable[all.vars(object$selectionF)[1]] ==
     1, ], rhs = 2)
-  vHvar <- model.matrix(object$formula, data = object$dataTable[object$dataTable$selectDum ==
+  vHvar <- model.matrix(object$formula, data = object$dataTable[object$dataTable[all.vars(object$selectionF)[1]] ==
     1, ], rhs = 3)
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
-  epsilon <- model.response(model.frame(object$formula, data = object$dataTable[object$dataTable$selectDum ==
+  epsilon <- model.response(model.frame(object$formula, data = object$dataTable[object$dataTable[all.vars(object$selectionF)[1]] ==
     1, ])) - as.numeric(crossprod(matrix(beta), t(Xvar)))
-  mustar <- -exp(Wu) * object$S * epsilon/(exp(Wu) + exp(Wv))
-  sigmastar <- sqrt(exp(Wu) * exp(Wv)/(exp(Wu) + exp(Wv)))
-  u <- mustar + sigmastar * dnorm(mustar/sigmastar)/pnorm(mustar/sigmastar)
-  uLB <- mustar + qnorm(1 - (1 - (1 - level)/2) * (1 - pnorm(-mustar/sigmastar))) *
-    sigmastar
-  uUB <- mustar + qnorm(1 - (1 - level)/2 * (1 - pnorm(-mustar/sigmastar))) *
-    sigmastar
-  m <- ifelse(mustar > 0, mustar, 0)
-  if (object$logDepVar == TRUE) {
-    teJLMS <- exp(-u)  ## for cost it is Farrell equivalent
-    teMO <- exp(-m)
-    teBC <- exp(-mustar + 1/2 * sigmastar^2) * pnorm(mustar/sigmastar -
-      sigmastar)/pnorm(mustar/sigmastar)
-    teBCLB <- exp(-uUB)
-    teBCUB <- exp(-uLB)
-    teBC_reciprocal <- exp(mustar + 1/2 * sigmastar^2) *
-      pnorm(mustar/sigmastar + sigmastar)/pnorm(mustar/sigmastar)
+  if (etype == "jlms") {
+    mustar <- -exp(Wu) * object$S * epsilon/(exp(Wu) + exp(Wv))
+    sigmastar <- sqrt(exp(Wu) * exp(Wv)/(exp(Wu) + exp(Wv)))
+    u <- mustar + sigmastar * dnorm(mustar/sigmastar)/pnorm(mustar/sigmastar)
+    uLB <- mustar + qnorm(1 - (1 - (1 - level)/2) * (1 -
+      pnorm(-mustar/sigmastar))) * sigmastar
+    uUB <- mustar + qnorm(1 - (1 - level)/2 * (1 - pnorm(-mustar/sigmastar))) *
+      sigmastar
+    m <- ifelse(mustar > 0, mustar, 0)
+    if (object$logDepVar == TRUE) {
+      teJLMS <- exp(-u)  ## for cost it is Farrell equivalent
+      teMO <- exp(-m)
+      teBC <- exp(-mustar + 1/2 * sigmastar^2) * pnorm(mustar/sigmastar -
+        sigmastar)/pnorm(mustar/sigmastar)
+      teBCLB <- exp(-uUB)
+      teBCUB <- exp(-uLB)
+      teBC_reciprocal <- exp(mustar + 1/2 * sigmastar^2) *
+        pnorm(mustar/sigmastar + sigmastar)/pnorm(mustar/sigmastar)
+    }
     res <- data.frame(u = rep(NA, object$Ninit), uLB = rep(NA,
       object$Ninit), uUB = rep(NA, object$Ninit), teJLMS = rep(NA,
       object$Ninit), m = rep(NA, object$Ninit), teMO = rep(NA,
@@ -3224,13 +3230,15 @@ chalfnormeff_ss <- function(object, level) {
     res_eff <- data.frame(u = u, uLB = uLB, uUB = uUB, teJLMS = teJLMS,
       m = m, teMO = teMO, teBC = teBC, teBCLB = teBCLB,
       teBCUB = teBCUB, teBC_reciprocal = teBC_reciprocal)
-    res[object$dataTable$selectDum == 1, ] <- res_eff
+    res[object$dataTable[all.vars(object$selectionF)[1]] ==
+      1, ] <- res_eff
   } else {
     res <- data.frame(u = rep(NA, object$Ninit), uLB = rep(NA,
       object$Ninit), uUB = rep(NA, object$Ninit), m = rep(NA,
       object$Ninit))
     res_eff <- data.frame(u = u, uLB = uLB, uUB = uUB, m = m)
-    res[object$dataTable$selectDum == 1, ] <- res_eff
+    res[object$dataTable[all.vars(object$selectionF)[1]] ==
+      1, ] <- res_eff
   }
   return(res)
 }
@@ -3242,13 +3250,14 @@ chalfnormeff_ss <- function(object, level) {
 cmarghalfnorm_Eu_ss <- function(object) {
   delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
-  uHvar <- model.matrix(object$formula, data = object$dataTable[object$dataTable$selectDum ==
+  uHvar <- model.matrix(object$formula, data = object$dataTable[object$dataTable[all.vars(object$selectionF)[1]] ==
     1, ], rhs = 2)
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
   res <- matrix(nrow = object$Ninit, ncol = object$nuZUvar)
   margEff <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
     matrix(exp(Wu/2) * dnorm(0), ncol = 1))
-  res[object$dataTable$selectDum == 1, ] <- margEff
+  res[object$dataTable[all.vars(object$selectionF)[1]] == 1,
+    ] <- margEff
   colnames(res) <- paste0("Eu_", colnames(uHvar)[-1])
   return(data.frame(res))
 }
@@ -3256,13 +3265,14 @@ cmarghalfnorm_Eu_ss <- function(object) {
 cmarghalfnorm_Vu_ss <- function(object) {
   delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
-  uHvar <- model.matrix(object$formula, data = object$dataTable,
-    rhs = 2)
+  uHvar <- model.matrix(object$formula, data = object$dataTable[object$dataTable[all.vars(object$selectionF)[1]] ==
+    1, ], rhs = 2)
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
   res <- matrix(nrow = object$Ninit, ncol = object$nuZUvar)
   margEff <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
     matrix(exp(Wu) * (1 - (dnorm(0)/pnorm(0))^2), ncol = 1))
-  res[object$dataTable$selectDum == 1, ] <- margEff
+  res[object$dataTable[all.vars(object$selectionF)[1]] == 1,
+    ] <- margEff
   colnames(res) <- paste0("Eu_", colnames(uHvar)[-1])
   return(data.frame(res))
 }

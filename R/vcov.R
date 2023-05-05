@@ -17,7 +17,7 @@
 #'
 #' \code{\link{vcov}} computes the variance-covariance matrix of the maximum
 #' likelihood (ML) coefficients from stochastic frontier models estimated with 
-#' \code{\link{lcmcross}}, \code{\link{sfacross}}, 
+#' \code{\link{sfacross}}, \code{\link{sfalcmcross}}, 
 #' or \code{\link{sfaselectioncross}}.
 #'
 #' @details The variance-covariance matrix is obtained by the inversion of the 
@@ -31,7 +31,7 @@
 #' parameters is obtained using the delta method.
 #'
 #' @param object A stochastic frontier model returned
-#' by \code{\link{lcmcross}}, \code{\link{sfacross}}, or 
+#' by \code{\link{sfacross}}, \code{\link{sfalcmcross}}, or 
 #' \code{\link{sfaselectioncross}}.
 #' @param extraPar Logical. Only available for non heteroscedastic models
 #' returned by \code{\link{sfacross}} and \code{\link{sfaselectioncross}}. 
@@ -64,11 +64,11 @@
 #'
 # @author K Hervé Dakpo
 #'
-#' @seealso \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
-#' model fitting function using cross-sectional or pooled data.
-#'
-#' \code{\link{sfacross}}, for the stochastic frontier analysis model
+#' @seealso \code{\link{sfacross}}, for the stochastic frontier analysis model
 #' fitting function using cross-sectional or pooled data.
+#' 
+#' \code{\link{sfalcmcross}}, for the latent class stochastic frontier analysis
+#' model fitting function using cross-sectional or pooled data.
 #' 
 #' \code{\link{sfaselectioncross}} for sample selection in stochastic frontier 
 #' model fitting function using cross-sectional data.
@@ -116,7 +116,7 @@
 #'
 #' ## Using data on eighty-two countries production (GDG)
 #' # LCM Cobb Douglas (production function) half normal distribution
-#' cb_2c_h <- lcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal',
+#' cb_2c_h <- sfalcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal',
 #' data = worldprod, uhet = ~ initStat, S = 1)
 #' vcov(cb_2c_h)
 #'
@@ -195,11 +195,11 @@ vcov.sfacross <- function(object, extraPar = FALSE, ...) {
   return(resCov)
 }
 
-# variance covariance matrix for lcmcross ----------
+# variance covariance matrix for sfalcmcross ----------
 #' @rdname vcov
-#' @aliases vcov.lcmcross
+#' @aliases vcov.sfalcmcross
 #' @export
-vcov.lcmcross <- function(object, ...) {
+vcov.sfalcmcross <- function(object, ...) {
   resCov <- object$invHessian
   return(resCov)
 }

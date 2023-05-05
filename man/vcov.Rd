@@ -3,19 +3,19 @@
 \name{vcov}
 \alias{vcov}
 \alias{vcov.sfacross}
-\alias{vcov.lcmcross}
+\alias{vcov.sfalcmcross}
 \alias{vcov.sfaselectioncross}
 \title{Compute variance-covariance matrix of stochastic frontier models}
 \usage{
 \method{vcov}{sfacross}(object, extraPar = FALSE, ...)
 
-\method{vcov}{lcmcross}(object, ...)
+\method{vcov}{sfalcmcross}(object, ...)
 
 \method{vcov}{sfaselectioncross}(object, extraPar = FALSE, ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{lcmcross}}, \code{\link{sfacross}}, or
+by \code{\link{sfacross}}, \code{\link{sfalcmcross}}, or
 \code{\link{sfaselectioncross}}.}
 
 \item{extraPar}{Logical. Only available for non heteroscedastic models
@@ -50,7 +50,7 @@ coefficients is returned.
 \description{
 \code{\link{vcov}} computes the variance-covariance matrix of the maximum
 likelihood (ML) coefficients from stochastic frontier models estimated with
-\code{\link{lcmcross}}, \code{\link{sfacross}},
+\code{\link{sfacross}}, \code{\link{sfalcmcross}},
 or \code{\link{sfaselectioncross}}.
 }
 \details{
@@ -105,17 +105,17 @@ lmtest::coeftest(cb_s_h, vcov. = sandwich::vcovOPG, adjust = TRUE)
 
 ## Using data on eighty-two countries production (GDG)
 # LCM Cobb Douglas (production function) half normal distribution
-cb_2c_h <- lcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal',
+cb_2c_h <- sfalcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal',
 data = worldprod, uhet = ~ initStat, S = 1)
 vcov(cb_2c_h)
 
 }
 \seealso{
-\code{\link{lcmcross}}, for the latent class stochastic frontier analysis
-model fitting function using cross-sectional or pooled data.
-
 \code{\link{sfacross}}, for the stochastic frontier analysis model
 fitting function using cross-sectional or pooled data.
+
+\code{\link{sfalcmcross}}, for the latent class stochastic frontier analysis
+model fitting function using cross-sectional or pooled data.
 
 \code{\link{sfaselectioncross}} for sample selection in stochastic frontier
 model fitting function using cross-sectional data.

@@ -4,8 +4,8 @@
 \alias{summary}
 \alias{summary.sfacross}
 \alias{print.summary.sfacross}
-\alias{summary.lcmcross}
-\alias{print.summary.lcmcross}
+\alias{summary.sfalcmcross}
+\alias{print.summary.sfalcmcross}
 \alias{summary.sfaselectioncross}
 \alias{print.summary.sfaselectioncross}
 \title{Summary of results for stochastic frontier models}
@@ -14,18 +14,18 @@
 
 \method{print}{summary.sfacross}(x, digits = max(3, getOption("digits") - 2), ...)
 
-\method{summary}{lcmcross}(object, grad = FALSE, ci = FALSE, ...)
+\method{summary}{sfalcmcross}(object, grad = FALSE, ci = FALSE, ...)
 
-\method{print}{summary.lcmcross}(x, digits = max(3, getOption("digits") - 2), ...)
+\method{print}{summary.sfalcmcross}(x, digits = max(3, getOption("digits") - 2), ...)
 
 \method{summary}{sfaselectioncross}(object, grad = FALSE, ci = FALSE, ...)
 
 \method{print}{summary.sfaselectioncross}(x, digits = max(3, getOption("digits") - 2), ...)
 }
 \arguments{
-\item{object}{An object of either class \code{'lcmcross'} returned by the
-function \code{\link{lcmcross}}, or \code{'sfacross'} returned by the
-function \code{\link{sfacross}}, or class \code{'sfaselectioncross'} returned
+\item{object}{An object of either class \code{'sfacross'} returned by the
+function \code{\link{sfacross}}, or \code{'sfalcmcross'} returned by the
+function \code{\link{sfalcmcross}}, or class \code{'sfaselectioncross'} returned
 by the function \code{\link{sfaselectioncross}}.}
 
 \item{grad}{Logical. Default = \code{FALSE}. If \code{TRUE}, the gradient
@@ -33,22 +33,22 @@ for the maximum likelihood (ML) estimates of the different parameters is
 returned.}
 
 \item{ci}{Logical. Default = \code{FALSE}. If \code{TRUE}, the 95\%
-confidence interval for the different parameters (OLS and ML estimates) is
+confidence interval for the different parameters (OLS or/and ML estimates) is
 returned.}
 
 \item{...}{Currently ignored.}
 
-\item{x}{An object of either class \code{'summary.lcmcross'}, \code{'summary.sfacross'}, or\cr
+\item{x}{An object of either class \code{'summary.sfacross'}, \code{'summary.sfalcmcross'}, or\cr
 \code{'summary.sfaselectioncross'}.}
 
 \item{digits}{Numeric. Number of digits displayed in values.}
 }
 \value{
 The \code{\link{summary}} method returns a list of class
-\code{'summary.lcmcross'}, \code{'summary.sfacross'}, or\cr
+\code{'summary.sfacross'}, \code{'summary.sfalcmcross'}, or\cr
 \code{'summary.sfaselectioncross'}
-that contains the same elements as an object returned by \code{\link{lcmcross}},
-\code{\link{sfacross}}, or \code{\link{sfaselectioncross}} with the
+that contains the same elements as an object returned by \code{\link{sfacross}},
+\code{\link{sfalcmcross}}, or \code{\link{sfaselectioncross}} with the
 following additional elements:
 
 \item{AIC}{Akaike information criterion.}
@@ -99,7 +99,7 @@ statistics of the difference between the stochastic frontier and the OLS.}
 }
 \description{
 Create and print summary results for stochastic frontier models returned by
-\code{\link{lcmcross}}, \code{\link{sfacross}}, or
+\code{\link{sfacross}}, \code{\link{sfalcmcross}}, or
 \code{\link{sfaselectioncross}}.
 }
 \examples{
@@ -115,11 +115,11 @@ summary(tl_u_ts, grad = TRUE, ci = TRUE)
 
 }
 \seealso{
-\code{\link{lcmcross}}, for the latent class stochastic frontier analysis
-model fitting function for cross-sectional or pooled data.
-
 \code{\link{sfacross}}, for the stochastic frontier analysis model
 fitting function for cross-sectional or pooled data.
+
+\code{\link{sfalcmcross}}, for the latent class stochastic frontier analysis
+model fitting function for cross-sectional or pooled data.
 
 \code{\link{sfaselectioncross}} for sample selection in stochastic frontier
 model fitting function for cross-sectional or pooled data.

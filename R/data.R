@@ -9,7 +9,7 @@
 #         -Data on Spanish dairy farms                                         #
 #         -Data on U.S. electric power generation                              #
 #         -Data on rice production in the Philippines                          #
-#         -Data on Swiss railway companies                                              #
+#         -Data on Swiss railway companies                                     #
 #         -Data on U.S. electricity generating plants                          #
 #         -Data on world production                                            #
 #         -Data on Norwegian dairy farms                                       #

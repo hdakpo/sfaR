@@ -16,11 +16,11 @@
 #' Extract log-likelihood value of stochastic frontier models
 #'
 #' \code{\link{logLik}} extracts the log-likelihood value(s) from stochastic 
-#' frontier models estimated with \code{\link{lcmcross}}, \code{\link{sfacross}}, 
+#' frontier models estimated with \code{\link{sfacross}}, \code{\link{sfalcmcross}}, 
 #' or \code{\link{sfaselectioncross}}.
 #'
 #' @param object A stochastic frontier model returned
-#' by \code{\link{lcmcross}}, \code{\link{sfacross}}, or  
+#' by \code{\link{sfacross}}, \code{\link{sfalcmcross}}, or  
 #' \code{\link{sfaselectioncross}}.
 #' @param individual Logical. If \code{FALSE} (default), the sum of all
 #' observations' log-likelihood values is returned. If \code{TRUE}, a vector of
@@ -39,11 +39,11 @@
 #'
 # @author K Hervé Dakpo
 #'
-#' @seealso \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
-#' model fitting function using cross-sectional or pooled data.
-#' 
-#' \code{\link{sfacross}}, for the stochastic frontier analysis model
+#' @seealso \code{\link{sfacross}}, for the stochastic frontier analysis model
 #' fitting function using cross-sectional or pooled data.
+#' 
+#' \code{\link{sfalcmcross}}, for the latent class stochastic frontier analysis
+#' model fitting function using cross-sectional or pooled data.
 #' 
 #' \code{\link{sfaselectioncross}} for sample selection in stochastic frontier 
 #' model fitting function using cross-sectional or pooled data.
@@ -52,6 +52,7 @@
 #'
 #' @examples
 #'
+#' \dontrun{
 #' ## Using data on fossil fuel fired steam electric power generation plants in the U.S.
 #' # Translog SFA (cost function) truncated normal with scaling property
 #' tl_u_ts <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
@@ -61,11 +62,12 @@
 #' scaling = TRUE, method = 'mla')
 #' logLik(tl_u_ts)
 #'
-#' ## Using data on eighty-two countries production (GDP)
+#' ## Using data on eighty-two countries production (DGP)
 #' # LCM Cobb Douglas (production function) half normal distribution
-#' cb_2c_h <- lcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal', 
+#' cb_2c_h <- sfalcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal', 
 #' data = worldprod, S = 1)
 #' logLik(cb_2c_h, individual = TRUE)
+#' }
 #'
 #' @aliases logLik.sfacross
 #' @export
@@ -90,11 +92,11 @@ logLik.sfacross <- function(object, individual = FALSE, ...) {
   }
 }
 
-# log likelihood (LL) extraction for lcmcross ----------
+# log likelihood (LL) extraction for sfalcmcross ----------
 #' @rdname logLik
-#' @aliases logLik.lcmcross
+#' @aliases logLik.sfalcmcross
 #' @export
-logLik.lcmcross <- function(object, individual = FALSE, ...) {
+logLik.sfalcmcross <- function(object, individual = FALSE, ...) {
   if (length(individual) != 1 || !is.logical(individual[1]))
     stop("argument 'individual' must be a single logical value",
       call. = FALSE)

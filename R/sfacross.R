@@ -543,7 +543,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
     data <- environment(formula)
   }
   mc$formula <- formula
-  mc$na.action <- na.pass # see sfaselectioncross: na.omit
+  mc$na.action <- na.pass
   mc[[1L]] <- quote(model.frame)
   mc <- eval(mc, parent.frame())
   validObs <- rowSums(is.na(mc) | is.infinite.data.frame(mc)) ==
@@ -558,7 +558,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
   if (N == 0L) {
     stop("0 (non-NA) cases", call. = FALSE)
   }
-  # if subset is non-missing and there NA, force data to
+  # if subset is non-missing and there are NA, force data to
   # change
   data <- data[row.names(data) %in% attr(mc, "row.names"),
     ]

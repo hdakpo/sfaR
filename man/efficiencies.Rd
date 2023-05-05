@@ -3,19 +3,19 @@
 \name{efficiencies}
 \alias{efficiencies}
 \alias{efficiencies.sfacross}
-\alias{efficiencies.lcmcross}
+\alias{efficiencies.sfalcmcross}
 \alias{efficiencies.sfaselectioncross}
 \title{Compute conditional (in-)efficiency estimates of stochastic frontier models}
 \usage{
 \method{efficiencies}{sfacross}(object, level = 0.95, newData = NULL, ...)
 
-\method{efficiencies}{lcmcross}(object, level = 0.95, newData = NULL, ...)
+\method{efficiencies}{sfalcmcross}(object, level = 0.95, newData = NULL, ...)
 
-\method{efficiencies}{sfaselectioncross}(object, level = 0.95, newData = NULL, ...)
+\method{efficiencies}{sfaselectioncross}(object, etype = "jlms", level = 0.95, newData = NULL, ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{lcmcross}}, \code{\link{sfacross}}, or
+by \code{\link{sfacross}}, \code{\link{sfalcmcross}}, or
 \code{\link{sfaselectioncross}}.}
 
 \item{level}{A number between between 0 and 0.9999 used for the computation
@@ -29,62 +29,15 @@ estimates. If NULL (the default), the efficiency estimates are calculated
 for the observations that were used in the estimation.}
 
 \item{...}{Currently ignored.}
+
+\item{etype}{Character. In the case of the sample selection model, 'etype'
+indicates how the (in)efficiency scores are computed. For now only the
+Jondrow et al. (1982) - 'jlms' - is implemented.}
 }
 \value{
 A data frame that contains individual (in-)efficiency estimates.
 These are ordered in the same way as the corresponding observations in the
 dataset used for the estimation.
-
-\bold{- For object of class \code{'lcmcross'} the following elements are returned:}
-
-\item{Group_c}{Most probable class for each observation.}
-
-\item{PosteriorProb_c}{Highest posterior probability.}
-
-\item{odRatio}{Posterior odds ratio
-\eqn{R_i = \frac{Post. Prob. Class 2}{Post. Prob. Class 1}}. The odds ratio
-can give an idea on how likely a decision making unit is to being fully
-efficient. Only for object of class \code{'zisfcross'}.}
-
-\item{u_c}{Conditional inefficiency of the most probable class given the
-posterior probability.}
-
-\item{teJLMS_c}{\eqn{\exp{(-E[u_c|\epsilon_c])}}. Only when, in the function
-\link{lcmcross} \code{logDepVar = TRUE}.}
-
-\item{teBC_c}{\eqn{E\left[\exp{(-u_c)}|\epsilon_c\right]}. Only when, in the
-function \link{lcmcross} \code{logDepVar = TRUE}.}
-
-\item{teBC_reciprocal_c}{\eqn{E\left[\exp{(u_c)}|\epsilon_c\right]}. Only
-when, in the function \link{lcmcross} \code{logDepVar = TRUE}.}
-
-\item{PosteriorProb_c#}{Posterior probability of class #.}
-
-\item{PriorProb_c#}{Prior probability of class #.}
-
-\item{u_c#}{Conditional inefficiency associated to class #, regardless of
-\code{Group_c}.}
-
-\item{teBC_c#}{Conditional efficiency
-(\eqn{E\left[\exp{(-u_c)}|\epsilon_c\right]}) associated to class #,
-regardless of \code{Group_c}. Only when, in the function
-\link{lcmcross} \code{logDepVar = TRUE}.}
-
-\item{teBC_reciprocal_c#}{Reciprocal conditional efficiency
-(\eqn{E\left[\exp{(u_c)}|\epsilon_c\right]}) associated to class #,
-regardless of \code{Group_c}. Only when, in the function
-\link{lcmcross} \code{logDepVar = TRUE}.}
-
-\item{ineff_c#}{Conditional inefficiency (\code{u_c}) for observations in
-class # only.}
-
-\item{effBC_c#}{Conditional efficiency (\code{teBC_c}) for observations in
-class # only.}
-
-\item{ReffBC_c#}{Reciprocal conditional efficiency (\code{teBC_reciprocal_c})
-for observations in class # only.}
-
-\item{theta_c#}{In the case \code{udist = 'uniform'}. \eqn{u \in [0, \theta_{c\#}]}.}
 
 \bold{- For object of class \code{'sfacross'} or \code{'sfaselectioncross'}
 the following elements are returned:}
@@ -151,10 +104,61 @@ or \code{'uniform'}. For object of class \code{'sfaselectioncross'}, only
 the \code{'hnormal'} distribution is available.}
 
 \item{theta}{In the case \code{udist = 'uniform'}. \eqn{u \in [0, \theta]}.}
+
+\bold{- For object of class \code{'sfalcmcross'} the following elements are returned:}
+
+\item{Group_c}{Most probable class for each observation.}
+
+\item{PosteriorProb_c}{Highest posterior probability.}
+
+\item{odRatio}{Posterior odds ratio
+\eqn{R_i = \frac{Post. Prob. Class 2}{Post. Prob. Class 1}}. The odds ratio
+can give an idea on how likely a decision making unit is to being fully
+efficient. Only for object of class \code{'zisfcross'}.}
+
+\item{u_c}{Conditional inefficiency of the most probable class given the
+posterior probability.}
+
+\item{teJLMS_c}{\eqn{\exp{(-E[u_c|\epsilon_c])}}. Only when, in the function
+\link{sfalcmcross} \code{logDepVar = TRUE}.}
+
+\item{teBC_c}{\eqn{E\left[\exp{(-u_c)}|\epsilon_c\right]}. Only when, in the
+function \link{sfalcmcross} \code{logDepVar = TRUE}.}
+
+\item{teBC_reciprocal_c}{\eqn{E\left[\exp{(u_c)}|\epsilon_c\right]}. Only
+when, in the function \link{sfalcmcross} \code{logDepVar = TRUE}.}
+
+\item{PosteriorProb_c#}{Posterior probability of class #.}
+
+\item{PriorProb_c#}{Prior probability of class #.}
+
+\item{u_c#}{Conditional inefficiency associated to class #, regardless of
+\code{Group_c}.}
+
+\item{teBC_c#}{Conditional efficiency
+(\eqn{E\left[\exp{(-u_c)}|\epsilon_c\right]}) associated to class #,
+regardless of \code{Group_c}. Only when, in the function
+\link{sfalcmcross} \code{logDepVar = TRUE}.}
+
+\item{teBC_reciprocal_c#}{Reciprocal conditional efficiency
+(\eqn{E\left[\exp{(u_c)}|\epsilon_c\right]}) associated to class #,
+regardless of \code{Group_c}. Only when, in the function
+\link{sfalcmcross} \code{logDepVar = TRUE}.}
+
+\item{ineff_c#}{Conditional inefficiency (\code{u_c}) for observations in
+class # only.}
+
+\item{effBC_c#}{Conditional efficiency (\code{teBC_c}) for observations in
+class # only.}
+
+\item{ReffBC_c#}{Reciprocal conditional efficiency (\code{teBC_reciprocal_c})
+for observations in class # only.}
+
+\item{theta_c#}{In the case \code{udist = 'uniform'}. \eqn{u \in [0, \theta_{c\#}]}.}
 }
 \description{
 \code{\link{efficiencies}} returns (in-)efficiency estimates of models
-estimated with \code{\link{lcmcross}}, \code{\link{sfacross}}, or
+estimated with \code{\link{sfacross}}, \code{\link{sfalcmcross}}, or
 \code{\link{sfaselectioncross}}.
 }
 \details{
@@ -167,7 +171,7 @@ computed following Horrace and Schmidt (1996), Hjalmarsson \emph{et al.}
 
 In the case of the half normal distribution for the one-sided error term,
 the formulae are as follows (for notations, see the \sQuote{Details} section
-of \code{\link{lcmcross}} or \code{\link{sfacross}}):
+of \code{\link{sfacross}} or \code{\link{sfalcmcross}}):
 
 \itemize{ \item The conditional inefficiency is: }
 
@@ -244,6 +248,7 @@ Thus
 }
 \examples{
 
+\dontrun{
 ## Using data on fossil fuel fired steam electric power generation plants in the U.S.
 # Translog SFA (cost function) truncated normal with scaling property
 tl_u_ts <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) + log(wl/wf) +
@@ -253,6 +258,7 @@ muhet = ~ regu, uhet = ~ regu, data = utility, S = -1, scaling = TRUE, method = 
 eff.tl_u_ts <- efficiencies(tl_u_ts)
 head(eff.tl_u_ts)
 summary(eff.tl_u_ts)
+}
 
 }
 \references{
@@ -279,7 +285,7 @@ Nguyen, N.B. 2010. Estimation of technical efficiency in stochastic frontier
 analysis. PhD Dissertation, Bowling Green State University, August.
 }
 \seealso{
-\code{\link{lcmcross}}, for the latent class stochastic frontier analysis
+\code{\link{sfalcmcross}}, for the latent class stochastic frontier analysis
 model fitting function using cross-sectional or pooled data.
 
 \code{\link{sfacross}}, for the stochastic frontier analysis model

@@ -71,7 +71,7 @@ the separation of observations in several classes). Only the half normal
 distribution is available for the one-sided error term. Heteroscedasticity
 in both error terms is possible. The choice of the number of classes can be
 guided by several information criteria (i.e. AIC, BIC or HQIC). 
-The main function for this class of model is `lcmcross`.
+The main function for this class of model is `sfalcmcross`.
 
 3. **Sample Selection Correction Stochastic Frontier Model**
 
@@ -141,15 +141,15 @@ output
 
 ```{r example 2}
 ## For the latent class stochastic frontier we have:
-lcm2c1 <- lcmcross(formula = ly ~ lk + ll + yr, thet = ~initStat, 
+lcm2c1 <- sfalcmcross(formula = ly ~ lk + ll + yr, thet = ~initStat, 
  data = worldprod)
-lcm2c2 <- lcmcross(formula = ly ~ lk + ll + yr, uhet = ~initStat, 
+lcm2c2 <- sfalcmcross(formula = ly ~ lk + ll + yr, uhet = ~initStat, 
  data = worldprod)
 ```
 
 The command `screenreg(list(lcm2c1, lcm2c2))` generates the following
 
-![lcmcross](https://user-images.githubusercontent.com/29732089/235991360-9b26b732-2a97-43b1-8ee1-d7f59147d4f1.png)
+![sfalcmcross](https://user-images.githubusercontent.com/29732089/236163537-dc12e886-84c2-49d4-a943-9d61cfb82000.png)
 
 ```{r example 3}
 ## The following simulation is used for the sample selection
@@ -192,6 +192,4 @@ The command `screenreg(list(lcm2c1, lcm2c2))` generates the following
 The command `screenreg(list(selecRes1, selecRes2))` 
 
 ![selectioncross](https://user-images.githubusercontent.com/29732089/236043261-af06f359-bbfc-46e0-8bde-2951cc80813c.png)
-
-![lcmcross](https://user-images.githubusercontent.com/29732089/236163537-dc12e886-84c2-49d4-a943-9d61cfb82000.png)
 

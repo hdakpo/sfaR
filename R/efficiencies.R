@@ -16,7 +16,7 @@
 #' Compute conditional (in-)efficiency estimates of stochastic frontier models
 #'
 #' \code{\link{efficiencies}} returns (in-)efficiency estimates of models 
-#' estimated with \code{\link{lcmcross}}, \code{\link{sfacross}}, or 
+#' estimated with \code{\link{sfacross}}, \code{\link{sfalcmcross}}, or 
 #' \code{\link{sfaselectioncross}}.
 #' 
 #' @name efficiencies
@@ -30,7 +30,7 @@
 #'
 #' In the case of the half normal distribution for the one-sided error term,
 #' the formulae are as follows (for notations, see the \sQuote{Details} section
-#' of \code{\link{lcmcross}} or \code{\link{sfacross}}):
+#' of \code{\link{sfacross}} or \code{\link{sfalcmcross}}):
 #'
 #' \itemize{ \item The conditional inefficiency is: }
 #' 
@@ -106,8 +106,11 @@
 #' \leq\exp{\left(-LB_i\right)}}
 #'
 #' @param object A stochastic frontier model returned
-#' by \code{\link{lcmcross}}, \code{\link{sfacross}}, or 
+#' by \code{\link{sfacross}}, \code{\link{sfalcmcross}}, or 
 #' \code{\link{sfaselectioncross}}.
+#' @param etype Character. In the case of the sample selection model, 'etype' 
+#' indicates how the (in)efficiency scores are computed. For now only the 
+#' Jondrow et al. (1982) - 'jlms' - is implemented.
 #' @param level A number between between 0 and 0.9999 used for the computation
 #' of (in-)efficiency confidence intervals (defaut = \code{0.95}). Only used
 #' when \code{udist} = \code{'hnormal'}, \code{'exponential'}, \code{'tnormal'}
@@ -122,57 +125,6 @@
 #' These are ordered in the same way as the corresponding observations in the
 #' dataset used for the estimation.
 #' 
-#' \bold{- For object of class \code{'lcmcross'} the following elements are returned:}
-#'
-#' \item{Group_c}{Most probable class for each observation.}
-#'
-#' \item{PosteriorProb_c}{Highest posterior probability.}
-#' 
-#' \item{odRatio}{Posterior odds ratio 
-#' \eqn{R_i = \frac{Post. Prob. Class 2}{Post. Prob. Class 1}}. The odds ratio 
-#' can give an idea on how likely a decision making unit is to being fully 
-#' efficient. Only for object of class \code{'zisfcross'}.}
-#' 
-#' \item{u_c}{Conditional inefficiency of the most probable class given the
-#' posterior probability.}
-#' 
-#' \item{teJLMS_c}{\eqn{\exp{(-E[u_c|\epsilon_c])}}. Only when, in the function
-#' \link{lcmcross} \code{logDepVar = TRUE}.}
-#' 
-#' \item{teBC_c}{\eqn{E\left[\exp{(-u_c)}|\epsilon_c\right]}. Only when, in the 
-#' function \link{lcmcross} \code{logDepVar = TRUE}.}
-#' 
-#' \item{teBC_reciprocal_c}{\eqn{E\left[\exp{(u_c)}|\epsilon_c\right]}. Only 
-#' when, in the function \link{lcmcross} \code{logDepVar = TRUE}.}
-#'
-#' \item{PosteriorProb_c#}{Posterior probability of class #.}
-#'
-#' \item{PriorProb_c#}{Prior probability of class #.}
-#'
-#' \item{u_c#}{Conditional inefficiency associated to class #, regardless of
-#' \code{Group_c}.}
-#' 
-#' \item{teBC_c#}{Conditional efficiency 
-#' (\eqn{E\left[\exp{(-u_c)}|\epsilon_c\right]}) associated to class #, 
-#' regardless of \code{Group_c}. Only when, in the function
-#' \link{lcmcross} \code{logDepVar = TRUE}.}
-#' 
-#' \item{teBC_reciprocal_c#}{Reciprocal conditional efficiency 
-#' (\eqn{E\left[\exp{(u_c)}|\epsilon_c\right]}) associated to class #, 
-#' regardless of \code{Group_c}. Only when, in the function
-#' \link{lcmcross} \code{logDepVar = TRUE}.}
-#'
-#' \item{ineff_c#}{Conditional inefficiency (\code{u_c}) for observations in
-#' class # only.}
-#' 
-#' \item{effBC_c#}{Conditional efficiency (\code{teBC_c}) for observations in
-#' class # only.}
-#' 
-#' \item{ReffBC_c#}{Reciprocal conditional efficiency (\code{teBC_reciprocal_c}) 
-#' for observations in class # only.}
-#' 
-#' \item{theta_c#}{In the case \code{udist = 'uniform'}. \eqn{u \in [0, \theta_{c\#}]}.}
-#'
 #' \bold{- For object of class \code{'sfacross'} or \code{'sfaselectioncross'} 
 #' the following elements are returned:}
 #'
@@ -238,10 +190,61 @@
 #' the \code{'hnormal'} distribution is available.}
 #' 
 #' \item{theta}{In the case \code{udist = 'uniform'}. \eqn{u \in [0, \theta]}.}
+#' 
+#' \bold{- For object of class \code{'sfalcmcross'} the following elements are returned:}
+#'
+#' \item{Group_c}{Most probable class for each observation.}
+#'
+#' \item{PosteriorProb_c}{Highest posterior probability.}
+#' 
+#' \item{odRatio}{Posterior odds ratio 
+#' \eqn{R_i = \frac{Post. Prob. Class 2}{Post. Prob. Class 1}}. The odds ratio 
+#' can give an idea on how likely a decision making unit is to being fully 
+#' efficient. Only for object of class \code{'zisfcross'}.}
+#' 
+#' \item{u_c}{Conditional inefficiency of the most probable class given the
+#' posterior probability.}
+#' 
+#' \item{teJLMS_c}{\eqn{\exp{(-E[u_c|\epsilon_c])}}. Only when, in the function
+#' \link{sfalcmcross} \code{logDepVar = TRUE}.}
+#' 
+#' \item{teBC_c}{\eqn{E\left[\exp{(-u_c)}|\epsilon_c\right]}. Only when, in the 
+#' function \link{sfalcmcross} \code{logDepVar = TRUE}.}
+#' 
+#' \item{teBC_reciprocal_c}{\eqn{E\left[\exp{(u_c)}|\epsilon_c\right]}. Only 
+#' when, in the function \link{sfalcmcross} \code{logDepVar = TRUE}.}
+#'
+#' \item{PosteriorProb_c#}{Posterior probability of class #.}
+#'
+#' \item{PriorProb_c#}{Prior probability of class #.}
+#'
+#' \item{u_c#}{Conditional inefficiency associated to class #, regardless of
+#' \code{Group_c}.}
+#' 
+#' \item{teBC_c#}{Conditional efficiency 
+#' (\eqn{E\left[\exp{(-u_c)}|\epsilon_c\right]}) associated to class #, 
+#' regardless of \code{Group_c}. Only when, in the function
+#' \link{sfalcmcross} \code{logDepVar = TRUE}.}
+#' 
+#' \item{teBC_reciprocal_c#}{Reciprocal conditional efficiency 
+#' (\eqn{E\left[\exp{(u_c)}|\epsilon_c\right]}) associated to class #, 
+#' regardless of \code{Group_c}. Only when, in the function
+#' \link{sfalcmcross} \code{logDepVar = TRUE}.}
+#'
+#' \item{ineff_c#}{Conditional inefficiency (\code{u_c}) for observations in
+#' class # only.}
+#' 
+#' \item{effBC_c#}{Conditional efficiency (\code{teBC_c}) for observations in
+#' class # only.}
+#' 
+#' \item{ReffBC_c#}{Reciprocal conditional efficiency (\code{teBC_reciprocal_c}) 
+#' for observations in class # only.}
+#' 
+#' \item{theta_c#}{In the case \code{udist = 'uniform'}. \eqn{u \in [0, \theta_{c\#}]}.}
 #'
 # @author K Hervé Dakpo
 #'
-#' @seealso \code{\link{lcmcross}}, for the latent class stochastic frontier analysis
+#' @seealso \code{\link{sfalcmcross}}, for the latent class stochastic frontier analysis
 #' model fitting function using cross-sectional or pooled data.
 #' 
 #' \code{\link{sfacross}}, for the stochastic frontier analysis model
@@ -275,7 +278,8 @@
 #' @keywords methods efficiencies
 #'
 #' @examples
-#'
+#' 
+#' \dontrun{
 #' ## Using data on fossil fuel fired steam electric power generation plants in the U.S.
 #' # Translog SFA (cost function) truncated normal with scaling property
 #' tl_u_ts <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) + log(wl/wf) +
@@ -285,6 +289,7 @@
 #' eff.tl_u_ts <- efficiencies(tl_u_ts)
 #' head(eff.tl_u_ts)
 #' summary(eff.tl_u_ts)
+#' }
 #'
 #' @aliases efficiencies.sfacross
 #' @export
@@ -351,14 +356,14 @@ efficiencies.sfacross <- function(object, level = 0.95, newData = NULL,
       }
     }
   }
-  return(data.frame(EffRes))
+  return(EffRes)
 }
 
-# conditional efficiencies lcmcross ----------
+# conditional efficiencies sfalcmcross ----------
 #' @rdname efficiencies
-#' @aliases efficiencies.lcmcross
+#' @aliases efficiencies.sfalcmcross
 #' @export
-efficiencies.lcmcross <- function(object, level = 0.95, newData = NULL,
+efficiencies.sfalcmcross <- function(object, level = 0.95, newData = NULL,
   ...) {
   if (level < 0 || level > 0.9999) {
     stop("'level' must be between 0 and 0.9999", call. = FALSE)
@@ -387,14 +392,14 @@ efficiencies.lcmcross <- function(object, level = 0.95, newData = NULL,
       }
     }
   }
-  return(data.frame(EffRes))
+  return(EffRes)
 }
 
 # conditional efficiencies sfaselectioncross ----------
 #' @rdname efficiencies
 #' @aliases efficiencies.sfaselectioncross
 #' @export
-efficiencies.sfaselectioncross <- function(object, level = 0.95,
+efficiencies.sfaselectioncross <- function(object, etype = "jlms", level = 0.95,
   newData = NULL, ...) {
   if (level < 0 || level > 0.9999) {
     stop("'level' must be between 0 and 0.9999", call. = FALSE)
@@ -406,6 +411,6 @@ efficiencies.sfaselectioncross <- function(object, level = 0.95,
     object$dataTable <- newData
     object$Nobs <- dim(newData)[1]
   }
-  EffRes <- chalfnormeff_ss(object = object, level = level)
-  return(data.frame(EffRes))
+  EffRes <- chalfnormeff_ss(object = object, etype = etype, level = level)
+  return(EffRes)
 }

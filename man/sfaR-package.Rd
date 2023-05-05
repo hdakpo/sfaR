@@ -11,25 +11,12 @@ maximum simulated likelihood - MSL) for various specifications of stochastic
 frontier analysis (SFA).
 }
 \details{
-Three categories of important functions are available: \code{\link{lcmcross}},
-\code{\link{sfacross}}, \code{\link{sfaselectioncross}},
+Three categories of important functions are available: \code{\link{sfacross}},
+\code{\link{sfalcmcross}}, \code{\link{sfaselectioncross}},
 which estimate different types of frontiers and offer eleven alternative
 optimization algorithms (i.e., "bfgs", "bhhh", "nr", "nm", "cg", "sann",
 "ucminf", "mla", "sr1", "sparse", "nlminb").
 }
-\section{lcmcross}{
- \code{\link{lcmcross}} estimates latent class stochastic
-frontier models (LCM) for cross-sectional or pooled data. It accounts for
-technological heterogeneity by splitting the observations into a maximum
-number of five classes. The classification operates based on a logit
-functional form that can be specified using some covariates (namely, the
-separating variables allowing the separation of observations in several
-classes). Only the half normal distribution is available for the one-sided
-error term. Heteroscedasticity in both error terms is possible. The choice of
-the number of classes can be guided by several information criteria (i.e.,
-AIC, BIC, or HQIC).
-}
-
 \section{sfacross}{
  \code{\link{sfacross}} estimates the basic stochastic
 frontier analysis (SFA) for cross-sectional or pooled data and allows for ten
@@ -44,6 +31,19 @@ uniform. Heteroscedasticity in both error terms can be implemented, in
 addition to heterogeneity in the truncated mean parameter in the case of the
 truncated normal and lognormal distributions. In addition, in the case of the
 truncated normal distribution, the scaling property can be estimated.
+}
+
+\section{sfalcmcross}{
+ \code{\link{sfalcmcross}} estimates latent class stochastic
+frontier models (LCM) for cross-sectional or pooled data. It accounts for
+technological heterogeneity by splitting the observations into a maximum
+number of five classes. The classification operates based on a logit
+functional form that can be specified using some covariates (namely, the
+separating variables allowing the separation of observations in several
+classes). Only the half normal distribution is available for the one-sided
+error term. Heteroscedasticity in both error terms is possible. The choice of
+the number of classes can be guided by several information criteria (i.e.,
+AIC, BIC, or HQIC).
 }
 
 \section{sfaselectioncross}{
