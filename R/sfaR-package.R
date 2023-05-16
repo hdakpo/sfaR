@@ -72,6 +72,7 @@
 #'
 #' @author K Hervé Dakpo, Yann Desjeux, Arne Henningsen and Laure Latruffe
 #'
+# @importFrom base standardGeneric
 #' @importFrom stats coefficients dnorm lm model.frame
 #' @importFrom stats model.matrix model.response nlminb
 #' @importFrom stats pnorm qnorm delete.response fitted

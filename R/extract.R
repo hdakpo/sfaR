@@ -84,6 +84,9 @@ extract.sfacross <- function(model, ...) {
   return(tr)
 }
 
+setGeneric("extract", function(model, ...) standardGeneric("extract"),
+           package = "texreg")
+
 setMethod("extract", signature = className("sfacross", "sfaR"),
   definition = extract.sfacross)
 

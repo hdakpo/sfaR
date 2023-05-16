@@ -19,6 +19,8 @@
 #' estimated with \code{\link{sfacross}}, \code{\link{sfalcmcross}}, or 
 #' \code{\link{sfaselectioncross}}.
 #' 
+#' @name efficiencies
+#' 
 #' @details In general, the conditional inefficiency is obtained following 
 #' Jondrow \emph{et al.} (1982) and the conditional efficiency is computed 
 #' following Battese and Coelli (1988). In some cases the conditional mode is 
@@ -142,8 +144,6 @@
 #' 
 #' where \eqn{\Phi_2^* \left(\mathbf{s}; \tilde{\bm{\kappa}}, \ddot{\bm{\Delta}}\right)=
 #' \frac{\partial \Phi_2\left(\mathbf{s}; \tilde{\bm{\kappa}}, \ddot{\bm{\Delta}} \right)}{\partial \mathbf{s}}}
-#' 
-#' @name efficiencies
 #'
 #' @param object A stochastic frontier model returned
 #' by \code{\link{sfacross}}, \code{\link{sfalcmcross}}, or 
