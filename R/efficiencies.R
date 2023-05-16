@@ -335,6 +335,7 @@
 #' 
 #' @aliases efficiencies.sfacross
 #' @export
+#' @export efficiencies
 # conditional efficiencies sfacross ----------
 efficiencies.sfacross <- function(object, level = 0.95, newData = NULL,
   ...) {
