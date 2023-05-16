@@ -13,7 +13,7 @@
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
 
-#' Extract frontier information to be used with \CRANpkg{texreg}
+#' Extract frontier information to be used with \bold{texreg} package
 #' 
 #' Extract coefficients and additional information for stochastic frontier models 
 #' returned by \code{\link{sfacross}}, \code{\link{sfalcmcross}}, or 

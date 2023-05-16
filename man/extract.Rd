@@ -5,7 +5,7 @@
 \alias{extract.sfacross}
 \alias{extract.sfalcmcross}
 \alias{extract.sfaselectioncross}
-\title{Extract frontier information to be used with \CRANpkg{texreg}}
+\title{Extract frontier information to be used with \bold{texreg} package}
 \usage{
 extract.sfacross(model, ...)
 

@@ -62,7 +62,7 @@
 #' scaling = TRUE, method = 'mla')
 #' logLik(tl_u_ts)
 #'
-#' ## Using data on eighty-two countries production (DGP)
+#' ## Using data on eighty-two countries production (GDP)
 #' # LCM Cobb Douglas (production function) half normal distribution
 #' cb_2c_h <- sfalcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal', 
 #' data = worldprod, S = 1)

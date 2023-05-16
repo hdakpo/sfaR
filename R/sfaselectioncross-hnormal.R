@@ -3183,15 +3183,16 @@ halfnormAlgOpt_ss_MSL <- function(start, olsParam, dataTable,
 # Conditional efficiencies estimation ----------
 #' efficiencies for halfnormal-normal distribution + selection bias
 #' @param object object of class selectioncross
-#' @param etype way (in)efficiency is computed: jlms bayes csn
 #' @param level level for confidence interval
 #' @noRd
-chalfnormeff_ss <- function(object, etype, level) {
+chalfnormeff_ss <- function(object, level) {
   beta <- object$mlParam[1:(object$nXvar)]
   delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
   phi <- object$mlParam[(object$nXvar + object$nuZUvar + 1):(object$nXvar +
     object$nuZUvar + object$nvZVvar)]
+  rho <- object$mlParam[object$nXvar + object$nuZUvar + object$nvZVvar +
+    1]
   Xvar <- model.matrix(object$formula, data = object$dataTable[object$dataTable[all.vars(object$selectionF)[1]] ==
     1, ], rhs = 1)
   uHvar <- model.matrix(object$formula, data = object$dataTable[object$dataTable[all.vars(object$selectionF)[1]] ==
@@ -3202,41 +3203,49 @@ chalfnormeff_ss <- function(object, etype, level) {
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable[object$dataTable[all.vars(object$selectionF)[1]] ==
     1, ])) - as.numeric(crossprod(matrix(beta), t(Xvar)))
-  if (etype == "jlms") {
-    mustar <- -exp(Wu) * object$S * epsilon/(exp(Wu) + exp(Wv))
-    sigmastar <- sqrt(exp(Wu) * exp(Wv)/(exp(Wu) + exp(Wv)))
-    u <- mustar + sigmastar * dnorm(mustar/sigmastar)/pnorm(mustar/sigmastar)
-    uLB <- mustar + qnorm(1 - (1 - (1 - level)/2) * (1 -
-      pnorm(-mustar/sigmastar))) * sigmastar
-    uUB <- mustar + qnorm(1 - (1 - level)/2 * (1 - pnorm(-mustar/sigmastar))) *
-      sigmastar
-    m <- ifelse(mustar > 0, mustar, 0)
+  u <- numeric(object$Nobs)
+  if (object$logDepVar == TRUE) {
+    teBC <- numeric(object$Nobs)
+    teBC_reciprocal <- numeric(object$Nobs)
+  }
+  for (i in 1:object$Nobs) {
+    sigmasq <- exp(Wv[i]) + exp(Wu[i])
+    sigmaC <- exp(Wu[i] + Wv[i])/sigmasq
+    pi_dot <- -object$S * epsilon[i] * exp(Wu[i])/sigmasq
+    kappa_dot <- c(-object$dataTable$PROBIT_PREDICTIONS[i] -
+      rho * exp(Wv[i]/2) * epsilon[i]/sigmasq, object$S *
+      exp(Wu[i]) * epsilon[i]/sigmasq)
+    D_c <- c(object$S * rho/exp(Wv[i]/2), 1)
+    D_dot <- D_c * sigmaC
+    Delta_dot <- matrix(c(1 - rho^2, rep(0, 3)), nrow = 2,
+      ncol = 2) + (matrix(D_c, ncol = 1) %*% matrix(D_c,
+      ncol = 2)) * sigmaC
+    u[i] <- pi_dot + (D_dot %*% t(mnorm::pmnorm(lower = rep(-Inf,
+      2), upper = rep(0, 2), mean = kappa_dot, sigma = Delta_dot,
+      grad_upper = TRUE)$grad))/mnorm::pmnorm(lower = rep(-Inf,
+      2), upper = rep(0, 2), mean = kappa_dot, sigma = Delta_dot)$prob
     if (object$logDepVar == TRUE) {
-      teJLMS <- exp(-u)  ## for cost it is Farrell equivalent
-      teMO <- exp(-m)
-      teBC <- exp(-mustar + 1/2 * sigmastar^2) * pnorm(mustar/sigmastar -
-        sigmastar)/pnorm(mustar/sigmastar)
-      teBCLB <- exp(-uUB)
-      teBCUB <- exp(-uLB)
-      teBC_reciprocal <- exp(mustar + 1/2 * sigmastar^2) *
-        pnorm(mustar/sigmastar + sigmastar)/pnorm(mustar/sigmastar)
+      teBC[i] <- mnorm::pmnorm(lower = rep(-Inf, 2), upper = -D_dot,
+        mean = kappa_dot, sigma = Delta_dot)$prob/mnorm::pmnorm(lower = rep(-Inf,
+        2), upper = rep(0, 2), mean = kappa_dot, sigma = Delta_dot)$prob *
+        exp(-pi_dot + 1/2 * sigmaC)
+      teBC_reciprocal[i] <- mnorm::pmnorm(lower = rep(-Inf,
+        2), upper = D_dot, mean = kappa_dot, sigma = Delta_dot)$prob/mnorm::pmnorm(lower = rep(-Inf,
+        2), upper = rep(0, 2), mean = kappa_dot, sigma = Delta_dot)$prob *
+        exp(pi_dot + 1/2 * sigmaC)
     }
-    res <- data.frame(u = rep(NA, object$Ninit), uLB = rep(NA,
-      object$Ninit), uUB = rep(NA, object$Ninit), teJLMS = rep(NA,
-      object$Ninit), m = rep(NA, object$Ninit), teMO = rep(NA,
-      object$Ninit), teBC = rep(NA, object$Ninit), teBCLB = rep(NA,
-      object$Ninit), teBCUB = rep(NA, object$Ninit), teBC_reciprocal = rep(NA,
+  }
+  if (object$logDepVar == TRUE) {
+    res <- data.frame(u = rep(NA, object$Ninit), teJLMS = rep(NA,
+      object$Ninit), teBC = rep(NA, object$Ninit), teBC_reciprocal = rep(NA,
       object$Ninit))
-    res_eff <- data.frame(u = u, uLB = uLB, uUB = uUB, teJLMS = teJLMS,
-      m = m, teMO = teMO, teBC = teBC, teBCLB = teBCLB,
-      teBCUB = teBCUB, teBC_reciprocal = teBC_reciprocal)
+    res_eff <- data.frame(u = u, teJLMS = exp(-u), teBC = teBC,
+      teBC_reciprocal = teBC_reciprocal)
     res[object$dataTable[all.vars(object$selectionF)[1]] ==
       1, ] <- res_eff
   } else {
-    res <- data.frame(u = rep(NA, object$Ninit), uLB = rep(NA,
-      object$Ninit), uUB = rep(NA, object$Ninit), m = rep(NA,
-      object$Ninit))
-    res_eff <- data.frame(u = u, uLB = uLB, uUB = uUB, m = m)
+    res <- data.frame(u = rep(NA, object$Ninit))
+    res_eff <- data.frame(u = u)
     res[object$dataTable[all.vars(object$selectionF)[1]] ==
       1, ] <- res_eff
   }

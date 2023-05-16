@@ -73,21 +73,20 @@ fitted.sfacross <- function(object, ...) {
 #' @export
 fitted.sfalcmcross <- function(object, ...) {
   if (object$nClasses == 2) {
-    data.frame(dplyr::select(object$dataTable, "mlFitted_c1",
-      "mlFitted_c2"))
+    data.frame(object$dataTable[, c("mlFitted_c1", "mlFitted_c2")])
   } else {
     if (object$nClasses == 3) {
-      data.frame(dplyr::select(object$dataTable, "mlFitted_c1",
-        "mlFitted_c2", "mlFitted_c3"))
+      data.frame(object$dataTable[, c("mlFitted_c1", "mlFitted_c2",
+        "mlFitted_c3")])
     } else {
       if (object$nClasses == 4) {
-        data.frame(dplyr::select(object$dataTable, "mlFitted_c1",
-          "mlFitted_c2", "mlFitted_c3", "mlFitted_c4"))
+        data.frame(object$dataTable[, c("mlFitted_c1",
+          "mlFitted_c2", "mlFitted_c3", "mlFitted_c4")])
       } else {
         if (object$nClasses == 5) {
-          data.frame(dplyr::select(object$dataTable,
-          "mlFitted_c1", "mlFitted_c2", "mlFitted_c3",
-          "mlFitted_c4", "mlFitted_c5"))
+          data.frame(object$dataTable[, c("mlFitted_c1",
+          "mlFitted_c2", "mlFitted_c3", "mlFitted_c4",
+          "mlFitted_c5")])
         }
       }
     }

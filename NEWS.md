@@ -6,19 +6,38 @@ Changes in 'sfaR' version to 1.0.0 (2023-05-05).
 * Sample selection stochastic frontier model is introduced with function
 `sfaselectioncross`
 
+* `texreg` package can be used for results output.
+
+* Arne Henningsen is a new author to the package.
+
+* Robust variance-covariance matrix can be obtained using `lmtest` package.
+
 ## BUG FIXES
+
+* `sfacross` previously returns the wrong sign of the gradient. Now the correct 
+sign is returned.
 
 ## DEPRECATED & DEFUNCT
 
 * `lcmcross` is now replaced by `sfalcmcross`. Associated methods are 
 modified accordingly to the new class `sfalcmcross`.
 
-
 ## OTHER USER-VISIBLE CHANGES
 
 * Package maintainer has changed from Yann Desjeux to K Hervé Dakpo.
 
-* Remove dependencies to packages `dplyr`, 
+* Remove dependencies to packages `dplyr`, `emdbook`, `fBasics`, `gsl`, `MASS`,
+`moments`, and `primes`.
+
+* In the case of the truncated skewed Laplace distribution, starting value for
+ `lambda` is changed from 0.03 to 1.
+ 
+* In the case of the uniform distribution, `theta` is reparameterized from
+ `theta = exp(Wu)` to `theta = sqrt(12) * exp(Wu/2)`.
+ 
+* Remove `initStart` option from `lcmcross`. It is replaced with `whichStart` option.
+
+* Add Roxygen comments.
 
 ***
 # sfaR 0.1.1

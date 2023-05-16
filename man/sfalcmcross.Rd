@@ -84,7 +84,7 @@ likelihood (ML) estimation.}
 \item{whichStart}{Integer. If \code{'whichStart = 1'}, the starting values
 are obtained from the method of moments. When \code{'whichStart = 2'}
 (Default), the model is initialized by solving the homoscedastic pooled
-cross section SFA model. \code{'whichStart = 1'} can be fast.}
+cross section SFA model.}
 
 \item{initAlg}{Character string specifying the algorithm used for
 initialization and obtain the starting values (when \code{'whichStart = 2'}).

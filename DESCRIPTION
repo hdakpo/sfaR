@@ -26,21 +26,21 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 Imports: 
     cubature,
-    dplyr,
+    fastGHQuad,
     Formula,
     marqLevAlg,
     maxLik,
     methods,
+    mnorm,
     nleqslv,
+    plm,
     qrng,
     randtoolbox,
-    trustOptim,
-    ucminf,
-    fastGHQuad,
-    stats,
     sandwich,
-    plm,
-    texreg
+    stats,
+    texreg,
+    trustOptim,
+    ucminf
 URL: https://github.com/hdakpo/sfaR
 Suggests: 
     lmtest

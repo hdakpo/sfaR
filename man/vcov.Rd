@@ -103,7 +103,7 @@ lmtest::coeftest(cb_s_h, vcov. = sandwich::vcovOPG)
  
 lmtest::coeftest(cb_s_h, vcov. = sandwich::vcovOPG, adjust = TRUE)
 
-## Using data on eighty-two countries production (GDG)
+## Using data on eighty-two countries production (GDP)
 # LCM Cobb Douglas (production function) half normal distribution
 cb_2c_h <- sfalcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal',
 data = worldprod, uhet = ~ initStat, S = 1)

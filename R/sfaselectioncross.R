@@ -457,10 +457,10 @@
 #' Empirical results for the distributions of \eqn{b_2} and \eqn{\sqrt{b_1}}.
 #' \emph{Biometrika}, \bold{60}:613--622.
 #' 
-#' Dakpo, K. H., Latruffe, L., Desjeux, Y., Jeanneaux, P., 2021. 
+#' Dakpo, K. H., Latruffe, L., Desjeux, Y., Jeanneaux, P., 2022. 
 #' Modeling heterogeneous technologies in the presence of sample selection: 
 #' The case of dairy farms and the adoption of agri-environmental schemes in France.
-#' \emph{Agricultural Economics}.
+#' \emph{Agricultural Economics}, \bold{53}(3), 422-438.
 #' 
 #' Greene, W., 2010. A stochastic frontier model with correction 
 #' for sample selection. \emph{Journal of Productivity Analysis}. \bold{34}, 15--24.
