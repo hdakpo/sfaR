@@ -23,7 +23,7 @@ sfaselectioncross(
   start = NULL,
   method = "bfgs",
   hessianType = 2L,
-  lType = "kronrod",
+  lType = "ghermite",
   Nsub = 100,
   uBound = Inf,
   simType = "halton",
@@ -119,7 +119,7 @@ available: \code{kronrod} for Gauss-Kronrod quadrature
 (see \code{\link[cubature:hcubature]{hcubature}} and
 \code{\link[cubature:pcubature]{pcubature}}), \code{ghermite} for Gauss-Hermite
 quadrature (see \code{\link[fastGHQuad:gaussHermiteData]{gaussHermiteData}}), and
-\code{msl} for maximum simulated likelihood. Default \code{kronrod}.}
+\code{msl} for maximum simulated likelihood. Default \code{ghermite}.}
 
 \item{Nsub}{Integer. Number of subdivisions/nodes used for quadrature approaches.
 Default \code{Nsub = 100}.}

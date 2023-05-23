@@ -1928,7 +1928,7 @@ cmargLCM4Chalfnorm_Eu <- function(object) {
   colnames(margEff_c4) <- paste0("Eu_", colnames(uHvar)[-1],
     "_c4")
   margEff_c <- matrix(nrow = nrow(margEff_c1), ncol = ncol(margEff_c1))
-  for (c in 1:ncol(margEff_c1)) {
+  for (c in seq_along(1:ncol(margEff_c1))) {
     margEff_c[, c] <- ifelse(Group_c == 1, margEff_c1[, c],
       ifelse(Group_c == 2, margEff_c2[, c], ifelse(Group_c ==
         3, margEff_c3[, c], margEff_c4[, c])))
@@ -2060,7 +2060,7 @@ cmargLCM4Chalfnorm_Vu <- function(object) {
   colnames(margEff_c4) <- paste0("Vu_", colnames(uHvar)[-1],
     "_c4")
   margEff_c <- matrix(nrow = nrow(margEff_c1), ncol = ncol(margEff_c1))
-  for (c in 1:ncol(margEff_c1)) {
+  for (c in seq_along(1:ncol(margEff_c1))) {
     margEff_c[, c] <- ifelse(Group_c == 1, margEff_c1[, c],
       ifelse(Group_c == 2, margEff_c2[, c], ifelse(Group_c ==
         3, margEff_c3[, c], margEff_c4[, c])))

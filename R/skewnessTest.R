@@ -63,7 +63,7 @@ skewnessTest <- function(object, test = "agostino") {
     object$AgostinoTest
   } else {
     if (test == "coelli") {
-      tt = list(data.name = deparse(substitute(object)),
+      tt <- list(data.name = deparse(substitute(object)),
         statistic = object$CoelliM3Test["z"], p.value = object$CoelliM3Test["p.value"],
         method = "## Coelli's test ##")
       class(tt) <- "htest"

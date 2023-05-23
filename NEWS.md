@@ -12,6 +12,8 @@ Changes in 'sfaR' version to 1.0.0 (2023-05-05).
 
 * Robust variance-covariance matrix can be obtained using `lmtest` package.
 
+* Add reciprocal of efficiency.
+
 ## BUG FIXES
 
 * `sfacross` previously returns the wrong sign of the gradient. Now the correct 
@@ -27,7 +29,7 @@ modified accordingly to the new class `sfalcmcross`.
 * Package maintainer has changed from Yann Desjeux to K Hervé Dakpo.
 
 * Remove dependencies to packages `dplyr`, `emdbook`, `fBasics`, `gsl`, `MASS`,
-`moments`, and `primes`.
+`moments`, `numDeriv`, and `primes`.
 
 * In the case of the truncated skewed Laplace distribution, starting value for
  `lambda` is changed from 0.03 to 1.

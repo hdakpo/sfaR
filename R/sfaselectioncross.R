@@ -83,7 +83,7 @@
 #' (see \code{\link[cubature:hcubature]{hcubature}} and 
 #' \code{\link[cubature:pcubature]{pcubature}}), \code{ghermite} for Gauss-Hermite
 #' quadrature (see \code{\link[fastGHQuad:gaussHermiteData]{gaussHermiteData}}), and
-#' \code{msl} for maximum simulated likelihood. Default \code{kronrod}.
+#' \code{msl} for maximum simulated likelihood. Default \code{ghermite}.
 #' @param Nsub Integer. Number of subdivisions/nodes used for quadrature approaches. 
 #' Default \code{Nsub = 100}.
 #' @param uBound Numeric. Upper bound for the inefficiency component when solving
@@ -531,7 +531,7 @@
 sfaselectioncross <- function(selectionF, frontierF, uhet, vhet,
   modelType = "greene10", logDepVar = TRUE, data, subset, weights,
   wscale = TRUE, S = 1L, udist = "hnormal", start = NULL, method = "bfgs",
-  hessianType = 2L, lType = "kronrod", Nsub = 100, uBound = Inf,
+  hessianType = 2L, lType = "ghermite", Nsub = 100, uBound = Inf,
   simType = "halton", Nsim = 100, prime = 2L, burn = 10, antithetics = FALSE,
   seed = 12345, itermax = 2000, printInfo = FALSE, intol = 1e-06,
   tol = 1e-12, gradtol = 1e-06, stepmax = 0.1, qac = "marquardt") {

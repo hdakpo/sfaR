@@ -51,7 +51,8 @@ clhsCheck_u <- function(formula) {
     formula[[2]] <- NULL
   if (length(attr(terM, "term.labels")) == 0 && attr(terM,
     "intercept") == 0) {
-    stop("at least one exogenous variable is required for heteroscedasticity in u",
+    stop("at least one exogenous variable is required for heteroscedasticity in 
+         u",
       call. = FALSE)
   } else {
     if (attr(terM, "intercept") == 0)
@@ -88,7 +89,8 @@ clhsCheck_v <- function(formula) {
     formula[[2]] <- NULL
   if (length(attr(terM, "term.labels")) == 0 && attr(terM,
     "intercept") == 0) {
-    stop("at least one exogenous variable is required for heteroscedasticity in v",
+    stop("at least one exogenous variable is required for heteroscedasticity in 
+         v",
       call. = FALSE)
   } else {
     if (attr(terM, "intercept") == 0)
@@ -344,7 +346,8 @@ ginvsfaR <- function(X, tol = sqrt(.Machine$double.eps)) {
   Positive <- Xsvd$d > max(tol * Xsvd$d[1L], 0)
   if (all(Positive))
     Xsvd$v %*% (1/Xsvd$d * t(Xsvd$u)) else if (!any(Positive))
-    array(0, dim(X)[2L:1L]) else Xsvd$v[, Positive, drop = FALSE] %*% ((1/Xsvd$d[Positive]) *
+    array(0, dim(X)[2L:1L]) else Xsvd$v[, Positive, drop = FALSE] %*% 
+    ((1/Xsvd$d[Positive]) *
     t(Xsvd$u[, Positive, drop = FALSE]))
 }
 
@@ -414,10 +417,12 @@ vcovObj <- function(mleObj, hessianType, method, nParm) {
 #' @noRd
 sfacrossdist <- function(udist) {
   switch(udist, tnormal = "Truncated-Normal Normal SF Model",
-    hnormal = "Normal-Half Normal SF Model", exponential = "Exponential Normal SF Model",
+    hnormal = "Normal-Half Normal SF Model", 
+    exponential = "Exponential Normal SF Model",
     rayleigh = "Rayleigh Normal SF Model", uniform = "Uniform Normal SF Model",
     gamma = "Gamma Normal SF Model", lognormal = "Log-Normal Normal SF Model",
-    weibull = "Weibull Normal SF Model", genexponential = "Generalized-Exponential Normal SF Model",
+    weibull = "Weibull Normal SF Model", 
+    genexponential = "Generalized-Exponential Normal SF Model",
     tslaplace = "Truncated Skewed-Laplace Normal SF Model")
 }
 
@@ -433,7 +438,8 @@ varuFun <- function(object, mu, P, lambda, k) {
     object$sigmauSq * (pi - 2)/pi
   } else {
     if (object$udist == "tnormal") {
-      a <- dnorm(mean(mu)/sqrt(object$sigmauSq))/pnorm(mean(mu)/sqrt(object$sigmauSq))
+      a <- dnorm(mean(mu)/sqrt(object$sigmauSq))/pnorm(mean(mu)/
+                                                         sqrt(object$sigmauSq))
       object$sigmauSq * (1 - mean(mu)/sqrt(object$sigmauSq) *
         a - a^2)
     } else {
@@ -506,7 +512,8 @@ euFun <- function(object, mu, P, lambda, k) {
     sqrt(object$sigmauSq) * sqrt(2/pi)
   } else {
     if (object$udist == "tnormal") {
-      mean(mu) + sqrt(object$sigmauSq) * dnorm(mean(mu)/sqrt(object$sigmauSq))/pnorm(mean(mu)/sqrt(object$sigmauSq))
+      mean(mu) + sqrt(object$sigmauSq) * dnorm(mean(mu)/sqrt(object$sigmauSq))/
+        pnorm(mean(mu)/sqrt(object$sigmauSq))
     } else {
       if (object$udist == "exponential") {
         sqrt(object$sigmauSq)
@@ -685,7 +692,7 @@ trimChar <- function(s, recode.factor = TRUE, ...) {
 #' @noRd
 centerText <- function(x, width) {
   retval <- vector(length = length(x), mode = "character")
-  for (i in 1:length(x)) {
+  for (i in seq_along(1:length(x))) {
     text <- trimChar(x[i])
     textWidth <- nchar(text)
     nspaces <- floor((width - textWidth)/2)
@@ -863,18 +870,18 @@ setClass("dagoTest", representation(call = "call", data = "list",
 
 setMethod("show", "dagoTest", function(object) {
   # Unlike print the argument for show is 'object'.
-  x = object
+  x <- object
   # Title:
   cat("## ", "D'Agostino's  Test", " ##\n", sep = "")
   # Test Results:
-  test = x@test
+  test <- x@test
   cat("\nTest Results:\n", sep = "")
   # Statistic:
   if (!is.null(test$statistic)) {
-    statistic = test$statistic
-    Names = names(statistic)
+    statistic <- test$statistic
+    Names <- names(statistic)
     cat("  STATISTIC:\n")
-    for (i in 1:length(Names)) {
+    for (i in seq_along(1:length(Names))) {
       if (!is.na(statistic[i])) {
         cat(paste("    ", Names[i], ": ", round(statistic[i],
           digits = 4), "\n", sep = ""))
@@ -883,12 +890,12 @@ setMethod("show", "dagoTest", function(object) {
   }
   # P-Value:
   if (!is.null(test$p.value)) {
-    pval = test$p.value
-    Names = names(pval)
+    pval <- test$p.value
+    Names <- names(pval)
     if (Names[1] == "")
-      space = "" else space = ": "
+      space <- "" else space <- ": "
     cat("  P.VALUE:\n")
-    for (i in 1:length(Names)) {
+    for (i in seq_along(1:length(Names))) {
       if (!is.na(pval[i])) {
         if (!inherits(version, "Sversion")) {
           cat(paste("    ", Names[i], space, format.pval(pval[i],

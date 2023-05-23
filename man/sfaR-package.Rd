@@ -19,8 +19,8 @@ optimization algorithms (i.e., "bfgs", "bhhh", "nr", "nm", "cg", "sann",
 }
 \section{sfacross}{
  \code{\link{sfacross}} estimates the basic stochastic
-frontier analysis (SFA) for cross-sectional or pooled data and allows for ten
-different distributions for the one-sided error term. These distributions
+frontier analysis (SFA) for cross-sectional or pooled data and allows for
+ten different distributions for the one-sided error term. These distributions
 include the exponential, the gamma, the generalized exponential,
 the half normal, the lognormal, the truncated normal, the truncated skewed
 Laplace, the Rayleigh, the uniform, and the Weibull distributions.
@@ -34,12 +34,12 @@ truncated normal distribution, the scaling property can be estimated.
 }
 
 \section{sfalcmcross}{
- \code{\link{sfalcmcross}} estimates latent class stochastic
-frontier models (LCM) for cross-sectional or pooled data. It accounts for
-technological heterogeneity by splitting the observations into a maximum
-number of five classes. The classification operates based on a logit
-functional form that can be specified using some covariates (namely, the
-separating variables allowing the separation of observations in several
+ \code{\link{sfalcmcross}} estimates latent class
+stochastic frontier models (LCM) for cross-sectional or pooled data.
+It accounts for technological heterogeneity by splitting the observations
+into a maximum number of five classes. The classification operates based on
+a logit functional form that can be specified using some covariates (namely,
+the separating variables allowing the separation of observations in several
 classes). Only the half normal distribution is available for the one-sided
 error term. Heteroscedasticity in both error terms is possible. The choice of
 the number of classes can be guided by several information criteria (i.e.,
@@ -48,10 +48,10 @@ AIC, BIC, or HQIC).
 
 \section{sfaselectioncross}{
  \code{\link{sfaselectioncross}} estimates the
-frontier for cross-sectional or pooled data in the presence of sample selection.
-The model solves the selection bias due to the correlation between the
-two-sided error terms in both the selection and the frontier equations.
-The likelihood can be estimated using five different
+frontier for cross-sectional or pooled data in the presence of sample
+selection. The model solves the selection bias due to the correlation
+between the two-sided error terms in both the selection and the frontier
+equations. The likelihood can be estimated using five different
 possibilities: gauss-kronrod quadrature, adaptive integration over hypercubes
 (hcubature and pcubature), gauss-hermite quadrature, and
 maximum simulated likelihood. Only the half normal
@@ -61,7 +61,8 @@ in both error terms is possible.
 
 \section{Bugreport}{
  Any bug or suggestion can be reported using the
-\code{sfaR} tracker facilities at: \url{https://github.com/hdakpo/sfaR/issues}
+\code{sfaR} tracker facilities at:
+\url{https://github.com/hdakpo/sfaR/issues}
 }
 
 \author{
