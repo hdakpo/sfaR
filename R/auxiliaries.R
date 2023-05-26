@@ -881,7 +881,7 @@ setMethod("show", "dagoTest", function(object) {
     statistic <- test$statistic
     Names <- names(statistic)
     cat("  STATISTIC:\n")
-    for (i in seq_along(1:length(Names))) {
+    for (i in seq_len(length(Names))) {
       if (!is.na(statistic[i])) {
         cat(paste("    ", Names[i], ": ", round(statistic[i],
           digits = 4), "\n", sep = ""))
