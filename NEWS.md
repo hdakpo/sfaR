@@ -14,6 +14,8 @@ Changes in 'sfaR' version to 1.0.0 (2023-05-05).
 
 * Add reciprocal of efficiency.
 
+* Add Battese and Coelli (1988) efficiency in the case of `sfalcmcross`
+
 ## BUG FIXES
 
 * `sfacross` previously returns the wrong sign of the gradient. Now the correct 
@@ -32,10 +34,10 @@ modified accordingly to the new class `sfalcmcross`.
 `moments`, `numDeriv`, and `primes`.
 
 * In the case of the truncated skewed Laplace distribution, starting value for
- `lambda` is changed from 0.03 to 1.
+`lambda` is changed from 0.03 to 1.
  
 * In the case of the uniform distribution, `theta` is reparameterized from
- `theta = exp(Wu)` to `theta = sqrt(12) * exp(Wu/2)`.
+`theta = exp(Wu)` to `theta = sqrt(12) * exp(Wu/2)`.
  
 * Remove `initStart` option from `lcmcross`. It is replaced with `whichStart` option.
 
