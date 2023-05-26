@@ -3,39 +3,37 @@
 \name{residuals}
 \alias{residuals}
 \alias{residuals.sfacross}
-\alias{residuals.lcmcross}
-\alias{residuals.selectioncross}
-\alias{residuals.zisfcross}
+\alias{residuals.sfalcmcross}
+\alias{residuals.sfaselectioncross}
 \title{Extract residuals of stochastic frontier models}
 \usage{
 \method{residuals}{sfacross}(object, ...)
 
-\method{residuals}{lcmcross}(object, ...)
+\method{residuals}{sfalcmcross}(object, ...)
 
-\method{residuals}{selectioncross}(object, ...)
-
-\method{residuals}{zisfcross}(object, ...)
+\method{residuals}{sfaselectioncross}(object, ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.}
+by \code{\link{sfacross}}, \code{\link{sfalcmcross}}, or
+\code{\link{sfaselectioncross}}.}
 
-\item{...}{Currently ignored.}
+\item{\dots}{Currently ignored.}
 }
 \value{
-When the \code{object} is of class \code{'sfacross'}, \code{'selectioncross'} or
-\code{'zisfcross'},
-\code{\link{residuals}} returns a vector of residuals values.
+When the \code{object} is of class \code{'sfacross'}, or
+\code{'sfaselectioncross'}, \code{\link{residuals}} returns a vector of
+residuals values.
 
-When the \code{object} is of class \code{'lcmcross'},
+When the \code{object} is of \code{'sfalcmcross'},
 \code{\link{residuals}} returns a data frame containing the residuals values
-for each latent class, where each variable terminates with \code{'_c#'},
+for each latent class, where each variable ends with \code{'_c#'},
 \code{'#'} being the class number.
 }
 \description{
-This function returns the residuals' values from classic or latent class
-stochastic frontier models estimated with \code{\link{sfacross}},
-\code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.
+This function returns the residuals' values from stochastic frontier models
+estimated with \code{\link{sfacross}}, \code{\link{sfalcmcross}}, or
+\code{\link{sfaselectioncross}}.
 }
 \note{
 The residuals values are ordered in the same way as the corresponding
@@ -43,35 +41,35 @@ observations in the dataset used for the estimation.
 }
 \examples{
 
+\dontrun{
 ## Using data on fossil fuel fired steam electric power generation plants in the U.S.
 # Translog SFA (cost function) truncated normal with scaling property
 tl_u_ts <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
-    log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
-    I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
-    udist = 'tnormal', muhet = ~ regu, uhet = ~ regu, data = utility, S = -1,
-    scaling = TRUE, method = 'mla')
-  resid.tl_u_ts <- residuals(tl_u_ts)
-  head(resid.tl_u_ts)
+log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+udist = 'tnormal', muhet = ~ regu, uhet = ~ regu, data = utility, S = -1,
+scaling = TRUE, method = 'mla')
+resid.tl_u_ts <- residuals(tl_u_ts)
+head(resid.tl_u_ts)
 
-## Using data on eighty-two countries production (DGP)
+## Using data on eighty-two countries production (GDP)
 # LCM Cobb Douglas (production function) half normal distribution
-cb_2c_h <- lcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal', data = worldprod, S = 1)
-  resid.cb_2c_h <- residuals(cb_2c_h)
-  head(resid.cb_2c_h)
+cb_2c_h <- sfalcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal', 
+data = worldprod, S = 1)
+resid.cb_2c_h <- residuals(cb_2c_h)
+head(resid.cb_2c_h)
+}
 
 }
 \seealso{
 \code{\link{sfacross}}, for the stochastic frontier analysis model
-fitting function.
+fitting function using cross-sectional or pooled data.
 
-\code{\link{lcmcross}}, for the latent class stochastic frontier analysis
-model fitting function.
+\code{\link{sfalcmcross}}, for the latent class stochastic frontier analysis
+model fitting function using cross-sectional or pooled data.
 
-\code{\link{selectioncross}} for sample selection in stochastic frontier model
-fitting function.
-
-\code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
-fitting function.
+\code{\link{sfaselectioncross}} for sample selection in stochastic frontier
+model fitting function using cross-sectional or pooled data.
 }
 \keyword{methods}
 \keyword{residuals}

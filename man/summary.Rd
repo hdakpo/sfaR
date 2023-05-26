@@ -4,57 +4,52 @@
 \alias{summary}
 \alias{summary.sfacross}
 \alias{print.summary.sfacross}
-\alias{summary.lcmcross}
-\alias{print.summary.lcmcross}
-\alias{summary.selectioncross}
-\alias{print.summary.selectioncross}
-\alias{summary.zisfcross}
-\alias{print.summary.zisfcross}
+\alias{summary.sfalcmcross}
+\alias{print.summary.sfalcmcross}
+\alias{summary.sfaselectioncross}
+\alias{print.summary.sfaselectioncross}
 \title{Summary of results for stochastic frontier models}
 \usage{
 \method{summary}{sfacross}(object, grad = FALSE, ci = FALSE, ...)
 
 \method{print}{summary.sfacross}(x, digits = max(3, getOption("digits") - 2), ...)
 
-\method{summary}{lcmcross}(object, grad = FALSE, ci = FALSE, ...)
+\method{summary}{sfalcmcross}(object, grad = FALSE, ci = FALSE, ...)
 
-\method{print}{summary.lcmcross}(x, digits = max(3, getOption("digits") - 2), ...)
+\method{print}{summary.sfalcmcross}(x, digits = max(3, getOption("digits") - 2), ...)
 
-\method{summary}{selectioncross}(object, grad = FALSE, ci = FALSE, ...)
+\method{summary}{sfaselectioncross}(object, grad = FALSE, ci = FALSE, ...)
 
-\method{print}{summary.selectioncross}(x, digits = max(3, getOption("digits") - 2), ...)
-
-\method{summary}{zisfcross}(object, grad = FALSE, ci = FALSE, ...)
-
-\method{print}{summary.zisfcross}(x, digits = max(3, getOption("digits") - 2), ...)
+\method{print}{summary.sfaselectioncross}(x, digits = max(3, getOption("digits") - 2), ...)
 }
 \arguments{
 \item{object}{An object of either class \code{'sfacross'} returned by the
-function \code{\link{sfacross}}, or class \code{'lcmcross'} returned by the
-function \code{\link{lcmcross}}, or class \code{'selectioncross'} returned by the
-function \code{\link{selectioncross}}, or class \code{'zisfcross'} returned by the
-function \code{\link{zisfcross}}.}
+function \code{\link{sfacross}}, or \code{'sfalcmcross'} returned by the
+function \code{\link{sfalcmcross}}, or class \code{'sfaselectioncross'} returned
+by the function \code{\link{sfaselectioncross}}.}
 
 \item{grad}{Logical. Default = \code{FALSE}. If \code{TRUE}, the gradient
 for the maximum likelihood (ML) estimates of the different parameters is
 returned.}
 
-\item{ci}{Logical. Default = \code{FALSE}. If \code{TRUE}, the 95\\%
-confidence interval for the different parameters (OLS and ML estimates) is
+\item{ci}{Logical. Default = \code{FALSE}. If \code{TRUE}, the 95\%
+confidence interval for the different parameters (OLS or/and ML estimates) is
 returned.}
 
 \item{...}{Currently ignored.}
 
-\item{x}{An object of either class \code{'summary.sfacross'},
-\code{'summary.lcmcross'}, \code{'summary.selectioncross'} or \code{'summary.zisfcross'}.}
+\item{x}{An object of either class \code{'summary.sfacross'}, \code{'summary.sfalcmcross'}, or\cr
+\code{'summary.sfaselectioncross'}.}
 
 \item{digits}{Numeric. Number of digits displayed in values.}
 }
 \value{
 The \code{\link{summary}} method returns a list of class
-\code{'summary.sfacross'}, \code{'summary.lcmcross'}, \code{'summary.selectioncross'} \code{'summary.zisfcross'}
+\code{'summary.sfacross'}, \code{'summary.sfalcmcross'}, or\cr
+\code{'summary.sfaselectioncross'}
 that contains the same elements as an object returned by \code{\link{sfacross}},
-\code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}} with the following additional elements:
+\code{\link{sfalcmcross}}, or \code{\link{sfaselectioncross}} with the
+following additional elements:
 
 \item{AIC}{Akaike information criterion.}
 
@@ -62,33 +57,36 @@ that contains the same elements as an object returned by \code{\link{sfacross}},
 
 \item{HQIC}{Hannan-Quinn information criterion.}
 
-\item{sigmavSq}{For \code{object} of class \code{'sfacross'} or \code{'selectioncross'}. Variance of
+\item{sigmavSq}{For \code{object} of class \code{'sfacross'} or
+\code{'sfaselectioncross'}. Variance of
 the two-sided error term (\eqn{\sigma_v^2}).}
 
-\item{sigmauSq}{For \code{object} of class \code{'sfacross'} or \code{'selectioncross'}.
-Parametrization of the variance of the one-sided error term
-(\eqn{\sigma_u^2}).}
+\item{sigmauSq}{For \code{object} of class \code{'sfacross'} or
+\code{'sfaselectioncross'}. Parametrization of the variance of the one-sided
+error term (\eqn{\sigma_u^2}).}
 
-\item{Varu}{For \code{object} of class \code{'sfacross'} or \code{'selectioncross'}. Variance of the
-one-sided error term.}
+\item{Varu}{For \code{object} of class \code{'sfacross'} or
+\code{'sfaselectioncross'}. Variance of the one-sided error term.}
 
-\item{THETA}{For \code{object} of class \code{'sfacross'} with \code{'udist
+\item{theta}{For \code{object} of class \code{'sfacross'} with \code{'udist
 = uniform'}.  \eqn{\Theta} value in the case the uniform distribution is
 defined as: \eqn{u_i \in [0, \Theta]}.}
 
-\item{Eu}{For \code{object} of class \code{'sfacross'} or \code{'selectioncross'}. Expected
-unconditional inefficiency.}
+\item{Eu}{For \code{object} of class \code{'sfacross'} or
+\code{'sfaselectioncross'}. Expected unconditional inefficiency
+(\eqn{E[u]}).}
 
-\item{Expu}{For \code{object} of class \code{'sfacross'} or \code{'selectioncross'}. Expected
-unconditional efficiency.}
+\item{Expu}{For \code{object} of class \code{'sfacross'} or
+\code{'sfaselectioncross'}. Expected unconditional efficiency
+(\eqn{E[\exp(u)]}).}
 
 \item{olsRes}{For \code{object} of class \code{'sfacross'}. Matrix of OLS
 estimates, their standard errors, t-values, P-values, and when \code{ci =
 TRUE} their confidence intervals.}
 
-\item{ols2StepRes}{For \code{object} of class \code{'selectioncross'}. Matrix of OLS
-2 step estimates, their standard errors, t-values, P-values, and when \code{ci =
-TRUE} their confidence intervals.}
+\item{ols2StepRes}{For \code{object} of class \code{'sfaselectioncross'}.
+Matrix of OLS 2 step estimates, their standard errors, t-values, P-values,
+and when \code{ci = TRUE} their confidence intervals.}
 
 \item{mlRes}{Matrix of ML estimates, their standard errors, z-values,
 asymptotic P-values, and when \code{grad = TRUE} their gradient, \code{ci =
@@ -101,33 +99,30 @@ statistics of the difference between the stochastic frontier and the OLS.}
 }
 \description{
 Create and print summary results for stochastic frontier models returned by
-\code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or
-\code{\link{zisfcross}}.
+\code{\link{sfacross}}, \code{\link{sfalcmcross}}, or
+\code{\link{sfaselectioncross}}.
 }
 \examples{
 
 ## Using data on fossil fuel fired steam electric power generation plants in the U.S.
 # Translog SFA (cost function) truncated normal with scaling property
 tl_u_ts <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
-    log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
-    I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
-    udist = 'tnormal', muhet = ~ regu, uhet = ~ regu, data = utility, S = -1,
-    scaling = TRUE, method = 'mla')
-  summary(tl_u_ts, grad = TRUE, ci = TRUE)
+log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+udist = 'tnormal', muhet = ~ regu, uhet = ~ regu, data = utility, S = -1,
+scaling = TRUE, method = 'mla')
+summary(tl_u_ts, grad = TRUE, ci = TRUE)
 
 }
 \seealso{
 \code{\link{sfacross}}, for the stochastic frontier analysis model
-fitting function.
+fitting function for cross-sectional or pooled data.
 
-\code{\link{lcmcross}}, for the latent class stochastic frontier analysis
-model fitting function.
+\code{\link{sfalcmcross}}, for the latent class stochastic frontier analysis
+model fitting function for cross-sectional or pooled data.
 
-\code{\link{selectioncross}} for sample selection in stochastic frontier model
-fitting function.
-
-\code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
-fitting function.
+\code{\link{sfaselectioncross}} for sample selection in stochastic frontier
+model fitting function for cross-sectional or pooled data.
 
 \code{\link[=print.sfacross]{print}} for printing \code{sfacross} object.
 

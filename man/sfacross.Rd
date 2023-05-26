@@ -5,7 +5,7 @@
 \alias{print.sfacross}
 \alias{bread.sfacross}
 \alias{estfun.sfacross}
-\title{Stochastic frontier estimation using cross-section data}
+\title{Stochastic frontier estimation using cross-sectional data}
 \usage{
 sfacross(
   formula,
@@ -64,13 +64,13 @@ two-sided error variance (see section \sQuote{Details}).}
 \item{subset}{An optional vector specifying a subset of observations to be
 used in the optimization process.}
 
-\item{weights}{An optional vector of weights to be used for weighted log-likelihood.
-Should be \code{NULL} or numeric vector with positive values. When \code{NULL},
-a numeric vector of 1 is used.}
+\item{weights}{An optional vector of weights to be used for weighted
+log-likelihood. Should be \code{NULL} or numeric vector with positive values.
+When \code{NULL}, a numeric vector of 1 is used.}
 
-\item{wscale}{Logical. When \code{weights} is not \code{NULL}, a scaling transformation
-is used such that the the \code{weights} sums to the sample size. Default \code{TRUE}.
-When \code{FALSE} no scaling is used.}
+\item{wscale}{Logical. When \code{weights} is not \code{NULL}, a scaling
+transformation is used such that the \code{weights} sum to the sample
+size. Default \code{TRUE}. When \code{FALSE} no scaling is used.}
 
 \item{S}{If \code{S = 1} (default), a production (profit) frontier is
 estimated: \eqn{\epsilon_i = v_i-u_i}. If \code{S = -1}, a cost frontier is
@@ -98,23 +98,25 @@ Default = \code{FALSE}. (see section \sQuote{Details}).}
 \item{start}{Numeric vector. Optional starting values for the maximum
 likelihood (ML) estimation.}
 
-\item{method}{Optimization algorithm used for the estimation.  Default =
+\item{method}{Optimization algorithm used for the estimation. Default =
 \code{'bfgs'}. 11 algorithms are available: \itemize{ \item \code{'bfgs'},
 for Broyden-Fletcher-Goldfarb-Shanno (see
 \code{\link[maxLik:maxBFGS]{maxBFGS}}) \item \code{'bhhh'}, for
 Berndt-Hall-Hall-Hausman (see \code{\link[maxLik:maxBHHH]{maxBHHH}}) \item
 \code{'nr'}, for Newton-Raphson (see \code{\link[maxLik:maxNR]{maxNR}})
 \item \code{'nm'}, for Nelder-Mead (see \code{\link[maxLik:maxNM]{maxNM}})
-\item \code{'cg'}, for Conjugate Gradient (see \code{\link[maxLik:maxCG]{maxCG}})
-\item \code{'sann'}, for Simulated Annealing (see \code{\link[maxLik:maxSANN]{maxSANN}})
-\item \code{'ucminf'}, implements a quasi-Newton type with BFGS updating of the
-inverse Hessian and soft line search with a trust region type monitoring of
-the input to the line search algorithm (see \code{\link[ucminf:ucminf]{ucminf}})
+\item \code{'cg'}, for Conjugate Gradient
+(see \code{\link[maxLik:maxCG]{maxCG}}) \item \code{'sann'}, for Simulated
+Annealing (see \code{\link[maxLik:maxSANN]{maxSANN}}) \item \code{'ucminf'},
+for a quasi-Newton type optimisation with BFGS updating of the inverse Hessian and
+soft line search with a trust region type monitoring of the input to the line
+search algorithm (see \code{\link[ucminf:ucminf]{ucminf}})
 \item \code{'mla'}, for general-purpose optimization based on
 Marquardt-Levenberg algorithm (see \code{\link[marqLevAlg:mla]{mla}})
 \item \code{'sr1'}, for Symmetric Rank 1 (see
-\code{\link[trustOptim:trust.optim]{trust.optim}}) \item \code{'sparse'}, for trust
-regions and sparse Hessian (see \code{\link[trustOptim:trust.optim]{trust.optim}}) \item
+\code{\link[trustOptim:trust.optim]{trust.optim}}) \item \code{'sparse'},
+for trust regions and sparse Hessian
+(see \code{\link[trustOptim:trust.optim]{trust.optim}}) \item
 \code{'nlminb'}, for optimization using PORT routines (see
 \code{\link[stats:nlminb]{nlminb}})}}
 
@@ -128,7 +130,7 @@ Halton draws are used for maximum simulated likelihood (MSL). If
 \code{simType = 'sobol'}, Sobol draws are used for MSL. If \code{simType =
 'uniform'}, uniform draws are used for MSL. (see section \sQuote{Details}).}
 
-\item{Nsim}{Number of draws for MSL.}
+\item{Nsim}{Number of draws for MSL. Default 100.}
 
 \item{prime}{Prime number considered for Halton and Generalized-Halton
 draws. Default = \code{2}.}
@@ -163,10 +165,12 @@ step length is decreased while also moving closer to the pure gradient
 direction. See \code{\link[maxLik:maxBHHH]{maxBHHH}} and
 \code{\link[maxLik:maxNR]{maxNR}}.}
 
-\item{x}{an object of class sfacross (returned by the function \code{\link{sfacross}}).}
+\item{x}{an object of class sfacross (returned by the function
+\code{\link{sfacross}}).}
 
 \item{...}{additional arguments of frontier are passed to sfacross;
-additional arguments of the print, bread, estfun, nobs methods are currently ignored.}
+additional arguments of the print, bread, estfun, nobs methods are currently
+ignored.}
 }
 \value{
 \code{\link{sfacross}} returns a list of class \code{'sfacross'}
@@ -211,8 +215,9 @@ two-sided error term.}
 
 \item{dataTable}{A data frame (tibble format) containing information on data
 used for optimization along with residuals and fitted values of the OLS and
-M(S)L estimations, and the individual observation log-likelihood. When \code{weights}
-is specified an additional variable is also provided in \code{dataTable}.}
+M(S)L estimations, and the individual observation log-likelihood. When
+\code{weights} is specified an additional variable is also provided in
+\code{dataTable}.}
 
 \item{olsParam}{Numeric vector. OLS estimates.}
 
@@ -277,7 +282,7 @@ M(S)L estimation.}
 \description{
 \code{\link{sfacross}} is a symbolic formula-based function for the
 estimation of stochastic frontier models in the case of cross-sectional or
-pooled cross-section data, using maximum (simulated) likelihood - M(S)L.
+pooled cross-sectional data, using maximum (simulated) likelihood - M(S)L.
 
 The function accounts for heteroscedasticity in both one-sided and two-sided
 error terms as in Reifschneider and Stevenson (1991), Caudill and Ford
@@ -285,25 +290,23 @@ error terms as in Reifschneider and Stevenson (1991), Caudill and Ford
 heterogeneity in the mean of the pre-truncated distribution as in Kumbhakar
 \emph{et al.} (1991), Huang and Liu (1994) and Battese and Coelli (1995).
 
-Ten distributions are possible for the one-sided error term and nine
+Ten distributions are possible for the one-sided error term and eleven
 optimization algorithms are available.
 
 The truncated normal - normal distribution with scaling property as in Wang
 and Schmidt (2002) is also implemented.
 }
 \details{
-The stochastic frontier model is defined as:
+The stochastic frontier model for the cross-sectional data is defined as:
 
-\Sexpr[results=rd, stage=build]{
-katex::math_to_rd("y_i = \\\alpha + \\\mathbf{x_i^{\\\prime}}\\\bm{\\\beta} + v_i - Su_i")
-}
+\deqn{y_i = \alpha + \mathbf{x_i^{\prime}}\bm{\beta} + v_i - Su_i}
 
-\Sexpr[results=rd, stage=build]{
-katex::math_to_rd("\\\epsilon_i = v_i -Su_i")
-}
+with
 
-where \eqn{i} is the observation, \eqn{j} is the class, \eqn{y} is the
-output (cost, revenue, profit), \eqn{x} is the vector of main explanatory
+\deqn{\epsilon_i = v_i -Su_i}
+
+where \eqn{i} is the observation, \eqn{y} is the
+output (cost, revenue, profit), \eqn{\mathbf{x}} is the vector of main explanatory
 variables (inputs and other control variables), \eqn{u} is the one-sided
 error term with variance \eqn{\sigma_{u}^2}, and \eqn{v} is the two-sided
 error term with variance \eqn{\sigma_{v}^2}.
@@ -322,59 +325,63 @@ counterpart of one (\code{1-draw}).
 To account for heteroscedasticity in the variance parameters of the error
 terms, a single part (right) formula can also be specified. To impose the
 positivity to these parameters, the variances are modelled as:
-\eqn{\sigma^2_u = \exp{(\delta'Z_u)}} or \eqn{\sigma^2_v =
-\exp{(\phi'Z_v)}}, where \eqn{Z_u} and \eqn{Z_v} are the heteroscedasticity
-variables (inefficiency drivers in the case of \eqn{Z_u}) and \eqn{\delta}
-and \eqn{\phi} the coefficients.  In the case of heterogeneity in the
-truncated mean \eqn{\mu}, it is modelled as \eqn{\mu=\omega'Z_{\mu}}. The
+\eqn{\sigma^2_u = \exp{(\bm{\delta}'\mathbf{Z}_u)}} or \eqn{\sigma^2_v =
+\exp{(\bm{\phi}'\mathbf{Z}_v)}}, where \eqn{\mathbf{Z}_u} and \eqn{\mathbf{Z}_v} are the heteroscedasticity
+variables (inefficiency drivers in the case of \eqn{\mathbf{Z}_u}) and \eqn{\bm{\delta}}
+and \eqn{\bm{\phi}} the coefficients. In the case of heterogeneity in the
+truncated mean \eqn{\mu}, it is modelled as \eqn{\mu=\bm{\omega}'\mathbf{Z}_{\mu}}. The
 scaling property can be applied for the truncated normal distribution:
-\eqn{u \sim h(Z_u, \delta)u} where \eqn{u} follows a truncated normal
+\eqn{u \sim h(\mathbf{Z}_u, \delta)u} where \eqn{u} follows a truncated normal
 distribution \eqn{N^+(\tau, \exp{(cu)})}.
 
 In the case of the truncated normal distribution, the convolution of
 \eqn{u_i} and \eqn{v_i} is:
 
-\Sexpr[results=rd, stage=build]{
-katex::math_to_rd("f(\\\epsilon_i)=\\\frac{1}{\\\sqrt{\\\\sigma_u^2 + \\\sigma_v^2}}\\\phi\\\\left(\\\frac{S\\\epsilon_i + \\\mu}{\\\sqrt{\\\sigma_u^2 + \\\sigma_v^2}}\\\\right)\\\Phi\\\\left(\\\frac{\\\mu_{i*}}{\\\sigma_*}\\\\right)\\\Big/\\\Phi\\\\left(\\\frac{\\\mu}{\\\sigma_u}\\\\right)")
-}
+\deqn{f(\epsilon_i)=\frac{1}{\sqrt{\sigma_u^2 + 
+\sigma_v^2}}\phi\left(\frac{S\epsilon_i + \mu}{\sqrt{
+\sigma_u^2 + \sigma_v^2}}\right)\Phi\left(\frac{
+\mu_{i*}}{\sigma_*}\right)\Big/\Phi\left(\frac{
+\mu}{\sigma_u}\right)}
 
 where
 
-\Sexpr[results=rd, stage=build]{
-katex::math_to_rd("\\\mu_{i*}=\\\frac{\\\mu\\\sigma_v^2 - S\\\epsilon_i\\\sigma_u^2}{\\\sigma_u^2 + \\\sigma_v^2}")
-}
+\deqn{\mu_{i*}=\frac{\mu\\\sigma_v^2 - 
+S\epsilon_i\sigma_u^2}{\sigma_u^2 + \sigma_v^2}}
 
 and
 
-\Sexpr[results=rd, stage=build]{
-katex::math_to_rd("\\\sigma_*^2 = \\\frac{\\\sigma_u^2 \\\sigma_v^2}{\\\sigma_u^2 + \\\sigma_v^2}")
-}
+\deqn{\sigma_*^2 = \frac{\sigma_u^2 
+\sigma_v^2}{\sigma_u^2 + \sigma_v^2}}
 
 In the case of the half normal distribution the convolution is obtained by
 setting \eqn{\mu=0}.
 
 \code{sfacross} allows for the maximization of weighted log-likelihood.
 When option \code{weights} is specified and \code{wscale = TRUE}, the weights
-is scaled as
+are scaled as:
 
-\Sexpr[results=rd, stage=build]{
-katex::math_to_rd('new_{weights} = sample_{size} \\\times \\\frac{old_{weights}}{\\\sum(old_{weights})}')
-}
+\deqn{new_{weights} = sample_{size} \times 
+\frac{old_{weights}}{\sum(old_{weights})}}
 
-For difficult problems, non-gradient methods (e.g. \code{nm} or \code{sann}) can be
-used to warm start the optimization and zoom in the neighborhood of the
-solution. Then a gradient-based methods is recommanded in the second step. In the case
-of \code{sann}, we recommand to significantly increase the iteration limit
-(e.g. \code{itermax = 20000}). The Conjugate Gradient (\code{cg}) can also be used
-in the first stage.
+For complex problems, non-gradient methods (e.g. \code{nm} or \code{sann})
+can be used to warm start the optimization and zoom in the neighborhood of
+the solution. Then a gradient-based methods is recommended in the second
+step. In the case of \code{sann}, we recommend to significantly increase the
+iteration limit (e.g. \code{itermax = 20000}). The Conjugate Gradient
+(\code{cg}) can also be used in the first stage.
 
-A set of extractor functions for fitted model objects is available for objects of class
-\code{'sfacross'} including methods to the generic functions \code{\link[=print.sfacross]{print}},
+A set of extractor functions for fitted model objects is available for
+objects of class \code{'sfacross'} including methods to the generic functions
+\code{\link[=print.sfacross]{print}},
 \code{\link[=summary.sfacross]{summary}}, \code{\link[=coef.sfacross]{coef}},
-\code{\link[=fitted.sfacross]{fitted}}, \code{\link[=logLik.sfacross]{logLik}},
-\code{\link[=residuals.sfacross]{residuals}}, \code{\link[=vcov.sfacross]{vcov}},
-\code{\link[=efficiencies.sfacross]{efficiencies}}, \code{\link[=ic.sfacross]{ic}},
-\code{\link[=marginal.sfacross]{marginal}}, \code{\link[=skewnessTest]{skewnessTest}},
+\code{\link[=fitted.sfacross]{fitted}},
+\code{\link[=logLik.sfacross]{logLik}},
+\code{\link[=residuals.sfacross]{residuals}},
+\code{\link[=vcov.sfacross]{vcov}},
+\code{\link[=efficiencies.sfacross]{efficiencies}},
+\code{\link[=ic.sfacross]{ic}},
+\code{\link[=marginal.sfacross]{marginal}},
+\code{\link[=skewnessTest]{skewnessTest}},
 \code{\link[=estfun.sfacross]{estfun}} and
 \code{\link[=bread.sfacross]{bread}} (from the \CRANpkg{sandwich} package),
 \code{\link[lmtest:coeftest]{lmtest::coeftest()}} (from the \CRANpkg{lmtest} package).
@@ -385,43 +392,44 @@ package.
 }
 \examples{
 
-## Using data on fossil fuel fired steam electric power generation plants in U.S.
+## Using data on fossil fuel fired steam electric power generation plants in the U.S.
 # Translog (cost function) half normal with heteroscedasticity
 tl_u_h <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
-    log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
-    I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
-    udist = 'hnormal', uhet = ~ regu, data = utility, S = -1, method = 'bfgs')
-  summary(tl_u_h)
+log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+udist = 'hnormal', uhet = ~ regu, data = utility, S = -1, method = 'bfgs')
+summary(tl_u_h)
 
 # Translog (cost function) truncated normal with heteroscedasticity
 tl_u_t <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
-    log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
-    I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
-    udist = 'tnormal', muhet = ~ regu, data = utility, S = -1, method = 'bhhh')
-  summary(tl_u_t)
+log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+udist = 'tnormal', muhet = ~ regu, data = utility, S = -1, method = 'bhhh')
+summary(tl_u_t)
 
 # Translog (cost function) truncated normal with scaling property
 tl_u_ts <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
-    log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
-    I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
-    udist = 'tnormal', muhet = ~ regu, uhet = ~ regu, data = utility, S = -1,
-    scaling = TRUE, method = 'mla')
-  summary(tl_u_ts)
+log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+udist = 'tnormal', muhet = ~ regu, uhet = ~ regu, data = utility, S = -1,
+scaling = TRUE, method = 'mla')
+summary(tl_u_ts)
 
 ## Using data on Philippine rice producers
-# Cobb Douglas (production function) generalized exponential, and Weibull distributions
+# Cobb Douglas (production function) generalized exponential, and Weibull 
+# distributions
 
 cb_p_ge <- sfacross(formula = log(PROD) ~ log(AREA) + log(LABOR) + log(NPK) +
-    log(OTHER), udist = 'genexponential', data = ricephil, S = 1, method = 'bfgs')
-  summary(cb_p_ge)
+log(OTHER), udist = 'genexponential', data = ricephil, S = 1, method = 'bfgs')
+summary(cb_p_ge)
 
 ## Using data on U.S. electric utility industry
 # Cost frontier Gamma distribution
 tl_u_g <- sfacross(formula = log(cost/fprice) ~ log(output) + I(log(output)^2) +
-    I(log(lprice/fprice)) + I(log(cprice/fprice)), udist = 'gamma', uhet = ~ 1,
-    data = electricity, S = -1, method = 'bfgs', simType = 'halton', Nsim = 200,
-    hessianType = 2)
-  summary(tl_u_g)
+I(log(lprice/fprice)) + I(log(cprice/fprice)), udist = 'gamma', uhet = ~ 1,
+data = electricity, S = -1, method = 'bfgs', simType = 'halton', Nsim = 200,
+hessianType = 2)
+summary(tl_u_g)
 
 }
 \references{
@@ -508,7 +516,8 @@ Wang, J. 2012. A normal truncated skewed-Laplace model in stochastic
 frontier analysis. Master thesis, Western Kentucky University, May.
 }
 \seealso{
-\code{\link[=print.sfacross]{print}} for printing \code{sfacross} object.
+\code{\link[=print.sfacross]{print}} for printing \code{sfacross}
+object.
 
 \code{\link[=summary.sfacross]{summary}} for creating and printing
 summary results.

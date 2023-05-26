@@ -32,9 +32,9 @@ ctruncnormscalike <- function(parm, nXvar, nuZUvar, nvZVvar,
   phi <- parm[(nXvar + length(delta) + 2 + 1):(nXvar + length(delta) +
     2 + nvZVvar)]
   musca <- exp(as.numeric(crossprod(matrix(delta), t(uHvar[,
-    -1])))) * tau
+    -1, drop = FALSE])))) * tau
   Wusca <- cu + 2 * as.numeric(crossprod(matrix(delta), t(uHvar[,
-    -1])))
+    -1, drop = FALSE])))
   Wvsca <- as.numeric(crossprod(matrix(phi), t(vHvar)))
   epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
   mustar <- (musca * exp(Wvsca) - exp(Wusca) * S * epsilon)/(exp(Wusca) +
@@ -74,11 +74,17 @@ csttruncnormscal <- function(olsObj, epsiRes, S, nuZUvar, uHvar,
   }
   dep_u <- 1/2 * log(((epsiRes^2 - varv) * pi/(pi - 2))^2)
   dep_v <- 1/2 * log((epsiRes^2 - (1 - 2/pi) * varu)^2)
-  reg_hetu <- lm(dep_u ~ ., data = as.data.frame(uHvar[, 2:nuZUvar,
-    drop = FALSE]))
+  reg_hetu <- if (nuZUvar == 1) {
+    lm(log(varu) ~ 1)
+  } else {
+    lm(dep_u ~ ., data = as.data.frame(uHvar[, 2:nuZUvar,
+      drop = FALSE]))
+  }
   if (any(is.na(reg_hetu$coefficients)))
     stop("At least one of the OLS coefficients of 'uhet' is NA: ",
-      paste(colnames(uHvar)[is.na(reg_hetu$coefficients)],
+      paste(if (length(grep("Intercept", colnames(uHvar))) ==
+        0)
+        colnames(uHvar)[is.na(reg_hetu$coefficients)[-1]] else colnames(uHvar)[is.na(reg_hetu$coefficients)],
         collapse = ", "), ". This may be due to a singular matrix due to potential perfect multicollinearity",
       call. = FALSE)
   reg_hetv <- if (nvZVvar == 1) {
@@ -128,11 +134,12 @@ cgradtruncnormscalike <- function(parm, nXvar, nuZUvar, nvZVvar,
   phi <- parm[(nXvar + length(delta) + 2 + 1):(nXvar + length(delta) +
     2 + nvZVvar)]
   musca <- exp(as.numeric(crossprod(matrix(delta), t(uHvar[,
-    -1])))) * tau
+    -1, drop = FALSE])))) * tau
   Wusca <- cu + 2 * as.numeric(crossprod(matrix(delta), t(uHvar[,
-    -1])))
+    -1, drop = FALSE])))
   Wvsca <- as.numeric(crossprod(matrix(phi), t(vHvar)))
-  Hsca <- as.numeric(crossprod(matrix(delta), t(uHvar[, -1])))
+  Hsca <- as.numeric(crossprod(matrix(delta), t(uHvar[, -1,
+    drop = FALSE])))
   epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
   sigma_sq <- exp(Wusca) + exp(Wvsca)
   muwv <- musca * exp(Wvsca)
@@ -195,17 +202,18 @@ cgradtruncnormscalike <- function(parm, nXvar, nuZUvar, nvZVvar,
 chesstruncnormscalike <- function(parm, nXvar, nuZUvar, nvZVvar,
   uHvar, vHvar, Yvar, Xvar, S, wHvar) {
   beta <- parm[1:(nXvar)]
-  delta <- parm[(nXvar + 1):(nXvar + (nuZUvar - 1))]
-  tau <- parm[nXvar + (nuZUvar - 1) + 1]
-  cu <- parm[nXvar + (nuZUvar - 1) + 2]
-  phi <- parm[(nXvar + (nuZUvar - 1) + 2 + 1):(nXvar + (nuZUvar -
-    1) + 2 + nvZVvar)]
+  delta <- parm[(nXvar + 1):(nXvar + nuZUvar - 1)]
+  tau <- parm[nXvar + length(delta) + 1]
+  cu <- parm[nXvar + length(delta) + 2]
+  phi <- parm[(nXvar + length(delta) + 2 + 1):(nXvar + length(delta) +
+    2 + nvZVvar)]
   musca <- exp(as.numeric(crossprod(matrix(delta), t(uHvar[,
-    -1])))) * tau
+    -1, drop = FALSE])))) * tau
   Wusca <- cu + 2 * as.numeric(crossprod(matrix(delta), t(uHvar[,
-    -1])))
+    -1, drop = FALSE])))
   Wvsca <- as.numeric(crossprod(matrix(phi), t(vHvar)))
-  Hsca <- as.numeric(crossprod(matrix(delta), t(uHvar[, -1])))
+  Hsca <- as.numeric(crossprod(matrix(delta), t(uHvar[, -1,
+    drop = FALSE])))
   epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
   sigma_sq <- exp(Wusca) + exp(Wvsca)
   muwv <- musca * exp(Wvsca)
@@ -411,13 +419,13 @@ truncnormscalAlgOpt <- function(start, olsParam, dataTable, S,
     nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
     vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar))
   if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
-    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
-      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
-      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
-      sann = function(...) maxSANN(...))
+    maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...),
+      bhhh = function(...) maxLik::maxBHHH(...), nr = function(...) maxLik::maxNR(...),
+      nm = function(...) maxLik::maxNM(...), cg = function(...) maxLik::maxCG(...),
+      sann = function(...) maxLik::maxSANN(...))
     method <- "maxLikAlgo"
   }
-  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+  mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
     fn = function(parm) -sum(ctruncnormscalike(parm, nXvar = nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
       vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar)),
@@ -433,7 +441,7 @@ truncnormscalAlgOpt <- function(start, olsParam, dataTable, S,
       iterlim = itermax, reltol = tol, tol = tol, qac = qac),
     nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
     uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-    S = S, wHvar = wHvar), sr1 = trust.optim(x = startVal,
+    S = S, wHvar = wHvar), sr1 = trustOptim::trust.optim(x = startVal,
     fn = function(parm) -sum(ctruncnormscalike(parm, nXvar = nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
       vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar)),
@@ -443,7 +451,7 @@ truncnormscalAlgOpt <- function(start, olsParam, dataTable, S,
       S = S, wHvar = wHvar)), method = "SR1", control = list(maxit = itermax,
       cgtol = gradtol, stop.trust.radius = tol, prec = tol,
       report.level = if (printInfo) 2 else 0, report.precision = 1L)),
-    sparse = trust.optim(x = startVal, fn = function(parm) -sum(ctruncnormscalike(parm,
+    sparse = trustOptim::trust.optim(x = startVal, fn = function(parm) -sum(ctruncnormscalike(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar)), gr = function(parm) -colSums(cgradtruncnormscalike(parm,
@@ -456,7 +464,7 @@ truncnormscalAlgOpt <- function(start, olsParam, dataTable, S,
       control = list(maxit = itermax, cgtol = gradtol,
         stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
         report.precision = 1L, preconditioner = 1L)),
-    mla = mla(b = startVal, fn = function(parm) -sum(ctruncnormscalike(parm,
+    mla = marqLevAlg::mla(b = startVal, fn = function(parm) -sum(ctruncnormscalike(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       S = S, wHvar = wHvar)), gr = function(parm) -colSums(cgradtruncnormscalike(parm,
@@ -492,7 +500,6 @@ truncnormscalAlgOpt <- function(start, olsParam, dataTable, S,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -531,6 +538,12 @@ truncnormscalAlgOpt <- function(start, olsParam, dataTable, S,
 #' @noRd
 ctruncnormscaleff <- function(object, level) {
   beta <- object$mlParam[1:(object$nXvar)]
+  Xvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 1)
+  uHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 3)
+  vHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 4)
   delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     (object$nuZUvar - 1))]
   tau <- object$mlParam[object$nXvar + (object$nuZUvar - 1) +
@@ -539,16 +552,10 @@ ctruncnormscaleff <- function(object, level) {
     2]
   phi <- object$mlParam[(object$nXvar + (object$nuZUvar - 1) +
     2 + 1):(object$nXvar + (object$nuZUvar - 1) + 2 + object$nvZVvar)]
-  Xvar <- model.matrix(object$formula, data = object$dataTable,
-    rhs = 1)
-  uHvar <- model.matrix(object$formula, data = object$dataTable,
-    rhs = 3)
-  vHvar <- model.matrix(object$formula, data = object$dataTable,
-    rhs = 4)
   musca <- exp(as.numeric(crossprod(matrix(delta), t(uHvar[,
-    -1])))) * tau
+    -1, drop = FALSE])))) * tau
   Wusca <- cu + 2 * as.numeric(crossprod(matrix(delta), t(uHvar[,
-    -1])))
+    -1, drop = FALSE])))
   Wvsca <- as.numeric(crossprod(matrix(phi), t(vHvar)))
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
     as.numeric(crossprod(matrix(beta), t(Xvar)))
@@ -570,11 +577,11 @@ ctruncnormscaleff <- function(object, level) {
     teBCUB <- exp(-uLB)
     teBC_reciprocal <- exp(mustar + 1/2 * sigmastar^2) *
       pnorm(mustar/sigmastar + sigmastar)/pnorm(mustar/sigmastar)
-    res <- bind_cols(u = u, uLB = uLB, uUB = uUB, teJLMS = teJLMS,
+    res <- data.frame(u = u, uLB = uLB, uUB = uUB, teJLMS = teJLMS,
       m = m, teMO = teMO, teBC = teBC, teBCLB = teBCLB,
       teBCUB = teBCUB, teBC_reciprocal = teBC_reciprocal)
   } else {
-    res <- bind_cols(u = u, uLB = uLB, uUB = uUB, m = m)
+    res <- data.frame(u = u, uLB = uLB, uUB = uUB, m = m)
   }
   return(res)
 }
@@ -584,32 +591,32 @@ ctruncnormscaleff <- function(object, level) {
 #' @param object object of class sfacross
 #' @noRd
 cmargtruncnormscal_Eu <- function(object) {
+  uHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 3)
   delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     (object$nuZUvar - 1))]
   tau <- object$mlParam[object$nXvar + (object$nuZUvar - 1) +
     1]
   cu <- object$mlParam[object$nXvar + (object$nuZUvar - 1) +
     2]
-  uHvar <- model.matrix(object$formula, data = object$dataTable,
-    rhs = 3)
   hi <- exp(as.numeric(crossprod(matrix(delta), t(uHvar[, -1]))))
   Lambda <- tau/exp(cu/2)
   m1 <- exp(cu/2) * (Lambda + dnorm(Lambda)/pnorm(Lambda))
   margEff <- kronecker(matrix(delta, nrow = 1), matrix(m1 *
     hi, ncol = 1))
   colnames(margEff) <- paste0("Eu_", colnames(uHvar)[-1])
-  return(margEff)
+  return(data.frame(margEff))
 }
 
 cmargtruncnormscal_Vu <- function(object) {
+  uHvar <- model.matrix(object$formula, data = object$dataTable,
+    rhs = 3)
   delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     (object$nuZUvar - 1))]
   tau <- object$mlParam[object$nXvar + (object$nuZUvar - 1) +
     1]
   cu <- object$mlParam[object$nXvar + (object$nuZUvar - 1) +
     2]
-  uHvar <- model.matrix(object$formula, data = object$dataTable,
-    rhs = 3)
   hi2 <- exp(2 * as.numeric(crossprod(matrix(delta), t(uHvar[,
     -1]))))
   Lambda <- tau/exp(cu/2)
@@ -618,5 +625,5 @@ cmargtruncnormscal_Vu <- function(object) {
   margEff <- kronecker(matrix(2 * delta, nrow = 1), matrix(m2 *
     hi2))
   colnames(margEff) <- paste0("Vu_", colnames(uHvar)[-1])
-  return(margEff)
+  return(data.frame(margEff))
 }

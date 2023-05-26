@@ -6,14 +6,14 @@
 
 #------------------------------------------------------------------------------#
 # Variance - Covariance Matrix of estimates                                    #
-# Models: -Standard Stochastic Frontier Analysis                               #
-#         -Latent Class Stochastic Frontier Analysis                           #
-#         -Sample selection correction                                         #
-#         -Zero inefficiency stochastic frontier                               #
+# Models: + Cross sectional & Pooled data                                      #
+#           -Stochastic Frontier Analysis                                      #
+#           -Latent Class Stochastic Frontier Analysis                         #
+#           -Sample selection correction for Stochastic Frontier Model         #
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
 
-#' Extract Total Number of Observations Used in frontier models
+#' Extract total number of observations used in frontier models
 #' 
 #' This function extracts the total number of 'observations' from a
 #' fitted frontier model.
@@ -23,57 +23,61 @@
 #' of observations of the model frame (number of rows in the model
 #' frame), because sometimes the model frame is further reduced by the
 #' estimation procedure especially in the presence of NA. In the case of 
-#' `selectioncross`, `nobs` returns the number of observations used in the 
-#' selection equation.
+#' `sfaselectioncross`, `nobs` returns the number of observations used in the 
+#' frontier equation.
 #'
 #' @name nobs
 #' 
-#' @param object a `sfacross`, `lcmcross`, `selectioncross` or `zisfcross` object for which the number of
-#'     total observations is to be extracted,
-#' @param \dots further arguments.
+#' @param object a `sfacross`, `sfalcmcross`, or `sfaselectioncross`
+#' object for which the number of total observations is to be extracted.
+#' @param \dots Currently ignored.
 #' 
 #' @return A single number, normally an integer.
 #' 
+# @author K Hervé Dakpo
+#' 
+#' @seealso \code{\link{sfacross}}, for the stochastic frontier analysis model
+#' fitting function using cross-sectional or pooled data.
+#' 
+#' \code{\link{sfalcmcross}}, for the latent class stochastic frontier analysis
+#' model fitting function using cross-sectional or pooled data.
+#' 
+#' \code{\link{sfaselectioncross}} for sample selection in stochastic frontier 
+#' model fitting function using cross-sectional or pooled data.
+#'
 #' @keywords attribute
 #' 
 #' @examples
 #' 
-#' ## Using data on fossil fuel fired steam electric power generation plants in U.S.
+#' \dontrun{
+#' ## Using data on fossil fuel fired steam electric power generation plants in the U.S.
 #' # Translog (cost function) half normal with heteroscedasticity
 #' tl_u_h <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
-#'     log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
-#'     I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
-#'     udist = 'hnormal', uhet = ~ regu, data = utility, S = -1, method = 'bfgs')
-#'     
-#'  nobs(tl_u_h)
+#' log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+#' I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+#' udist = 'hnormal', uhet = ~ regu, data = utility, S = -1, method = 'bfgs')
+#' nobs(tl_u_h)
+#' }
 #' 
 #' @aliases nobs.sfacross
 #' @export
-# Extract number of observations for sfacros ----------
+# Extract number of observations for sfacross ----------
 nobs.sfacross <- function(object, ...) {
   return(object$Nobs)
 }
 
-# Eobjecttract number of observations for lcmcros ----------
+# Extract number of observations for sfalcmcross ----------
 #' @rdname nobs
-#' @aliases nobs.lcmcross
+#' @aliases nobs.sfalcmcross
 #' @export
-nobs.lcmcross <- function(object, ...) {
+nobs.sfalcmcross <- function(object, ...) {
   return(object$Nobs)
 }
 
-# Eobjecttract number of observations for selectioncros ----------
+# Extract number of observations for sfaselectioncross ----------
 #' @rdname nobs
-#' @aliases nobs.selectioncross
+#' @aliases nobs.sfaselectioncross
 #' @export
-nobs.selectioncross <- function(object, ...) {
-  return(object$Nobs)
-}
-
-# Eobjecttract number of observations for zisfcros ----------
-#' @rdname nobs
-#' @aliases nobs.zisfcross
-#' @export
-nobs.zisfcross <- function(object, ...) {
+nobs.sfaselectioncross <- function(object, ...) {
   return(object$Nobs)
 }

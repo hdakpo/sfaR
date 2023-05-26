@@ -103,7 +103,7 @@ csttslnorm <- function(olsObj, epsiRes, S, nuZUvar, uHvar, nvZVvar,
   } else {
     beta <- olsObj
   }
-  return(c(beta, delta, phi, lambda = 0.03))
+  return(c(beta, delta, phi, lambda = 1))
 }
 
 # Gradient of the likelihood function ----------
@@ -338,13 +338,13 @@ tslnormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
     nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
     vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar))
   if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
-    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
-      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
-      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
-      sann = function(...) maxSANN(...))
+    maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...),
+      bhhh = function(...) maxLik::maxBHHH(...), nr = function(...) maxLik::maxNR(...),
+      nm = function(...) maxLik::maxNM(...), cg = function(...) maxLik::maxCG(...),
+      sann = function(...) maxLik::maxSANN(...))
     method <- "maxLikAlgo"
   }
-  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+  mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
     fn = function(parm) -sum(ctslnormlike(parm, nXvar = nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
       vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar)),
@@ -360,7 +360,7 @@ tslnormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       iterlim = itermax, reltol = tol, tol = tol, qac = qac),
     nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
     uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-    S = S, wHvar = wHvar), sr1 = trust.optim(x = startVal,
+    S = S, wHvar = wHvar), sr1 = trustOptim::trust.optim(x = startVal,
     fn = function(parm) -sum(ctslnormlike(parm, nXvar = nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
       vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar)),
@@ -369,7 +369,7 @@ tslnormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar)),
     method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
       stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
-      report.precision = 1L)), sparse = trust.optim(x = startVal,
+      report.precision = 1L)), sparse = trustOptim::trust.optim(x = startVal,
     fn = function(parm) -sum(ctslnormlike(parm, nXvar = nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
       vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar)),
@@ -382,29 +382,29 @@ tslnormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       "dgCMatrix"), method = "Sparse", control = list(maxit = itermax,
       cgtol = gradtol, stop.trust.radius = tol, prec = tol,
       report.level = if (printInfo) 2 else 0, report.precision = 1L,
-      preconditioner = 1L)), mla = mla(b = startVal, fn = function(parm) -sum(ctslnormlike(parm,
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-    S = S, wHvar = wHvar)), gr = function(parm) -colSums(cgradtslnormlike(parm,
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-    S = S, wHvar = wHvar)), hess = function(parm) -chesstslnormlike(parm,
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-    S = S, wHvar = wHvar), print.info = printInfo, maxiter = itermax,
-    epsa = gradtol, epsb = gradtol), nlminb = nlminb(start = startVal,
-    objective = function(parm) -sum(ctslnormlike(parm, nXvar = nXvar,
+      preconditioner = 1L)), mla = marqLevAlg::mla(b = startVal,
+    fn = function(parm) -sum(ctslnormlike(parm, nXvar = nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
       vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar)),
-    gradient = function(parm) -colSums(cgradtslnormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S, wHvar = wHvar)), hessian = function(parm) -chesstslnormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S, wHvar = wHvar), control = list(iter.max = itermax,
-      trace = if (printInfo) 1 else 0, eval.max = itermax,
-      rel.tol = tol, x.tol = tol)))
+    gr = function(parm) -colSums(cgradtslnormlike(parm, nXvar = nXvar,
+      nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar)),
+    hess = function(parm) -chesstslnormlike(parm, nXvar = nXvar,
+      nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar),
+    print.info = printInfo, maxiter = itermax, epsa = gradtol,
+    epsb = gradtol), nlminb = nlminb(start = startVal, objective = function(parm) -sum(ctslnormlike(parm,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S, wHvar = wHvar)), gradient = function(parm) -colSums(cgradtslnormlike(parm,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S, wHvar = wHvar)), hessian = function(parm) -chesstslnormlike(parm,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    S = S, wHvar = wHvar), control = list(iter.max = itermax,
+    trace = if (printInfo) 1 else 0, eval.max = itermax,
+    rel.tol = tol, x.tol = tol)))
   if (method %in% c("ucminf", "nlminb")) {
     mleObj$gradient <- colSums(cgradtslnormlike(mleObj$par,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
@@ -418,7 +418,6 @@ tslnormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -467,7 +466,7 @@ ctslnormeff <- function(object, level) {
   vHvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 3)
   lambda <- object$mlParam[object$nXvar + object$nuZUvar +
-                             object$nvZVvar + 1]
+    object$nvZVvar + 1]
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
@@ -490,10 +489,10 @@ ctslnormeff <- function(object, level) {
       exp(Wv)/2) * pnorm(a + exp(Wv/2)) - exp(B) * exp(b *
       exp(Wv/2) + exp(Wv)/2) * pnorm(b + exp(Wv/2)))/(2 *
       exp(A) * pnorm(a) - exp(B) * pnorm(b))
-    res <- bind_cols(u = u, teJLMS = teJLMS, teBC = teBC,
+    res <- data.frame(u = u, teJLMS = teJLMS, teBC = teBC,
       teBC_reciprocal = teBC_reciprocal)
   } else {
-    res <- bind_cols(u = u)
+    res <- data.frame(u = u)
   }
   return(res)
 }
@@ -508,13 +507,13 @@ cmargtslnorm_Eu <- function(object) {
   uHvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 2)
   lambda <- object$mlParam[object$nXvar + object$nuZUvar +
-                             object$nvZVvar + 1]
+    object$nvZVvar + 1]
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
   margEff <- kronecker(matrix(delta[2:object$nuZUvar] * (1 +
     4 * lambda + 2 * lambda^2)/((1 + lambda) * (1 + 2 * lambda)),
     nrow = 1), matrix(exp(Wu/2), ncol = 1))
   colnames(margEff) <- paste0("Eu_", colnames(uHvar)[-1])
-  return(margEff)
+  return(data.frame(margEff))
 }
 
 cmargtslnorm_Vu <- function(object) {
@@ -523,12 +522,12 @@ cmargtslnorm_Vu <- function(object) {
   uHvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 2)
   lambda <- object$mlParam[object$nXvar + object$nuZUvar +
-                                       object$nvZVvar + 1]
+    object$nvZVvar + 1]
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
   margEff <- kronecker(matrix(delta[2:object$nuZUvar] * (1 +
     8 * lambda + 16 * lambda^2 + 12 * lambda^3 + 4 * lambda^4)/((1 +
     lambda)^2 * (1 + 2 * lambda)^2), nrow = 1), matrix(exp(Wu),
     ncol = 1))
   colnames(margEff) <- paste0("Vu_", colnames(uHvar)[-1])
-  return(margEff)
+  return(data.frame(margEff))
 }

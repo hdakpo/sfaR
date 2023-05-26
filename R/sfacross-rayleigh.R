@@ -69,7 +69,7 @@ cstraynorm <- function(olsObj, epsiRes, S, nuZUvar, uHvar, nvZVvar,
     lm(log(varu) ~ 1)
   } else {
     lm(dep_u ~ ., data = as.data.frame(uHvar[, 2:nuZUvar,
-      drop = FALSE]))
+                                             drop = FALSE]))
   }
   if (any(is.na(reg_hetu$coefficients)))
     stop("At least one of the OLS coefficients of 'uhet' is NA: ",
@@ -80,7 +80,7 @@ cstraynorm <- function(olsObj, epsiRes, S, nuZUvar, uHvar, nvZVvar,
     lm(log(varv) ~ 1)
   } else {
     lm(dep_v ~ ., data = as.data.frame(vHvar[, 2:nvZVvar,
-      drop = FALSE]))
+                                             drop = FALSE]))
   }
   if (any(is.na(reg_hetv$coefficients)))
     stop("at least one of the OLS coefficients of 'vhet' is NA: ",
@@ -323,13 +323,13 @@ raynormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
     vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar,
     S = S))
   if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
-    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
-      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
-      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
-      sann = function(...) maxSANN(...))
+    maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...),
+      bhhh = function(...) maxLik::maxBHHH(...), nr = function(...) maxLik::maxNR(...),
+      nm = function(...) maxLik::maxNM(...), cg = function(...) maxLik::maxCG(...),
+      sann = function(...) maxLik::maxSANN(...))
     method <- "maxLikAlgo"
   }
-  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+  mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
     fn = function(parm) -sum(craynormlike(parm, nXvar = nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
       vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar,
@@ -345,7 +345,7 @@ raynormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       iterlim = itermax, reltol = tol, tol = tol, qac = qac),
     nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
     uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-    wHvar = wHvar, S = S), sr1 = trust.optim(x = startVal,
+    wHvar = wHvar, S = S), sr1 = trustOptim::trust.optim(x = startVal,
     fn = function(parm) -sum(craynormlike(parm, nXvar = nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
       vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar,
@@ -355,7 +355,7 @@ raynormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       wHvar = wHvar, S = S)), method = "SR1", control = list(maxit = itermax,
       cgtol = gradtol, stop.trust.radius = tol, prec = tol,
       report.level = if (printInfo) 2 else 0, report.precision = 1L)),
-    sparse = trust.optim(x = startVal, fn = function(parm) -sum(craynormlike(parm,
+    sparse = trustOptim::trust.optim(x = startVal, fn = function(parm) -sum(craynormlike(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       wHvar = wHvar, S = S)), gr = function(parm) -colSums(cgradraynormlike(parm,
@@ -368,7 +368,7 @@ raynormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       control = list(maxit = itermax, cgtol = gradtol,
         stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
         report.precision = 1L, preconditioner = 1L)),
-    mla = mla(b = startVal, fn = function(parm) -sum(craynormlike(parm,
+    mla = marqLevAlg::mla(b = startVal, fn = function(parm) -sum(craynormlike(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       wHvar = wHvar, S = S)), gr = function(parm) -colSums(cgradraynormlike(parm,
@@ -404,7 +404,6 @@ raynormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -476,10 +475,10 @@ craynormeff <- function(object, level) {
       pnorm(mustar/sigmastar + sigmastar))/(sigmastar *
       dnorm(mustar/sigmastar) + mustar * pnorm(mustar/sigmastar))
     teMO <- exp(-m)
-    res <- bind_cols(u = u, teJLMS = teJLMS, teBC = teBC,
+    res <- data.frame(u = u, teJLMS = teJLMS, teBC = teBC,
       m = m, teMO = teMO, teBC_reciprocal = teBC_reciprocal)
   } else {
-    res <- bind_cols(u = u, m = m)
+    res <- data.frame(u = u, m = m)
   }
   return(res)
 }
@@ -494,10 +493,10 @@ cmargraynorm_Eu <- function(object) {
   uHvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 2)
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
-  margEff <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
-    matrix(exp(Wu/2) * 1/2 * sqrt(pi/2), ncol = 1))
+  margEff <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1), matrix(exp(Wu/2) * 1/2 *
+    sqrt(pi/2), ncol = 1))
   colnames(margEff) <- paste0("Eu_", colnames(uHvar)[-1])
-  return(margEff)
+  return(data.frame(margEff))
 }
 
 cmargraynorm_Vu <- function(object) {
@@ -506,8 +505,8 @@ cmargraynorm_Vu <- function(object) {
   uHvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 2)
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
-  margEff <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
-    matrix(exp(Wu) * (4 - pi)/2, ncol = 1))
+  margEff <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1), matrix(exp(Wu) * (4 -
+    pi)/2, ncol = 1))
   colnames(margEff) <- paste0("Vu_", colnames(uHvar)[-1])
-  return(margEff)
+  return(data.frame(margEff))
 }

@@ -36,13 +36,13 @@ cweibullnormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
   epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
   if (k < 0)
     return(NA)
-  ll <- numeric(N)
-  ur <- list()
-  for (i in seq_along(1:N)) {
-    ur[[i]] <- exp(Wu[i]/2) * (-log(1 - FiMat[i, ]))^(1/k)
-    ll[i] <- log(mean(1/exp(Wv[i]/2) * dnorm((epsilon[i] +
-      S * ur[[i]])/exp(Wv[i]/2))))
-  }
+  urMat <- sweep((-log(1 - FiMat))^(1/k), MARGIN = 1, STATS = exp(Wu/2),
+    FUN = "*")
+  uepsi <- sweep(S * urMat, MARGIN = 1, STATS = epsilon, FUN = "+")
+  duepsi <- dnorm(sweep(uepsi, MARGIN = 1, STATS = exp(Wv/2),
+    FUN = "/"))
+  ll <- log(apply(sweep(duepsi, MARGIN = 1, STATS = exp(Wv/2),
+    FUN = "/"), 1, mean))
   return(ll * wHvar)
 }
 
@@ -388,13 +388,13 @@ weibullnormAlgOpt <- function(start, olsParam, dataTable, S,
     vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
     FiMat = FiMat, wHvar = wHvar))
   if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
-    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
-      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
-      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
-      sann = function(...) maxSANN(...))
+    maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...),
+      bhhh = function(...) maxLik::maxBHHH(...), nr = function(...) maxLik::maxNR(...),
+      nm = function(...) maxLik::maxNM(...), cg = function(...) maxLik::maxCG(...),
+      sann = function(...) maxLik::maxSANN(...))
     method <- "maxLikAlgo"
   }
-  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+  mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
     fn = function(parm) -sum(cweibullnormlike(parm, nXvar = nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
       vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
@@ -410,7 +410,7 @@ weibullnormAlgOpt <- function(start, olsParam, dataTable, S,
         iterlim = itermax, reltol = tol, tol = tol, qac = qac),
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S, N = N, FiMat = FiMat, wHvar = wHvar), sr1 = trust.optim(x = startVal,
+      S = S, N = N, FiMat = FiMat, wHvar = wHvar), sr1 = trustOptim::trust.optim(x = startVal,
       fn = function(parm) -sum(cweibullnormlike(parm, nXvar = nXvar,
         nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
         vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
@@ -420,7 +420,7 @@ weibullnormAlgOpt <- function(start, olsParam, dataTable, S,
         S = S, N = N, FiMat = FiMat, wHvar = wHvar)),
       method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
         stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
-        report.precision = 1L)), sparse = trust.optim(x = startVal,
+        report.precision = 1L)), sparse = trustOptim::trust.optim(x = startVal,
       fn = function(parm) -sum(cweibullnormlike(parm, nXvar = nXvar,
         nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
         vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
@@ -435,7 +435,7 @@ weibullnormAlgOpt <- function(start, olsParam, dataTable, S,
         "dgCMatrix"), method = "Sparse", control = list(maxit = itermax,
         cgtol = gradtol, stop.trust.radius = tol, prec = tol,
         report.level = if (printInfo) 2 else 0, report.precision = 1L,
-        preconditioner = 1L)), mla = mla(b = startVal,
+        preconditioner = 1L)), mla = marqLevAlg::mla(b = startVal,
       fn = function(parm) -sum(cweibullnormlike(parm, nXvar = nXvar,
         nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
         vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
@@ -476,7 +476,6 @@ weibullnormAlgOpt <- function(start, olsParam, dataTable, S,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -520,7 +519,7 @@ fnExpUWeiNorm <- function(u, sigma, k) {
 }
 
 # fn conditional inefficiencies ----------
-#' function to estimate unconditional efficiency (Battese and Coelli style)
+#' function to estimate conditional inefficiency
 #' @param u inefficiency variable over which integration will be done
 #' @param sigmaU standard error of the weibull distribution
 #' @param sigmaV standard error of the two-sided error component
@@ -534,7 +533,7 @@ fnCondEffWeibull <- function(u, sigmaU, sigmaV, k, epsilon, S) {
 }
 
 # fn conditional efficiencies ----------
-#' function to estimate unconditional efficiency (Battese and Coelli style)
+#' function to estimate conditional efficiency (Battese and Coelli style)
 #' @param u inefficiency variable over which integration will be done
 #' @param sigmaU standard error of the weibull distribution
 #' @param sigmaV standard error of the two-sided error component
@@ -549,7 +548,7 @@ fnCondBCEffWeibull <- function(u, sigmaU, sigmaV, k, epsilon,
 }
 
 # fn reciprocal conditional efficiencies----------
-#' function to estimate unconditional efficiency (Battese and Coelli style)
+#' function to estimate conditional efficiency (Battese and Coelli style)
 #' @param u inefficiency variable over which integration will be done
 #' @param sigmaU standard error of the weibull distribution
 #' @param sigmaV standard error of the two-sided error component
@@ -587,37 +586,35 @@ cweibullnormeff <- function(object, level) {
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
     as.numeric(crossprod(matrix(beta), t(Xvar)))
   u <- numeric(object$Nobs)
+  density_epsilon_vec <- numeric(object$Nobs)
   for (i in seq_along(1:object$Nobs)) {
     ur <- exp(Wu[i]/2) * (-log(1 - object$FiMat[i, ]))^(1/k)
-    density_epsilon <- mean(1/exp(Wv[i]/2) * dnorm((epsilon[i] +
+    density_epsilon_vec[i] <- mean(1/exp(Wv[i]/2) * dnorm((epsilon[i] +
       object$S * ur)/exp(Wv[i]/2)))
     u[i] <- hcubature(f = fnCondEffWeibull, lowerLimit = 0,
       upperLimit = Inf, maxEval = 100, fDim = 1, sigmaU = exp(Wu[i]/2),
       sigmaV = exp(Wv[i]/2), k = k, epsilon = epsilon[i],
-      S = object$S, vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon
+      S = object$S, vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon_vec[i]
   }
   if (object$logDepVar == TRUE) {
     teJLMS <- exp(-u)
     teBC <- numeric(object$Nobs)
     teBC_reciprocal <- numeric(object$Nobs)
     for (i in seq_along(1:object$Nobs)) {
-      ur <- exp(Wu[i]/2) * (-log(1 - object$FiMat[i, ]))^(1/k)
-      density_epsilon <- mean(1/exp(Wv[i]/2) * dnorm((epsilon[i] +
-        object$S * ur)/exp(Wv[i]/2)))
       teBC[i] <- hcubature(f = fnCondBCEffWeibull, lowerLimit = 0,
         upperLimit = Inf, maxEval = 100, fDim = 1, sigmaU = exp(Wu[i]/2),
         sigmaV = exp(Wv[i]/2), k = k, epsilon = epsilon[i],
-        S = object$S, vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon
+        S = object$S, vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon_vec[i]
       teBC_reciprocal[i] <- hcubature(f = fnCondBCreciprocalEffWeibull,
         lowerLimit = 0, upperLimit = Inf, maxEval = 100,
         fDim = 1, sigmaU = exp(Wu[i]/2), sigmaV = exp(Wv[i]/2),
         k = k, epsilon = epsilon[i], S = object$S, vectorInterface = FALSE,
-        tol = 1e-15)$integral/density_epsilon
+        tol = 1e-15)$integral/density_epsilon_vec[i]
     }
-    res <- bind_cols(u = u, teJLMS = teJLMS, teBC = teBC,
+    res <- data.frame(u = u, teJLMS = teJLMS, teBC = teBC,
       teBC_reciprocal = teBC_reciprocal)
   } else {
-    res <- bind_cols(u = u)
+    res <- data.frame(u = u)
   }
   return(res)
 }
@@ -626,7 +623,7 @@ cweibullnormeff <- function(object, level) {
 #' marginal impact on efficiencies for weibull-normal distribution
 #' @param object object of class sfacross
 #' @noRd
-cmargweibull_Eu <- function(object) {
+cmargweibullnorm_Eu <- function(object) {
   delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
   k <- object$mlParam[object$nXvar + object$nuZUvar + object$nvZVvar +
@@ -637,10 +634,10 @@ cmargweibull_Eu <- function(object) {
   margEff <- kronecker(matrix(delta[2:object$nuZUvar] * 1/2,
     nrow = 1), matrix(exp(Wu/2) * gamma(1 + 1/k), ncol = 1))
   colnames(margEff) <- paste0("Eu_", colnames(uHvar)[-1])
-  return(margEff)
+  return(data.frame(margEff))
 }
 
-cmargweibull_Vu <- function(object) {
+cmargweibullnorm_Vu <- function(object) {
   delta <- object$mlParam[(object$nXvar + 1):(object$nXvar +
     object$nuZUvar)]
   k <- object$mlParam[object$nXvar + object$nuZUvar + object$nvZVvar +
@@ -652,5 +649,5 @@ cmargweibull_Vu <- function(object) {
     matrix(exp(Wu) * (gamma(1 + 2/k) - (gamma(1 + 1/k))^2),
       ncol = 1))
   colnames(margEff) <- paste0("Vu_", colnames(uHvar)[-1])
-  return(margEff)
+  return(data.frame(margEff))
 }

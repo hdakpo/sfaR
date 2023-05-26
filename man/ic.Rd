@@ -3,27 +3,25 @@
 \name{ic}
 \alias{ic}
 \alias{ic.sfacross}
-\alias{ic.lcmcross}
-\alias{ic.selectioncross}
-\alias{ic.zisfcross}
+\alias{ic.sfalcmcross}
+\alias{ic.sfaselectioncross}
 \title{Extract information criteria of stochastic frontier models}
 \usage{
 \method{ic}{sfacross}(object, IC = "AIC", ...)
 
-\method{ic}{lcmcross}(object, IC = "AIC", ...)
+\method{ic}{sfalcmcross}(object, IC = "AIC", ...)
 
-\method{ic}{selectioncross}(object, IC = "AIC", ...)
-
-\method{ic}{zisfcross}(object, IC = "AIC", ...)
+\method{ic}{sfaselectioncross}(object, IC = "AIC", ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.}
+by \code{\link{sfacross}}, \code{\link{sfalcmcross}}, or
+\code{\link{sfaselectioncross}}.}
 
 \item{IC}{Character string. Information criterion measure. Three criteria
 are available: \itemize{ \item \code{'AIC'} for Akaike information criterion
 (default) \item \code{'BIC'} for Bayesian information criterion \item
-\code{'HQIC'} for Hannan-Quinn information criterion }}
+\code{'HQIC'} for Hannan-Quinn information criterion }.}
 
 \item{...}{Currently ignored.}
 }
@@ -32,9 +30,9 @@ are available: \itemize{ \item \code{'AIC'} for Akaike information criterion
 (AIC, BIC or HQIC) of the maximum likelihood coefficients.
 }
 \description{
-\code{\link{ic}} returns information criterion from classic or latent class
-stochastic frontier models estimated with \code{\link{sfacross}},
-\code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.
+\code{\link{ic}} returns information criterion from stochastic
+frontier models estimated with \code{\link{sfacross}}, \code{\link{sfalcmcross}},
+or \code{\link{sfaselectioncross}}.
 }
 \details{
 The different information criteria are computed as follows: \itemize{ \item
@@ -45,27 +43,26 @@ estimated and \eqn{N} the number of observations.
 }
 \examples{
 
+\dontrun{
 ## Using data on Swiss railway
 # LCM (cost function) half normal distribution
-cb_2c_u <- lcmcross(formula = LNCT ~ LNQ2 + LNQ3 + LNNET + LNPK + LNPL,
-    udist = 'hnormal', uhet = ~ 1, data = swissrailways, S = -1, method='ucminf')
-  ic(cb_2c_u)
-  ic(cb_2c_u, IC = 'BIC')
-  ic(cb_2c_u, IC = 'HQIC')
+cb_2c_u <- sfalcmcross(formula = LNCT ~ LNQ2 + LNQ3 + LNNET + LNPK + LNPL,
+udist = 'hnormal', uhet = ~ 1, data = swissrailways, S = -1, method='ucminf')
+ic(cb_2c_u)
+ic(cb_2c_u, IC = 'BIC')
+ic(cb_2c_u, IC = 'HQIC')
+}
 
 }
 \seealso{
 \code{\link{sfacross}}, for the stochastic frontier analysis model
-fitting function.
+fitting function using cross-sectional or pooled data.
 
-\code{\link{lcmcross}}, for the latent class stochastic frontier analysis
-model fitting function.
+\code{\link{sfalcmcross}}, for the latent class stochastic frontier analysis
+model fitting function using cross-sectional or pooled data.
 
-\code{\link{selectioncross}} for sample selection in stochastic frontier model
-fitting function.
-
-\code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
-fitting function.
+\code{\link{sfaselectioncross}} for sample selection in stochastic frontier
+model fitting function using cross-sectional or pooled data.
 }
 \keyword{AIC}
 \keyword{BIC}

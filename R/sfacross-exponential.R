@@ -244,13 +244,13 @@ exponormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
     vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar,
     S = S))
   if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
-    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
-      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
-      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
-      sann = function(...) maxSANN(...))
+    maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...),
+      bhhh = function(...) maxLik::maxBHHH(...), nr = function(...) maxLik::maxNR(...),
+      nm = function(...) maxLik::maxNM(...), cg = function(...) maxLik::maxCG(...),
+      sann = function(...) maxLik::maxSANN(...))
     method <- "maxLikAlgo"
   }
-  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+  mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
     fn = function(parm) -sum(cexponormlike(parm, nXvar = nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
       vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar,
@@ -266,7 +266,7 @@ exponormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       iterlim = itermax, reltol = tol, tol = tol, qac = qac),
     nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
     uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-    wHvar = wHvar, S = S), sr1 = trust.optim(x = startVal,
+    wHvar = wHvar, S = S), sr1 = trustOptim::trust.optim(x = startVal,
     fn = function(parm) -sum(cexponormlike(parm, nXvar = nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
       vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar,
@@ -276,7 +276,7 @@ exponormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       wHvar = wHvar, S = S)), method = "SR1", control = list(maxit = itermax,
       cgtol = gradtol, stop.trust.radius = tol, prec = tol,
       report.level = if (printInfo) 2 else 0, report.precision = 1L)),
-    sparse = trust.optim(x = startVal, fn = function(parm) -sum(cexponormlike(parm,
+    sparse = trustOptim::trust.optim(x = startVal, fn = function(parm) -sum(cexponormlike(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       wHvar = wHvar, S = S)), gr = function(parm) -colSums(cgradexponormlike(parm,
@@ -289,7 +289,7 @@ exponormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       control = list(maxit = itermax, cgtol = gradtol,
         stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
         report.precision = 1L, preconditioner = 1L)),
-    mla = mla(b = startVal, fn = function(parm) -sum(cexponormlike(parm,
+    mla = marqLevAlg::mla(b = startVal, fn = function(parm) -sum(cexponormlike(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
       wHvar = wHvar, S = S)), gr = function(parm) -colSums(cgradexponormlike(parm,
@@ -325,7 +325,6 @@ exponormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -395,11 +394,11 @@ cexponormeff <- function(object, level) {
     teBCUB <- exp(-uLB)
     teBC_reciprocal <- exp(mustar + 1/2 * exp(Wv)) * pnorm(mustar/sqrt(exp(Wv)) +
       sqrt(exp(Wv)))/pnorm(mustar/sqrt(exp(Wv)))
-    res <- bind_cols(u = u, uLB = uLB, uUB = uUB, teJLMS = teJLMS,
+    res <- data.frame(u = u, uLB = uLB, uUB = uUB, teJLMS = teJLMS,
       m = m, teMO = teMO, teBC = teBC, teBCLB = teBCLB,
       teBCUB = teBCUB, teBC_reciprocal = teBC_reciprocal)
   } else {
-    res <- bind_cols(u = u, uLB = uLB, uUB = uUB, m = m)
+    res <- data.frame(u = u, uLB = uLB, uUB = uUB, m = m)
   }
   return(res)
 }
@@ -417,7 +416,7 @@ cmargexponorm_Eu <- function(object) {
   margEff <- kronecker(matrix(delta[2:object$nuZUvar] * 1/2,
     nrow = 1), matrix(exp(Wu/2), ncol = 1))
   colnames(margEff) <- paste0("Eu_", colnames(uHvar)[-1])
-  return(margEff)
+  return(data.frame(margEff))
 }
 
 cmargexponorm_Vu <- function(object) {
@@ -429,5 +428,5 @@ cmargexponorm_Vu <- function(object) {
   margEff <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
     matrix(exp(Wu), ncol = 1))
   colnames(margEff) <- paste0("Vu_", colnames(uHvar)[-1])
-  return(margEff)
+  return(data.frame(margEff))
 }

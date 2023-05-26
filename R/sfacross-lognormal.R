@@ -66,7 +66,7 @@ cstlognorm <- function(olsObj, epsiRes, S, nmuZUvar, nuZUvar,
   uHvar, muHvar, nvZVvar, vHvar) {
   m2 <- sum(epsiRes^2)/length(epsiRes)
   m3 <- sum(epsiRes^3)/length(epsiRes)
-  varu <- tryCatch((nleqslv(x = 0.01, fn = function(x) {
+  varu <- tryCatch((nleqslv::nleqslv(x = 0.01, fn = function(x) {
     -exp(9 * x^2/2) + 3 * exp(5 * x^2/2) - 2 * exp(3 * x^2/2) -
       S * m3
   }, method = "Newton")$x)^2, error = function(e) e)
@@ -98,12 +98,6 @@ cstlognorm <- function(olsObj, epsiRes, S, nmuZUvar, nuZUvar,
   } else {
     lm(dep_v ~ ., data = as.data.frame(vHvar[, 2:nvZVvar,
       drop = FALSE]))
-  }
-  if (any(is.na(reg_hetv$coefficients))) {
-    stop("at least one of the OLS coefficients of 'vhet' is NA: ",
-      paste(colnames(vHvar)[is.na(reg_hetv$coefficients)],
-        collapse = ", "), ". This may be due to a singular matrix due to potential perfect multicollinearity",
-      call. = FALSE)
   }
   reg_hetmu <- if (nmuZUvar == 1) {
     lm(epsiRes ~ 1)
@@ -417,13 +411,13 @@ lognormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
     muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
     Xvar = Xvar, S = S, N = N, FiMat = FiMat, wHvar = wHvar))
   if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
-    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
-      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
-      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
-      sann = function(...) maxSANN(...))
+    maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...),
+      bhhh = function(...) maxLik::maxBHHH(...), nr = function(...) maxLik::maxNR(...),
+      nm = function(...) maxLik::maxNM(...), cg = function(...) maxLik::maxCG(...),
+      sann = function(...) maxLik::maxSANN(...))
     method <- "maxLikAlgo"
   }
-  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+  mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
     fn = function(parm) -sum(clognormlike(parm, nXvar = nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
       muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
@@ -442,7 +436,7 @@ lognormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
     nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
     nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
     vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
-    FiMat = FiMat, wHvar = wHvar), sr1 = trust.optim(x = startVal,
+    FiMat = FiMat, wHvar = wHvar), sr1 = trustOptim::trust.optim(x = startVal,
     fn = function(parm) -sum(clognormlike(parm, nXvar = nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
       muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
@@ -453,7 +447,7 @@ lognormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       Xvar = Xvar, S = S, N = N, FiMat = FiMat, wHvar = wHvar)),
     method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
       stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
-      report.precision = 1L)), sparse = trust.optim(x = startVal,
+      report.precision = 1L)), sparse = trustOptim::trust.optim(x = startVal,
     fn = function(parm) -sum(clognormlike(parm, nXvar = nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
       muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
@@ -462,42 +456,42 @@ lognormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
       muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
       Xvar = Xvar, S = S, N = N, FiMat = FiMat, wHvar = wHvar)),
-    function(parm) as(-chesslognormlike(parm, nXvar = nXvar,
+    hs = function(parm) as(-chesslognormlike(parm, nXvar = nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
       muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
       Xvar = Xvar, S = S, N = N, FiMat = FiMat, wHvar = wHvar),
       "dgCMatrix"), method = "Sparse", control = list(maxit = itermax,
       cgtol = gradtol, stop.trust.radius = tol, prec = tol,
       report.level = if (printInfo) 2 else 0, report.precision = 1L,
-      preconditioner = 1L)), mla = mla(b = startVal, fn = function(parm) -sum(clognormlike(parm,
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-    nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
-    FiMat = FiMat, wHvar = wHvar)), gr = function(parm) -colSums(cgradlognormlike(parm,
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-    nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
-    FiMat = FiMat, wHvar = wHvar)), hess = function(parm) -chesslognormlike(parm,
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-    nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
-    FiMat = FiMat, wHvar = wHvar), print.info = printInfo,
-    maxiter = itermax, epsa = gradtol, epsb = gradtol), nlminb = nlminb(start = startVal,
-    objective = function(parm) -sum(clognormlike(parm, nXvar = nXvar,
+      preconditioner = 1L)), mla = marqLevAlg::mla(b = startVal,
+    fn = function(parm) -sum(clognormlike(parm, nXvar = nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
       muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
       Xvar = Xvar, S = S, N = N, FiMat = FiMat, wHvar = wHvar)),
-    gradient = function(parm) -colSums(cgradlognormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
-      FiMat = FiMat, wHvar = wHvar)), hessian = function(parm) -chesslognormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
-      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
-      FiMat = FiMat, wHvar = wHvar), control = list(iter.max = itermax,
-      trace = if (printInfo) 1 else 0, eval.max = itermax,
-      rel.tol = tol, x.tol = tol)))
+    gr = function(parm) -colSums(cgradlognormlike(parm, nXvar = nXvar,
+      nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
+      muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
+      Xvar = Xvar, S = S, N = N, FiMat = FiMat, wHvar = wHvar)),
+    hess = function(parm) -chesslognormlike(parm, nXvar = nXvar,
+      nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
+      muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
+      Xvar = Xvar, S = S, N = N, FiMat = FiMat, wHvar = wHvar),
+    print.info = printInfo, maxiter = itermax, epsa = gradtol,
+    epsb = gradtol), nlminb = nlminb(start = startVal, objective = function(parm) -sum(clognormlike(parm,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
+    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
+    FiMat = FiMat, wHvar = wHvar)), gradient = function(parm) -colSums(cgradlognormlike(parm,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
+    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
+    FiMat = FiMat, wHvar = wHvar)), hessian = function(parm) -chesslognormlike(parm,
+    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+    nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
+    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
+    FiMat = FiMat, wHvar = wHvar), control = list(iter.max = itermax,
+    trace = if (printInfo) 1 else 0, eval.max = itermax,
+    rel.tol = tol, x.tol = tol)))
   if (method %in% c("ucminf", "nlminb")) {
     mleObj$gradient <- colSums(cgradlognormlike(mleObj$par,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
@@ -512,7 +506,6 @@ lognormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -559,7 +552,7 @@ fnExpULogNorm <- function(u, sigma, mu) {
 }
 
 # fn conditional inefficiencies ----------
-#' function to estimate unconditional efficiency (Battese and Coelli style)
+#' function to estimate conditional inefficiency
 #' @param u inefficiency variable over which integration will be done
 #' @param sigmaU standard error of the weibull distribution
 #' @param sigmaV standard error of the two-sided error component
@@ -574,7 +567,7 @@ fnCondEffLogNorm <- function(u, sigmaU, sigmaV, mu, epsilon,
 }
 
 # fn conditional efficiencies ----------
-#' function to estimate unconditional efficiency (Battese and Coelli style)
+#' function to estimate conditional efficiency (Battese and Coelli style)
 #' @param u inefficiency variable over which integration will be done
 #' @param sigmaU standard error of the weibull distribution
 #' @param sigmaV standard error of the two-sided error component
@@ -589,37 +582,7 @@ fnCondBCEffLogNorm <- function(u, sigmaU, sigmaV, mu, epsilon,
 }
 
 # fn reciproccal conditional efficiencies ----------
-#' function to estimate unconditional efficiency (Battese and Coelli style)
-#' @param u inefficiency variable over which integration will be done
-#' @param sigmaU standard error of the weibull distribution
-#' @param sigmaV standard error of the two-sided error component
-#' @param mu location parameter
-#' @param epsilon composite noise
-#' @param S integer for cost/prod estimation
-#' @noRd
-fnCondBCreciprocalEffLogNorm <- function(u, sigmaU, sigmaV, mu,
-  epsilon, S) {
-  exp(u)/u * 1/(sigmaU * sigmaV) * dnorm((log(u) - mu)/sigmaU) *
-    dnorm((epsilon + S * u)/sigmaV)
-}
-
-# fn to solve for conditional efficiencies ----------
-#' function to estimate unconditional efficiency (Battese and Coelli style)
-#' @param u inefficiency variable over which integration will be done
-#' @param sigmaU standard error of the weibull distribution
-#' @param sigmaV standard error of the two-sided error component
-#' @param mu location parameter
-#' @param epsilon composite noise
-#' @param S integer for cost/prod estimation
-#' @noRd
-fnCondBCEffLogNorm <- function(u, sigmaU, sigmaV, mu, epsilon,
-  S) {
-  exp(-u)/u * 1/(sigmaU * sigmaV) * dnorm((log(u) - mu)/sigmaU) *
-    dnorm((epsilon + S * u)/sigmaV)
-}
-
-# fn to solve for conditional inefficiencies ----------
-#' function to estimate unconditional efficiency (Battese and Coelli style)
+#' function to estimate conditional efficiency (Battese and Coelli style)
 #' @param u inefficiency variable over which integration will be done
 #' @param sigmaU standard error of the weibull distribution
 #' @param sigmaV standard error of the two-sided error component
@@ -661,39 +624,36 @@ clognormeff <- function(object, level) {
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
     as.numeric(crossprod(matrix(beta), t(Xvar)))
   u <- numeric(object$Nobs)
+  density_epsilon_vec <- numeric(object$Nobs)
   for (i in 1:object$Nobs) {
     ur <- exp(mu[i] + exp(Wu[i]/2) * qnorm(object$FiMat[i,
       ]))
-    density_epsilon <- (mean(1/exp(Wv[i]/2) * dnorm((epsilon[i] +
+    density_epsilon_vec[i] <- (mean(1/exp(Wv[i]/2) * dnorm((epsilon[i] +
       object$S * ur)/exp(Wv[i]/2))))
     u[i] <- hcubature(f = fnCondEffLogNorm, lowerLimit = 0,
       upperLimit = Inf, maxEval = 100, fDim = 1, sigmaU = exp(Wu[i]/2),
       sigmaV = exp(Wv[i]/2), mu = mu[i], epsilon = epsilon[i],
-      S = object$S, vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon
+      S = object$S, vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon_vec[i]
   }
   if (object$logDepVar == TRUE) {
     teJLMS <- exp(-u)
     teBC <- numeric(object$Nobs)
     teBC_reciprocal <- numeric(object$Nobs)
     for (i in 1:object$Nobs) {
-      ur <- exp(mu[i] + exp(Wu[i]/2) * qnorm(object$FiMat[i,
-        ]))
-      density_epsilon <- (mean(1/exp(Wv[i]/2) * dnorm((epsilon[i] +
-        object$S * ur)/exp(Wv[i]/2))))
       teBC[i] <- hcubature(f = fnCondBCEffLogNorm, lowerLimit = 0,
         upperLimit = Inf, maxEval = 100, fDim = 1, sigmaU = exp(Wu[i]/2),
         sigmaV = exp(Wv[i]/2), mu = mu[i], epsilon = epsilon[i],
-        S = object$S, vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon
+        S = object$S, vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon_vec[i]
       teBC_reciprocal[i] <- hcubature(f = fnCondBCreciprocalEffLogNorm,
         lowerLimit = 0, upperLimit = Inf, maxEval = 100,
         fDim = 1, sigmaU = exp(Wu[i]/2), sigmaV = exp(Wv[i]/2),
         mu = mu[i], epsilon = epsilon[i], S = object$S,
-        vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon
+        vectorInterface = FALSE, tol = 1e-15)$integral/density_epsilon_vec[i]
     }
-    res <- bind_cols(u = u, teJLMS = teJLMS, teBC = teBC,
+    res <- data.frame(u = u, teJLMS = teJLMS, teBC = teBC,
       teBC_reciprocal = teBC_reciprocal)
   } else {
-    res <- bind_cols(u = u)
+    res <- data.frame(u = u)
   }
   return(res)
 }
@@ -725,7 +685,7 @@ cmarglognorm_Eu <- function(object) {
     mu_mat[, !idTRUE_mu], Wu_mat[, !idTRUE_Wu])
   colnames(margEff) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
     colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
-  return(margEff)
+  return(data.frame(margEff))
 }
 
 cmarglognorm_Vu <- function(object) {
@@ -751,5 +711,5 @@ cmarglognorm_Vu <- function(object) {
     mu_mat[, !idTRUE_mu], Wu_mat[, !idTRUE_Wu])
   colnames(margEff) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
     colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
-  return(margEff)
+  return(data.frame(margEff))
 }

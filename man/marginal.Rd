@@ -3,26 +3,25 @@
 \name{marginal}
 \alias{marginal}
 \alias{marginal.sfacross}
-\alias{marginal.lcmcross}
-\alias{marginal.selectioncross}
-\alias{marginal.zisfcross}
+\alias{marginal.sfalcmcross}
+\alias{marginal.sfaselectioncross}
 \title{Marginal effects of the inefficiency drivers in stochastic frontier models}
 \usage{
 \method{marginal}{sfacross}(object, newData = NULL, ...)
 
-\method{marginal}{lcmcross}(object, newData = NULL, ...)
+\method{marginal}{sfalcmcross}(object, newData = NULL, ...)
 
-\method{marginal}{selectioncross}(object, newData = NULL, ...)
-
-\method{marginal}{zisfcross}(object, newData = NULL, ...)
+\method{marginal}{sfaselectioncross}(object, newData = NULL, ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.}
+by \code{\link{sfacross}}, \code{\link{sfalcmcross}}, or
+\code{\link{sfaselectioncross}}.}
 
-\item{newData}{Optional data frame that is used to calculate the marginal effect of \eqn{Z} variables on
-inefficiency. If NULL (the default), the marginal estimates are calculated
-for the observations that were used in the estimation.}
+\item{newData}{Optional data frame that is used to calculate the marginal
+effect of \eqn{Z} variables on inefficiency. If NULL (the default), the
+marginal estimates are calculated for the observations that were used in the
+estimation.}
 
 \item{...}{Currently ignored.}
 }
@@ -30,27 +29,25 @@ for the observations that were used in the estimation.}
 \code{\link{marginal}} returns a data frame containing the marginal
 effects of the \eqn{Z_u} variables on the expected inefficiency (each
 variable has the prefix \code{'Eu_'}) and on the variance of the
-inefficiency (each variable has the prefix \code{'Vu_'}) is returned.
+inefficiency (each variable has the prefix \code{'Vu_'}).
 
-In the case of the latent class frontier model (LCM) or the zero inefficiency
-frontier model, each variable terminates with
-\code{'_c#'} where \code{'#'} is the class number
-.
+In the case of the latent class stochastic frontier (LCM), each variable
+ends with \code{'_c#'} where \code{'#'} is the class number.
 }
 \description{
-This function returns marginal effects of the inefficiency drivers from
-classic or latent class stochastic frontier models estimated with
-\code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.
+This function returns marginal effects of the inefficiency drivers from stochastic
+frontier models estimated with \code{\link{sfacross}}, \code{\link{sfalcmcross}},
+or \code{\link{sfaselectioncross}}.
 }
 \details{
-\code{\link{marginal}} operates in the presence of exogenous variables that
-explain inefficiency, namely the inefficiency drivers (\eqn{uhet = ~ Z_u} or
-\eqn{muhet = ~ Z_{mu}}).
+\code{\link{marginal}} operates in the presence of exogenous
+variables that explain inefficiency, namely the inefficiency drivers
+(\eqn{uhet = ~ Z_u} or \eqn{muhet = ~ Z_{mu}}).
 
 Two components are computed for each variable: the marginal effects on the
-expected inefficiency (\eqn{\frac{\partial E[u]}{\partial Z_{(m)u}}}) and
+expected inefficiency (\eqn{\frac{\partial E[u]}{\partial Z_{mu}}}) and
 the marginal effects on the variance of inefficiency (\eqn{\frac{\partial
-V[u]}{\partial Z_{(m)u}}}).
+V[u]}{\partial Z_{mu}}}).
 
 The model also allows the Wang (2002) parametrization of \eqn{\mu} and
 \eqn{\sigma_u^2} by the same vector of exogenous variables. This double
@@ -59,22 +56,24 @@ inefficiency and its drivers.
 }
 \examples{
 
+\dontrun{
 ## Using data on fossil fuel fired steam electric power generation plants in the U.S.
 # Translog SFA (cost function) truncated normal with scaling property
 tl_u_ts <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
-    log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
-    I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
-    udist = 'tnormal', muhet = ~ regu + wl, uhet = ~ regu + wl, data = utility, S = -1,
-    scaling = TRUE, method = 'mla')
-  marg.tl_u_ts <- marginal(tl_u_ts)
-  summary(marg.tl_u_ts)
+log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+udist = 'tnormal', muhet = ~ regu + wl, uhet = ~ regu + wl, data = utility, 
+S = -1, scaling = TRUE, method = 'mla')
+marg.tl_u_ts <- marginal(tl_u_ts)
+summary(marg.tl_u_ts)
 
-## Using data on eighty-two countries production (DGP)
+## Using data on eighty-two countries production (GDP)
 # LCM Cobb Douglas (production function) half normal distribution
-cb_2c_h <- lcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal',
+cb_2c_h <- sfalcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal',
     data = worldprod, uhet = ~ initStat + h, S = 1, method = 'mla')
   marg.cb_2c_h <- marginal(cb_2c_h)
   summary(marg.cb_2c_h)
+  }
 
 }
 \references{
@@ -84,16 +83,13 @@ Analysis}, \bold{18}:241--253.
 }
 \seealso{
 \code{\link{sfacross}}, for the stochastic frontier analysis model
-fitting function.
+fitting function using cross-sectional or pooled data.
 
-\code{\link{lcmcross}}, for the latent class stochastic frontier analysis
-model fitting function.
+\code{\link{sfalcmcross}}, for the latent class stochastic frontier analysis
+model fitting function using cross-sectional or pooled data.
 
-\code{\link{selectioncross}} for sample selection in stochastic frontier model
-fitting function.
-
-\code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
-fitting function.
+\code{\link{sfaselectioncross}} for sample selection in stochastic frontier
+model fitting function using cross-sectional or pooled data.
 }
 \keyword{marginal}
 \keyword{methods}

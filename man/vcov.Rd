@@ -3,34 +3,33 @@
 \name{vcov}
 \alias{vcov}
 \alias{vcov.sfacross}
-\alias{vcov.lcmcross}
-\alias{vcov.selectioncross}
-\alias{vcov.zisfcross}
+\alias{vcov.sfalcmcross}
+\alias{vcov.sfaselectioncross}
 \title{Compute variance-covariance matrix of stochastic frontier models}
 \usage{
 \method{vcov}{sfacross}(object, extraPar = FALSE, ...)
 
-\method{vcov}{lcmcross}(object, ...)
+\method{vcov}{sfalcmcross}(object, ...)
 
-\method{vcov}{selectioncross}(object, extraPar = FALSE, ...)
-
-\method{vcov}{zisfcross}(object, ...)
+\method{vcov}{sfaselectioncross}(object, extraPar = FALSE, ...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.}
+by \code{\link{sfacross}}, \code{\link{sfalcmcross}}, or
+\code{\link{sfaselectioncross}}.}
 
 \item{extraPar}{Logical. Only available for non heteroscedastic models
-returned by \code{\link{sfacross}} or \code{\link{selectioncross}}. Default = \code{FALSE}. If \code{TRUE},
-variances and covariances of additional parameters are returned:
+returned by \code{\link{sfacross}} and \code{\link{sfaselectioncross}}.
+Default = \code{FALSE}. If \code{TRUE}, variances and covariances of
+additional parameters are returned:
 
 \code{sigmaSq} = \code{sigmauSq} + \code{sigmavSq}
 
 \code{lambdaSq} = \code{sigmauSq}/\code{sigmavSq}
 
-\code{sigmauSq} = \eqn{\exp{(Wu)}} = \eqn{\exp{(\delta Z_u)}}
+\code{sigmauSq} = \eqn{\exp{(Wu)}} = \eqn{\exp{(\bm{\delta} \mathbf{Z}_u)}}
 
-\code{sigmavSq} = \eqn{\exp{(Wv)}} = \eqn{\exp{(\phi Z_v)}}
+\code{sigmavSq} = \eqn{\exp{(Wv)}} = \eqn{\exp{(\bm{\phi} \mathbf{Z}_v)}}
 
 \code{sigma} = \code{sigmaSq}^0.5
 
@@ -50,76 +49,76 @@ coefficients is returned.
 }
 \description{
 \code{\link{vcov}} computes the variance-covariance matrix of the maximum
-likelihood (ML) coefficients of classic or latent class stochastic frontier
-models estimated by \code{\link{sfacross}}, \code{\link{lcmcross}}, \code{\link{selectioncross}} or \code{\link{zisfcross}}.
+likelihood (ML) coefficients from stochastic frontier models estimated with
+\code{\link{sfacross}}, \code{\link{sfalcmcross}},
+or \code{\link{sfaselectioncross}}.
 }
 \details{
-The variance-covariance matrix is obtained by the inversion of the negative
-Hessian matrix. Depending on the distribution and the \code{'hessianType'}
-option, the analytical/numeric Hessian or the bhhh Hessian is evaluated.
+The variance-covariance matrix is obtained by the inversion of the
+negative Hessian matrix. Depending on the distribution and the
+\code{'hessianType'} option, the analytical/numeric Hessian or the bhhh
+Hessian is evaluated.
 
-The argument \code{extraPar}, is currently available for objects of class
-\code{'sfacross'}.  When \code{'extraPar = TRUE'}, the variance-covariance
-of the additional parameters is obtained using the delta method.
+The argument \code{extraPar}, is currently available only for objects of class
+\code{'sfacross'} and \code{'sfaselectioncross'}. When
+\code{'extraPar = TRUE'}, the variance-covariance of the additional
+parameters is obtained using the delta method.
 }
 \examples{
 
 ## Using data on Spanish dairy farms
 # Cobb Douglas (production function) half normal distribution
 cb_s_h <- sfacross(formula = YIT ~ X1 + X2 + X3 + X4, udist = 'hnormal',
-    data = dairyspain, S = 1, method = 'bfgs')
-  vcov(cb_s_h)
-  vcov(cb_s_h, extraPar = TRUE)
+data = dairyspain, S = 1, method = 'bfgs')
+vcov(cb_s_h)
+vcov(cb_s_h, extraPar = TRUE)
  
- # Other variance-covariance matrices can be obtained using the sandwich package
+# Other variance-covariance matrices can be obtained using the sandwich package
  
- # Robust variance-covariance matrix
+# Robust variance-covariance matrix
  
- requireNamespace("sandwich", quietly = TRUE)
+requireNamespace('sandwich', quietly = TRUE)
  
- sandwich::vcovCL(cb_s_h)
+sandwich::vcovCL(cb_s_h)
  
- # Coefficients and standard error can be obtained using lmtest package
+# Coefficients and standard errors can be obtained using lmtest package
  
- requireNamespace("lmtest", quietly = TRUE)
+requireNamespace('lmtest', quietly = TRUE)
  
- lmtest::coeftest(cb_s_h, vcov. = sandwich::vcovCL)
+lmtest::coeftest(cb_s_h, vcov. = sandwich::vcovCL)
  
- # Clustered Standard errors
+# Clustered standard errors
  
- lmtest::coeftest(cb_s_h, vcov. = sandwich::vcovCL, cluster = ~ FARM)
+lmtest::coeftest(cb_s_h, vcov. = sandwich::vcovCL, cluster = ~ FARM)
  
- # Doubly clustered standard errors
+# Doubly clustered standard errors
  
- lmtest::coeftest(cb_s_h, vcov. = sandwich::vcovCL, cluster = ~ FARM + YEAR)
+lmtest::coeftest(cb_s_h, vcov. = sandwich::vcovCL, cluster = ~ FARM + YEAR)
  
- # BHHH standard errors can also be obtained using
+# BHHH standard errors
  
- lmtest::coeftest(cb_s_h, vcov. = sandwich::vcovOPG)
+lmtest::coeftest(cb_s_h, vcov. = sandwich::vcovOPG)
  
- # Adjusted BHHH standard errors is obtained by
+# Adjusted BHHH standard errors
  
- lmtest::coeftest(cb_s_h, vcov. = sandwich::vcovOPG, adjust = TRUE)
+lmtest::coeftest(cb_s_h, vcov. = sandwich::vcovOPG, adjust = TRUE)
 
-## Using data on eighty-two countries production (DGP)
+## Using data on eighty-two countries production (GDP)
 # LCM Cobb Douglas (production function) half normal distribution
-cb_2c_h <- lcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal',
-    data = worldprod, uhet = ~ initStat, S = 1)
-  vcov(cb_2c_h)
+cb_2c_h <- sfalcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal',
+data = worldprod, uhet = ~ initStat, S = 1)
+vcov(cb_2c_h)
 
 }
 \seealso{
 \code{\link{sfacross}}, for the stochastic frontier analysis model
-fitting function.
+fitting function using cross-sectional or pooled data.
 
-\code{\link{lcmcross}}, for the latent class stochastic frontier analysis
-model fitting function.
+\code{\link{sfalcmcross}}, for the latent class stochastic frontier analysis
+model fitting function using cross-sectional or pooled data.
 
-\code{\link{selectioncross}} for sample selection in stochastic frontier model
-fitting function.
-
-\code{\link{zisfcross}} for zero inefficiency in stochastic frontier model
-fitting function.
+\code{\link{sfaselectioncross}} for sample selection in stochastic frontier
+model fitting function using cross-sectional data.
 }
 \keyword{methods}
 \keyword{vcov}

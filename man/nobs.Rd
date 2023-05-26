@@ -3,24 +3,21 @@
 \name{nobs}
 \alias{nobs}
 \alias{nobs.sfacross}
-\alias{nobs.lcmcross}
-\alias{nobs.selectioncross}
-\alias{nobs.zisfcross}
-\title{Extract Total Number of Observations Used in frontier models}
+\alias{nobs.sfalcmcross}
+\alias{nobs.sfaselectioncross}
+\title{Extract total number of observations used in frontier models}
 \usage{
 \method{nobs}{sfacross}(object, ...)
 
-\method{nobs}{lcmcross}(object, ...)
+\method{nobs}{sfalcmcross}(object, ...)
 
-\method{nobs}{selectioncross}(object, ...)
-
-\method{nobs}{zisfcross}(object, ...)
+\method{nobs}{sfaselectioncross}(object, ...)
 }
 \arguments{
-\item{object}{a \code{sfacross}, \code{lcmcross}, \code{selectioncross} or \code{zisfcross} object for which the number of
-total observations is to be extracted,}
+\item{object}{a \code{sfacross}, \code{sfalcmcross}, or \code{sfaselectioncross}
+object for which the number of total observations is to be extracted.}
 
-\item{\dots}{further arguments.}
+\item{\dots}{Currently ignored.}
 }
 \value{
 A single number, normally an integer.
@@ -35,19 +32,30 @@ used by the estimation procedure. It is not necessarily the number
 of observations of the model frame (number of rows in the model
 frame), because sometimes the model frame is further reduced by the
 estimation procedure especially in the presence of NA. In the case of
-\code{selectioncross}, \code{nobs} returns the number of observations used in the
-selection equation.
+\code{sfaselectioncross}, \code{nobs} returns the number of observations used in the
+frontier equation.
 }
 \examples{
 
-## Using data on fossil fuel fired steam electric power generation plants in U.S.
+\dontrun{
+## Using data on fossil fuel fired steam electric power generation plants in the U.S.
 # Translog (cost function) half normal with heteroscedasticity
 tl_u_h <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
-    log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
-    I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
-    udist = 'hnormal', uhet = ~ regu, data = utility, S = -1, method = 'bfgs')
-    
- nobs(tl_u_h)
+log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+udist = 'hnormal', uhet = ~ regu, data = utility, S = -1, method = 'bfgs')
+nobs(tl_u_h)
+}
 
+}
+\seealso{
+\code{\link{sfacross}}, for the stochastic frontier analysis model
+fitting function using cross-sectional or pooled data.
+
+\code{\link{sfalcmcross}}, for the latent class stochastic frontier analysis
+model fitting function using cross-sectional or pooled data.
+
+\code{\link{sfaselectioncross}} for sample selection in stochastic frontier
+model fitting function using cross-sectional or pooled data.
 }
 \keyword{attribute}

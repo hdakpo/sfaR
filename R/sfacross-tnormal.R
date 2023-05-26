@@ -371,13 +371,13 @@ truncnormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
     muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
     Xvar = Xvar, S = S, wHvar = wHvar))
   if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
-    maxRoutine <- switch(method, bfgs = function(...) maxBFGS(...),
-      bhhh = function(...) maxBHHH(...), nr = function(...) maxNR(...),
-      nm = function(...) maxNM(...), cg = function(...) maxCG(...),
-      sann = function(...) maxSANN(...))
+    maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...),
+      bhhh = function(...) maxLik::maxBHHH(...), nr = function(...) maxLik::maxNR(...),
+      nm = function(...) maxLik::maxNM(...), cg = function(...) maxLik::maxCG(...),
+      sann = function(...) maxLik::maxSANN(...))
     method <- "maxLikAlgo"
   }
-  mleObj <- switch(method, ucminf = ucminf(par = startVal,
+  mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
     fn = function(parm) -sum(ctruncnormlike(parm, nXvar = nXvar,
       nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
       muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
@@ -395,7 +395,7 @@ truncnormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
     nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
     nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
     vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar),
-    sr1 = trust.optim(x = startVal, fn = function(parm) -sum(ctruncnormlike(parm,
+    sr1 = trustOptim::trust.optim(x = startVal, fn = function(parm) -sum(ctruncnormlike(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
       vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar)),
@@ -406,7 +406,7 @@ truncnormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
         wHvar = wHvar)), method = "SR1", control = list(maxit = itermax,
         cgtol = gradtol, stop.trust.radius = tol, prec = tol,
         report.level = if (printInfo) 2 else 0, report.precision = 1L)),
-    sparse = trust.optim(x = startVal, fn = function(parm) -sum(ctruncnormlike(parm,
+    sparse = trustOptim::trust.optim(x = startVal, fn = function(parm) -sum(ctruncnormlike(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
       vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar)),
@@ -422,7 +422,7 @@ truncnormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       control = list(maxit = itermax, cgtol = gradtol,
         stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
         report.precision = 1L, preconditioner = 1L)),
-    mla = mla(b = startVal, fn = function(parm) -sum(ctruncnormlike(parm,
+    mla = marqLevAlg::mla(b = startVal, fn = function(parm) -sum(ctruncnormlike(parm,
       nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
       nmuZUvar = nmuZUvar, muHvar = muHvar, uHvar = uHvar,
       vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar)),
@@ -464,7 +464,6 @@ truncnormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
       mleObj$estimate
     } else {
       if (method %in% c("sr1", "sparse")) {
-        names(mleObj$solution) <- names(startVal)
         mleObj$solution
       } else {
         if (method == "mla") {
@@ -544,11 +543,11 @@ ctruncnormeff <- function(object, level) {
     teBCUB <- exp(-uLB)
     teBC_reciprocal <- exp(mustar + 1/2 * sigmastar^2) *
       pnorm(mustar/sigmastar + sigmastar)/pnorm(mustar/sigmastar)
-    res <- bind_cols(u = u, uLB = uLB, uUB = uUB, teJLMS = teJLMS,
+    res <- data.frame(u = u, uLB = uLB, uUB = uUB, teJLMS = teJLMS,
       m = m, teMO = teMO, teBC = teBC, teBCLB = teBCLB,
       teBCUB = teBCUB, teBC_reciprocal = teBC_reciprocal)
   } else {
-    res <- bind_cols(u = u, uLB = uLB, uUB = uUB, m = m)
+    res <- data.frame(u = u, uLB = uLB, uUB = uUB, m = m)
   }
   return(res)
 }
@@ -583,7 +582,7 @@ cmargtruncnorm_Eu <- function(object) {
     mu_mat[, !idTRUE_mu], Wu_mat[, !idTRUE_Wu])
   colnames(margEff) <- paste0("Eu_", c(colnames(muHvar)[-1][idTRUE_mu],
     colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
-  return(margEff)
+  return(data.frame(margEff))
 }
 
 cmargtruncnorm_Vu <- function(object) {
@@ -609,7 +608,7 @@ cmargtruncnorm_Vu <- function(object) {
       (Lambda + Lambda^3 + (2 + 3 * Lambda^2) * dnorm(Lambda)/pnorm(Lambda) +
         2 * Lambda * (dnorm(Lambda)/pnorm(Lambda))^2)),
       ncol = 1))
-  idTRUE_mu <- substring(names(omega)[-1], 5) %in% substring(names(delta)[-1],
+  idTRUE_mu <- (substring(names(omega)[-1], 5)) %in% substring(names(delta)[-1],
     4)
   idTRUE_Wu <- substring(names(delta)[-1], 4) %in% substring(names(omega)[-1],
     5)
@@ -617,5 +616,5 @@ cmargtruncnorm_Vu <- function(object) {
     mu_mat[, !idTRUE_mu], Wu_mat[, !idTRUE_Wu])
   colnames(margEff) <- paste0("Vu_", c(colnames(muHvar)[-1][idTRUE_mu],
     colnames(muHvar)[-1][!idTRUE_mu], colnames(uHvar)[-1][!idTRUE_Wu]))
-  return(margEff)
+  return(data.frame(margEff))
 }
