@@ -810,7 +810,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
   if (inherits(data, "pdata.frame")) {
     dataTable <- data[, names(index(data))]
   } else {
-    dataTable <- data.frame(IdObs = c(1:sum(validObs)))
+    dataTable <- data.frame(IdObs = 1:sum(validObs))
   }
   dataTable <- cbind(dataTable, data[, all.vars(terms(formula))],
     weights = wHvar)

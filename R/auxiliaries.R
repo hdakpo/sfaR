@@ -692,7 +692,7 @@ trimChar <- function(s, recode.factor = TRUE, ...) {
 #' @noRd
 centerText <- function(x, width) {
   retval <- vector(length = length(x), mode = "character")
-  for (i in seq_along(1:length(x))) {
+  for (i in seq_len(length(x))) {
     text <- trimChar(x[i])
     textWidth <- nchar(text)
     nspaces <- floor((width - textWidth)/2)
@@ -895,7 +895,7 @@ setMethod("show", "dagoTest", function(object) {
     if (Names[1] == "")
       space <- "" else space <- ": "
     cat("  P.VALUE:\n")
-    for (i in seq_along(1:length(Names))) {
+    for (i in seq_len(length(Names))) {
       if (!is.na(pval[i])) {
         if (!inherits(version, "Sversion")) {
           cat(paste("    ", Names[i], space, format.pval(pval[i],

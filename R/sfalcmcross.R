@@ -630,7 +630,7 @@ sfalcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
   if (inherits(data, "pdata.frame")) {
     dataTable <- data[, names(index(data))][validObs, ]
   } else {
-    dataTable <- data.frame(IdObs = c(1:sum(validObs)))
+    dataTable <- data.frame(IdObs = 1:sum(validObs))
   }
   dataTable <- cbind(dataTable, data[, all.vars(terms(formula))][validObs,
     ], weights = wHvar)

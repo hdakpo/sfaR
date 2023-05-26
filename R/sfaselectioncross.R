@@ -821,7 +821,7 @@ sfaselectioncross <- function(selectionF, frontierF, uhet, vhet,
   if (inherits(data, "pdata.frame")) {
     dataTable <- data[, names(index(data))]
   } else {
-    dataTable <- data.frame(IdObs = c(1:N_S))
+    dataTable <- data.frame(IdObs = 1:N_S)
   }
   dataTable <- data.frame(cbind(dataTable, data[, c(all.vars(terms(selectionF)),
     all.vars(terms(frontierF)))], weights = wProbit))
