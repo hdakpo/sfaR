@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# sfaR: Stochastic Frontier Analysis Routines
+# sfaR: Stochastic Frontier Analysis Using R
 
 <!-- badges: start -->
 

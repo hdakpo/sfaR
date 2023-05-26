@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# sfaR: Stochastic Frontier Analysis Routines
+# sfaR: Stochastic Frontier Analysis Using R
 
 <!-- badges: start -->
 [![CodeFactor](https://www.codefactor.io/repository/github/hdakpo/sfaR/badge)](https://www.codefactor.io/repository/github/hdakpo/sfaR)
