@@ -4,7 +4,7 @@ Changes in 'sfaR' version to 1.0.0 (2023-05-05).
 ## NEW FEATURES
 
 * Sample selection stochastic frontier model is introduced with function
-`sfaselectioncross`
+`sfaselectioncross`.
 
 * `texreg` package can be used for results output.
 
@@ -14,7 +14,7 @@ Changes in 'sfaR' version to 1.0.0 (2023-05-05).
 
 * Add reciprocal of efficiency.
 
-* Add Battese and Coelli (1988) efficiency in the case of `sfalcmcross`
+* Add Battese and Coelli (1988) efficiency in the case of `sfalcmcross`.
 
 ## BUG FIXES
 
@@ -53,7 +53,7 @@ Changes in 'sfaR' version 0.1.1 (2022-05-05).
 
 ## BUG FIXES
 
-* The `fitted()` function now works properly for objects of class `sfacross`
+* The `fitted()` function now works properly for objects of class `sfacross`.
 
 * When `extraPar = TRUE`, the `coef()` function now works properly on objects of class `lcmcross` for models with a number of classes (argument `lcmClasses`) equal to 4 or more.
 

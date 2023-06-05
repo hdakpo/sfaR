@@ -36,7 +36,7 @@ cgammanormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
   epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
   mui <- -S * epsilon - exp(Wv)/sqrt(exp(Wu))
   Hi <- numeric(N)
-  for (i in seq_along(1:N)) {
+  for (i in seq_len(N)) {
     Hi[i] <- mean((mui[i] + sqrt(exp(Wv[i])) * qnorm(FiMat[i,
       ] + (1 - FiMat[i, ]) * pnorm(-mui[i]/sqrt(exp(Wv[i])))))^(P -
       1))
@@ -165,7 +165,7 @@ cgradgammanormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
   F7 <- sweep(F6, MARGIN = 1, STATS = exp(Wv)/exp(Wu/2), FUN = "-") *
     F3^(P - 2) * (P - 1)
   gx <- matrix(nrow = N, ncol = nXvar)
-  for (k in seq_along(1:nXvar)) {
+  for (k in seq_len(nXvar)) {
     gx[, k] <- apply(sweep(S * (1 - F4) * F3^(P - 2) * (P -
       1), MARGIN = 1, STATS = Xvar[, k], FUN = "*"), 1,
       sum)/sumF3
@@ -173,14 +173,14 @@ cgradgammanormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
   gx <- sweep(Xvar, MARGIN = 1, STATS = S * sigx2, FUN = "*") +
     gx
   gu <- matrix(nrow = N, ncol = nuZUvar)
-  for (k in seq_along(1:nuZUvar)) {
+  for (k in seq_len(nuZUvar)) {
     gu[, k] <- apply(sweep(F5, MARGIN = 1, STATS = uHvar[,
       k], FUN = "*"), 1, sum)/sumF3
   }
   gu <- sweep(uHvar, MARGIN = 1, STATS = sigx5, FUN = "*") +
     gu
   gv <- matrix(nrow = N, ncol = nvZVvar)
-  for (k in seq_along(1:nvZVvar)) {
+  for (k in seq_len(nvZVvar)) {
     gv[, k] <- apply(sweep(F7, MARGIN = 1, STATS = vHvar[,
       k], FUN = "*"), 1, sum)/sumF3
   }
@@ -267,7 +267,7 @@ chessgammanormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
   X1 <- matrix(nrow = N, ncol = nXvar)
   X2 <- matrix(nrow = N, ncol = nXvar)
   X3 <- matrix(nrow = N, ncol = nXvar)
-  for (k in seq_along(1:nXvar)) {
+  for (k in seq_len(nXvar)) {
     X1[, k] <- apply(sweep(S * (1 - F4) * F3^(P - 2) * (P -
       1), MARGIN = 1, STATS = Xvar[, k], FUN = "*"), 1,
       sum)/sumF3
@@ -279,7 +279,7 @@ chessgammanormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
   }
   ZU1 <- matrix(nrow = N, ncol = nuZUvar)
   ZU2 <- matrix(nrow = N, ncol = nuZUvar)
-  for (k in seq_along(1:nuZUvar)) {
+  for (k in seq_len(nuZUvar)) {
     ZU1[, k] <- apply(sweep(F5, MARGIN = 1, STATS = uHvar[,
       k], FUN = "*"), 1, sum)/sumF3
     ZU2[, k] <- apply(sweep(F11 * (0.5 - 0.5 * F4), MARGIN = 1,
@@ -287,7 +287,7 @@ chessgammanormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
   }
   ZV1 <- matrix(nrow = N, ncol = nvZVvar)
   ZV2 <- matrix(nrow = N, ncol = nvZVvar)
-  for (k in seq_along(1:nvZVvar)) {
+  for (k in seq_len(nvZVvar)) {
     ZV1[, k] <- apply(sweep(F7, MARGIN = 1, STATS = vHvar[,
       k], FUN = "*"), 1, sum)/sumF3
     ZV2[, k] <- apply(sweep(F12 * F11, MARGIN = 1, STATS = vHvar[,
@@ -299,7 +299,7 @@ chessgammanormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
   HU1 <- list()
   HUV1 <- list()
   HV1 <- list()
-  for (r in seq_along(1:Q)) {
+  for (r in seq_len(Q)) {
     HX1[[r]] <- crossprod(sweep(Xvar, MARGIN = 1, STATS = wHvar *
       ((1 - F4)^2 * (F3)^(P - 3) * (P - 2) - F9 * F10)[,
         r] * (P - 1)/sumF3, FUN = "*"), Xvar)
@@ -570,7 +570,7 @@ cgammanormeff <- function(object, level) {
   mui <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu))
   Hi1 <- numeric(object$Nobs)
   Hi2 <- numeric(object$Nobs)
-  for (i in 1:object$Nobs) {
+  for (i in seq_len(object$Nobs)) {
     Hi1[i] <- mean((mui[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
       ] + (1 - object$FiMat[i, ]) * pnorm(-mui[i]/sqrt(exp(Wv[i])))))^(P))
     Hi2[i] <- mean((mui[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
@@ -586,7 +586,7 @@ cgammanormeff <- function(object, level) {
       exp(Wv)
     Gi <- numeric(object$Nobs)
     Ki <- numeric(object$Nobs)
-    for (i in 1:object$Nobs) {
+    for (i in seq_len(object$Nobs)) {
       Gi[i] <- mean((mui_Gi[i] + sqrt(exp(Wv[i])) * qnorm(object$FiMat[i,
         ] + (1 - object$FiMat[i, ]) * pnorm(-mui_Gi[i]/sqrt(exp(Wv[i])))))^(P -
         1))

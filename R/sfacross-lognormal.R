@@ -41,7 +41,7 @@ clognormlike <- function(parm, nXvar, nmuZUvar, nuZUvar, nvZVvar,
   epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
   ll <- numeric(N)
   ur <- list()
-  for (i in seq_along(1:N)) {
+  for (i in seq_len(N)) {
     ur[[i]] <- exp(mu[i] + exp(Wu[i]/2) * qnorm(FiMat[i,
       ]))
     ll[i] <- log(mean(1/exp(Wv[i]/2) * dnorm((epsilon[i] +
@@ -175,22 +175,22 @@ cgradlognormlike <- function(parm, nXvar, nmuZUvar, nuZUvar,
   sigx5 <- sweep((sigx4 - 0.5 * dqFi), MARGIN = 1, STATS = exp(Wv/2),
     FUN = "/")
   gx <- matrix(nrow = N, ncol = nXvar)
-  for (k in seq_along(1:nXvar)) {
+  for (k in seq_len(nXvar)) {
     gx[, k] <- apply(sweep(sigx1, MARGIN = 1, STATS = Xvar[,
       k], FUN = "*"), 1, sum)/WvdqFi
   }
   gmu <- matrix(nrow = N, ncol = nmuZUvar)
-  for (k in seq_along(1:nmuZUvar)) {
+  for (k in seq_len(nmuZUvar)) {
     gmu[, k] <- apply(sweep(sigx2, MARGIN = 1, STATS = -(S *
       muHvar[, k]), FUN = "*"), 1, sum)/WvdqFi
   }
   gu <- matrix(nrow = N, ncol = nuZUvar)
-  for (k in seq_along(1:nuZUvar)) {
+  for (k in seq_len(nuZUvar)) {
     gu[, k] <- apply(sweep(sigx3, MARGIN = 1, STATS = -(0.5 *
       (S * uHvar[, k])), FUN = "*"), 1, sum)/WvdqFi
   }
   gv <- matrix(nrow = N, ncol = nvZVvar)
-  for (k in seq_along(1:nvZVvar)) {
+  for (k in seq_len(nvZVvar)) {
     gv[, k] <- apply(sweep(sigx5, MARGIN = 1, STATS = vHvar[,
       k], FUN = "*"), 1, sum)/WvdqFi
   }
@@ -248,22 +248,22 @@ chesslognormlike <- function(parm, nXvar, nmuZUvar, nuZUvar,
   sigx3 <- sweep((0.5 * sigx2 - 0.5 * dqFi), MARGIN = 1, STATS = 1/ewv_h,
     FUN = "*")
   gx <- matrix(nrow = N, ncol = nXvar)
-  for (k in seq_along(1:nXvar)) {
+  for (k in seq_len(nXvar)) {
     gx[, k] <- apply(sweep(dqFi * WuWvmuqFiepsi_cub, MARGIN = 1,
       STATS = Xvar[, k], FUN = "*"), 1, sum)
   }
   gmu <- matrix(nrow = N, ncol = nmuZUvar)
-  for (k in seq_along(1:nmuZUvar)) {
+  for (k in seq_len(nmuZUvar)) {
     gmu[, k] <- apply(sweep(-(S * dqFi * exp(WumuqFi) * WuWvmuqFiepsi_cub),
       MARGIN = 1, STATS = muHvar[, k], FUN = "*"), 1, sum)
   }
   gu <- matrix(nrow = N, ncol = nuZUvar)
-  for (k in seq_along(1:nuZUvar)) {
+  for (k in seq_len(nuZUvar)) {
     gu[, k] <- apply(sweep(-(0.5 * (S * sigx1)), MARGIN = 1,
       STATS = uHvar[, k], FUN = "*"), 1, sum)
   }
   gv <- matrix(nrow = N, ncol = nvZVvar)
-  for (k in seq_along(1:nvZVvar)) {
+  for (k in seq_len(nvZVvar)) {
     gv[, k] <- apply(sweep(sigx3, MARGIN = 1, STATS = vHvar[,
       k], FUN = "*"), 1, sum)
   }
@@ -308,7 +308,7 @@ chesslognormlike <- function(parm, nXvar, nmuZUvar, nuZUvar,
   Usq <- list()
   Uv <- list()
   Vsq <- list()
-  for (r in seq_along(1:Q)) {
+  for (r in seq_len(Q)) {
     Xsq[[r]] <- crossprod(sweep(Xvar, MARGIN = 1, STATS = wHvar *
       sigx5[, r]/WvdqFi, FUN = "*"), Xvar)
     Xmu[[r]] <- crossprod(sweep(Xvar, MARGIN = 1, STATS = -wHvar *
@@ -625,7 +625,7 @@ clognormeff <- function(object, level) {
     as.numeric(crossprod(matrix(beta), t(Xvar)))
   u <- numeric(object$Nobs)
   density_epsilon_vec <- numeric(object$Nobs)
-  for (i in 1:object$Nobs) {
+  for (i in seq_len(object$Nobs)) {
     ur <- exp(mu[i] + exp(Wu[i]/2) * qnorm(object$FiMat[i,
       ]))
     density_epsilon_vec[i] <- (mean(1/exp(Wv[i]/2) * dnorm((epsilon[i] +
@@ -639,7 +639,7 @@ clognormeff <- function(object, level) {
     teJLMS <- exp(-u)
     teBC <- numeric(object$Nobs)
     teBC_reciprocal <- numeric(object$Nobs)
-    for (i in 1:object$Nobs) {
+    for (i in seq_len(object$Nobs)) {
       teBC[i] <- hcubature(f = fnCondBCEffLogNorm, lowerLimit = 0,
         upperLimit = Inf, maxEval = 100, fDim = 1, sigmaU = exp(Wu[i]/2),
         sigmaV = exp(Wv[i]/2), mu = mu[i], epsilon = epsilon[i],

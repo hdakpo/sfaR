@@ -152,17 +152,17 @@ cgradweibullnormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
     FUN = "*")
   sdFiv <- apply(dFiv, 1, sum)
   gx <- matrix(nrow = N, ncol = nXvar)
-  for (k in seq_along(1:nXvar)) {
+  for (k in seq_len(nXvar)) {
     gx[, k] <- apply(sweep(sigx1, MARGIN = 1, STATS = Xvar[,
       k], FUN = "*"), 1, sum)/sdFiv
   }
   gu <- matrix(nrow = N, ncol = nuZUvar)
-  for (k in seq_along(1:nuZUvar)) {
+  for (k in seq_len(nuZUvar)) {
     gu[, k] <- apply(sweep(sigx3, MARGIN = 1, STATS = -(0.5 *
       (S * uHvar[, k])), FUN = "*"), 1, sum)/sdFiv
   }
   gv <- matrix(nrow = N, ncol = nvZVvar)
-  for (k in seq_along(1:nvZVvar)) {
+  for (k in seq_len(nvZVvar)) {
     gv[, k] <- apply(sweep(sigx4, MARGIN = 1, STATS = vHvar[,
       k], FUN = "*"), 1, sum)/sdFiv
   }
@@ -262,7 +262,7 @@ chessweibullnormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
     MARGIN = 1, STATS = ewu_h, FUN = "*")
   X1 <- matrix(nrow = N, ncol = nXvar)
   X7 <- matrix(nrow = N, ncol = nXvar)
-  for (k in seq_along(1:nXvar)) {
+  for (k in seq_len(nXvar)) {
     X1[, k] <- apply(sweep(sigx1, MARGIN = 1, STATS = Xvar[,
       k], FUN = "*"), 1, sum)
     X7[, k] <- apply(sweep(S * sigx7 * sigx10, MARGIN = 1,
@@ -270,7 +270,7 @@ chessweibullnormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
   }
   Zu4 <- matrix(nrow = N, ncol = nuZUvar)
   Zu10 <- matrix(nrow = N, ncol = nuZUvar)
-  for (k in seq_along(1:nuZUvar)) {
+  for (k in seq_len(nuZUvar)) {
     Zu4[, k] <- apply(sweep(-(0.5 * (S * sigx4)), MARGIN = 1,
       STATS = uHvar[, k], FUN = "*"), 1, sum)
     Zu10[, k] <- apply(sweep(S * ((0.5 * lFimat - sigx11) *
@@ -278,12 +278,12 @@ chessweibullnormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
       k]/sdFiv, FUN = "*"), 1, sum)
   }
   Zv3 <- matrix(nrow = N, ncol = nvZVvar)
-  for (k in seq_along(1:nvZVvar)) {
+  for (k in seq_len(nvZVvar)) {
     Zv3[, k] <- apply(sweep(sigx3, MARGIN = 1, STATS = vHvar[,
       k], FUN = "*"), 1, sum)
   }
   Zv21 <- matrix(nrow = N, ncol = nvZVvar)
-  for (k in seq_along(1:nvZVvar)) {
+  for (k in seq_len(nvZVvar)) {
     Zv21[, k] <- apply(sweep(S * sigx21, MARGIN = 1, STATS = vHvar[,
       k]/sdFiv, FUN = "*"), 1, sum)
   }
@@ -293,7 +293,7 @@ chessweibullnormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
   Zu11 <- list()
   Zuv14 <- list()
   Zv18 <- list()
-  for (r in seq_along(1:Q)) {
+  for (r in seq_len(Q)) {
     X6[[r]] <- crossprod(sweep(Xvar, MARGIN = 1, STATS = wHvar *
       sigx6[, r]/sdFiv, FUN = "*"), Xvar)
     Xu8[[r]] <- crossprod(sweep(Xvar, MARGIN = 1, STATS = -wHvar *
@@ -587,7 +587,7 @@ cweibullnormeff <- function(object, level) {
     as.numeric(crossprod(matrix(beta), t(Xvar)))
   u <- numeric(object$Nobs)
   density_epsilon_vec <- numeric(object$Nobs)
-  for (i in seq_along(1:object$Nobs)) {
+  for (i in seq_len(object$Nobs)) {
     ur <- exp(Wu[i]/2) * (-log(1 - object$FiMat[i, ]))^(1/k)
     density_epsilon_vec[i] <- mean(1/exp(Wv[i]/2) * dnorm((epsilon[i] +
       object$S * ur)/exp(Wv[i]/2)))
@@ -600,7 +600,7 @@ cweibullnormeff <- function(object, level) {
     teJLMS <- exp(-u)
     teBC <- numeric(object$Nobs)
     teBC_reciprocal <- numeric(object$Nobs)
-    for (i in seq_along(1:object$Nobs)) {
+    for (i in seq_len(object$Nobs)) {
       teBC[i] <- hcubature(f = fnCondBCEffWeibull, lowerLimit = 0,
         upperLimit = Inf, maxEval = 100, fDim = 1, sigmaU = exp(Wu[i]/2),
         sigmaV = exp(Wv[i]/2), k = k, epsilon = epsilon[i],
