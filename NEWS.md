@@ -8,8 +8,6 @@ Changes in 'sfaR' version to 1.0.0 (2023-05-05).
 
 * `texreg` package can be used for results output.
 
-* Arne Henningsen is a new author to the package.
-
 * Robust variance-covariance matrix can be obtained using `lmtest` package.
 
 * Add reciprocal of efficiency.
@@ -29,6 +27,8 @@ modified accordingly to the new class `sfalcmcross`.
 ## OTHER USER-VISIBLE CHANGES
 
 * Package maintainer has changed from Yann Desjeux to K Hervé Dakpo.
+
+* Arne Henningsen is a new co-author of the package.
 
 * Remove dependencies to packages `dplyr`, `emdbook`, `fBasics`, `gsl`, `MASS`,
 `moments`, `numDeriv`, and `primes`.
