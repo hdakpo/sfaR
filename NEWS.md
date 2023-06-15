@@ -1,5 +1,5 @@
 # sfaR 1.0.0
-Changes in 'sfaR' version to 1.0.0 (2023-05-05).
+Changes in 'sfaR' version to 1.0.0 (2023-06-13).
 
 ## NEW FEATURES
 
