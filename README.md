@@ -9,7 +9,7 @@
 [![R-CMD-check](https://github.com/hdakpo/sfaR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/hdakpo/sfaR/actions/workflows/R-CMD-check.yaml)
 [![CRAN
 status](https://www.r-pkg.org/badges/version/sfaR)](https://CRAN.R-project.org/package=sfaR)
-[![](https://img.shields.io/badge/devel%20version-1.0.0-darkred.svg)](https://github.com/hdakpo/sfaR)
+[![](https://img.shields.io/badge/devel%20version-1.0.0.9000-darkred.svg)](https://github.com/hdakpo/sfaR)
 [![](https://img.shields.io/badge/license-GPL-blue)](https://github.com/hdakpo/sfaR)
 [![Downloads](https://cranlogs.r-pkg.org/badges/sfaR)](https://CRAN.R-project.org/package=sfaR)
 [![](https://img.shields.io/github/languages/code-size/hdakpo/sfaR.svg)](https://github.com/hdakpo/sfaR)
@@ -137,7 +137,12 @@ Outputs of estimation can be exported using the *texreg* package. For
 instance, using the command `screenreg(list(hlf, trnorm, tscal, expo))`
 yields the following output
 
-![sfacross](https://user-images.githubusercontent.com/29732089/235988357-90a74e12-7695-47ae-8b29-3591ca221bcd.png)
+<figure>
+<img
+src="https://user-images.githubusercontent.com/29732089/235988357-90a74e12-7695-47ae-8b29-3591ca221bcd.png"
+alt="sfacross" />
+<figcaption aria-hidden="true">sfacross</figcaption>
+</figure>
 
 ``` r
 ## For the latent class stochastic frontier we have:
@@ -153,7 +158,12 @@ lcm2c2 <- sfalcmcross(formula = ly ~ lk + ll + yr, uhet = ~initStat,
 
 The command `screenreg(list(lcm2c1, lcm2c2))` generates the following
 
-![sfalcmcross](https://user-images.githubusercontent.com/29732089/236163537-dc12e886-84c2-49d4-a943-9d61cfb82000.png)
+<figure>
+<img
+src="https://user-images.githubusercontent.com/29732089/236163537-dc12e886-84c2-49d4-a943-9d61cfb82000.png"
+alt="sfalcmcross" />
+<figcaption aria-hidden="true">sfalcmcross</figcaption>
+</figure>
 
 ``` r
 ## The following simulation is used for the sample selection
@@ -198,4 +208,9 @@ The command `screenreg(list(lcm2c1, lcm2c2))` generates the following
 
 The command `screenreg(list(selecRes1, selecRes2))`
 
-![selectioncross](https://user-images.githubusercontent.com/29732089/236043261-af06f359-bbfc-46e0-8bde-2951cc80813c.png)
+<figure>
+<img
+src="https://user-images.githubusercontent.com/29732089/236043261-af06f359-bbfc-46e0-8bde-2951cc80813c.png"
+alt="selectioncross" />
+<figcaption aria-hidden="true">selectioncross</figcaption>
+</figure>
