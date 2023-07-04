@@ -1,6 +1,6 @@
 Package: sfaR
 Title: Stochastic Frontier Analysis Routines
-Version: 1.0.0
+Version: 1.0.0.9000
 Authors@R: c(
     person("K Hervé", "Dakpo", email = "k-herve.dakpo@inrae.fr", role = c("aut", "cre")),
     person("Yann", "Desjeux", role = "aut"),
