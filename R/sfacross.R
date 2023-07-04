@@ -963,7 +963,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
   names(mleList$gradient) <- names(mleList$mlParam)
   colnames(mleList$mleObj$gradL_OBS) <- names(mleList$mlParam)
   # Return object -------
-  mlDate <- format(Sys.time(), "Model was estimated on : %b %a %d, %Y at %H:%M")
+  mlDate <- format(Sys.time(), "Model was estimated on : %b %a %d, %Y at %H:%M:%S")
   dataTable$mlResiduals <- Yvar - as.numeric(crossprod(matrix(mleList$mlParam[1:nXvar]),
     t(Xvar)))
   dataTable$mlFitted <- as.numeric(crossprod(matrix(mleList$mlParam[1:nXvar]),
