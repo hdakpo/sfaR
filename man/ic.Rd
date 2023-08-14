@@ -4,19 +4,43 @@
 \alias{ic}
 \alias{ic.sfacross}
 \alias{ic.sfalcmcross}
+\alias{ic.sfagzisfcross}
+\alias{ic.sfacnsfcross}
+\alias{ic.sfamisfcross}
+\alias{ic.sfazisfcross}
 \alias{ic.sfaselectioncross}
+\alias{ic.sfametacross}
+\alias{ic.sfapanel1}
+\alias{ic.sfalcmpanel}
 \title{Extract information criteria of stochastic frontier models}
 \usage{
 \method{ic}{sfacross}(object, IC = "AIC", ...)
 
-\method{ic}{sfalcmcross}(object, IC = "AIC", ...)
+\method{ic}{sfalcmcross}(...)
 
-\method{ic}{sfaselectioncross}(object, IC = "AIC", ...)
+\method{ic}{sfagzisfcross}(...)
+
+\method{ic}{sfacnsfcross}(...)
+
+\method{ic}{sfamisfcross}(...)
+
+\method{ic}{sfazisfcross}(...)
+
+\method{ic}{sfaselectioncross}(...)
+
+\method{ic}{sfametacross}(object, IC = "AIC", ...)
+
+\method{ic}{sfapanel1}(...)
+
+\method{ic}{sfalcmpanel}(...)
 }
 \arguments{
-\item{object}{A stochastic frontier model returned
-by \code{\link{sfacross}}, \code{\link{sfalcmcross}}, or
-\code{\link{sfaselectioncross}}.}
+\item{object}{A stochastic frontier model returned by \code{\link{sfacross}},
+\code{\link{sfalcmcross}}, \code{\link{sfagzisfcross}},
+\code{\link{sfacnsfcross}}, \code{\link{sfamisfcross}},
+\code{\link{sfazisfcross}}, \code{\link{sfametacross}},
+\code{\link{sfaselectioncross}}, \code{\link{sfapanel1}}, or
+\code{\link{sfalcmpanel}}.}
 
 \item{IC}{Character string. Information criterion measure. Three criteria
 are available: \itemize{ \item \code{'AIC'} for Akaike information criterion
@@ -31,8 +55,12 @@ are available: \itemize{ \item \code{'AIC'} for Akaike information criterion
 }
 \description{
 \code{\link{ic}} returns information criterion from stochastic
-frontier models estimated with \code{\link{sfacross}}, \code{\link{sfalcmcross}},
-or \code{\link{sfaselectioncross}}.
+frontier models estimated with \code{\link{sfacross}},
+\code{\link{sfalcmcross}}, \code{\link{sfagzisfcross}},
+\code{\link{sfacnsfcross}}, \code{\link{sfamisfcross}},
+\code{\link{sfazisfcross}}, \code{\link{sfametacross}},
+\code{\link{sfaselectioncross}}, \code{\link{sfapanel1}}, or
+\code{\link{sfalcmpanel}}.
 }
 \details{
 The different information criteria are computed as follows: \itemize{ \item
@@ -44,8 +72,8 @@ estimated and \eqn{N} the number of observations.
 \examples{
 
 \dontrun{
-## Using data on Swiss railway
-# LCM (cost function) half normal distribution
+# Using data on Swiss railway
+## LCM (cost function) half normal distribution
 cb_2c_u <- sfalcmcross(formula = LNCT ~ LNQ2 + LNQ3 + LNNET + LNPK + LNPL,
 udist = 'hnormal', uhet = ~ 1, data = swissrailways, S = -1, method='ucminf')
 ic(cb_2c_u)
@@ -61,8 +89,30 @@ fitting function using cross-sectional or pooled data.
 \code{\link{sfalcmcross}}, for the latent class stochastic frontier analysis
 model fitting function using cross-sectional or pooled data.
 
+\code{\link{sfagzisfcross}}, for the generalized zero inefficiency
+stochastic frontier analysis model fitting function using cross-sectional or
+pooled data.
+
+\code{\link{sfacnsfcross}}, for the contaminated noise stochastic
+frontier analysis model fitting function using cross-sectional data.
+
+\code{\link{sfamisfcross}}, for the multi-modal inefficiency stochastic
+frontier analysis model fitting function using cross-sectional data.
+
+\code{\link{sfazisfcross}} for zero inefficiency in stochastic frontier model
+fitting function using cross-sectional data.
+
+\code{\link{sfametacross}}, for fitting different metafrontier models
+using cross-sectional or pooled data.
+
 \code{\link{sfaselectioncross}} for sample selection in stochastic frontier
 model fitting function using cross-sectional or pooled data.
+
+\code{\link{sfapanel1}}, for the first generation stochastic frontier
+analysis model fitting function using panel data.
+
+\code{\link{sfalcmpanel}}, for the latent class stochastic frontier analysis
+model fitting function using panel data.
 }
 \keyword{AIC}
 \keyword{BIC}

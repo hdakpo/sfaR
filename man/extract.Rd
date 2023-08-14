@@ -5,6 +5,12 @@
 \alias{extract.sfacross}
 \alias{extract.sfalcmcross}
 \alias{extract.sfaselectioncross}
+\alias{extract.sfacnsfcross}
+\alias{extract.sfamisfcross}
+\alias{extract.sfazisfcross}
+\alias{extract.sfametacross}
+\alias{extract.sfapanel1}
+\alias{extract.sfalcmpanel}
 \title{Extract frontier information to be used with \bold{texreg} package}
 \usage{
 extract.sfacross(model, ...)
@@ -12,10 +18,22 @@ extract.sfacross(model, ...)
 extract.sfalcmcross(model, ...)
 
 extract.sfaselectioncross(model, ...)
+
+extract.sfacnsfcross(model, ...)
+
+extract.sfamisfcross(model, ...)
+
+extract.sfazisfcross(model, ...)
+
+extract.sfapanel1(model, ...)
+
+extract.sfalcmpanel(model, ...)
 }
 \arguments{
-\item{model}{objects of class \code{'sfacross'}, \code{'sfalcmcross'}, or
-\code{'sfaselectioncross'}}
+\item{model}{objects of class \code{'sfacross'}, \code{'sfalcmcross'},
+\code{'sfagzisfcross'}, \code{'sfacnsfcross'}, \code{'sfamisfcross'},
+\code{'sfazisfcross'}, \code{'sfametacross'}, \code{'sfaselectioncross'},
+\code{'sfapanel1'}, or \code{'sfalcmpanel'}}
 
 \item{...}{Currently ignored}
 }
@@ -23,9 +41,12 @@ extract.sfaselectioncross(model, ...)
 A texreg object representing the statistical model.
 }
 \description{
-Extract coefficients and additional information for stochastic frontier models
-returned by \code{\link{sfacross}}, \code{\link{sfalcmcross}}, or
-\code{\link{sfaselectioncross}}.
+Extract coefficients and additional information for stochastic frontier
+models returned by \code{\link{sfacross}}, \code{\link{sfalcmcross}},
+\code{\link{sfagzisfcross}}, \code{\link{sfacnsfcross}},
+\code{\link{sfamisfcross}}, \code{\link{sfazisfcross}},
+\code{\link{sfametacross}}, \code{\link{sfaselectioncross}},
+\code{\link{sfapanel1}}, or \code{\link{sfalcmpanel}}.
 }
 \examples{
 
@@ -47,7 +68,8 @@ S = -1, method = 'bfgs', scaling = TRUE)
 expo <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
 log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
 I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
-udist = 'exponential', uhet = ~ regu, data = utility, S = -1, method = 'bfgs')
+udist = 'exponential', uhet = ~ regu, data = utility, S = -1, 
+method = 'bfgs')
 
 texreg::screenreg(list(hlf, trnorm, tscal, expo))
 
@@ -59,8 +81,30 @@ fitting function using cross-sectional or pooled data.
 \code{\link{sfalcmcross}}, for the latent class stochastic frontier analysis
 model fitting function using cross-sectional or pooled data.
 
+\code{\link{sfagzisfcross}}, for the generalized zero inefficiency
+stochastic frontier analysis model fitting function using cross-sectional or
+pooled data.
+
+\code{\link{sfacnsfcross}}, for the contaminated noise stochastic
+frontier analysis model fitting function using cross-sectional data.
+
+\code{\link{sfamisfcross}}, for the multi-modal inefficiency stochastic
+frontier analysis model fitting function using cross-sectional data.
+
+\code{\link{sfazisfcross}} for zero inefficiency in stochastic frontier model
+fitting function using cross-sectional data.
+
+\code{\link{sfametacross}}, for fitting different metafrontier models
+using cross-sectional or pooled data.
+
 \code{\link{sfaselectioncross}} for sample selection in stochastic frontier
 model fitting function using cross-sectional data.
+
+\code{\link{sfapanel1}}, for the first generation stochastic frontier
+analysis model fitting function using panel data.
+
+\code{\link{sfalcmpanel}}, for the latent class stochastic frontier analysis
+model fitting function using panel data.
 }
 \keyword{extract}
 \keyword{methods}

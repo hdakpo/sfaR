@@ -3,11 +3,25 @@
 \name{coef}
 \alias{coef}
 \alias{coef.sfacross}
-\alias{coef.summary.sfacross}
 \alias{coef.sfalcmcross}
-\alias{coef.summary.sfalcmcross}
+\alias{coef.sfagzisfcross}
+\alias{coef.sfacnsfcross}
+\alias{coef.sfamisfcross}
+\alias{coef.sfazisfcross}
 \alias{coef.sfaselectioncross}
+\alias{coef.sfametacross}
+\alias{coef.sfapanel1}
+\alias{coef.sfalcmpanel}
+\alias{coef.summary.sfacross}
+\alias{coef.summary.sfalcmcross}
+\alias{coef.summary.sfagzisfcross}
+\alias{coef.summary.sfacnsfcross}
+\alias{coef.summary.sfamisfcross}
+\alias{coef.summary.sfazisfcross}
 \alias{coef.summary.sfaselectioncross}
+\alias{coef.summary.sfametacross}
+\alias{coef.summary.sfapanel1}
+\alias{coef.summary.sfalcmpanel}
 \title{Extract coefficients of stochastic frontier models}
 \usage{
 \method{coef}{sfacross}(object, extraPar = FALSE, ...)
@@ -16,17 +30,52 @@
 
 \method{coef}{sfalcmcross}(object, extraPar = FALSE, ...)
 
-\method{coef}{summary.sfalcmcross}(object, ...)
+\method{coef}{summary.sfalcmcross}(...)
+
+\method{coef}{sfagzisfcross}(...)
+
+\method{coef}{summary.sfagzisfcross}(...)
+
+\method{coef}{sfacnsfcross}(object, extraPar = FALSE, ...)
+
+\method{coef}{summary.sfacnsfcross}(...)
+
+\method{coef}{sfamisfcross}(object, extraPar = FALSE, ...)
+
+\method{coef}{summary.sfamisfcross}(...)
+
+\method{coef}{sfazisfcross}(object, extraPar = FALSE, ...)
+
+\method{coef}{summary.sfazisfcross}(...)
 
 \method{coef}{sfaselectioncross}(object, extraPar = FALSE, ...)
 
-\method{coef}{summary.sfaselectioncross}(object, ...)
+\method{coef}{summary.sfaselectioncross}(...)
+
+\method{coef}{sfametacross}(object, extraPar = FALSE, ...)
+
+\method{coef}{summary.sfametacross}(...)
+
+\method{coef}{sfapanel1}(object, extraPar = FALSE, ...)
+
+\method{coef}{summary.sfapanel1}(...)
+
+\method{coef}{sfalcmpanel}(object, extraPar = FALSE, ...)
+
+\method{coef}{summary.sfalcmpanel}(...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned by \code{\link{sfacross}},
-\code{\link{sfalcmcross}}, or \code{\link{sfaselectioncross}}, or an object
-of class \code{'summary.sfacross'}, \code{'summary.sfalcmcross'}, or\cr
-\code{'summary.sfaselectioncross'}.}
+\code{\link{sfalcmcross}}, \code{\link{sfagzisfcross}},
+\code{\link{sfacnsfcross}}, \code{\link{sfamisfcross}},
+\code{\link{sfazisfcross}}, \code{\link{sfametacross}},
+\code{\link{sfaselectioncross}}, \code{\link{sfapanel1}}, or
+\code{\link{sfalcmpanel}} or an object of class \code{'summary.sfacross'},
+\code{'summary.sfalcmcross'}, \code{'summary.sfagzisfcross'},
+\code{'summary.sfacnsfcross'}, \code{'summary.sfamisfcross'},
+\code{'summary.sfazisfcross'}, \code{'summary.sfametacross'},
+\code{'summary.sfaselectioncross'}, \code{'summary.sfapanel1'} or
+\code{'summary.sfalcmpanel'}.}
 
 \item{extraPar}{Logical (default = \code{FALSE}). If \code{TRUE}, additional
 parameters are returned:
@@ -53,32 +102,51 @@ parameters are returned:
 }
 \value{
 For objects of class \code{'summary.sfacross'},
-\code{'summary.sfalcmcross'}, or \code{'summary.sfaselectioncross'},
-\code{\link{coef}} returns a matrix with four columns. Namely, the
-estimated coefficients, their standard errors, z-values,
-and (asymptotic) P-values.
+\code{'summary.sfalcmcross'}, \code{'summary.sfagzisfcross'},
+\code{'summary.sfacnsfcross'}, \code{'summary.sfamisfcross'},
+\code{'summary.sfazisfcross'}, \code{'summary.sfaselectioncross'},
+\code{'summary.sfapanel1'} or \code{'summary.sfalcmpanel'},
+\code{\link{coef}} returns a matrix with four columns, namely, the estimated
+coefficients, their standard errors, z-values, and (asymptotic) P-values. For
+objects of class \code{'summary.metasfacross'}, a list of four-column
+matrices is returned.
 
-For objects of class \code{'sfacross'}, \code{'sfalcmcross'}, or
-\code{'sfaselectioncross'}, \code{\link{coef}} returns a numeric vector of
-the estimated coefficients. If \code{extraPar = TRUE}, additional parameters,
+For objects of class \code{'sfacross'}, \code{'sfalcmcross'},
+\code{'sfagzisfcross'}, \code{'sfacnsfcross'},  \code{'sfamisfcross'},
+\code{'sfazisfcross'}, \code{'sfaselectioncross'}, \code{'sfapanel1'},
+\code{'sfalcmpanel'}, \code{\link{coef}} returns a numeric vector of the
+estimated coefficients. If \code{extraPar = TRUE}, additional parameters,
 detailed in the section \sQuote{Arguments}, are also returned. In the case
-of object of class \code{'sfalcmcross'}, each additional
-parameter ends with \code{'#'} that represents the class number.
+of object of class \code{'sfalcmcross'}, , each additional parameter ends with
+\code{'#'} that
+represents the class number.
+
+For an object of class \code{'sfametacross'}, \code{\link{coef}} returns a
+matrix of the estimated coefficients for each group and the metafrontier (
+whenever available). If \code{extraPar = TRUE}, additional parameters,
+detailed in the section \sQuote{Arguments}, are also returned.
 }
 \description{
 From an object of class \code{'summary.sfacross'},
-\code{'summary.sfalcmcross'}, or \code{'summary.sfaselectioncross'},
-\code{\link{coef}} extracts the coefficients,
-their standard errors, z-values, and (asymptotic) P-values.
+\code{'summary.sfalcmcross'}, \code{'summary.sfagzisfcross'},
+\code{'summary.sfacnsfcross'}, \code{'summary.sfamisfcross'},
+\code{'summary.sfazisfcross'}, \code{'summary.sfametacross'},
+\code{'summary.sfaselectioncross'}, \code{'summary.sfapanel1'}, or
+\code{'summary.sfalcmpanel'} \code{\link{coef}} extracts the
+coefficients, their standard errors, z-values, and (asymptotic) P-values.
 
-From on object of class \code{'sfacross'}, \code{'sfalcmcross'}, or
-\code{'sfaselectioncross'}, it extracts only the estimated coefficients.
+From on object of class \code{'sfacross'}, \code{'sfalcmcross'},
+\code{'sfagzisfcross'}, \code{'sfacnsfcross'}, \code{'sfamisfcross'},
+\code{'sfazisfcross'}, \code{'sfametacross'}, \code{'sfaselectioncross'},
+\code{'sfapanel1'}, or \code{'sfalcmpanel'} it extracts only the estimated
+coefficients.
 }
 \examples{
 
 \dontrun{
-## Using data on fossil fuel fired steam electric power generation plants in the U.S.
-# Translog SFA (cost function) truncated normal with scaling property
+# Using data on fossil fuel fired steam electric power generation plants in 
+# the U.S.
+## Translog SFA (cost function) truncated normal with scaling property
 tl_u_ts <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
 log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
 I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
@@ -96,8 +164,30 @@ fitting function using cross-sectional or pooled data.
 \code{\link{sfalcmcross}}, for the latent class stochastic frontier analysis
 model fitting function using cross-sectional or pooled data.
 
+\code{\link{sfagzisfcross}}, for the generalized zero inefficiency
+stochastic frontier analysis model fitting function using cross-sectional or
+pooled data.
+
+\code{\link{sfacnsfcross}}, for the contaminated noise stochastic
+frontier analysis model fitting function using cross-sectional data.
+
+\code{\link{sfamisfcross}}, for the multi-modal inefficiency stochastic
+frontier analysis model fitting function using cross-sectional data.
+
+\code{\link{sfazisfcross}} for zero inefficiency in stochastic frontier model
+fitting function using cross-sectional data.
+
+\code{\link{sfametacross}}, for fitting different metafrontier models
+using cross-sectional or pooled data.
+
 \code{\link{sfaselectioncross}} for sample selection in stochastic frontier
 model fitting function using cross-sectional or pooled data.
+
+\code{\link{sfapanel1}}, for the first generation stochastic frontier
+analysis model fitting function using panel data.
+
+\code{\link{sfalcmpanel}}, for the latent class stochastic frontier analysis
+model fitting function using panel data.
 }
 \keyword{coefficients}
 \keyword{methods}

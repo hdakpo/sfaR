@@ -9,6 +9,11 @@
 # Models: + Cross sectional & Pooled data                                      #
 #           -Stochastic Frontier Analysis                                      #
 #           -Latent Class Stochastic Frontier Analysis                         #
+#           -Generalized Zero Inefficiency Stochastic Frontier Analysis        #
+#           -Zero inefficiency Stochastic Frontier                             #
+#           -Contaminated noise Stochastic Frontier                            #
+#           -Multi-Modal Inefficiency Stochastic Frontier Analysis             #
+#           -Stochastic/Deterministic Metafrontier Analysis                    #
 #           -Sample selection correction for Stochastic Frontier Model         #
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
@@ -19,8 +24,10 @@
 #' maximum simulated likelihood - MSL) for various specifications of stochastic
 #' frontier analysis (SFA).
 #'
-#' Three categories of functions are available: \code{\link{sfacross}}, 
-#' \code{\link{sfalcmcross}}, \code{\link{sfaselectioncross}},
+#' Seven categories of functions are available: \code{\link{sfacross}}, 
+#' \code{\link{sfalcmcross}}, \code{\link{sfagzisfcross}}, 
+#' \code{\link{sfacnsfcross}}, \code{\link{sfamisfcross}}, 
+#' \code{\link{sfazisfcross}}, \code{\link{sfaselectioncross}},
 #' which estimate different types of frontiers and offer eleven alternative 
 #' optimization algorithms (i.e., "bfgs", "bhhh", "nr", "nm", "cg", "sann", 
 #' "ucminf", "mla", "sr1", "sparse", "nlminb").
@@ -38,12 +45,14 @@
 #' the half normal, the lognormal, the truncated normal, the truncated skewed 
 #' Laplace, the Rayleigh, the uniform, and the Weibull distributions. 
 #' In the case of the gamma, lognormal, and Weibull distributions, maximum 
-#' simulated likelihood (MSL) is used with the possibility of four specific 
-#' distributions to construct the draws: halton, generalized halton, sobol and 
+#' simulated likelihood (MSL) is used with eight possibilities for generating 
+#' random numbers: halton, generalized halton, sobol, randomized sobol, 
+#' modified latin hypercube sampling, richtmyer, randomized richtmyer, and 
 #' uniform. Heteroscedasticity in both error terms can be implemented, in 
 #' addition to heterogeneity in the truncated mean parameter in the case of the 
-#' truncated normal and lognormal distributions. In addition, in the case of the
-#'  truncated normal distribution, the scaling property can be estimated.
+#' truncated normal and lognormal distributions. In addition, in the case of the 
+#' truncated normal distribution, the scaling property can be 
+#' estimated.
 #'  
 #' @section sfalcmcross: \code{\link{sfalcmcross}} estimates latent class 
 #' stochastic frontier models (LCM) for cross-sectional or pooled data. 
@@ -55,6 +64,84 @@
 #' error term. Heteroscedasticity in both error terms is possible. The choice of 
 #' the number of classes can be guided by several information criteria (i.e., 
 #' AIC, BIC, or HQIC).
+#' 
+#' @section sfacnsfcross: \code{\link{sfacnsfcross}} estimates the contaminated 
+#' noise stochastic frontier (CNSF), which allows for the possibility of 
+#' outliers in the two-sided error term. The model splits the observations into 
+#' two groups with different variance for the two-sided error term. The 
+#' probability of belonging to one of these classes is based on either a logit, 
+#' probit, cauchit or cloglog functional form that can be specified using some 
+#' covariates. As in the case of \code{\link{sfacross}} ten different 
+#' distributions for the one-sided error term are implemented. These 
+#' distributions include the exponential, the Gamma, the generalized exponential, 
+#' the half normal, the lognormal, the truncated normal, the truncated skewed 
+#' Laplace, the Rayleigh, the uniform and the Weibull distributions. In the case 
+#' of the Gamma, lognormal and Weibull distributions, maximum simulated 
+#' likelihood (MSL) is used with eight possibilities for generating random 
+#' numbers: halton, generalized halton, sobol, randomized sobol, modified latin 
+#' hypercube sampling, richtmyer, randomized richtmyer, and uniform. 
+#' Heteroscedasticity in both error terms can be implemented, in addition to 
+#' heterogeneity in the truncated mean parameter in the case of the truncated 
+#' normal and lognormal distributions. Two variants of the CNSF are available: 
+#' one that allows common one-sided error term variance for both classes and the 
+#' other one that allows different one-sided error term variances between the 
+#' two aforementionned classes.
+#' 
+#' @section sfamisfcross: \code{\link{sfamisfcross}} estimates the multi-modal 
+#' inefficiency stochastic frontier (MISF), which allows for mixture 
+#' distribution in the one-sided error term. The model splits the observations 
+#' into two groups with different variance for the one-sided error term. 
+#' The probability of belonging to one of these classes is based on either a 
+#' logit, probit, cauchit or cloglog functional form that can be specified using 
+#' some covariates. As in the case of \code{\link{sfacross}} ten different 
+#' distributions for the one-sided error term are implemented. These 
+#' distributions include the exponential, the Gamma, the generalized 
+#' exponential, the half normal, the lognormal, the truncated normal, the 
+#' truncated skewed Laplace, the Rayleigh, the uniform and the Weibull 
+#' distributions. In the case of the Gamma, lognormal and Weibull distributions, 
+#' maximum simulated likelihood (MSL) is used with eight possibilities for 
+#' generating random numbers: halton, generalized halton, sobol, randomized 
+#' sobol, modified latin hypercube sampling, richtmyer, randomized richtmyer, 
+#' and uniform. Heteroscedasticity in both error terms can be implemented, in 
+#' addition to heterogeneity in the truncated mean parameter in the case of the 
+#' truncated normal and lognormal distributions. 
+#' 
+#' @section sfazisfcross: \code{\link{sfazisfcross}} relaxes the assumption that 
+#' all firms are inefficient (zero inefficiency stochastic frontier - ZISF). 
+#' The model splits the observations into two groups: one efficient and the 
+#' other inefficient. The probability of belonging to one of these classes is 
+#' based on either a logit, probit, cauchit or cloglog functional form that can 
+#' be specified using some covariates. As in the case of \code{\link{sfacross}} 
+#' ten different distributions for the one-sided error term are implemented. 
+#' These distributions include the exponential, the Gamma, the generalized 
+#' exponential, the half normal, the lognormal, the truncated normal, the 
+#' truncated skewed Laplace, the Rayleigh, the uniform and the Weibull 
+#' distributions. In the case of the Gamma, lognormal and Weibull 
+#' distributions, maximum simulated likelihood (MSL) is used with eight 
+#' possibilities for generating random numbers: halton, generalized halton, 
+#' sobol, randomized sobol, modified latin hypercube sampling, richtmyer, 
+#' randomized richtmyer, and uniform. Heteroscedasticity in both error terms 
+#' can be implemented, in addition to heterogeneity in the truncated mean 
+#' parameter in the case of the truncated normal and lognormal distributions. 
+#' Two variants of the ZISF are available: one that allows common two-sided 
+#' error term variance for both classes (inefficient vs efficient) and the 
+#' other one that allows different two-sided error term variances between the 
+#' two aforementionned classes.
+#' 
+#' @section sfagzisfcross: \code{\link{sfagzisfcross}} estimates the generalized 
+#' zero inefficiency stochastic frontier model (GZISF) for cross-sectional or 
+#' pooled data. It accounts for technological heterogeneity by splitting the 
+#' observations into a maximum number of five classes, with the particularity 
+#' that the last class is contains efficient observations. The classification 
+#' operates based on a logit functional form that can be specified using some 
+#' covariates (namely, the separating variables allowing the separation of 
+#' observations in several classes). Only the half normal distribution is 
+#' available for the one-sided error term. Heteroscedasticity in both error 
+#' terms is possible. The choice of the number of classes can be guided by 
+#' several information criteria (i.e., AIC, BIC, or HQIC).
+#' 
+#' @section sfametacross: \code{\link{sfametacross}} estimates either the 
+#' deterministic or the stochastic metafrontier.
 #'  
 #' @section sfaselectioncross: \code{\link{sfaselectioncross}} estimates the 
 #' frontier for cross-sectional or pooled data in the presence of sample 
@@ -62,8 +149,8 @@
 #' between the two-sided error terms in both the selection and the frontier 
 #' equations. The likelihood can be estimated using five different
 #' possibilities: gauss-kronrod quadrature, adaptive integration over hypercubes 
-#' (hcubature and pcubature), gauss-hermite quadrature, and
-#'  maximum simulated likelihood. Only the half normal
+#' (hcubature and pcubature), gauss-hermite quadrature, and maximum simulated 
+#' likelihood. Only the half normal
 #' distribution is available for the one-sided error term. Heteroscedasticity
 #' in both error terms is possible.
 #' 
@@ -73,18 +160,18 @@
 #'
 #' @author K Hervé Dakpo, Yann Desjeux, Arne Henningsen and Laure Latruffe
 #'
-# @importFrom base standardGeneric
-#' @importFrom stats coefficients dnorm lm model.frame
-#' @importFrom stats model.matrix model.response nlminb
-#' @importFrom stats pnorm qnorm delete.response fitted
-#' @importFrom stats logLik residuals terms vcov formula
-#' @importFrom stats integrate runif model.weights nobs
-#' @importFrom stats na.pass printCoefmat pt qt na.omit
-#' @importFrom stats pchisq qchisq uniroot complete.cases
+# @importFrom stats coefficients dnorm lm model.frame
+# @importFrom stats model.matrix model.response nlminb
+# @importFrom stats pnorm qnorm delete.response fitted
+# @importFrom stats logLik residuals terms vcov formula
+# @importFrom stats integrate runif model.weights nobs
+# @importFrom stats na.pass printCoefmat pt qt na.omit
+# @importFrom stats pchisq qchisq uniroot complete.cases
+# @importFrom stats var rnorm
+#' @import stats
 #' @importFrom methods as new
 #' @importFrom Formula as.Formula Formula
-#' @importFrom randtoolbox get.primes sobol
-#' @importFrom qrng ghalton
+#' @importFrom qrng ghalton sobol
 #' @import maxLik
 #' @importFrom ucminf ucminf
 #' @importFrom trustOptim trust.optim
@@ -92,9 +179,20 @@
 #' @importFrom nleqslv nleqslv
 #' @importFrom fastGHQuad gaussHermiteData
 #' @importFrom cubature hcubature pcubature
-#' @importFrom sandwich bread estfun
-# @importFrom calculus jacobian
+#' @importFrom calculus jacobian
 #' @importFrom plm pdata.frame index
-#' @importFrom texreg extract createTexreg
-#' @importFrom mnorm pmnorm
+#' @importFrom mnorm pmnorm rmnorm halton
+#' @importFrom tmvtnorm rtmvnorm
+#' @import lpSolveAPI
+#' @importFrom lsei lsi
+#' @importFrom progressr handlers progressor
+# @importFrom foreach foreach
+# @importFrom future plan
+# @importFrom doFuture %dofuture%
+# @importFrom randtoolbox get.primes sobol
+# @importFrom iterators iter
+# @importFrom base standardGeneric
+# @importFrom texreg extract createTexreg
+# @importFrom sandwich bread estfun
+# @importFrom utils capture.output
 NULL

@@ -4,23 +4,48 @@
 \alias{nobs}
 \alias{nobs.sfacross}
 \alias{nobs.sfalcmcross}
+\alias{nobs.sfagzisfcross}
+\alias{nobs.sfacnsfcross}
+\alias{nobs.sfamisfcross}
+\alias{nobs.sfazisfcross}
 \alias{nobs.sfaselectioncross}
+\alias{nobs.sfametacross}
+\alias{nobs.sfapanel1}
+\alias{nobs.sfalcmpanel}
 \title{Extract total number of observations used in frontier models}
 \usage{
 \method{nobs}{sfacross}(object, ...)
 
-\method{nobs}{sfalcmcross}(object, ...)
+\method{nobs}{sfalcmcross}(...)
 
-\method{nobs}{sfaselectioncross}(object, ...)
+\method{nobs}{sfagzisfcross}(...)
+
+\method{nobs}{sfacnsfcross}(...)
+
+\method{nobs}{sfamisfcross}(...)
+
+\method{nobs}{sfazisfcross}(...)
+
+\method{nobs}{sfaselectioncross}(...)
+
+\method{nobs}{sfametacross}(...)
+
+\method{nobs}{sfapanel1}(object, ...)
+
+\method{nobs}{sfalcmpanel}(object, ...)
 }
 \arguments{
-\item{object}{a \code{sfacross}, \code{sfalcmcross}, or \code{sfaselectioncross}
-object for which the number of total observations is to be extracted.}
+\item{object}{a \code{sfacross}, \code{sfalcmcross}, \code{sfagzisfcross}, \code{sfacnsfcross},
+\code{sfamisfcross}, \code{sfazisfcross}, \code{sfaselectioncross}, \code{sfapanel1}, or
+\code{sfalcmpanel} object for which the number of total observations is to be
+extracted. For object \code{sfametacross} the number of observations per group is
+also returned.}
 
 \item{\dots}{Currently ignored.}
 }
 \value{
-A single number, normally an integer.
+A single number, normally an integer, except for the metafrontier
+case where of vector of integers is returned.
 }
 \description{
 This function extracts the total number of 'observations' from a
@@ -31,15 +56,16 @@ fitted frontier model.
 used by the estimation procedure. It is not necessarily the number
 of observations of the model frame (number of rows in the model
 frame), because sometimes the model frame is further reduced by the
-estimation procedure especially in the presence of NA. In the case of
-\code{sfaselectioncross}, \code{nobs} returns the number of observations used in the
+estimation procedure especially in the presence of 'NA' or 'Inf'. In the case
+of \code{sfaselectioncross}, \code{nobs} returns the number of observations used in the
 frontier equation.
 }
 \examples{
 
 \dontrun{
-## Using data on fossil fuel fired steam electric power generation plants in the U.S.
-# Translog (cost function) half normal with heteroscedasticity
+# Using data on fossil fuel fired steam electric power generation plants in 
+# the U.S.
+## Translog (cost function) half normal with heteroscedasticity
 tl_u_h <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
 log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
 I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
@@ -55,7 +81,30 @@ fitting function using cross-sectional or pooled data.
 \code{\link{sfalcmcross}}, for the latent class stochastic frontier analysis
 model fitting function using cross-sectional or pooled data.
 
+\code{\link{sfagzisfcross}}, for the generalized zero inefficiency
+stochastic frontier analysis model fitting function using cross-sectional or
+pooled data.
+
+\code{\link{sfacnsfcross}}, for the contaminated noise stochastic
+frontier analysis model fitting function using cross-sectional data.
+
+\code{\link{sfamisfcross}}, for the multi-modal inefficiency stochastic
+frontier analysis model fitting function using cross-sectional data.
+
+\code{\link{sfazisfcross}} for zero inefficiency in stochastic frontier model
+fitting function using cross-sectional data.
+
+\code{\link{sfametacross}}, for fitting different metafrontier models
+using cross-sectional or pooled data.
+
 \code{\link{sfaselectioncross}} for sample selection in stochastic frontier
 model fitting function using cross-sectional or pooled data.
+
+\code{\link{sfapanel1}}, for the first generation stochastic frontier
+analysis model fitting function using panel data.
+
+\code{\link{sfalcmpanel}}, for the latent class stochastic frontier analysis
+model fitting function using panel data.
 }
-\keyword{attribute}
+\keyword{methods}
+\keyword{nobs}

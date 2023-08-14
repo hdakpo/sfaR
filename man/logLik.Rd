@@ -4,19 +4,43 @@
 \alias{logLik}
 \alias{logLik.sfacross}
 \alias{logLik.sfalcmcross}
+\alias{logLik.sfagzisfcross}
+\alias{logLik.sfacnsfcross}
+\alias{logLik.sfamisfcross}
+\alias{logLik.sfazisfcross}
 \alias{logLik.sfaselectioncross}
+\alias{logLik.sfametacross}
+\alias{logLik.sfapanel1}
+\alias{logLik.sfalcmpanel}
 \title{Extract log-likelihood value of stochastic frontier models}
 \usage{
 \method{logLik}{sfacross}(object, individual = FALSE, ...)
 
-\method{logLik}{sfalcmcross}(object, individual = FALSE, ...)
+\method{logLik}{sfalcmcross}(...)
 
-\method{logLik}{sfaselectioncross}(object, individual = FALSE, ...)
+\method{logLik}{sfagzisfcross}(...)
+
+\method{logLik}{sfacnsfcross}(...)
+
+\method{logLik}{sfamisfcross}(...)
+
+\method{logLik}{sfazisfcross}(...)
+
+\method{logLik}{sfaselectioncross}(...)
+
+\method{logLik}{sfametacross}(...)
+
+\method{logLik}{sfapanel1}(...)
+
+\method{logLik}{sfalcmpanel}(...)
 }
 \arguments{
-\item{object}{A stochastic frontier model returned
-by \code{\link{sfacross}}, \code{\link{sfalcmcross}}, or
-\code{\link{sfaselectioncross}}.}
+\item{object}{A stochastic frontier model returned by \code{\link{sfacross}},
+\code{\link{sfalcmcross}}, \code{\link{sfagzisfcross}},
+\code{\link{sfacnsfcross}}, \code{\link{sfamisfcross}},
+\code{\link{sfazisfcross}}, \code{\link{sfametacross}},
+\code{\link{sfaselectioncross}}, \code{\link{sfapanel1}}, or
+\code{\link{sfalcmpanel}}.}
 
 \item{individual}{Logical. If \code{FALSE} (default), the sum of all
 observations' log-likelihood values is returned. If \code{TRUE}, a vector of
@@ -32,17 +56,26 @@ attributes, when \code{individual = FALSE}, or a list of elements, containing
 the log-likelihood of each observation (\code{logLik}), the total number of
 observations (\code{Nobs}) and the number of free parameters (\code{df}),
 when \code{individual = TRUE}.
+
+For object of class \code{'sfametacross'}, the groups log-likelihood values
+are returned, and in the case of \code{'modelType'} = 'hhl14', the
+metafrontier log-likelihood value is also returned.
 }
 \description{
 \code{\link{logLik}} extracts the log-likelihood value(s) from stochastic
-frontier models estimated with \code{\link{sfacross}}, \code{\link{sfalcmcross}},
-or \code{\link{sfaselectioncross}}.
+frontier models estimated with \code{\link{sfacross}},
+\code{\link{sfalcmcross}}, \code{\link{sfagzisfcross}},
+\code{\link{sfacnsfcross}}, \code{\link{sfamisfcross}},
+\code{\link{sfazisfcross}}, \code{\link{sfametacross}},
+\code{\link{sfaselectioncross}}, \code{\link{sfapanel1}}, or
+\code{\link{sfalcmpanel}}.
 }
 \examples{
 
 \dontrun{
-## Using data on fossil fuel fired steam electric power generation plants in the U.S.
-# Translog SFA (cost function) truncated normal with scaling property
+# Using data on fossil fuel fired steam electric power generation plants in 
+# the U.S.
+## Translog SFA (cost function) truncated normal with scaling property
 tl_u_ts <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
 log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
 I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
@@ -50,8 +83,8 @@ udist = 'tnormal', muhet = ~ regu, uhet = ~ regu, data = utility, S = -1,
 scaling = TRUE, method = 'mla')
 logLik(tl_u_ts)
 
-## Using data on eighty-two countries production (GDP)
-# LCM Cobb Douglas (production function) half normal distribution
+# Using data on eighty-two countries production (GDP)
+## LCM Cobb Douglas (production function) half normal distribution
 cb_2c_h <- sfalcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal', 
 data = worldprod, S = 1)
 logLik(cb_2c_h, individual = TRUE)
@@ -65,8 +98,30 @@ fitting function using cross-sectional or pooled data.
 \code{\link{sfalcmcross}}, for the latent class stochastic frontier analysis
 model fitting function using cross-sectional or pooled data.
 
+\code{\link{sfagzisfcross}}, for the generalized zero inefficiency
+stochastic frontier analysis model fitting function using cross-sectional or
+pooled data.
+
+\code{\link{sfacnsfcross}}, for the contaminated noise stochastic
+frontier analysis model fitting function using cross-sectional data.
+
+\code{\link{sfamisfcross}}, for the multi-modal inefficiency stochastic
+frontier analysis model fitting function using cross-sectional data.
+
+\code{\link{sfazisfcross}} for zero inefficiency in stochastic frontier model
+fitting function using cross-sectional data.
+
+\code{\link{sfametacross}}, for fitting different metafrontier models
+using cross-sectional or pooled data.
+
 \code{\link{sfaselectioncross}} for sample selection in stochastic frontier
 model fitting function using cross-sectional or pooled data.
+
+\code{\link{sfapanel1}}, for the first generation stochastic frontier
+analysis model fitting function using panel data.
+
+\code{\link{sfalcmpanel}}, for the latent class stochastic frontier analysis
+model fitting function using panel data.
 }
-\keyword{likelihood}
+\keyword{logLik}
 \keyword{methods}

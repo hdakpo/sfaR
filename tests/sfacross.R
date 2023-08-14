@@ -15,6 +15,21 @@ round(coef(summary(cd_u_h)), 3)
 t(sapply(efficiencies(cd_u_h), function(x) round(summary(x),
   3)))
 
+# marginal(cd_u_h)
+# coef(cd_u_h)
+# vcov(cd_u_h)
+# nobs(cd_u_h)
+# logLik(cd_u_h)
+# residuals(cd_u_h)
+# ic(cd_u_h)
+# fitted(cd_u_h)
+# efficiencies(cd_u_h)
+
+# sandwich::bread(cd_u_h)
+# sandwich::estfun(cd_u_h)
+# 
+# texreg::extract(cd_u_h)
+
 # Cobb-Douglas (cost function) truncated normal with
 # heteroscedasticity
 cd_u_t <- sfacross(formula = log(tc/wf) ~ log(y) + log(wl/wf) +

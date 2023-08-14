@@ -4,36 +4,85 @@
 \alias{residuals}
 \alias{residuals.sfacross}
 \alias{residuals.sfalcmcross}
+\alias{residuals.sfagzisfcross}
+\alias{residuals.sfacnsfcross}
+\alias{residuals.sfamisfcross}
+\alias{residuals.sfazisfcross}
 \alias{residuals.sfaselectioncross}
+\alias{residuals.sfametacross}
+\alias{residuals.sfapanel1}
+\alias{residuals.sfalcmpanel}
 \title{Extract residuals of stochastic frontier models}
 \usage{
 \method{residuals}{sfacross}(object, ...)
 
 \method{residuals}{sfalcmcross}(object, ...)
 
-\method{residuals}{sfaselectioncross}(object, ...)
+\method{residuals}{sfagzisfcross}(...)
+
+\method{residuals}{sfacnsfcross}(...)
+
+\method{residuals}{sfamisfcross}(...)
+
+\method{residuals}{sfazisfcross}(...)
+
+\method{residuals}{sfaselectioncross}(...)
+
+\method{residuals}{sfametacross}(object, ...)
+
+\method{residuals}{sfapanel1}(...)
+
+\method{residuals}{sfalcmpanel}(...)
 }
 \arguments{
-\item{object}{A stochastic frontier model returned
-by \code{\link{sfacross}}, \code{\link{sfalcmcross}}, or
-\code{\link{sfaselectioncross}}.}
+\item{object}{A stochastic frontier model returned by \code{\link{sfacross}},
+\code{\link{sfalcmcross}}, \code{\link{sfagzisfcross}},
+\code{\link{sfacnsfcross}}, \code{\link{sfamisfcross}},
+\code{\link{sfazisfcross}}, \code{\link{sfametacross}},
+\code{\link{sfaselectioncross}}, \code{\link{sfapanel1}}, or
+\code{\link{sfalcmpanel}}.}
 
 \item{\dots}{Currently ignored.}
 }
 \value{
-When the \code{object} is of class \code{'sfacross'}, or
-\code{'sfaselectioncross'}, \code{\link{residuals}} returns a vector of
-residuals values.
+When the \code{object} is of class \code{'sfacross'},
+code{'sfacnsfcross'}, \code{'sfamisfcross'}, \code{'sfazisfcross'},
+\code{'sfaselectioncross'}, or \code{'sfapanel1'}, \code{\link{residuals}}
+returns a vector of residuals values.
 
-When the \code{object} is of \code{'sfalcmcross'},
-\code{\link{residuals}} returns a data frame containing the residuals values
-for each latent class, where each variable ends with \code{'_c#'},
-\code{'#'} being the class number.
+When the \code{object} is of class \code{'sfalcmcross'},
+\code{'sfagzisfcross'}, or \code{'sfalcmpanel'}, \code{\link{residuals}}
+returns a data frame containing the residuals values for each latent class,
+where each variable ends with \code{'_c#'}, \code{'#'} being the class number.
+
+For an object of class \code{'sfametacross'}, a data frame containing the
+residuals values for each each group and the metafrontier is returned. Each
+variable name ends with \code{'_g'} where \code{'g'} is the group name. For
+the metafrontier \code{'g'} = 'metafrontier'.
+For \code{'modelType'} = 'aos17a' or \code{'modelType'} = 'aos17b', the
+residuals for the metafrontier are simply the mean values of all the
+residuals from the simulated metafrontiers.
 }
 \description{
 This function returns the residuals' values from stochastic frontier models
-estimated with \code{\link{sfacross}}, \code{\link{sfalcmcross}}, or
-\code{\link{sfaselectioncross}}.
+estimated with \code{\link{sfacross}}, \code{\link{sfalcmcross}},
+\code{\link{sfagzisfcross}}, \code{\link{sfacnsfcross}},
+\code{\link{sfamisfcross}}, \code{\link{sfazisfcross}},
+\code{\link{sfametacross}}, \code{\link{sfaselectioncross}},
+\code{\link{sfapanel1}}, or \code{\link{sfalcmpanel}}.
+}
+\details{
+Let's consider the standard stochastic frontier model
+
+\deqn{y_i = \alpha + \mathbf{x_i^{\prime}}\bm{\beta} + v_i - Su_i}
+
+The fitted frontier is obtained as
+
+\deqn{\hat{f}_i=\mathbf{x_i^{\prime}}\bm{\hat{\beta}}}
+
+then the residuals is obtained as
+
+\deqn{\hat{\epsilon}_i=y_i - \hat{f}_i}
 }
 \note{
 The residuals values are ordered in the same way as the corresponding
@@ -42,8 +91,9 @@ observations in the dataset used for the estimation.
 \examples{
 
 \dontrun{
-## Using data on fossil fuel fired steam electric power generation plants in the U.S.
-# Translog SFA (cost function) truncated normal with scaling property
+# Using data on fossil fuel fired steam electric power generation plants in 
+# the U.S.
+## Translog SFA (cost function) truncated normal with scaling property
 tl_u_ts <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
 log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
 I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
@@ -52,8 +102,8 @@ scaling = TRUE, method = 'mla')
 resid.tl_u_ts <- residuals(tl_u_ts)
 head(resid.tl_u_ts)
 
-## Using data on eighty-two countries production (GDP)
-# LCM Cobb Douglas (production function) half normal distribution
+# Using data on eighty-two countries production (GDP)
+## LCM Cobb Douglas (production function) half normal distribution
 cb_2c_h <- sfalcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal', 
 data = worldprod, S = 1)
 resid.cb_2c_h <- residuals(cb_2c_h)
@@ -68,8 +118,30 @@ fitting function using cross-sectional or pooled data.
 \code{\link{sfalcmcross}}, for the latent class stochastic frontier analysis
 model fitting function using cross-sectional or pooled data.
 
+\code{\link{sfagzisfcross}}, for the generalized zero inefficiency
+stochastic frontier analysis model fitting function using cross-sectional or
+pooled data.
+
+\code{\link{sfacnsfcross}}, for the contaminated noise stochastic
+frontier analysis model fitting function using cross-sectional data.
+
+\code{\link{sfamisfcross}}, for the multi-modal inefficiency stochastic
+frontier analysis model fitting function using cross-sectional data.
+
+\code{\link{sfazisfcross}} for zero inefficiency in stochastic frontier model
+fitting function using cross-sectional data.
+
+\code{\link{sfametacross}}, for fitting different metafrontier models
+using cross-sectional or pooled data.
+
 \code{\link{sfaselectioncross}} for sample selection in stochastic frontier
 model fitting function using cross-sectional or pooled data.
+
+\code{\link{sfapanel1}}, for the first generation stochastic frontier
+analysis model fitting function using panel data.
+
+\code{\link{sfalcmpanel}}, for the latent class stochastic frontier analysis
+model fitting function using panel data.
 }
 \keyword{methods}
 \keyword{residuals}

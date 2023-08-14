@@ -4,18 +4,35 @@
 \alias{marginal}
 \alias{marginal.sfacross}
 \alias{marginal.sfalcmcross}
+\alias{marginal.sfagzisfcross}
+\alias{marginal.sfacnsfcross}
+\alias{marginal.sfamisfcross}
+\alias{marginal.sfazisfcross}
 \alias{marginal.sfaselectioncross}
+\alias{marginal.sfametacross}
 \title{Marginal effects of the inefficiency drivers in stochastic frontier models}
 \usage{
 \method{marginal}{sfacross}(object, newData = NULL, ...)
 
 \method{marginal}{sfalcmcross}(object, newData = NULL, ...)
 
+\method{marginal}{sfagzisfcross}(...)
+
+\method{marginal}{sfacnsfcross}(object, newData = NULL, ...)
+
+\method{marginal}{sfamisfcross}(object, newData = NULL, ...)
+
+\method{marginal}{sfazisfcross}(object, newData = NULL, ...)
+
 \method{marginal}{sfaselectioncross}(object, newData = NULL, ...)
+
+\method{marginal}{sfametacross}(object, newData = NULL, ...)
 }
 \arguments{
-\item{object}{A stochastic frontier model returned
-by \code{\link{sfacross}}, \code{\link{sfalcmcross}}, or
+\item{object}{A stochastic frontier model returned by \code{\link{sfacross}},
+\code{\link{sfalcmcross}}, \code{\link{sfagzisfcross}},
+\code{\link{sfacnsfcross}}, \code{\link{sfamisfcross}},
+\code{\link{sfazisfcross}}, \code{\link{sfametacross}}, or
 \code{\link{sfaselectioncross}}.}
 
 \item{newData}{Optional data frame that is used to calculate the marginal
@@ -31,13 +48,20 @@ effects of the \eqn{Z_u} variables on the expected inefficiency (each
 variable has the prefix \code{'Eu_'}) and on the variance of the
 inefficiency (each variable has the prefix \code{'Vu_'}).
 
-In the case of the latent class stochastic frontier (LCM), each variable
-ends with \code{'_c#'} where \code{'#'} is the class number.
+In the case of the contaminated noise stochastic frontier (CNSF), or
+generalized zero inefficiency stochastic frontier (GZISF), or latent class
+stochastic frontier (LCM), or the multi-modal inefficiency stochastic
+frontier (MISF) or the zero inefficiency frontier (ZISF),
+each variable terminates with \code{'_c#'} where \code{'#'} is the class
+number.
 }
 \description{
-This function returns marginal effects of the inefficiency drivers from stochastic
-frontier models estimated with \code{\link{sfacross}}, \code{\link{sfalcmcross}},
-or \code{\link{sfaselectioncross}}.
+This function returns marginal effects of the inefficiency drivers from
+stochastic frontier models estimated with \code{\link{sfacross}},
+\code{\link{sfalcmcross}}, \code{\link{sfagzisfcross}},
+\code{\link{sfacnsfcross}}, \code{\link{sfamisfcross}},
+\code{\link{sfazisfcross}}, \code{\link{sfametacross}}, or
+\code{\link{sfaselectioncross}}.
 }
 \details{
 \code{\link{marginal}} operates in the presence of exogenous
@@ -57,8 +81,9 @@ inefficiency and its drivers.
 \examples{
 
 \dontrun{
-## Using data on fossil fuel fired steam electric power generation plants in the U.S.
-# Translog SFA (cost function) truncated normal with scaling property
+# Using data on fossil fuel fired steam electric power generation plants in 
+# the U.S.
+## Translog SFA (cost function) truncated normal with scaling property
 tl_u_ts <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
 log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
 I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
@@ -67,8 +92,8 @@ S = -1, scaling = TRUE, method = 'mla')
 marg.tl_u_ts <- marginal(tl_u_ts)
 summary(marg.tl_u_ts)
 
-## Using data on eighty-two countries production (GDP)
-# LCM Cobb Douglas (production function) half normal distribution
+# Using data on eighty-two countries production (GDP)
+## LCM Cobb Douglas (production function) half normal distribution
 cb_2c_h <- sfalcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal',
     data = worldprod, uhet = ~ initStat + h, S = 1, method = 'mla')
   marg.cb_2c_h <- marginal(cb_2c_h)
@@ -87,6 +112,22 @@ fitting function using cross-sectional or pooled data.
 
 \code{\link{sfalcmcross}}, for the latent class stochastic frontier analysis
 model fitting function using cross-sectional or pooled data.
+
+\code{\link{sfagzisfcross}}, for the generalized zero inefficiency
+stochastic frontier analysis model fitting function using cross-sectional or
+pooled data.
+
+\code{\link{sfacnsfcross}}, for the contaminated noise stochastic
+frontier analysis model fitting function using cross-sectional data.
+
+\code{\link{sfamisfcross}}, for the multi-modal inefficiency stochastic
+frontier analysis model fitting function using cross-sectional data.
+
+\code{\link{sfazisfcross}} for zero inefficiency in stochastic frontier model
+fitting function using cross-sectional data.
+
+\code{\link{sfametacross}}, for fitting different metafrontier models
+using cross-sectional or pooled data.
 
 \code{\link{sfaselectioncross}} for sample selection in stochastic frontier
 model fitting function using cross-sectional or pooled data.

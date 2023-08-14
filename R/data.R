@@ -23,9 +23,9 @@
 #' and year identifications, plus measurements on one output (i.e. milk), and
 #' four inputs (i.e. cows, land, labor and feed).
 #'
-#' @details This dataset has been used in Alvarez \emph{et al.} (2004).  The data have
-#' been normalized so that the logs of the inputs sum to zero over the 1,482
-#' observations.
+#' @details This dataset has been used in Alvarez \emph{et al.} (2004).  The 
+#' data have been normalized so that the logs of the inputs sum to zero over the 
+#' 1,482 observations.
 #'
 #' @name dairyspain
 #' @docType data
@@ -61,8 +61,8 @@ NULL
 #'
 #' This dataset is on electric power generation in the United States.
 #'
-#' @details The dataset is from Christensen and Greene (1976) and has also been used in
-#' Greene (1990).
+#' @details The dataset is from Christensen and Greene (1976) and has also been 
+#' used in Greene (1990).
 #'
 #' @name electricity
 #' @docType data
@@ -243,16 +243,20 @@ NULL
 #' @docType data
 #' @format A data frame with 2,727 observations on the following 23 variables.
 #' \describe{ \item{farmid}{Farm identification.} \item{year}{Year
-#' identification.} \item{y1}{Milk sold (1000 liters).} \item{y2}{Meat (1000 NOK).} 
+#' identification.} \item{y1}{Milk sold (1000 liters).} \item{y2}{Meat 
+#' (1000 NOK).} 
 #' \item{y3}{Support payments (1000 NOK).} \item{y4}{Other outputs (1000 NOK).} 
 #' \item{p1}{Milk price (NOK/liter).} \item{p2}{Meat price (cattle index).} 
-#' \item{p3}{Support payments price (CP index).} \item{p4}{Other outputs price index.} 
+#' \item{p3}{Support payments price (CP index).} \item{p4}{Other outputs price 
+#' index.} 
 #' \item{x1}{Land (decare (daa) = 0.1 ha).} \item{x2}{Labour (1000 hours).} 
-#' \item{x3}{Purchase feed (1000 NOK).} \item{x4}{Other variable costs (1000 NOK).} 
+#' \item{x3}{Purchase feed (1000 NOK).} \item{x4}{Other variable costs 
+#' (1000 NOK).} 
 #' \item{x5}{Cattle capital (1000 NOK).} \item{x6}{Other capital (1000 NOK).} 
 #' \item{w1}{Land price (NOK/daa).} \item{w2}{Labour price (NOK/hour).} 
 #' \item{w3}{Feed price index.} \item{w4}{Other variable cost index.} 
-#' \item{w5}{Cattle capital rent.} \item{w6}{Other capital rent and depreciation.} 
+#' \item{w5}{Cattle capital rent.} \item{w6}{Other capital rent and 
+#' depreciation.} 
 #' \item{tc}{Total cost.}}
 #' @references Kumbhakar, S.C., H.J. Wang, and A. Horncastle. 2014. \emph{A
 #' Practitioner's Guide to Stochastic Frontier Analysis Using Stata}. Cambridge

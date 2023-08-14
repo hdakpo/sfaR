@@ -4,34 +4,81 @@
 \alias{fitted}
 \alias{fitted.sfacross}
 \alias{fitted.sfalcmcross}
+\alias{fitted.sfagzisfcross}
+\alias{fitted.sfacnsfcross}
+\alias{fitted.sfamisfcross}
+\alias{fitted.sfazisfcross}
 \alias{fitted.sfaselectioncross}
+\alias{fitted.sfametacross}
+\alias{fitted.sfapanel1}
+\alias{fitted.sfalcmpanel}
 \title{Extract fitted values of stochastic frontier models}
 \usage{
 \method{fitted}{sfacross}(object, ...)
 
 \method{fitted}{sfalcmcross}(object, ...)
 
-\method{fitted}{sfaselectioncross}(object, ...)
+\method{fitted}{sfagzisfcross}(...)
+
+\method{fitted}{sfacnsfcross}(...)
+
+\method{fitted}{sfamisfcross}(...)
+
+\method{fitted}{sfazisfcross}(...)
+
+\method{fitted}{sfaselectioncross}(...)
+
+\method{fitted}{sfametacross}(object, ...)
+
+\method{fitted}{sfapanel1}(...)
+
+\method{fitted}{sfalcmpanel}(...)
 }
 \arguments{
 \item{object}{A stochastic frontier model returned
-by \code{\link{sfacross}}, \code{\link{sfalcmcross}}, or
-\code{\link{sfaselectioncross}}.}
+by \code{\link{sfacross}}, \code{\link{sfalcmcross}},
+\code{\link{sfagzisfcross}}, \code{\link{sfacnsfcross}},
+\code{\link{sfamisfcross}}, \code{\link{sfazisfcross}},
+\code{\link{sfametacross}}, \code{\link{sfaselectioncross}},
+\code{\link{sfapanel1}}, or \code{\link{sfalcmpanel}}.}
 
 \item{...}{Currently ignored.}
 }
 \value{
-In the case of an object of class \code{'sfacross'}, or
-\code{'sfaselectioncross'}, a vector of fitted values is returned.
+In the case of an object of class \code{'sfacross'},
+code{'sfacnsfcross'}, \code{'sfamisfcross'}, \code{'sfazisfcross'},
+\code{'sfaselectioncross'}, or \code{'sfapanel1'}, a vector of fitted values
+is returned.
 
-In the case of an object of class \code{'sfalcmcross'}, a data frame
-containing the fitted values for each class is returned where each variable
-ends with \code{'_c#'}, \code{'#'} being the class number.
+In the case of an object of class \code{'sfalcmcross'}
+\code{'sfagzisfcross'}, or \code{'sfalcmpanel'}, a data frame containing the
+fitted values for each class is returned where each variable ends with
+\code{'_c#'}, \code{'#'} being the class number.
+
+For object of class \code{'sfametacross'}, a data frame containing the fitted
+values for each each group and the metafrontier is returned. Each variable
+name ends with \code{'_g'} where \code{'g'} is the group name. For the
+metafrontier \code{'g'} = 'metafrontier'. For \code{'modelType'} = 'aos17a'
+or \code{'modelType'} = 'aos17b', the fitted metafrontier is simply the mean
+values of all the simulated metafrontiers.
 }
 \description{
 \code{\link{fitted}} returns the fitted frontier values from stochastic
-frontier models estimated with \code{\link{sfacross}}, \code{\link{sfalcmcross}},
-or \code{\link{sfaselectioncross}}.
+frontier models estimated with \code{\link{sfacross}},
+\code{\link{sfalcmcross}}, \code{\link{sfagzisfcross}},
+\code{\link{sfacnsfcross}}, \code{\link{sfamisfcross}},
+\code{\link{sfazisfcross}}, \code{\link{sfametacross}},
+\code{\link{sfaselectioncross}}, \code{\link{sfapanel1}}, or
+\code{\link{sfalcmpanel}}.
+}
+\details{
+Let's consider the standard stochastic frontier model
+
+\deqn{y_i = \alpha + \mathbf{x_i^{\prime}}\bm{\beta} + v_i - Su_i}
+
+The fitted frontier is obtained as
+
+\deqn{\hat{f}_i=\mathbf{x_i^{\prime}}\bm{\hat{\beta}}}
 }
 \note{
 The fitted values are ordered in the same way as the corresponding
@@ -40,8 +87,8 @@ observations in the dataset used for the estimation.
 \examples{
 
 \dontrun{
-## Using data on eighty-two countries production (GDP)
-# LCM Cobb Douglas (production function) half normal distribution
+# Using data on eighty-two countries production (GDP)
+## LCM Cobb Douglas (production function) half normal distribution
 cb_2c_h <- sfalcmcross(formula = ly ~ lk + ll + yr, udist = 'hnormal', 
 data = worldprod)
 fit.cb_2c_h <- fitted(cb_2c_h)
@@ -56,8 +103,30 @@ fitting function using cross-sectional or pooled data.
 \code{\link{sfalcmcross}}, for the latent class stochastic frontier analysis
 model fitting function using cross-sectional or pooled data.
 
+\code{\link{sfagzisfcross}}, for the generalized zero inefficiency
+stochastic frontier analysis model fitting function using cross-sectional or
+pooled data.
+
+\code{\link{sfacnsfcross}}, for the contaminated noise stochastic
+frontier analysis model fitting function using cross-sectional data.
+
+\code{\link{sfamisfcross}}, for the multi-modal inefficiency stochastic
+frontier analysis model fitting function using cross-sectional data.
+
+\code{\link{sfazisfcross}} for zero inefficiency in stochastic frontier model
+fitting function using cross-sectional data.
+
+\code{\link{sfametacross}}, for fitting different metafrontier models
+using cross-sectional or pooled data.
+
 \code{\link{sfaselectioncross}} for sample selection in stochastic frontier
 model fitting function using cross-sectional or pooled data.
+
+\code{\link{sfapanel1}}, for the first generation stochastic frontier
+analysis model fitting function using panel data.
+
+\code{\link{sfalcmpanel}}, for the latent class stochastic frontier analysis
+model fitting function using panel data.
 }
 \keyword{fitted}
 \keyword{methods}

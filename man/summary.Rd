@@ -3,11 +3,25 @@
 \name{summary}
 \alias{summary}
 \alias{summary.sfacross}
-\alias{print.summary.sfacross}
 \alias{summary.sfalcmcross}
-\alias{print.summary.sfalcmcross}
+\alias{summary.sfagzisfcross}
+\alias{summary.sfacnsfcross}
+\alias{summary.sfamisfcross}
+\alias{summary.sfazisfcross}
 \alias{summary.sfaselectioncross}
+\alias{summary.sfametacross}
+\alias{summary.sfapanel1}
+\alias{summary.sfalcmpanel}
+\alias{print.summary.sfacross}
+\alias{print.summary.sfalcmcross}
+\alias{print.summary.sfagzisfcross}
+\alias{print.summary.sfacnsfcross}
+\alias{print.summary.sfamisfcross}
+\alias{print.summary.sfazisfcross}
 \alias{print.summary.sfaselectioncross}
+\alias{print.summary.sfametacross}
+\alias{print.summary.sfapanel1}
+\alias{print.summary.sfalcmpanel}
 \title{Summary of results for stochastic frontier models}
 \usage{
 \method{summary}{sfacross}(object, grad = FALSE, ci = FALSE, ...)
@@ -18,15 +32,47 @@
 
 \method{print}{summary.sfalcmcross}(x, digits = max(3, getOption("digits") - 2), ...)
 
+\method{summary}{sfagzisfcross}(object, grad = FALSE, ci = FALSE, ...)
+
+\method{print}{summary.sfagzisfcross}(x, digits = max(3, getOption("digits") - 2), ...)
+
+\method{summary}{sfacnsfcross}(object, grad = FALSE, ci = FALSE, ...)
+
+\method{print}{summary.sfacnsfcross}(x, digits = max(3, getOption("digits") - 2), ...)
+
+\method{summary}{sfamisfcross}(object, grad = FALSE, ci = FALSE, ...)
+
+\method{print}{summary.sfamisfcross}(x, digits = max(3, getOption("digits") - 2), ...)
+
+\method{summary}{sfazisfcross}(object, grad = FALSE, ci = FALSE, ...)
+
+\method{print}{summary.sfazisfcross}(x, digits = max(3, getOption("digits") - 2), ...)
+
 \method{summary}{sfaselectioncross}(object, grad = FALSE, ci = FALSE, ...)
 
 \method{print}{summary.sfaselectioncross}(x, digits = max(3, getOption("digits") - 2), ...)
+
+\method{summary}{sfametacross}(object, grad = FALSE, ci = FALSE, ...)
+
+\method{print}{summary.sfametacross}(x, digits = max(3, getOption("digits") - 2), ...)
+
+\method{summary}{sfapanel1}(object, grad = FALSE, ci = FALSE, ...)
+
+\method{print}{summary.sfapanel1}(x, digits = max(3, getOption("digits") - 2), ...)
+
+\method{summary}{sfalcmpanel}(object, grad = FALSE, ci = FALSE, ...)
+
+\method{print}{summary.sfalcmpanel}(x, digits = max(3, getOption("digits") - 2), ...)
 }
 \arguments{
 \item{object}{An object of either class \code{'sfacross'} returned by the
-function \code{\link{sfacross}}, or \code{'sfalcmcross'} returned by the
-function \code{\link{sfalcmcross}}, or class \code{'sfaselectioncross'} returned
-by the function \code{\link{sfaselectioncross}}.}
+function \code{\link{sfacross}}, \code{'sfalcmcross'} returned by the
+function \code{\link{sfalcmcross}}, \code{'sfagzisfcross'} returned by the
+function \code{\link{sfagzisfcross}}, \code{'sfametacross'} returned by the
+function \code{\link{sfametacross}}, \code{'sfaselectioncross'}
+returned by the function \code{\link{sfaselectioncross}}, \code{'sfapanel1'}
+returned by the function \code{\link{sfapanel1}}, or \code{'sfalcmpanel'}
+returned by the function \code{\link{sfalcmpanel}}.}
 
 \item{grad}{Logical. Default = \code{FALSE}. If \code{TRUE}, the gradient
 for the maximum likelihood (ML) estimates of the different parameters is
@@ -38,17 +84,28 @@ returned.}
 
 \item{...}{Currently ignored.}
 
-\item{x}{An object of either class \code{'summary.sfacross'}, \code{'summary.sfalcmcross'}, or\cr
-\code{'summary.sfaselectioncross'}.}
+\item{x}{An object of either class \code{'summary.sfacross'},
+\code{'summary.sfalcmcross'}, \code{'summary.sfagzisfcross'},
+\code{'summary.sfacnsfcross'}, \code{'summary.sfamisfcross'},
+\code{'summary.sfazisfcross'}, \code{'summary.sfametacross'},
+\code{'summary.sfaselectioncross'}, \code{'summary.sfapanel1'}, or
+\code{'summary.sfalcmpanel'}.}
 
 \item{digits}{Numeric. Number of digits displayed in values.}
 }
 \value{
 The \code{\link{summary}} method returns a list of class
-\code{'summary.sfacross'}, \code{'summary.sfalcmcross'}, or\cr
-\code{'summary.sfaselectioncross'}
-that contains the same elements as an object returned by \code{\link{sfacross}},
-\code{\link{sfalcmcross}}, or \code{\link{sfaselectioncross}} with the
+\code{'summary.sfacross'}, \code{'summary.sfalcmcross'},
+\code{'summary.sfagzisfcross'}, \code{'summary.sfacnsfcross'},
+\code{'summary.sfamisfcross'}, \code{'summary.sfazisfcross'},
+\code{'summary.sfametacross'}, \code{'summary.sfaselectioncross'},
+\code{'summary.sfapanel1'}, or \code{'summary.sfalcmpanel'}
+that contains the same elements as an object returned by
+\code{\link{sfacross}}, \code{\link{sfalcmcross}},
+\code{\link{sfagzisfcross}}, \code{\link{sfacnsfcross}},
+\code{\link{sfamisfcross}}, \code{\link{sfazisfcross}},
+\code{\link{sfametacross}}, \code{\link{sfaselectioncross}},
+\code{\link{sfapanel1}}, or \code{\link{sfalcmpanel}} with the
 following additional elements:
 
 \item{AIC}{Akaike information criterion.}
@@ -69,7 +126,7 @@ error term (\eqn{\sigma_u^2}).}
 \code{'sfaselectioncross'}. Variance of the one-sided error term.}
 
 \item{theta}{For \code{object} of class \code{'sfacross'} with \code{'udist
-= uniform'}.  \eqn{\Theta} value in the case the uniform distribution is
+= uniform'}. \eqn{\Theta} value in the case the uniform distribution is
 defined as: \eqn{u_i \in [0, \Theta]}.}
 
 \item{Eu}{For \code{object} of class \code{'sfacross'} or
@@ -90,7 +147,9 @@ and when \code{ci = TRUE} their confidence intervals.}
 
 \item{mlRes}{Matrix of ML estimates, their standard errors, z-values,
 asymptotic P-values, and when \code{grad = TRUE} their gradient, \code{ci =
-TRUE} their confidence intervals.}
+TRUE} their confidence intervals. For object of class \code{'sfametacross'},
+'mlRes' is a list of the Matrices of the ML estimates for each group and the
+metafrontier.}
 
 \item{chisq}{For \code{object} of class \code{'sfacross'}. Chi-square
 statistics of the difference between the stochastic frontier and the OLS.}
@@ -99,13 +158,17 @@ statistics of the difference between the stochastic frontier and the OLS.}
 }
 \description{
 Create and print summary results for stochastic frontier models returned by
-\code{\link{sfacross}}, \code{\link{sfalcmcross}}, or
-\code{\link{sfaselectioncross}}.
+\code{\link{sfacross}}, \code{\link{sfalcmcross}},
+\code{\link{sfagzisfcross}}, \code{\link{sfacnsfcross}},
+\code{\link{sfamisfcross}}, \code{\link{sfazisfcross}},
+\code{\link{sfametacross}}, \code{\link{sfaselectioncross}},
+\code{\link{sfapanel1}}, or \code{\link{sfalcmpanel}}.
 }
 \examples{
 
-## Using data on fossil fuel fired steam electric power generation plants in the U.S.
-# Translog SFA (cost function) truncated normal with scaling property
+# Using data on fossil fuel fired steam electric power generation plants in 
+# the U.S.
+## Translog SFA (cost function) truncated normal with scaling property
 tl_u_ts <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
 log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
 I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
@@ -121,8 +184,30 @@ fitting function for cross-sectional or pooled data.
 \code{\link{sfalcmcross}}, for the latent class stochastic frontier analysis
 model fitting function for cross-sectional or pooled data.
 
+\code{\link{sfagzisfcross}}, for the generalized zero inefficiency
+stochastic frontier analysis model fitting function using cross-sectional or
+pooled data.
+
+\code{\link{sfacnsfcross}}, for the contaminated noise stochastic
+frontier analysis model fitting function using cross-sectional data.
+
+\code{\link{sfamisfcross}}, for the multi-modal inefficiency stochastic
+frontier analysis model fitting function using cross-sectional data.
+
+\code{\link{sfazisfcross}} for zero inefficiency in stochastic frontier model
+fitting function using cross-sectional data.
+
+\code{\link{sfametacross}}, for fitting different metafrontier models
+using cross-sectional or pooled data.
+
 \code{\link{sfaselectioncross}} for sample selection in stochastic frontier
 model fitting function for cross-sectional or pooled data.
+
+\code{\link{sfapanel1}}, for the first generation stochastic frontier
+analysis model fitting function using panel data.
+
+\code{\link{sfalcmpanel}}, for the latent class stochastic frontier analysis
+model fitting function using panel data.
 
 \code{\link[=print.sfacross]{print}} for printing \code{sfacross} object.
 
