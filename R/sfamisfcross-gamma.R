@@ -68,8 +68,8 @@ cmisfgammanormlike_logit <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar, vHvar
       Hi2
     Probc1 <- exp(Wz)/(1 + exp(Wz))
     Probc2 <- 1 - Probc1
-    ifelse(Probc1 * Pi1 + Probc2 * Pi2 <= 0, return(-.Machine$double.xmax), return(wHvar * log(Probc1 *
-      Pi1 + Probc2 * Pi2)))
+    ifelse(Probc1 * Pi1 + Probc2 * Pi2 <= 0, return(-.Machine$double.xmax), return(wHvar *
+      log(Probc1 * Pi1 + Probc2 * Pi2)))
   }
 }
 
@@ -110,8 +110,8 @@ cmisfgammanormlike_cauchit <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar, vHv
       Hi2
     Probc1 <- 1/pi * atan(Wz) + 1/2
     Probc2 <- 1 - Probc1
-    ifelse(Probc1 * Pi1 + Probc2 * Pi2 <= 0, return(-.Machine$double.xmax), return(wHvar * log(Probc1 *
-      Pi1 + Probc2 * Pi2)))
+    ifelse(Probc1 * Pi1 + Probc2 * Pi2 <= 0, return(-.Machine$double.xmax), return(wHvar *
+      log(Probc1 * Pi1 + Probc2 * Pi2)))
   }
 }
 
@@ -152,8 +152,8 @@ cmisfgammanormlike_probit <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar, vHva
       Hi2
     Probc1 <- pnorm(Wz)
     Probc2 <- 1 - Probc1
-    ifelse(Probc1 * Pi1 + Probc2 * Pi2 <= 0, return(-.Machine$double.xmax), return(wHvar * log(Probc1 *
-      Pi1 + Probc2 * Pi2)))
+    ifelse(Probc1 * Pi1 + Probc2 * Pi2 <= 0, return(-.Machine$double.xmax), return(wHvar *
+      log(Probc1 * Pi1 + Probc2 * Pi2)))
   }
 }
 
@@ -194,8 +194,8 @@ cmisfgammanormlike_cloglog <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar, vHv
       Hi2
     Probc1 <- 1 - exp(-exp(Wz))
     Probc2 <- 1 - Probc1
-    ifelse(Probc1 * Pi1 + Probc2 * Pi2 <= 0, return(-.Machine$double.xmax), return(wHvar * log(Probc1 *
-      Pi1 + Probc2 * Pi2)))
+    ifelse(Probc1 * Pi1 + Probc2 * Pi2 <= 0, return(-.Machine$double.xmax), return(wHvar *
+      log(Probc1 * Pi1 + Probc2 * Pi2)))
   }
 }
 
@@ -823,8 +823,12 @@ misfgammanormAlgOpt_logit <- function(start, randStart, sdStart, olsParam, dataT
     printInfo = printInfo, tol = tol)
   initGamma <- start_st$initGamma
   startVal <- start_st$StartVal
-  if (randStart)
-    startVal <- startVal + rnorm(length(startVal), sd = sdStart)
+  if (randStart) {
+    rd <- rnorm(length(startVal), sd = sdStart)
+    rd[(nXvar + 2 * nuZUvar + nvZVvar + 1):(nXvar + 2 * nuZUvar + nvZVvar + 2)] <- abs(rd[(nXvar +
+      2 * nuZUvar + nvZVvar + 1):(nXvar + 2 * nuZUvar + nvZVvar + 2)])
+    startVal <- startVal + rd
+  }
   startLoglik <- sum(cmisfgammanormlike_logit(startVal, nXvar = nXvar, nuZUvar = nuZUvar,
     nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
     S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar, nZHvar = nZHvar))
@@ -942,8 +946,12 @@ misfgammanormAlgOpt_cauchit <- function(start, randStart, sdStart, olsParam, dat
     printInfo = printInfo, tol = tol)
   initGamma <- start_st$initGamma
   startVal <- start_st$StartVal
-  if (randStart)
-    startVal <- startVal + rnorm(length(startVal), sd = sdStart)
+  if (randStart) {
+    rd <- rnorm(length(startVal), sd = sdStart)
+    rd[(nXvar + 2 * nuZUvar + nvZVvar + 1):(nXvar + 2 * nuZUvar + nvZVvar + 2)] <- abs(rd[(nXvar +
+      2 * nuZUvar + nvZVvar + 1):(nXvar + 2 * nuZUvar + nvZVvar + 2)])
+    startVal <- startVal + rd
+  }
   startLoglik <- sum(cmisfgammanormlike_cauchit(startVal, nXvar = nXvar, nuZUvar = nuZUvar,
     nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
     S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar, nZHvar = nZHvar))
@@ -1061,8 +1069,12 @@ misfgammanormAlgOpt_probit <- function(start, randStart, sdStart, olsParam, data
     printInfo = printInfo, tol = tol)
   initGamma <- start_st$initGamma
   startVal <- start_st$StartVal
-  if (randStart)
-    startVal <- startVal + rnorm(length(startVal), sd = sdStart)
+  if (randStart) {
+    rd <- rnorm(length(startVal), sd = sdStart)
+    rd[(nXvar + 2 * nuZUvar + nvZVvar + 1):(nXvar + 2 * nuZUvar + nvZVvar + 2)] <- abs(rd[(nXvar +
+      2 * nuZUvar + nvZVvar + 1):(nXvar + 2 * nuZUvar + nvZVvar + 2)])
+    startVal <- startVal + rd
+  }
   startLoglik <- sum(cmisfgammanormlike_probit(startVal, nXvar = nXvar, nuZUvar = nuZUvar,
     nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
     S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar, nZHvar = nZHvar))
@@ -1180,8 +1192,12 @@ misfgammanormAlgOpt_cloglog <- function(start, randStart, sdStart, olsParam, dat
     printInfo = printInfo, tol = tol)
   initGamma <- start_st$initGamma
   startVal <- start_st$StartVal
-  if (randStart)
-    startVal <- startVal + rnorm(length(startVal), sd = sdStart)
+  if (randStart) {
+    rd <- rnorm(length(startVal), sd = sdStart)
+    rd[(nXvar + 2 * nuZUvar + nvZVvar + 1):(nXvar + 2 * nuZUvar + nvZVvar + 2)] <- abs(rd[(nXvar +
+      2 * nuZUvar + nvZVvar + 1):(nXvar + 2 * nuZUvar + nvZVvar + 2)])
+    startVal <- startVal + rd
+  }
   startLoglik <- sum(cmisfgammanormlike_cloglog(startVal, nXvar = nXvar, nuZUvar = nuZUvar,
     nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
     S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar, nZHvar = nZHvar))
