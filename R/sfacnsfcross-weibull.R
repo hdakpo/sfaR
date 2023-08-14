@@ -62,8 +62,8 @@ ccnsfweibullnormlike_logit <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar, vHv
     }
     Probc1 <- exp(Wz)/(1 + exp(Wz))
     Probc2 <- 1 - Probc1
-    ifelse(Probc1 * Pi1 + Probc2 * Pi2 <= 0, return(-.Machine$double.xmax), return(wHvar * log(Probc1 *
-      Pi1 + Probc2 * Pi2)))
+    ifelse(Probc1 * Pi1 + Probc2 * Pi2 <= 0, return(-.Machine$double.xmax), return(wHvar *
+      log(Probc1 * Pi1 + Probc2 * Pi2)))
   }
 }
 
@@ -94,8 +94,8 @@ ccnsfweibullnormlike_cauchit <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar, v
     }
     Probc1 <- 1/pi * atan(Wz) + 1/2
     Probc2 <- 1 - Probc1
-    ifelse(Probc1 * Pi1 + Probc2 * Pi2 <= 0, return(-.Machine$double.xmax), return(wHvar * log(Probc1 *
-      Pi1 + Probc2 * Pi2)))
+    ifelse(Probc1 * Pi1 + Probc2 * Pi2 <= 0, return(-.Machine$double.xmax), return(wHvar *
+      log(Probc1 * Pi1 + Probc2 * Pi2)))
   }
 }
 
@@ -126,8 +126,8 @@ ccnsfweibullnormlike_probit <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar, vH
     }
     Probc1 <- pnorm(Wz)
     Probc2 <- 1 - Probc1
-    ifelse(Probc1 * Pi1 + Probc2 * Pi2 <= 0, return(-.Machine$double.xmax), return(wHvar * log(Probc1 *
-      Pi1 + Probc2 * Pi2)))
+    ifelse(Probc1 * Pi1 + Probc2 * Pi2 <= 0, return(-.Machine$double.xmax), return(wHvar *
+      log(Probc1 * Pi1 + Probc2 * Pi2)))
   }
 }
 
@@ -158,8 +158,8 @@ ccnsfweibullnormlike_cloglog <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar, v
     }
     Probc1 <- 1 - exp(-exp(Wz))
     Probc2 <- 1 - Probc1
-    ifelse(Probc1 * Pi1 + Probc2 * Pi2 <= 0, return(-.Machine$double.xmax), return(wHvar * log(Probc1 *
-      Pi1 + Probc2 * Pi2)))
+    ifelse(Probc1 * Pi1 + Probc2 * Pi2 <= 0, return(-.Machine$double.xmax), return(wHvar *
+      log(Probc1 * Pi1 + Probc2 * Pi2)))
   }
 }
 
@@ -196,8 +196,8 @@ cmcesfweibullnormlike_logit <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar, vH
     }
     Probc1 <- exp(Wz)/(1 + exp(Wz))
     Probc2 <- 1 - Probc1
-    ifelse(Probc1 * Pi1 + Probc2 * Pi2 <= 0, return(-.Machine$double.xmax), return(wHvar * log(Probc1 *
-      Pi1 + Probc2 * Pi2)))
+    ifelse(Probc1 * Pi1 + Probc2 * Pi2 <= 0, return(-.Machine$double.xmax), return(wHvar *
+      log(Probc1 * Pi1 + Probc2 * Pi2)))
   }
 }
 
@@ -232,8 +232,8 @@ cmcesfweibullnormlike_cauchit <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar, 
     }
     Probc1 <- 1/pi * atan(Wz) + 1/2
     Probc2 <- 1 - Probc1
-    ifelse(Probc1 * Pi1 + Probc2 * Pi2 <= 0, return(-.Machine$double.xmax), return(wHvar * log(Probc1 *
-      Pi1 + Probc2 * Pi2)))
+    ifelse(Probc1 * Pi1 + Probc2 * Pi2 <= 0, return(-.Machine$double.xmax), return(wHvar *
+      log(Probc1 * Pi1 + Probc2 * Pi2)))
   }
 }
 
@@ -268,8 +268,8 @@ cmcesfweibullnormlike_probit <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar, v
     }
     Probc1 <- pnorm(Wz)
     Probc2 <- 1 - Probc1
-    ifelse(Probc1 * Pi1 + Probc2 * Pi2 <= 0, return(-.Machine$double.xmax), return(wHvar * log(Probc1 *
-      Pi1 + Probc2 * Pi2)))
+    ifelse(Probc1 * Pi1 + Probc2 * Pi2 <= 0, return(-.Machine$double.xmax), return(wHvar *
+      log(Probc1 * Pi1 + Probc2 * Pi2)))
   }
 }
 
@@ -304,8 +304,8 @@ cmcesfweibullnormlike_cloglog <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar, 
     }
     Probc1 <- 1 - exp(-exp(Wz))
     Probc2 <- 1 - Probc1
-    ifelse(Probc1 * Pi1 + Probc2 * Pi2 <= 0, return(-.Machine$double.xmax), return(wHvar * log(Probc1 *
-      Pi1 + Probc2 * Pi2)))
+    ifelse(Probc1 * Pi1 + Probc2 * Pi2 <= 0, return(-.Machine$double.xmax), return(wHvar *
+      log(Probc1 * Pi1 + Probc2 * Pi2)))
   }
 }
 
@@ -1072,8 +1072,12 @@ cnsfweibullnormAlgOpt_logit <- function(start, randStart, sdStart, olsParam, dat
     printInfo = printInfo, tol = tol)
   initWeibull <- start_st$initWeibull
   startVal <- start_st$StartVal
-  if (randStart)
-    startVal <- startVal + rnorm(length(startVal), sd = sdStart)
+  if (randStart) {
+    rd <- rnorm(length(startVal), sd = sdStart)
+    rd[nXvar + nuZUvar + 2 * nvZVvar + 1] <- abs(rd[nXvar + nuZUvar + 2 * nvZVvar +
+      1])
+    startVal <- startVal + rd
+  }
   startLoglik <- sum(ccnsfweibullnormlike_logit(startVal, nXvar = nXvar, nuZUvar = nuZUvar,
     nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
     S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar, nZHvar = nZHvar))
@@ -1191,8 +1195,12 @@ cnsfweibullnormAlgOpt_cauchit <- function(start, randStart, sdStart, olsParam, d
     printInfo = printInfo, tol = tol)
   initWeibull <- start_st$initWeibull
   startVal <- start_st$StartVal
-  if (randStart)
-    startVal <- startVal + rnorm(length(startVal), sd = sdStart)
+  if (randStart) {
+    rd <- rnorm(length(startVal), sd = sdStart)
+    rd[nXvar + nuZUvar + 2 * nvZVvar + 1] <- abs(rd[nXvar + nuZUvar + 2 * nvZVvar +
+      1])
+    startVal <- startVal + rd
+  }
   startLoglik <- sum(ccnsfweibullnormlike_cauchit(startVal, nXvar = nXvar, nuZUvar = nuZUvar,
     nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
     S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar, nZHvar = nZHvar))
@@ -1310,8 +1318,12 @@ cnsfweibullnormAlgOpt_probit <- function(start, randStart, sdStart, olsParam, da
     printInfo = printInfo, tol = tol)
   initWeibull <- start_st$initWeibull
   startVal <- start_st$StartVal
-  if (randStart)
-    startVal <- startVal + rnorm(length(startVal), sd = sdStart)
+  if (randStart) {
+    rd <- rnorm(length(startVal), sd = sdStart)
+    rd[nXvar + nuZUvar + 2 * nvZVvar + 1] <- abs(rd[nXvar + nuZUvar + 2 * nvZVvar +
+      1])
+    startVal <- startVal + rd
+  }
   startLoglik <- sum(ccnsfweibullnormlike_probit(startVal, nXvar = nXvar, nuZUvar = nuZUvar,
     nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
     S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar, nZHvar = nZHvar))
@@ -1429,8 +1441,12 @@ cnsfweibullnormAlgOpt_cloglog <- function(start, randStart, sdStart, olsParam, d
     printInfo = printInfo, tol = tol)
   initWeibull <- start_st$initWeibull
   startVal <- start_st$StartVal
-  if (randStart)
-    startVal <- startVal + rnorm(length(startVal), sd = sdStart)
+  if (randStart) {
+    rd <- rnorm(length(startVal), sd = sdStart)
+    rd[nXvar + nuZUvar + 2 * nvZVvar + 1] <- abs(rd[nXvar + nuZUvar + 2 * nvZVvar +
+      1])
+    startVal <- startVal + rd
+  }
   startLoglik <- sum(ccnsfweibullnormlike_cloglog(startVal, nXvar = nXvar, nuZUvar = nuZUvar,
     nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
     S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar, nZHvar = nZHvar))
@@ -1550,8 +1566,13 @@ mcesfweibullnormAlgOpt_logit <- function(start, randStart, sdStart, olsParam, da
     printInfo = printInfo, tol = tol)
   initWeibull <- start_st$initWeibull
   startVal <- start_st$StartVal
-  if (randStart)
-    startVal <- startVal + rnorm(length(startVal), sd = sdStart)
+  if (randStart) {
+    rd <- rnorm(length(startVal), sd = sdStart)
+    rd[(nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(nXvar + 2 * nuZUvar + 2 * nvZVvar +
+      2)] <- abs(rd[(nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(nXvar + 2 * nuZUvar +
+      2 * nvZVvar + 2)])
+    startVal <- startVal + rd
+  }
   startLoglik <- sum(cmcesfweibullnormlike_logit(startVal, nXvar = nXvar, nuZUvar = nuZUvar,
     nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
     S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar, nZHvar = nZHvar))
@@ -1669,8 +1690,13 @@ mcesfweibullnormAlgOpt_cauchit <- function(start, randStart, sdStart, olsParam, 
     printInfo = printInfo, tol = tol)
   initWeibull <- start_st$initWeibull
   startVal <- start_st$StartVal
-  if (randStart)
-    startVal <- startVal + rnorm(length(startVal), sd = sdStart)
+  if (randStart) {
+    rd <- rnorm(length(startVal), sd = sdStart)
+    rd[(nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(nXvar + 2 * nuZUvar + 2 * nvZVvar +
+      2)] <- abs(rd[(nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(nXvar + 2 * nuZUvar +
+      2 * nvZVvar + 2)])
+    startVal <- startVal + rd
+  }
   startLoglik <- sum(cmcesfweibullnormlike_cauchit(startVal, nXvar = nXvar, nuZUvar = nuZUvar,
     nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
     S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar, nZHvar = nZHvar))
@@ -1788,8 +1814,13 @@ mcesfweibullnormAlgOpt_probit <- function(start, randStart, sdStart, olsParam, d
     printInfo = printInfo, tol = tol)
   initWeibull <- start_st$initWeibull
   startVal <- start_st$StartVal
-  if (randStart)
-    startVal <- startVal + rnorm(length(startVal), sd = sdStart)
+  if (randStart) {
+    rd <- rnorm(length(startVal), sd = sdStart)
+    rd[(nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(nXvar + 2 * nuZUvar + 2 * nvZVvar +
+      2)] <- abs(rd[(nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(nXvar + 2 * nuZUvar +
+      2 * nvZVvar + 2)])
+    startVal <- startVal + rd
+  }
   startLoglik <- sum(cmcesfweibullnormlike_probit(startVal, nXvar = nXvar, nuZUvar = nuZUvar,
     nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
     S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar, nZHvar = nZHvar))
@@ -1907,8 +1938,13 @@ mcesfweibullnormAlgOpt_cloglog <- function(start, randStart, sdStart, olsParam, 
     printInfo = printInfo, tol = tol)
   initWeibull <- start_st$initWeibull
   startVal <- start_st$StartVal
-  if (randStart)
-    startVal <- startVal + rnorm(length(startVal), sd = sdStart)
+  if (randStart) {
+    rd <- rnorm(length(startVal), sd = sdStart)
+    rd[(nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(nXvar + 2 * nuZUvar + 2 * nvZVvar +
+      2)] <- abs(rd[(nXvar + 2 * nuZUvar + 2 * nvZVvar + 1):(nXvar + 2 * nuZUvar +
+      2 * nvZVvar + 2)])
+    startVal <- startVal + rd
+  }
   startLoglik <- sum(cmcesfweibullnormlike_cloglog(startVal, nXvar = nXvar, nuZUvar = nuZUvar,
     nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
     S = S, wHvar = wHvar, N = N, FiMat = FiMat, Zvar = Zvar, nZHvar = nZHvar))
