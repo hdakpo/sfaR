@@ -83,7 +83,7 @@ implemented.}
 likelihood (ML) estimation.}
 
 \item{randStart}{Logical. Define if random starting values should be used for
-M(S)L estimation. New starting values are obtained as old ones + draws from
+ML estimation. New starting values are obtained as old ones + draws from
 normal distribution with std. deviation of 0.01. \code{'seed'} is not
 considered here, then each run will provide different starting values
 (unless a seed is set by the user before the run).}

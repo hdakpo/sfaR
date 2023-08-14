@@ -2,10 +2,10 @@
 % Please edit documentation in R/sfalcmcross.R
 \name{sfalcmcross}
 \alias{sfalcmcross}
-\alias{print.sfalcmcross}
 \alias{bread.sfalcmcross}
 \alias{estfun.sfalcmcross}
-\title{Latent class stochastic frontier using cross-sectional data}
+\alias{print.sfalcmcross}
+\title{Latent class stochastic frontier using cross-sectional or pooled data}
 \usage{
 sfalcmcross(
   formula,
@@ -20,6 +20,7 @@ sfalcmcross(
   S = 1L,
   udist = "hnormal",
   start = NULL,
+  randStart = FALSE,
   whichStart = 2L,
   initAlg = "nm",
   initIter = 100,
@@ -36,9 +37,9 @@ sfalcmcross(
 
 \method{print}{sfalcmcross}(x, ...)
 
-\method{bread}{sfalcmcross}(x, ...)
+bread.sfalcmcross(x, ...)
 
-\method{estfun}{sfalcmcross}(x, ...)
+estfun.sfalcmcross(x, ...)
 }
 \arguments{
 \item{formula}{A symbolic description of the model to be estimated based on
@@ -75,11 +76,16 @@ estimated: \eqn{\epsilon_i = v_i+u_i}.}
 
 \item{udist}{Character string. Distribution specification for the one-sided
 error term. Only the half normal distribution \code{'hnormal'} (Aigner
-\emph{et al.}, 1977, Meeusen and Vandenbroeck, 1977) is currently
-implemented.}
+\emph{et al.}) is currently implemented.}
 
 \item{start}{Numeric vector. Optional starting values for the maximum
 likelihood (ML) estimation.}
+
+\item{randStart}{Logical. Define if random starting values should be used for
+ML estimation. New starting values are obtained as old ones + draws from
+normal distribution with std. deviation of 0.01. \code{'seed'} is not
+considered here, then each run will provide different starting values
+(unless a seed is set by the user before the run).}
 
 \item{whichStart}{Integer. If \code{'whichStart = 1'}, the starting values
 are obtained from the method of moments. When \code{'whichStart = 2'}
@@ -93,9 +99,9 @@ Only \pkg{maxLik} package algorithms are available:
 (see \code{\link[maxLik:maxBFGS]{maxBFGS}})
 \item \code{'bhhh'}, for Berndt-Hall-Hall-Hausman
 (see \code{\link[maxLik:maxBHHH]{maxBHHH}})
-\item \code{'nr'}, for Newton-Raphson (see \code{\link[maxLik:maxNR]{maxNR}})
-\item \code{'nm'}, for Nelder-Mead - Default -
-(see \code{\link[maxLik:maxNM]{maxNM}})
+\item \code{'nr'}, for Newton-Raphson (see
+\code{\link[maxLik:maxNR]{maxNR}}) \item \code{'nm'}, for Nelder-Mead -
+Default - (see \code{\link[maxLik:maxNM]{maxNM}})
 \item \code{'cg'}, for Conjugate Gradient
 (see \code{\link[maxLik:maxCG]{maxCG}}) \item \code{'sann'}, for Simulated
 Annealing (see \code{\link[maxLik:maxSANN]{maxSANN}})
@@ -114,19 +120,19 @@ for Broyden-Fletcher-Goldfarb-Shanno (see
 Berndt-Hall-Hall-Hausman (see \code{\link[maxLik:maxBHHH]{maxBHHH}}) \item
 \code{'nr'}, for Newton-Raphson (see \code{\link[maxLik:maxNR]{maxNR}})
 \item \code{'nm'}, for Nelder-Mead (see \code{\link[maxLik:maxNM]{maxNM}})
-\item \code{'cg'}, for Conjugate Gradient
-(see \code{\link[maxLik:maxCG]{maxCG}}) \item \code{'sann'}, for Simulated
-Annealing (see \code{\link[maxLik:maxSANN]{maxSANN}})
-\item \code{'ucminf'}, for a quasi-Newton type optimization with BFGS updating of
-the inverse Hessian and soft line search with a trust region type monitoring
-of the input to the line search algorithm
-(see \code{\link[ucminf:ucminf]{ucminf}})
+\item \code{'cg'}, for Conjugate Gradient (see
+\code{\link[maxLik:maxCG]{maxCG}}) \item \code{'sann'}, for Simulated
+Annealing (see \code{\link[maxLik:maxSANN]{maxSANN}}) \item \code{'ucminf'},
+for a quasi-Newton type optimization with BFGS updating of the inverse
+Hessian and soft line search with a trust region type monitoring of
+the input to the line search algorithm (see
+\code{\link[ucminf:ucminf]{ucminf}})
 \item \code{'mla'}, for general-purpose optimization based on
 Marquardt-Levenberg algorithm (see \code{\link[marqLevAlg:mla]{mla}})
 \item \code{'sr1'}, for Symmetric Rank 1 (see
 \code{\link[trustOptim:trust.optim]{trust.optim}}) \item \code{'sparse'},
-for trust regions and sparse Hessian
-(see \code{\link[trustOptim:trust.optim]{trust.optim}}) \item
+for trust regions and sparse Hessian (see
+\code{\link[trustOptim:trust.optim]{trust.optim}}) \item
 \code{'nlminb'}, for optimization using PORT routines (see
 \code{\link[stats:nlminb]{nlminb}})}}
 
@@ -158,12 +164,12 @@ gradient direction. See \code{\link[maxLik:maxBHHH]{maxBHHH}} and
 \code{\link{sfalcmcross}}).}
 
 \item{...}{additional arguments of frontier are passed to sfalcmcross;
-additional arguments of the print, bread, estfun, nobs methods are currently
+additional arguments of the print, bread, and estfun methods are currently
 ignored.}
 }
 \value{
-\code{\link{sfalcmcross}} returns a list of class \code{'sfalcmcross'}
-containing the following elements:
+\code{\link{sfalcmcross}} returns a list of class
+\code{'sfalcmcross'} containing the following elements:
 
 \item{call}{The matched call.}
 
@@ -198,7 +204,7 @@ two-sided error term.}
 
 \item{startVal}{Numeric vector. Starting value for ML estimation.}
 
-\item{dataTable}{A data frame (tibble format) containing information on data
+\item{dataTable}{A data frame containing information on data
 used for optimization along with residuals and fitted values of the OLS and
 ML estimations, and the individual observation log-likelihood. When
 \code{weights} is specified an additional variable is also provided in
@@ -239,6 +245,8 @@ the ML estimation.}
 
 \item{invHessian}{The covariance matrix of the parameters obtained from the
 ML estimation.}
+
+\item{conditionNums}{Matrix. Condition number adding columns one by one.}
 
 \item{hessianType}{The argument \code{'hessianType'}. See the section
 \sQuote{Arguments}.}
@@ -303,8 +311,8 @@ using a logit specification:
 \deqn{\pi(i,j) = \frac{\exp{(\bm{\theta}_j'\mathbf{Z}_{hi})}}{
 \sum_{m=1}^{J}\exp{(\bm{\theta}_m'\mathbf{Z}_{hi})}}}
 
-with \eqn{\mathbf{Z}_h} the covariates, \eqn{\bm{\theta}} the coefficients estimated for
-the covariates, and \eqn{\exp(\bm{\theta}_J'\mathbf{Z}_h)=1}.
+with \eqn{\mathbf{Z}_h} the covariates, \eqn{\bm{\theta}} the coefficients
+estimated for the covariates, and \eqn{\exp(\bm{\theta}_J'\mathbf{Z}_h)=1}.
 
 The unconditional likelihood of observation \eqn{i} is simply the average
 over the \eqn{J} classes:
@@ -324,11 +332,12 @@ probability is obtained using Bayes' rule, as follows for class \eqn{j}:
 To accommodate heteroscedasticity in the variance parameters of the error
 terms, a single part (right) formula can also be specified. To impose the
 positivity on these parameters, the variances are modelled respectively as:
-\eqn{\sigma^2_{u|j} = \exp{(\bm{\delta}_j'\mathbf{Z}_u)}} and \eqn{\sigma^2_{v|j} =
-\exp{(\bm{\phi}_j'\mathbf{Z}_v)}}, where \eqn{Z_u} and \eqn{Z_v} are the
-heteroscedasticity variables (inefficiency drivers in the case of \eqn{\mathbf{Z}_u})
-and \eqn{\bm{\delta}} and \eqn{\bm{\phi}} the coefficients. \code{'sfalcmcross'} only
-supports the half-normal distribution for the one-sided error term.
+\eqn{\sigma^2_{u|j} = \exp{(\bm{\delta}_j'\mathbf{Z}_u)}} and
+\eqn{\sigma^2_{v|j} = \exp{(\bm{\phi}_j'\mathbf{Z}_v)}}, where \eqn{Z_u} and
+\eqn{Z_v} are the heteroscedasticity variables (inefficiency drivers in the
+case of \eqn{\mathbf{Z}_u}) and \eqn{\bm{\delta}} and \eqn{\bm{\phi}} the
+coefficients. \code{'sfalcmcross'} only supports the half-normal distribution
+for the one-sided error term.
 
 \code{sfalcmcross} allows for the maximization of weighted log-likelihood.
 When option \code{weights} is specified and \code{wscale = TRUE}, the weights
@@ -345,8 +354,8 @@ increase the iteration limit (e.g. \code{itermax = 20000}). The Conjugate
 Gradient (\code{cg}) can also be used in the first stage.
 
 A set of extractor functions for fitted model objects is available for
-objects of class \code{'sfalcmcross'} including methods to the generic functions
-\code{\link[=print.sfalcmcross]{print}},
+objects of class \code{'sfalcmcross'} including methods to the generic
+functions \code{\link[=print.sfalcmcross]{print}},
 \code{\link[=summary.sfalcmcross]{summary}},
 \code{\link[=coef.sfalcmcross]{coef}},
 \code{\link[=fitted.sfalcmcross]{fitted}},
@@ -357,8 +366,8 @@ objects of class \code{'sfalcmcross'} including methods to the generic functions
 \code{\link[=ic.sfalcmcross]{ic}},
 \code{\link[=marginal.sfalcmcross]{marginal}},
 \code{\link[=estfun.sfalcmcross]{estfun}} and
-\code{\link[=bread.sfalcmcross]{bread}} (from the \CRANpkg{sandwich} package),
-\code{\link[lmtest:coeftest]{lmtest::coeftest()}} (from the \CRANpkg{lmtest} package).
+\code{\link[=bread.sfalcmcross]{bread}} (from the \CRANpkg{sandwich}
+package), \code{\link[lmtest:coeftest]{lmtest::coeftest()}} (from the \CRANpkg{lmtest} package).
 }
 \note{
 In the case of panel data, \code{\link{sfalcmcross}} estimates a pooled
@@ -367,18 +376,18 @@ permanent (not fixed over time).
 }
 \examples{
 
-## Using data on eighty-two countries production (GDP)
-# LCM Cobb Douglas (production function) half normal distribution
-# Intercept and initStat used as separating variables
+# Using data on eighty-two countries production (GDP)
+## LCM Cobb Douglas (production function) half normal distribution
+## Intercept and initStat used as separating variables
 cb_2c_h1 <- sfalcmcross(formula = ly ~ lk + ll + yr, thet = ~initStat, 
 data = worldprod)
 summary(cb_2c_h1)
 
-# summary of the initial ML model
+## summary of the initial ML model
 summary(cb_2c_h1$InitHalf)
 
-# Only the intercept is used as the separating variable
-# and only variable initStat is used as inefficiency driver
+## Only the intercept is used as the separating variable
+## and initStat is used as inefficiency driver
 cb_2c_h3 <- sfalcmcross(formula = ly ~ lk + ll + yr, uhet = ~initStat, 
 data = worldprod)
 summary(cb_2c_h3)
@@ -401,10 +410,6 @@ Hadri, K. 1999. Estimation of a doubly heteroscedastic stochastic frontier
 cost function. \emph{Journal of Business & Economic Statistics},
 \bold{17}(3), 359--363.
 
-Meeusen, W., and J. Vandenbroeck. 1977. Efficiency estimation from
-Cobb-Douglas production functions with composed error. \emph{International
-Economic Review}, \bold{18}(2), 435--445.
-
 Orea, L., and S.C. Kumbhakar. 2004. Efficiency measurement using a latent
 class stochastic frontier model. \emph{Empirical Economics}, \bold{29},
 169--183.
@@ -418,8 +423,8 @@ frontier: A framework for the analysis of firm inefficiency.
 \emph{International Economic Review}, \bold{32}(3), 715--723.
 }
 \seealso{
-\code{\link[=print.sfalcmcross]{print}} for printing \code{sfalcmcross}
-object.
+\code{\link[=print.sfalcmcross]{print}} for printing
+\code{sfalcmcross} object.
 
 \code{\link[=summary.sfalcmcross]{summary}} for creating and printing
 summary results.
@@ -438,11 +443,11 @@ values.
 \code{\link[=logLik.sfalcmcross]{logLik}} for extracting log-likelihood
 value(s) of the estimation.
 
-\code{\link[=marginal.sfalcmcross]{marginal}} for computing marginal effects of
-inefficiency drivers.
+\code{\link[=marginal.sfalcmcross]{marginal}} for computing marginal effects
+of inefficiency drivers.
 
-\code{\link[=residuals.sfalcmcross]{residuals}} for extracting residuals of the
-estimation.
+\code{\link[=residuals.sfalcmcross]{residuals}} for extracting residuals of
+the estimation.
 
 \code{\link[=vcov.sfalcmcross]{vcov}} for computing the variance-covariance
 matrix of the coefficients.
