@@ -19,8 +19,8 @@ MM USD.} \item{output}{Output in million KwH.} \item{lprice}{Labor price.}
 This dataset is on electric power generation in the United States.
 }
 \details{
-The dataset is from Christensen and Greene (1976) and has also been used in
-Greene (1990).
+The dataset is from Christensen and Greene (1976) and has also been
+used in Greene (1990).
 }
 \examples{
 

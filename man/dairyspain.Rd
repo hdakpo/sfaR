@@ -32,9 +32,9 @@ and year identifications, plus measurements on one output (i.e. milk), and
 four inputs (i.e. cows, land, labor and feed).
 }
 \details{
-This dataset has been used in Alvarez \emph{et al.} (2004).  The data have
-been normalized so that the logs of the inputs sum to zero over the 1,482
-observations.
+This dataset has been used in Alvarez \emph{et al.} (2004).  The
+data have been normalized so that the logs of the inputs sum to zero over the
+1,482 observations.
 }
 \examples{
 

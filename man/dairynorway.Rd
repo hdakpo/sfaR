@@ -7,16 +7,20 @@
 \format{
 A data frame with 2,727 observations on the following 23 variables.
 \describe{ \item{farmid}{Farm identification.} \item{year}{Year
-identification.} \item{y1}{Milk sold (1000 liters).} \item{y2}{Meat (1000 NOK).}
+identification.} \item{y1}{Milk sold (1000 liters).} \item{y2}{Meat
+(1000 NOK).}
 \item{y3}{Support payments (1000 NOK).} \item{y4}{Other outputs (1000 NOK).}
 \item{p1}{Milk price (NOK/liter).} \item{p2}{Meat price (cattle index).}
-\item{p3}{Support payments price (CP index).} \item{p4}{Other outputs price index.}
+\item{p3}{Support payments price (CP index).} \item{p4}{Other outputs price
+index.}
 \item{x1}{Land (decare (daa) = 0.1 ha).} \item{x2}{Labour (1000 hours).}
-\item{x3}{Purchase feed (1000 NOK).} \item{x4}{Other variable costs (1000 NOK).}
+\item{x3}{Purchase feed (1000 NOK).} \item{x4}{Other variable costs
+(1000 NOK).}
 \item{x5}{Cattle capital (1000 NOK).} \item{x6}{Other capital (1000 NOK).}
 \item{w1}{Land price (NOK/daa).} \item{w2}{Labour price (NOK/hour).}
 \item{w3}{Feed price index.} \item{w4}{Other variable cost index.}
-\item{w5}{Cattle capital rent.} \item{w6}{Other capital rent and depreciation.}
+\item{w5}{Cattle capital rent.} \item{w6}{Other capital rent and
+depreciation.}
 \item{tc}{Total cost.}}
 }
 \source{
