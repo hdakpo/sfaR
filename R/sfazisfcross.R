@@ -526,7 +526,7 @@
 sfazisfcross <- function(formula, muhet, uhet, vhet, thet, logDepVar = TRUE, data,
   subset, weights, wscale = TRUE, S = 1L, udist = "hnormal", sigmavType = "common",
   linkF = "logit", start = NULL, randStart = FALSE, whichStart = 2L, initAlg = "nm",
-  initIter = 100, method = "bfgs", hessianType = 1, simType = "halton", Nsim = 300,
+  initIter = 100, method = "bfgs", hessianType = 1, simType = "halton", Nsim = 100,
   prime = 2L, burn = 10, antithetics = FALSE, seed = 12345, itermax = 2000L, printInfo = FALSE,
   tol = 1e-12, gradtol = 1e-06, stepmax = 0.1, qac = "marquardt") {
   # sigma_v model check -------
@@ -719,7 +719,7 @@ sfazisfcross <- function(formula, muhet, uhet, vhet, thet, logDepVar = TRUE, dat
   }
   # Draws for MSL -------
   if (udist %in% c("gamma", "lognormal", "weibull")) {
-    if (!(simType %in% c("halton", "ghalton", "rhalton", "sobol", "rsobol", "richtmyer",
+    if (!(simType %in% c("halton", "ghalton", "sobol", "rsobol", "richtmyer",
       "rrichtmyer", "uniform", "mlhs"))) {
       stop("Unknown or non-available random draws method", call. = FALSE)
     }
