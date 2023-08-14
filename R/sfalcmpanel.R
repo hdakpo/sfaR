@@ -417,7 +417,7 @@
 #' # World production data
 #' dataW <- worldprod
 #' dataW$trend <- as.numeric(dataW$yr)
-#' dataW <- pdata.frame(dataW, index = c("code", "yr"))
+#' dataW <- plm::pdata.frame(dataW, index = c("code", "yr"))
 #' 
 #' lcm2c <- sfalcmpanel(formula = ly ~ lk + ll + trend, modelType = "bc92a", 
 #' data = dataW)
