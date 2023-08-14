@@ -414,8 +414,15 @@
 #'
 #'
 #' @examples
+#' # World production data
+#' dataW <- worldprod
+#' dataW$trend <- as.numeric(dataW$yr)
+#' dataW <- pdata.frame(dataW, index = c("code", "yr"))
 #' 
+#' lcm2c <- sfalcmpanel(formula = ly ~ lk + ll + trend, modelType = "bc92a", 
+#' data = dataW)
 #' 
+#' summary(lcm2c)
 #' 
 #' @export
 sfalcmpanel <- function(formula, uhet, vhet, thet, logDepVar = TRUE, data, idVar = NULL,
