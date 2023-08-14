@@ -2,10 +2,11 @@
 % Please edit documentation in R/sfaselectioncross.R
 \name{sfaselectioncross}
 \alias{sfaselectioncross}
-\alias{print.sfaselectioncross}
 \alias{bread.sfaselectioncross}
 \alias{estfun.sfaselectioncross}
-\title{Sample selection in stochastic frontier estimation using cross-section data}
+\alias{print.sfaselectioncross}
+\title{Sample selection in stochastic frontier estimation using cross-section or
+pooled data}
 \usage{
 sfaselectioncross(
   selectionF,
@@ -21,6 +22,7 @@ sfaselectioncross(
   S = 1L,
   udist = "hnormal",
   start = NULL,
+  randStart = FALSE,
   method = "bfgs",
   hessianType = 2L,
   lType = "ghermite",
@@ -43,14 +45,15 @@ sfaselectioncross(
 
 \method{print}{sfaselectioncross}(x, ...)
 
-\method{bread}{sfaselectioncross}(x, ...)
+bread.sfaselectioncross(x, ...)
 
-\method{estfun}{sfaselectioncross}(x, ...)
+estfun.sfaselectioncross(x, ...)
 }
 \arguments{
 \item{selectionF}{A symbolic (formula) description of the selection equation.}
 
-\item{frontierF}{A symbolic (formula) description of the outcome (frontier) equation.}
+\item{frontierF}{A symbolic (formula) description of the outcome (frontier)
+equation.}
 
 \item{uhet}{A one-part formula to consider heteroscedasticity in the
 one-sided error variance (see section \sQuote{Details}).}
@@ -58,8 +61,8 @@ one-sided error variance (see section \sQuote{Details}).}
 \item{vhet}{A one-part formula to consider heteroscedasticity in the
 two-sided error variance (see section \sQuote{Details}).}
 
-\item{modelType}{Character string. Model used to solve the selection bias. Only the
-model discussed in Greene (2010) is currently available.}
+\item{modelType}{Character string. Model used to solve the selection bias.
+Only the model discussed in Greene (2010) is currently available.}
 
 \item{logDepVar}{Logical. Informs whether the dependent variable is logged
 (\code{TRUE}) or not (\code{FALSE}). Default = \code{TRUE}.}
@@ -69,13 +72,13 @@ model discussed in Greene (2010) is currently available.}
 \item{subset}{An optional vector specifying a subset of observations to be
 used in the optimization process.}
 
-\item{weights}{An optional vector of weights to be used for weighted log-likelihood.
-Should be \code{NULL} or numeric vector with positive values. When \code{NULL},
-a numeric vector of 1 is used.}
+\item{weights}{An optional vector of weights to be used for weighted
+log-likelihood. Should be \code{NULL} or numeric vector with positive values.
+When \code{NULL}, a numeric vector of 1 is used.}
 
-\item{wscale}{Logical. When \code{weights} is not \code{NULL}, a scaling transformation
-is used such that the \code{weights} sum to the sample size. Default \code{TRUE}.
-When \code{FALSE} no scaling is used.}
+\item{wscale}{Logical. When \code{weights} is not \code{NULL}, a scaling
+transformation is used such that the \code{weights} sum to the sample size.
+Default \code{TRUE}. When \code{FALSE} no scaling is used.}
 
 \item{S}{If \code{S = 1} (default), a production (profit) frontier is
 estimated: \eqn{\epsilon_i = v_i-u_i}. If \code{S = -1}, a cost frontier is
@@ -88,6 +91,12 @@ implemented.}
 \item{start}{Numeric vector. Optional starting values for the maximum
 likelihood (ML) estimation.}
 
+\item{randStart}{Logical. Define if random starting values should be used for
+M(S)L estimation. New starting values are obtained as old ones + draws from
+normal distribution with std. deviation of 0.01. \code{'seed'} is not
+considered here, then each run will provide different starting values
+(unless a seed is set by the user before the run).}
+
 \item{method}{Optimization algorithm used for the estimation.  Default =
 \code{'bfgs'}. 11 algorithms are available: \itemize{ \item \code{'bfgs'},
 for Broyden-Fletcher-Goldfarb-Shanno (see
@@ -95,16 +104,19 @@ for Broyden-Fletcher-Goldfarb-Shanno (see
 Berndt-Hall-Hall-Hausman (see \code{\link[maxLik:maxBHHH]{maxBHHH}}) \item
 \code{'nr'}, for Newton-Raphson (see \code{\link[maxLik:maxNR]{maxNR}})
 \item \code{'nm'}, for Nelder-Mead (see \code{\link[maxLik:maxNM]{maxNM}})
-\item \code{'cg'}, for Conjugate Gradient (see \code{\link[maxLik:maxCG]{maxCG}})
-\item \code{'sann'}, for Simulated Annealing (see \code{\link[maxLik:maxSANN]{maxSANN}})
-\item \code{'ucminf'}, for a quasi-Newton type optimization with BFGS updating of the
-inverse Hessian and soft line search with a trust region type monitoring of
-the input to the line search algorithm (see \code{\link[ucminf:ucminf]{ucminf}})
+\item \code{'cg'}, for Conjugate Gradient (see
+\code{\link[maxLik:maxCG]{maxCG}}) \item \code{'sann'}, for Simulated
+Annealing (see \code{\link[maxLik:maxSANN]{maxSANN}}) \item \code{'ucminf'},
+for a quasi-Newton type optimization with BFGS updating of the inverse
+Hessian and soft line search with a trust region type monitoring of
+the input to the line search algorithm (see
+\code{\link[ucminf:ucminf]{ucminf}})
 \item \code{'mla'}, for general-purpose optimization based on
 Marquardt-Levenberg algorithm (see \code{\link[marqLevAlg:mla]{mla}})
 \item \code{'sr1'}, for Symmetric Rank 1 (see
-\code{\link[trustOptim:trust.optim]{trust.optim}}) \item \code{'sparse'}, for trust
-regions and sparse Hessian (see \code{\link[trustOptim:trust.optim]{trust.optim}}) \item
+\code{\link[trustOptim:trust.optim]{trust.optim}}) \item \code{'sparse'},
+for trust regions and sparse Hessian (see
+\code{\link[trustOptim:trust.optim]{trust.optim}}) \item
 \code{'nlminb'}, for optimization using PORT routines (see
 \code{\link[stats:nlminb]{nlminb}})}}
 
@@ -112,27 +124,34 @@ regions and sparse Hessian (see \code{\link[trustOptim:trust.optim]{trust.optim}
 returned. If \code{2}, bhhh Hessian is estimated (\eqn{g'g}). bhhh hessian is
 estimated by default as the estimation is conducted in two steps.}
 
-\item{lType}{Specifies the way the likelihood is estimated. Five possibilities are
-available: \code{kronrod} for Gauss-Kronrod quadrature
+\item{lType}{Specifies the way the likelihood is estimated. Five
+possibilities are available: \code{kronrod} for Gauss-Kronrod quadrature
 (see \code{\link[stats:integrate]{integrate}}), \code{hcubature} and
 \code{pcubature} for adaptive integration over hypercubes
 (see \code{\link[cubature:hcubature]{hcubature}} and
-\code{\link[cubature:pcubature]{pcubature}}), \code{ghermite} for Gauss-Hermite
-quadrature (see \code{\link[fastGHQuad:gaussHermiteData]{gaussHermiteData}}), and
+\code{\link[cubature:pcubature]{pcubature}}), \code{ghermite} for
+Gauss-Hermite quadrature (see
+\code{\link[fastGHQuad:gaussHermiteData]{gaussHermiteData}}), and
 \code{msl} for maximum simulated likelihood. Default \code{ghermite}.}
 
-\item{Nsub}{Integer. Number of subdivisions/nodes used for quadrature approaches.
-Default \code{Nsub = 100}.}
+\item{Nsub}{Integer. Number of subdivisions/nodes used for quadrature
+approaches. Default \code{Nsub = 100}.}
 
-\item{uBound}{Numeric. Upper bound for the inefficiency component when solving
-integrals using quadrature approaches except Gauss-Hermite for which the upper
-bound is automatically infinite (\code{Inf}). Default \code{uBound = Inf}.}
+\item{uBound}{Numeric. Upper bound for the inefficiency component when
+solving integrals using quadrature approaches except Gauss-Hermite for which
+the upper bound is automatically infinite (\code{Inf}). Default
+\code{uBound = Inf}.}
 
 \item{simType}{Character string. If \code{simType = 'halton'} (Default),
 Halton draws are used for maximum simulated likelihood (MSL). If
-\code{simType = 'ghalton'}, Generalized-Halton draws are used for MSL. If
-\code{simType = 'sobol'}, Sobol draws are used for MSL. If \code{simType =
-'uniform'}, uniform draws are used for MSL. (see section \sQuote{Details}).}
+\code{simType = 'ghalton'}, Generalized-Halton  draws are used for MSL. If
+\code{simType = 'sobol'} or \code{simType = 'rsobol'}, Sobol draws or
+randomized Sobol draws are used for MSL, respectively. If
+\code{simType = 'richtmyer'}, or \code{simType = 'rrichtmyer'},
+Richtmyer sequence or randomized Richtmyer sequence is used for MSL
+estimation, respectively. If \code{simType = 'mlhs'}, modified latin
+hypercube sampling is performed. If \code{simType = 'uniform'}, uniform draws
+are used for MSL. (see section \sQuote{Details}).}
 
 \item{Nsim}{Number of draws for MSL (default 100).}
 
@@ -172,14 +191,16 @@ step length is decreased while also moving closer to the pure gradient
 direction. See \code{\link[maxLik:maxBHHH]{maxBHHH}} and
 \code{\link[maxLik:maxNR]{maxNR}}.}
 
-\item{x}{an object of class sfaselectioncross (returned by the function \code{\link{sfaselectioncross}}).}
+\item{x}{an object of class sfaselectioncross (returned by the function
+\code{\link{sfaselectioncross}}).}
 
 \item{...}{additional arguments of frontier are passed to sfaselectioncross;
-additional arguments of the print, bread, estfun, nobs methods are currently ignored.}
+additional arguments of the print, bread, and estfun methods are currently
+ignored.}
 }
 \value{
-\code{\link{sfaselectioncross}} returns a list of class \code{'sfaselectioncross'}
-containing the following elements:
+\code{\link{sfaselectioncross}} returns a list of class
+\code{'sfaselectioncross'} containing the following elements:
 
 \item{call}{The matched call.}
 
@@ -216,27 +237,33 @@ two-sided error term.}
 
 \item{startVal}{Numeric vector. Starting value for M(S)L estimation.}
 
-\item{dataTable}{A data frame (tibble format) containing information on data
+\item{dataTable}{A data frame containing information on data
 used for optimization along with residuals and fitted values of the OLS and
-M(S)L estimations, and the individual observation log-likelihood. When argument \code{weights}
-is specified, an additional variable is provided in \code{dataTable}.}
+M(S)L estimations, and the individual observation log-likelihood. When
+argument \code{weights} is specified, an additional variable is provided in
+\code{dataTable}.}
 
 \item{lpmObj}{Linear probability model used for initializing the first step
 probit model.}
 
-\item{probitObj}{Probit model. Object of class \code{'maxLik'} and \code{'maxim'}.}
+\item{probitObj}{Probit model. Object of class \code{'maxLik'} and
+\code{'maxim'}.}
 
 \item{ols2stepParam}{Numeric vector. OLS second step estimates for
 selection correction. Inverse Mills Ratio is introduced as an additional
 explanatory variable.}
 
-\item{ols2stepStder}{Numeric vector. Standard errors of OLS second step estimates.}
+\item{ols2stepStder}{Numeric vector. Standard errors of OLS second step
+estimates.}
 
-\item{ols2stepSigmasq}{Numeric. Estimated variance of OLS second step random error.}
+\item{ols2stepSigmasq}{Numeric. Estimated variance of OLS second step random
+error.}
 
-\item{ols2stepLoglik}{Numeric. Log-likelihood value of OLS second step estimation.}
+\item{ols2stepLoglik}{Numeric. Log-likelihood value of OLS second step
+estimation.}
 
-\item{ols2stepSkew}{Numeric. Skewness of the residuals of the OLS second step estimation.}
+\item{ols2stepSkew}{Numeric. Skewness of the residuals of the OLS second step
+estimation.}
 
 \item{ols2stepM3Okay}{Logical. Indicating whether the residuals of the OLS
 second step estimation have the expected skewness.}
@@ -250,7 +277,8 @@ D'Agostino and Pearson, 1973).}
 \item{isWeights}{Logical. If \code{TRUE} weighted log-likelihood is
 maximized.}
 
-\item{lType}{Type of likelihood estimated. See the section \sQuote{Arguments}.}
+\item{lType}{Type of likelihood estimated. See the section
+\sQuote{Arguments}.}
 
 \item{optType}{Optimization algorithm used.}
 
@@ -274,6 +302,8 @@ the M(S)L estimation.}
 \item{invHessian}{Covariance matrix of the parameters obtained from the
 M(S)L estimation.}
 
+\item{conditionNums}{Matrix. Condition number adding columns one by one.}
+
 \item{hessianType}{The argument \code{'hessianType'}. See the section
 \sQuote{Arguments}.}
 
@@ -289,22 +319,23 @@ See the section \sQuote{Arguments}.}
 'msl'}.}
 
 \item{gHermiteData}{List. Gauss-Hermite quadrature rule as provided by
-\code{\link[fastGHQuad:gaussHermiteData]{gaussHermiteData}}. Only if \code{lType = 
-'ghermite'}.}
+\code{\link[fastGHQuad:gaussHermiteData]{gaussHermiteData}}. Only if
+\code{lType = 'ghermite'}.}
 
 \item{Nsub}{Number of subdivisions used for quadrature approaches.}
 
 \item{uBound}{Upper bound for the inefficiency component when solving
-integrals using quadrature approaches except Gauss-Hermite for which the upper
-bound is automatically infinite (\code{Inf}).}
+integrals using quadrature approaches except Gauss-Hermite for which the
+upper bound is automatically infinite (\code{Inf}).}
 
-\item{intol}{Integration tolerance for quadrature approaches except Gauss-Hermite.}
+\item{intol}{Integration tolerance for quadrature approaches except
+Gauss-Hermite.}
 }
 \description{
 \code{\link{sfaselectioncross}} is a symbolic formula based function for the
 estimation of the stochastic frontier model in the presence of sample
-selection. The model accommodates cross-sectional or pooled cross-sectional data.
-The model can be estimated using different quadrature approaches or
+selection. The model accommodates cross-sectional or pooled cross-sectional
+data. The model can be estimated using different quadrature approaches or
 maximum simulated likelihood (MSL). See Greene (2010).
 
 Only the half-normal distribution is possible for the one-sided error term.
@@ -315,9 +346,10 @@ two-sided error terms, as in Reifschneider and Stevenson (1991), Caudill and
 Ford (1993), Caudill \emph{et al.} (1995) and Hadri (1999).
 }
 \details{
-The current model is an extension of Heckman (1976, 1979) sample selection model to
-nonlinear models particularly stochastic frontier model. The model has first been discussed in
-Greene (2010), and an application can be found in Dakpo et al. (2021). Practically, we have:
+The current model is an extension of Heckman (1976, 1979) sample selection
+model to nonlinear models particularly stochastic frontier model. The model
+has first been discussed in Greene (2010), and an application can be found
+in Dakpo et al. (2021). Practically, we have:
 
 \deqn{
 y_{1i} =  \left\{ \begin{array}{ll}
@@ -357,10 +389,12 @@ the frontier equation. The selection bias arises from the correlation
 between the two symmetric random components \eqn{v_i} and \eqn{w_i}:
 
 \deqn{
-(v_i, w_i) \sim \mathcal{N}_2\left\lbrack(0,0), (1, \rho \sigma_v, \sigma_v^2) \right\rbrack
+(v_i, w_i) \sim \mathcal{N}_2\left\lbrack(0,0), (1, \rho \sigma_v, 
+\sigma_v^2) \right\rbrack
 }
 
-Conditionaly on \eqn{|U_i|}, the probability associated to each observation is:
+Conditionaly on \eqn{|U_i|}, the probability associated to each observation
+is:
 
 \deqn{
 Pr \left\lbrack y_{1i}^* \leq 0 \right\rbrack^{1-y_{1i}} \cdot \left\lbrace 
@@ -384,8 +418,8 @@ f(y_{2i}) \cdot Pr(y_{1i}^* \geq 0|y_{2i})
 Using the properties of a bivariate normal distribution, we have:
 
 \deqn{
-y_{i1}^* | y_{i2} \sim N\left(\mathbf{Z_{si}^{\prime}} \bm{\gamma}+\frac{\rho}{
-\sigma_v}v_i, 1-\rho^2\right)
+y_{i1}^* | y_{i2} \sim N\left(\mathbf{Z_{si}^{\prime}} \bm{\gamma}+
+\frac{\rho}{\sigma_v}v_i, 1-\rho^2\right)
 }
 
 Hence conditionally on \eqn{|U_i|}, we have:
@@ -412,63 +446,75 @@ Since the non-selected observations bring no additional information,
 the conditional likelihood to be considered is:
 
 \deqn{
-L_i\big||U_i| = \frac{1}{\sigma_v}\phi\left(\frac{y_{2i}-\mathbf{x_{i}^{\prime}} 
-\bm{\beta} + S\sigma_u|U_i|}{\sigma_v}\right) \Phi\left(\frac{\mathbf{Z_{si}^{\prime}} 
-\bm{\gamma}+\frac{\rho}{\sigma_v}\left(y_{2i}-\mathbf{x_{i}^{\prime}} \bm{\beta} + 
-S\sigma_u|U_i|\right)}{\sqrt{1-\rho^2}}\right) 
+L_i\big||U_i| = \frac{1}{\sigma_v}\phi\left(\frac{y_{2i}-
+\mathbf{x_{i}^{\prime}} \bm{\beta} + S\sigma_u|U_i|}{\sigma_v}\right) 
+\Phi\left(\frac{\mathbf{Z_{si}^{\prime}} \bm{\gamma}+\frac{\rho}{\sigma_v}
+\left(y_{2i}-\mathbf{x_{i}^{\prime}} \bm{\beta} + S\sigma_u|U_i|\right)}{
+\sqrt{1-\rho^2}}\right) 
 }
 
-The unconditional likelihood is obtained by integrating \eqn{|U_i|} out of the conditional likelihood. Thus
+The unconditional likelihood is obtained by integrating \eqn{|U_i|} out of
+the conditional likelihood. Thus
 
 \deqn{
-L_i\\ = \int_{|U_i|} \frac{1}{\sigma_v}\phi\left(\frac{y_{2i}-\mathbf{x_{i}^{\prime}} 
-\bm{\beta} + S\sigma_u|U_i|}{\sigma_v}\right) \Phi\left(\frac{\mathbf{Z_{si}^{\prime}} 
-\bm{\gamma}+ \frac{\rho}{\sigma_v}\left(y_{2i}-\mathbf{x_{i}^{\prime}} \bm{\beta} + 
-S\sigma_u|U_i|\right)}{\sqrt{1-\rho^2}}\right)p\left(|U_i|\right)d|U_i|
+L_i\\ = \int_{|U_i|} \frac{1}{\sigma_v}\phi\left(\frac{y_{2i}-
+\mathbf{x_{i}^{\prime}} \bm{\beta} + S\sigma_u|U_i|}{\sigma_v}\right) 
+\Phi\left(\frac{\mathbf{Z_{si}^{\prime}} \bm{\gamma}+ \frac{\rho}{\sigma_v}
+\left(y_{2i}-\mathbf{x_{i}^{\prime}} \bm{\beta} + S\sigma_u|U_i|\right)}{
+\sqrt{1-\rho^2}}\right)p\left(|U_i|\right)d|U_i|
 }
 
-To simplifiy the estimation, the likelihood can be estimated using a two-step approach.
-In the first step, the probit model can be run and estimate of \eqn{\gamma} can be obtained.
-Then, in the second step, the following model is estimated:
+To simplifiy the estimation, the likelihood can be estimated using a two-step
+approach. In the first step, the probit model can be run and estimate of
+\eqn{\gamma} can be obtained. Then, in the second step, the following model
+is estimated:
 
 \deqn{
-L_i\\ = \int_{|U_i|} \frac{1}{\sigma_v}\phi\left(\frac{y_{2i}-\mathbf{x_{i}^{\prime}} 
-\bm{\beta} + S\sigma_u|U_i|}{\sigma_v}\right) \Phi\left(\frac{a_i + 
-\frac{\rho}{\sigma_v}\left(y_{2i}-\mathbf{x_{i}^{\prime}} \bm{\beta} + 
-S\sigma_u|U_i|\right)}{\sqrt{1-\rho^2}}\right)p\left(|U_i|\right)d|U_i| 
+L_i\\ = \int_{|U_i|} \frac{1}{\sigma_v}\phi\left(\frac{y_{2i}-
+\mathbf{x_{i}^{\prime}} \bm{\beta} + S\sigma_u|U_i|}{\sigma_v}\right) 
+\Phi\left(\frac{a_i + \frac{\rho}{\sigma_v}\left(y_{2i}-
+\mathbf{x_{i}^{\prime}} \bm{\beta} + S\sigma_u|U_i|\right)}{\sqrt{1-\rho^2}}
+\right)p\left(|U_i|\right)d|U_i| 
 }
 
-where \eqn{a_i = \mathbf{Z_{si}^{\prime}} \hat{\bm{\gamma}}}. This likelihood can be estimated using
-five different approaches: Gauss-Kronrod quadrature, adaptive integration over hypercubes
-(hcubature and pcubature), Gauss-Hermite quadrature, and
-maximum simulated likelihood. We also use the BHHH estimator to obtain
-the asymptotic standard errors for the parameter estimators.
+where \eqn{a_i = \mathbf{Z_{si}^{\prime}} \hat{\bm{\gamma}}}. This likelihood
+can be estimated using five different approaches: Gauss-Kronrod quadrature,
+adaptive integration over hypercubes (hcubature and pcubature), Gauss-Hermite
+quadrature, and maximum simulated likelihood. We also use the BHHH estimator
+to obtain the asymptotic standard errors for the parameter estimators.
 
-\code{sfaselectioncross} allows for the maximization of weighted log-likelihood.
-When option \code{weights} is specified and \code{wscale = TRUE}, the weights
-are scaled as:
+\code{sfaselectioncross} allows for the maximization of weighted
+log-likelihood. When option \code{weights} is specified and
+\code{wscale = TRUE}, the weights are scaled as:
 
 \deqn{
-new_{weights} = sample_{size} \times \frac{old_{weights}}{\sum(old_{weights})}
+new_{weights} = sample_{size} \times \frac{old_{weights}}{
+\sum(old_{weights})}
 }
 
-For complex problems, non-gradient methods (e.g. \code{nm} or \code{sann}) can be
-used to warm start the optimization and zoom in the neighborhood of the
-solution. Then a gradient-based methods is recommended in the second step. In the case
-of \code{sann}, we recommend to significantly increase the iteration limit
-(e.g. \code{itermax = 20000}). The Conjugate Gradient (\code{cg}) can also be used
-in the first stage.
+For complex problems, non-gradient methods (e.g. \code{nm} or \code{sann})
+can be used to warm start the optimization and zoom in the neighborhood of
+the solution. Then a gradient-based methods is recommended in the second
+step. In the case of \code{sann}, we recommend to significantly increase the
+iteration limit (e.g. \code{itermax = 20000}). The Conjugate Gradient
+(\code{cg}) can also be used in the first stage.
 
-A set of extractor functions for fitted model objects is available for objects of class
-\code{'sfaselectioncross'} including methods to the generic functions \code{\link[=print.sfaselectioncross]{print}},
-\code{\link[=summary.sfaselectioncross]{summary}}, \code{\link[=coef.sfaselectioncross]{coef}},
-\code{\link[=fitted.sfaselectioncross]{fitted}}, \code{\link[=logLik.sfaselectioncross]{logLik}},
-\code{\link[=residuals.sfaselectioncross]{residuals}}, \code{\link[=vcov.sfaselectioncross]{vcov}},
-\code{\link[=efficiencies.sfaselectioncross]{efficiencies}}, \code{\link[=ic.sfaselectioncross]{ic}},
+A set of extractor functions for fitted model objects is available for
+objects of class
+\code{'sfaselectioncross'} including methods to the generic functions
+\code{\link[=print.sfaselectioncross]{print}},
+\code{\link[=summary.sfaselectioncross]{summary}},
+\code{\link[=coef.sfaselectioncross]{coef}},
+\code{\link[=fitted.sfaselectioncross]{fitted}},
+\code{\link[=logLik.sfaselectioncross]{logLik}},
+\code{\link[=residuals.sfaselectioncross]{residuals}},
+\code{\link[=vcov.sfaselectioncross]{vcov}},
+\code{\link[=efficiencies.sfaselectioncross]{efficiencies}},
+\code{\link[=ic.sfaselectioncross]{ic}},
 \code{\link[=marginal.sfaselectioncross]{marginal}},
 \code{\link[=estfun.sfaselectioncross]{estfun}} and
-\code{\link[=bread.sfaselectioncross]{bread}} (from the \CRANpkg{sandwich} package),
-\code{\link[lmtest:coeftest]{lmtest::coeftest()}} (from the \CRANpkg{lmtest} package).
+\code{\link[=bread.sfaselectioncross]{bread}} (from the \CRANpkg{sandwich}
+package), \code{\link[lmtest:coeftest]{lmtest::coeftest()}} (from the \CRANpkg{lmtest} package).
 }
 \note{
 For the Halton draws, the code is adapted from the \pkg{mlogit}
@@ -478,7 +524,7 @@ package.
 
 \dontrun{
 
-## Simulated example
+# Simulated example
 
 N <- 2000  # sample size
 set.seed(12345)
@@ -496,10 +542,10 @@ x2 <- rnorm(N)
 y <- x1 + x2 + e2 - u
 data <- cbind(y = y, x1 = x1, x2 = x2, z1 = z1, z2 = z2, d = d)
 
-## Estimation using quadrature (Gauss-Kronrod)
+# Estimation using quadrature (Gauss-Kronrod)
 
-selecRes1 <- sfaselectioncross(selectionF = d ~ z1 + z2, frontierF = y ~ x1 + x2, 
-modelType = 'greene10', method = 'bfgs',
+selecRes1 <- sfaselectioncross(selectionF = d ~ z1 + z2, 
+frontierF = y ~ x1 + x2, modelType = 'greene10', method = 'bfgs',
 logDepVar = TRUE, data = as.data.frame(data),
 S = 1L, udist = 'hnormal', lType = 'kronrod', Nsub = 100, uBound = Inf,
 simType = 'halton', Nsim = 300, prime = 2L, burn = 10, antithetics = FALSE,
@@ -507,10 +553,10 @@ seed = 12345, itermax = 2000, printInfo = FALSE)
 
 summary(selecRes1)
 
-## Estimation using maximum simulated likelihood
+# Estimation using maximum simulated likelihood
 
-selecRes2 <- sfaselectioncross(selectionF = d ~ z1 + z2, frontierF = y ~ x1 + x2, 
-modelType = 'greene10', method = 'bfgs',
+selecRes2 <- sfaselectioncross(selectionF = d ~ z1 + z2, 
+frontierF = y ~ x1 + x2, modelType = 'greene10', method = 'bfgs',
 logDepVar = TRUE, data = as.data.frame(data),
 S = 1L, udist = 'hnormal', lType = 'msl', Nsub = 100, uBound = Inf,
 simType = 'halton', Nsim = 300, prime = 2L, burn = 10, antithetics = FALSE,
@@ -522,8 +568,9 @@ summary(selecRes2)
 
 }
 \references{
-Caudill, S. B., and Ford, J. M. 1993. Biases in frontier estimation due to
-heteroscedasticity. \emph{Economics Letters}, \bold{41}(1), 17--20.
+Caudill, S. B., and Ford, J. M. 1993. Biases in frontier
+estimation due to heteroscedasticity. \emph{Economics Letters},
+\bold{41}(1), 17--20.
 
 Caudill, S. B., Ford, J. M., and Gropper, D. M. 1995. Frontier estimation
 and firm-specific inefficiency measures in the presence of
@@ -540,11 +587,12 @@ Empirical results for the distributions of \eqn{b_2} and \eqn{\sqrt{b_1}}.
 
 Dakpo, K. H., Latruffe, L., Desjeux, Y., Jeanneaux, P., 2022.
 Modeling heterogeneous technologies in the presence of sample selection:
-The case of dairy farms and the adoption of agri-environmental schemes in France.
-\emph{Agricultural Economics}, \bold{53}(3), 422-438.
+The case of dairy farms and the adoption of agri-environmental schemes in
+France. \emph{Agricultural Economics}, \bold{53}(3), 422-438.
 
 Greene, W., 2010. A stochastic frontier model with correction
-for sample selection. \emph{Journal of Productivity Analysis}. \bold{34}, 15--24.
+for sample selection. \emph{Journal of Productivity Analysis}. \bold{34},
+15--24.
 
 Hadri, K. 1999. Estimation of a doubly heteroscedastic stochastic frontier
 cost function. \emph{Journal of Business & Economic Statistics},
@@ -561,38 +609,40 @@ frontier: A framework for the analysis of firm inefficiency.
 \emph{International Economic Review}, \bold{32}(3), 715--723.
 }
 \seealso{
-\code{\link[=print.sfaselectioncross]{print}} for printing \code{sfaselectioncross} object.
+\code{\link[=print.sfaselectioncross]{print}} for printing
+\code{sfaselectioncross} object.
 
 \code{\link[=summary.sfaselectioncross]{summary}} for creating and printing
 summary results.
 
-\code{\link[=coef.sfaselectioncross]{coef}} for extracting coefficients of the
-estimation.
+\code{\link[=coef.sfaselectioncross]{coef}} for extracting coefficients of
+the estimation.
 
 \code{\link[=efficiencies.sfaselectioncross]{efficiencies}} for computing
 (in-)efficiency estimates.
 
-\code{\link[=fitted.sfaselectioncross]{fitted}} for extracting the fitted frontier
-values.
+\code{\link[=fitted.sfaselectioncross]{fitted}} for extracting the fitted
+frontier values.
 
 \code{\link[=ic.sfaselectioncross]{ic}} for extracting information criteria.
 
 \code{\link[=logLik.sfaselectioncross]{logLik}} for extracting log-likelihood
 value(s) of the estimation.
 
-\code{\link[=marginal.sfaselectioncross]{marginal}} for computing marginal effects of
-inefficiency drivers.
+\code{\link[=marginal.sfaselectioncross]{marginal}} for computing marginal
+effects of inefficiency drivers.
 
-\code{\link[=residuals.sfaselectioncross]{residuals}} for extracting residuals of the
-estimation.
+\code{\link[=residuals.sfaselectioncross]{residuals}} for extracting
+residuals of the estimation.
 
-\code{\link[=vcov.sfaselectioncross]{vcov}} for computing the variance-covariance
-matrix of the coefficients.
+\code{\link[=vcov.sfaselectioncross]{vcov}} for computing the
+variance-covariance matrix of the coefficients.
 
-\code{\link[=bread.sfaselectioncross]{bread}} for bread for sandwich estimator.
+\code{\link[=bread.sfaselectioncross]{bread}} for bread for sandwich
+estimator.
 
-\code{\link[=estfun.sfaselectioncross]{estfun}} for gradient extraction for each
-observation.
+\code{\link[=estfun.sfaselectioncross]{estfun}} for gradient extraction for
+each observation.
 }
 \keyword{cross-section}
 \keyword{likelihood}

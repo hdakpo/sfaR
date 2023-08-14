@@ -2,10 +2,10 @@
 % Please edit documentation in R/sfacross.R
 \name{sfacross}
 \alias{sfacross}
-\alias{print.sfacross}
 \alias{bread.sfacross}
 \alias{estfun.sfacross}
-\title{Stochastic frontier estimation using cross-sectional data}
+\alias{print.sfacross}
+\title{Stochastic frontier estimation using cross-sectional or pooled data}
 \usage{
 sfacross(
   formula,
@@ -21,6 +21,7 @@ sfacross(
   udist = "hnormal",
   scaling = FALSE,
   start = NULL,
+  randStart = FALSE,
   method = "bfgs",
   hessianType = 1L,
   simType = "halton",
@@ -39,9 +40,9 @@ sfacross(
 
 \method{print}{sfacross}(x, ...)
 
-\method{bread}{sfacross}(x, ...)
+bread.sfacross(x, ...)
 
-\method{estfun}{sfacross}(x, ...)
+estfun.sfacross(x, ...)
 }
 \arguments{
 \item{formula}{A symbolic description of the model to be estimated based on
@@ -98,25 +99,32 @@ Default = \code{FALSE}. (see section \sQuote{Details}).}
 \item{start}{Numeric vector. Optional starting values for the maximum
 likelihood (ML) estimation.}
 
-\item{method}{Optimization algorithm used for the estimation. Default =
+\item{randStart}{Logical. Define if random starting values should be used for
+M(S)L estimation. New starting values are obtained as old ones + draws from
+normal distribution with std. deviation of 0.01. \code{'seed'} is not
+considered here, then each run will provide different starting values
+(unless a seed is set by the user before the run).}
+
+\item{method}{Optimization algorithm used for the estimation.  Default =
 \code{'bfgs'}. 11 algorithms are available: \itemize{ \item \code{'bfgs'},
 for Broyden-Fletcher-Goldfarb-Shanno (see
 \code{\link[maxLik:maxBFGS]{maxBFGS}}) \item \code{'bhhh'}, for
 Berndt-Hall-Hall-Hausman (see \code{\link[maxLik:maxBHHH]{maxBHHH}}) \item
 \code{'nr'}, for Newton-Raphson (see \code{\link[maxLik:maxNR]{maxNR}})
 \item \code{'nm'}, for Nelder-Mead (see \code{\link[maxLik:maxNM]{maxNM}})
-\item \code{'cg'}, for Conjugate Gradient
-(see \code{\link[maxLik:maxCG]{maxCG}}) \item \code{'sann'}, for Simulated
+\item \code{'cg'}, for Conjugate Gradient (see
+\code{\link[maxLik:maxCG]{maxCG}}) \item \code{'sann'}, for Simulated
 Annealing (see \code{\link[maxLik:maxSANN]{maxSANN}}) \item \code{'ucminf'},
-for a quasi-Newton type optimisation with BFGS updating of the inverse Hessian and
-soft line search with a trust region type monitoring of the input to the line
-search algorithm (see \code{\link[ucminf:ucminf]{ucminf}})
+for a quasi-Newton type optimization with BFGS updating of the inverse
+Hessian and soft line search with a trust region type monitoring of
+the input to the line search algorithm (see
+\code{\link[ucminf:ucminf]{ucminf}})
 \item \code{'mla'}, for general-purpose optimization based on
 Marquardt-Levenberg algorithm (see \code{\link[marqLevAlg:mla]{mla}})
 \item \code{'sr1'}, for Symmetric Rank 1 (see
 \code{\link[trustOptim:trust.optim]{trust.optim}}) \item \code{'sparse'},
-for trust regions and sparse Hessian
-(see \code{\link[trustOptim:trust.optim]{trust.optim}}) \item
+for trust regions and sparse Hessian (see
+\code{\link[trustOptim:trust.optim]{trust.optim}}) \item
 \code{'nlminb'}, for optimization using PORT routines (see
 \code{\link[stats:nlminb]{nlminb}})}}
 
@@ -126,17 +134,23 @@ bhhh Hessian is estimated (\eqn{g'g}).}
 
 \item{simType}{Character string. If \code{simType = 'halton'} (Default),
 Halton draws are used for maximum simulated likelihood (MSL). If
-\code{simType = 'ghalton'}, Generalized-Halton draws are used for MSL. If
-\code{simType = 'sobol'}, Sobol draws are used for MSL. If \code{simType =
-'uniform'}, uniform draws are used for MSL. (see section \sQuote{Details}).}
+\code{simType = 'ghalton'}, Generalized-Halton  draws are used for MSL. If
+\code{simType = 'sobol'} or \code{simType = 'rsobol'}, Sobol draws or
+randomized Sobol draws are used for MSL, respectively. If
+\code{simType = 'richtmyer'}, or \code{simType = 'rrichtmyer'},
+Richtmyer sequence or randomized Richtmyer sequence is used for MSL
+estimation, respectively. If \code{simType = 'mlhs'}, modified latin
+hypercube sampling is performed. If \code{simType = 'uniform'}, uniform draws
+are used for MSL. (see section \sQuote{Details}).}
 
 \item{Nsim}{Number of draws for MSL. Default 100.}
 
-\item{prime}{Prime number considered for Halton and Generalized-Halton
-draws. Default = \code{2}.}
+\item{prime}{Prime number considered for quasi-random sequences. The first
+10,000 primes are available. Default = \code{2}.}
 
-\item{burn}{Number of the first observations discarded in the case of Halton
-draws. Default = \code{10}.}
+\item{burn}{Number of the first observations discarded in the case of Halton,
+Richtmyer, and Sobol draws. For the randomized versions, the burn is not
+considered. Default = \code{10}.}
 
 \item{antithetics}{Logical. Default = \code{FALSE}. If \code{TRUE},
 antithetics counterpart of the uniform draws is computed. (see section
@@ -169,7 +183,7 @@ direction. See \code{\link[maxLik:maxBHHH]{maxBHHH}} and
 \code{\link{sfacross}}).}
 
 \item{...}{additional arguments of frontier are passed to sfacross;
-additional arguments of the print, bread, estfun, nobs methods are currently
+additional arguments of the print, bread, and estfun methods are currently
 ignored.}
 }
 \value{
@@ -213,7 +227,7 @@ two-sided error term.}
 
 \item{startVal}{Numeric vector. Starting value for M(S)L estimation.}
 
-\item{dataTable}{A data frame (tibble format) containing information on data
+\item{dataTable}{A data frame containing information on data
 used for optimization along with residuals and fitted values of the OLS and
 M(S)L estimations, and the individual observation log-likelihood. When
 \code{weights} is specified an additional variable is also provided in
@@ -229,8 +243,8 @@ M(S)L estimations, and the individual observation log-likelihood. When
 
 \item{olsSkew}{Numeric. Skewness of the residuals of the OLS estimation.}
 
-\item{olsM3Okay}{Logical. Indicating whether the residuals of the OLS
-estimation have the expected skewness.}
+\item{olsM3Okay}{Character string. Indicating whether the residuals of the
+OLS estimation have the expected skewness.}
 
 \item{CoelliM3Test}{Coelli's test for OLS residuals skewness. (See Coelli,
 1995).}
@@ -262,6 +276,8 @@ the M(S)L estimation.}
 
 \item{invHessian}{Covariance matrix of the parameters obtained from the
 M(S)L estimation.}
+
+\item{conditionNums}{Matrix. Condition number adding columns one by one.}
 
 \item{hessianType}{The argument \code{'hessianType'}. See the section
 \sQuote{Arguments}.}
@@ -306,10 +322,10 @@ with
 \deqn{\epsilon_i = v_i -Su_i}
 
 where \eqn{i} is the observation, \eqn{y} is the
-output (cost, revenue, profit), \eqn{\mathbf{x}} is the vector of main explanatory
-variables (inputs and other control variables), \eqn{u} is the one-sided
-error term with variance \eqn{\sigma_{u}^2}, and \eqn{v} is the two-sided
-error term with variance \eqn{\sigma_{v}^2}.
+output (cost, revenue, profit), \eqn{\mathbf{x}} is the vector of main
+explanatory variables (inputs and other control variables), \eqn{u} is the
+one-sided error term with variance \eqn{\sigma_{u}^2}, and \eqn{v} is the
+two-sided error term with variance \eqn{\sigma_{v}^2}.
 
 \code{S = 1} in the case of production (profit) frontier function and
 \code{S = -1} in the case of cost frontier function.
@@ -326,13 +342,14 @@ To account for heteroscedasticity in the variance parameters of the error
 terms, a single part (right) formula can also be specified. To impose the
 positivity to these parameters, the variances are modelled as:
 \eqn{\sigma^2_u = \exp{(\bm{\delta}'\mathbf{Z}_u)}} or \eqn{\sigma^2_v =
-\exp{(\bm{\phi}'\mathbf{Z}_v)}}, where \eqn{\mathbf{Z}_u} and \eqn{\mathbf{Z}_v} are the heteroscedasticity
-variables (inefficiency drivers in the case of \eqn{\mathbf{Z}_u}) and \eqn{\bm{\delta}}
-and \eqn{\bm{\phi}} the coefficients. In the case of heterogeneity in the
-truncated mean \eqn{\mu}, it is modelled as \eqn{\mu=\bm{\omega}'\mathbf{Z}_{\mu}}. The
+\exp{(\bm{\phi}'\mathbf{Z}_v)}}, where \eqn{\mathbf{Z}_u} and
+\eqn{\mathbf{Z}_v} are the heteroscedasticity variables (inefficiency drivers
+in the case of \eqn{\mathbf{Z}_u}) and \eqn{\bm{\delta}} and \eqn{\bm{\phi}}
+the coefficients. In the case of heterogeneity in the truncated mean
+\eqn{\mu}, it is modelled as \eqn{\mu=\bm{\omega}'\mathbf{Z}_{\mu}}. The
 scaling property can be applied for the truncated normal distribution:
-\eqn{u \sim h(\mathbf{Z}_u, \delta)u} where \eqn{u} follows a truncated normal
-distribution \eqn{N^+(\tau, \exp{(cu)})}.
+\eqn{u \sim h(\mathbf{Z}_u, \delta)u} where \eqn{u} follows a truncated
+normal distribution \eqn{N^+(\tau, \exp{(cu)})}.
 
 In the case of the truncated normal distribution, the convolution of
 \eqn{u_i} and \eqn{v_i} is:
@@ -392,22 +409,23 @@ package.
 }
 \examples{
 
-## Using data on fossil fuel fired steam electric power generation plants in the U.S.
-# Translog (cost function) half normal with heteroscedasticity
+# Using data on fossil fuel fired steam electric power generation plants in 
+# the U.S.
+## Translog (cost function) half normal with heteroscedasticity
 tl_u_h <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
 log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
 I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
 udist = 'hnormal', uhet = ~ regu, data = utility, S = -1, method = 'bfgs')
 summary(tl_u_h)
 
-# Translog (cost function) truncated normal with heteroscedasticity
+## Translog (cost function) truncated normal with heteroscedasticity
 tl_u_t <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
 log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
 I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
 udist = 'tnormal', muhet = ~ regu, data = utility, S = -1, method = 'bhhh')
 summary(tl_u_t)
 
-# Translog (cost function) truncated normal with scaling property
+## Translog (cost function) truncated normal with scaling property
 tl_u_ts <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
 log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
 I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
@@ -415,20 +433,20 @@ udist = 'tnormal', muhet = ~ regu, uhet = ~ regu, data = utility, S = -1,
 scaling = TRUE, method = 'mla')
 summary(tl_u_ts)
 
-## Using data on Philippine rice producers
-# Cobb Douglas (production function) generalized exponential, and Weibull 
-# distributions
+# Using data on Philippine rice producers
+## Cobb Douglas (production function) generalized exponential distribution
 
 cb_p_ge <- sfacross(formula = log(PROD) ~ log(AREA) + log(LABOR) + log(NPK) +
-log(OTHER), udist = 'genexponential', data = ricephil, S = 1, method = 'bfgs')
+log(OTHER), udist = 'genexponential', data = ricephil, S = 1, 
+method = 'bfgs')
 summary(cb_p_ge)
 
-## Using data on U.S. electric utility industry
-# Cost frontier Gamma distribution
-tl_u_g <- sfacross(formula = log(cost/fprice) ~ log(output) + I(log(output)^2) +
-I(log(lprice/fprice)) + I(log(cprice/fprice)), udist = 'gamma', uhet = ~ 1,
-data = electricity, S = -1, method = 'bfgs', simType = 'halton', Nsim = 200,
-hessianType = 2)
+# Using data on U.S. electric utility industry
+## Cost frontier Gamma distribution
+tl_u_g <- sfacross(formula = log(cost/fprice) ~ log(output) + 
+I(log(output)^2) + I(log(lprice/fprice)) + I(log(cprice/fprice)), 
+udist = 'gamma', uhet = ~ 1, data = electricity, S = -1, method = 'bfgs', 
+simType = 'halton', Nsim = 200, hessianType = 2)
 summary(tl_u_g)
 
 }
@@ -442,7 +460,7 @@ effects in a stochastic frontier production function for panel data.
 \emph{Empirical Economics}, \bold{20}(2), 325--332.
 
 Caudill, S. B., and Ford, J. M. 1993. Biases in frontier estimation due to
-heteroscedasticity. \emph{Economics Letters}, \bold{41}(1), 17--20.
+heteroscedasticity. \emph{Economics Letters}, \bold{41}(1), --20.
 
 Caudill, S. B., Ford, J. M., and Gropper, D. M. 1995. Frontier estimation
 and firm-specific inefficiency measures in the presence of
@@ -459,7 +477,7 @@ Empirical results for the distributions of \eqn{b_2} and \eqn{\sqrt{b_1}}.
 
 Greene, W. H. 2003. Simulated likelihood estimation of the normal-Gamma
 stochastic frontier function. \emph{Journal of Productivity Analysis},
-\bold{19}(2-3), 179--190.
+\bold{19}(2-3), 9--190.
 
 Hadri, K. 1999. Estimation of a doubly heteroscedastic stochastic frontier
 cost function. \emph{Journal of Business & Economic Statistics},
@@ -470,7 +488,7 @@ Hajargasht, G. 2015. Stochastic frontiers with a Rayleigh distribution.
 
 Huang, C. J., and Liu, J.-T. 1994. Estimation of a non-neutral stochastic
 frontier production function. \emph{Journal of Productivity Analysis},
-\bold{5}(2), 171--180.
+\bold{5}(2), 1--180.
 
 Kumbhakar, S. C., Ghosh, S., and McGuckin, J. T. 1991) A generalized
 production frontier approach for estimating determinants of inefficiency in

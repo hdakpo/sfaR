@@ -30,7 +30,7 @@ sfazisfcross(
   method = "bfgs",
   hessianType = 1,
   simType = "halton",
-  Nsim = 300,
+  Nsim = 100,
   prime = 2L,
   burn = 10,
   antithetics = FALSE,
@@ -171,22 +171,23 @@ estimated (\eqn{g'g}).}
 
 \item{simType}{Character string. If \code{simType = 'halton'} (Default),
 Halton draws are used for maximum simulated likelihood (MSL). If
-\code{simType = 'ghalton'}, or \code{simType = 'rhalton'}, Generalized-Halton
-draws or randomized Halton draws are used for MSL. If
+\code{simType = 'ghalton'}, Generalized-Halton  draws are used for MSL. If
 \code{simType = 'sobol'} or \code{simType = 'rsobol'}, Sobol draws or
 randomized Sobol draws are used for MSL, respectively. If
 \code{simType = 'richtmyer'}, or \code{simType = 'rrichtmyer'},
 Richtmyer sequence or randomized Richtmyer sequence is used for MSL
-estimation, respectively. If \code{simType = 'uniform'}, uniform draws are
-used for MSL. (see section \sQuote{Details}).}
+estimation, respectively. If \code{simType = 'mlhs'}, modified latin
+hypercube sampling is performed. If \code{simType = 'uniform'}, uniform draws
+are used for MSL. (see section \sQuote{Details}).}
 
 \item{Nsim}{Number of draws for MSL.}
 
-\item{prime}{Prime number considered for Halton and Generalized-Halton
-draws. Default = \code{2}.}
+\item{prime}{Prime number considered for quasi-random sequences. The first
+10,000 primes are available. Default = \code{2}.}
 
-\item{burn}{Number of the first observations discarded in the case of Halton
-draws. Default = \code{10}.}
+\item{burn}{Number of the first observations discarded in the case of Halton,
+Richtmyer, and Sobol draws. For the randomized versions, the burn is not
+considered. Default = \code{10}.}
 
 \item{antithetics}{Logical. Default = \code{FALSE}. If \code{TRUE},
 antithetics counterpart of the uniform draws is computed. (see section
