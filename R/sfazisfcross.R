@@ -101,7 +101,7 @@
 #'  \code{\link[maxLik:maxSANN]{maxSANN}})
 #' }
 #' @param initIter Maximum number of iterations for initialization algorithm.
-#' Default \code{100}.
+#' Default \code{500}.
 #' @param method Optimization algorithm used for the estimation.  Default =
 #' \code{'bfgs'}. 11 algorithms are available: \itemize{ \item \code{'bfgs'},
 #' for Broyden-Fletcher-Goldfarb-Shanno (see
@@ -526,7 +526,7 @@
 sfazisfcross <- function(formula, muhet, uhet, vhet, thet, logDepVar = TRUE, data,
   subset, weights, wscale = TRUE, S = 1L, udist = "hnormal", sigmavType = "common",
   linkF = "logit", start = NULL, randStart = FALSE, whichStart = 2L, initAlg = "nm",
-  initIter = 100, method = "bfgs", hessianType = 1, simType = "halton", Nsim = 100,
+  initIter = 500, method = "bfgs", hessianType = 1, simType = "halton", Nsim = 100,
   prime = 2L, burn = 10, antithetics = FALSE, seed = 12345, itermax = 2000L, printInfo = FALSE,
   tol = 1e-12, gradtol = 1e-06, stepmax = 0.1, qac = "marquardt") {
   # sigma_v model check -------

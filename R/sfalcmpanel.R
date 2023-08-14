@@ -112,7 +112,7 @@
 #' Annealing (see \code{\link[maxLik:maxSANN]{maxSANN}})
 #' }
 #' @param initIter Maximum number of iterations for initializing algorithm.
-#' Default \code{100}.
+#' Default \code{500}.
 #' @param invariance Integer. Except in the case of \code{'modelType = 'bc92c''},
 #' in the presence of heteroscedasticity, variables are supposed to be constant
 #' over time for each cross section. When this is not the case, three options 
@@ -421,7 +421,7 @@
 sfalcmpanel <- function(formula, uhet, vhet, thet, logDepVar = TRUE, data, idVar = NULL,
   timeVar = NULL, subset, weights, wscale = TRUE, S = 1L, modelType = "bc92a",
   udist = "hnormal", start = NULL, randStart = FALSE, whichStart = 2L, initAlg = "nm",
-  initIter = 100, invariance = 2L, lcmClasses = 2, method = "bfgs", hessianType = 1,
+  initIter = 500, invariance = 2L, lcmClasses = 2, method = "bfgs", hessianType = 1,
   itermax = 2000L, printInfo = FALSE, tol = 1e-12, gradtol = 1e-06, stepmax = 0.1,
   qac = "marquardt") {
   # panel model check -------

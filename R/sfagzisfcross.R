@@ -80,7 +80,7 @@
 #' Annealing (see \code{\link[maxLik:maxSANN]{maxSANN}})
 #' }
 #' @param initIter Maximum number of iterations for initialization algorithm.
-#' Default \code{100}.
+#' Default \code{500}.
 #' @param gzisfClasses Number of classes to be estimated (default = \code{2}). A
 #' maximum of five classes can be estimated.
 ##' @param method Optimization algorithm used for the estimation.  Default =
@@ -412,7 +412,7 @@
 #' @export
 sfagzisfcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE, data, subset,
   weights, wscale = TRUE, S = 1L, udist = "hnormal", start = NULL, randStart = FALSE,
-  whichStart = 2L, initAlg = "bfgs", initIter = 100, gzisfClasses = 2, method = "bfgs",
+  whichStart = 2L, initAlg = "bfgs", initIter = 500, gzisfClasses = 2, method = "bfgs",
   hessianType = 1, itermax = 2000L, printInfo = FALSE, tol = 1e-12, gradtol = 1e-06,
   stepmax = 0.1, qac = "marquardt") {
   # u distribution check -------
