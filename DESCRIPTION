@@ -1,6 +1,6 @@
 Package: sfaR
 Title: Stochastic Frontier Analysis Routines
-Version: 1.0.0.9000
+Version: 2.0.0.9000
 Authors@R: c(
     person("K Hervé", "Dakpo", email = "k-herve.dakpo@inrae.fr", role = c("aut", "cre")),
     person("Yann", "Desjeux", role = "aut"),
@@ -17,7 +17,8 @@ Description: Maximum likelihood estimation for stochastic frontier
     <doi:10.1111/1477-9552.12422>, for cross-sectional and pooled data,
     and the sample selection model as described in Greene (2010)
     <doi:10.1007/s11123-009-0159-1>, and applied in Dakpo et al. (2021)
-    <doi:10.1111/agec.12683>.  Several possibilities in terms of
+    <doi:10.1111/agec.12683>, the deterministic and stochastic metafrontiers for
+    cross-sectional and pooled data. Several possibilities in terms of
     optimization algorithms are proposed.
 License: GPL (>= 3)
 URL: https://github.com/hdakpo/sfaR
@@ -25,26 +26,33 @@ BugReports: https://github.com/hdakpo/sfaR/issues
 Depends: 
     R (>= 3.5.0)
 Imports: 
+    calculus,
     cubature,
     fastGHQuad,
     Formula,
+    lpSolveAPI,
+    lsei,
     marqLevAlg,
     maxLik,
     methods,
     mnorm,
     nleqslv,
     plm,
+    progressr,
     qrng,
-    randtoolbox,
-    sandwich,
     stats,
-    texreg,
+    tmvtnorm,
     trustOptim,
     ucminf
 Suggests: 
+    ggplot2,
+    kableExtra,
     knitr,
     lmtest,
-    rmarkdown
+    rmarkdown,
+    sandwich,
+    texreg,
+    xtable
 Encoding: UTF-8
 Language: en-US
 LazyData: true

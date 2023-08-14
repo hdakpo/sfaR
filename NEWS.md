@@ -1,5 +1,31 @@
 # sfaR (development version)
 
+## NEW FEATURES
+
+* New SFA models: ZISF, CNSF, MISF, panel first generation
+
+* New sequences for pseudo random numbers for M(S)L.
+
+* Random starting values can be use for M(S)L.
+
+## BUG FIXES
+
+* `print.summary.sfacross` previously returns the wrong 'sigmav' and 'sigmau'.
+
+* `print.summary.sfaselectioncross` previously returns the wrong 'sigmav' and 'sigmau'.
+
+## OTHER USER-VISIBLE CHANGES
+
+* Models estimation date now includes seconds.
+
+* Remove dependencies to package `randtoolbox`: version 2.0.4 has disabled 
+scrambling.
+
+* Packages `texreg` and `sandwich` are moved from Imports to Suggests.
+
+* Remove deprecated function `lcmcross` along with associated methods.
+
+***
 # sfaR 1.0.0
 Changes in 'sfaR' version to 1.0.0 (2023-06-13).
 
