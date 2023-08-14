@@ -26,7 +26,7 @@ sfapanel1(
   randStart = FALSE,
   whichStart = 2L,
   initAlg = "nm",
-  initIter = 100,
+  initIter = 500,
   invariance = 2L,
   method = "bfgs",
   hessianType = 1L,
@@ -156,7 +156,7 @@ Annealing (see \code{\link[maxLik:maxSANN]{maxSANN}})
 }}
 
 \item{initIter}{Maximum number of iterations for initializing algorithm.
-Default \code{100}.}
+Default \code{500}.}
 
 \item{invariance}{Integer. Except in the case of \code{'modelType = 'bc92c''},
 in the presence of heteroscedasticity, variables are supposed to be constant
@@ -303,6 +303,8 @@ M(S)L estimations, and the individual observation log-likelihood. When
 \item{gHvar}{Matrix of variables used in the case of time varying
 inefficiency when \code{'modelType %in% c('bc92a', 'bc92b', 'bc92c', 'kw05',
 'c00', 'mols93')'} (for internal use).}
+
+\item{ngZGvar}{Number of columns in gHvar when available.}
 
 \item{invariance}{Methodology used to obtain time invariant exogenous
 variables (in the case of heteroscedasticity).}

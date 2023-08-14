@@ -26,7 +26,7 @@ sfalcmpanel(
   randStart = FALSE,
   whichStart = 2L,
   initAlg = "nm",
-  initIter = 100,
+  initIter = 500,
   invariance = 2L,
   lcmClasses = 2,
   method = "bfgs",
@@ -139,7 +139,7 @@ Annealing (see \code{\link[maxLik:maxSANN]{maxSANN}})
 }}
 
 \item{initIter}{Maximum number of iterations for initializing algorithm.
-Default \code{100}.}
+Default \code{500}.}
 
 \item{invariance}{Integer. Except in the case of \code{'modelType = 'bc92c''},
 in the presence of heteroscedasticity, variables are supposed to be constant
@@ -284,6 +284,8 @@ maximized.}
 
 \item{startLoglik}{Log-likelihood at the starting values.}
 
+\item{nClasses}{The number of classes estimated.}
+
 \item{mlLoglik}{Log-likelihood value of the M(S)L estimation.}
 
 \item{mlParam}{Parameters obtained from M(S)L estimation.}
@@ -357,6 +359,18 @@ estimated for the covariates, and \eqn{\exp(\bm{\theta}_J'\mathbf{Z}_h)=1}.
 The particularity of the prior probability is that it is time-invariant. In
 the case of \code{'sfalcmpanel'}, the \eqn{\mathbf{Z}_h} are averaged for
 each cross-section.
+}
+\examples{
+# World production data
+dataW <- worldprod
+dataW$trend <- as.numeric(dataW$yr)
+dataW <- pdata.frame(dataW, index = c("code", "yr"))
+
+lcm2c <- sfalcmpanel(formula = ly ~ lk + ll + trend, modelType = "bc92a", 
+data = dataW)
+
+summary(lcm2c)
+
 }
 \references{
 Aigner, D., Lovell, C. A. K., and P. Schmidt. 1977. Formulation

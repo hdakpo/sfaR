@@ -26,7 +26,7 @@ sfazisfcross(
   randStart = FALSE,
   whichStart = 2L,
   initAlg = "nm",
-  initIter = 100,
+  initIter = 500,
   method = "bfgs",
   hessianType = 1,
   simType = "halton",
@@ -140,7 +140,7 @@ Conjugate Gradient (see \code{\link[maxLik:maxCG]{maxCG}})
 }}
 
 \item{initIter}{Maximum number of iterations for initialization algorithm.
-Default \code{100}.}
+Default \code{500}.}
 
 \item{method}{Optimization algorithm used for the estimation.  Default =
 \code{'bfgs'}. 11 algorithms are available: \itemize{ \item \code{'bfgs'},

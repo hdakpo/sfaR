@@ -23,7 +23,7 @@ sfagzisfcross(
   randStart = FALSE,
   whichStart = 2L,
   initAlg = "bfgs",
-  initIter = 100,
+  initIter = 500,
   gzisfClasses = 2,
   method = "bfgs",
   hessianType = 1,
@@ -108,7 +108,7 @@ Annealing (see \code{\link[maxLik:maxSANN]{maxSANN}})
 }}
 
 \item{initIter}{Maximum number of iterations for initialization algorithm.
-Default \code{100}.}
+Default \code{500}.}
 
 \item{gzisfClasses}{Number of classes to be estimated (default = \code{2}). A
 maximum of five classes can be estimated.}
