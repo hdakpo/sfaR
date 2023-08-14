@@ -1,0 +1,1545 @@
+%\documentclass[article]{jss}
+\documentclass[nojss]{jss}
+
+%% -- LaTeX packages and custom commands ---------------------------------------
+
+\usepackage{orcidlink,thumbpdf,lmodern}
+\usepackage{mathtools,amssymb,amsthm,amsmath, bm}
+\usepackage{adjustbox}
+\usepackage{longtable}
+\usepackage{booktabs} % for toprule
+\usepackage{bookmark}
+\usepackage{textcomp} % for registered symbol (in biblio)
+\usepackage{multirow}
+\usepackage{arydshln} % for dashed line in tables
+\usepackage[flushleft]{threeparttable} % for table note
+\usepackage{pdflscape}
+\usepackage{geometry}
+%\usepackage{fancyhdr}
+%\usepackage{tabularx, colortbl, array}
+\usepackage{scrlayer-scrpage}
+
+%\setlength{\arrayrulewidth}{0.5mm}
+%\renewcommand{\arraystretch}{1.5}
+%\setlength{\tabcolsep}{18pt}
+
+\DeclareNewLayer[
+  background,
+  rightmargin,
+  contents={%
+    \parbox[b][\layerheight][c]{\dimexpr\footskip+\footheight\relax}{%
+      \hfill\rotatebox{90}{\pagemark}}}
+]{lscape.foot}
+
+\DeclareNewLayer[
+  background,
+  textarea,
+  addvoffset=-\dimexpr\headsep+\headheight\relax, % Adjust vertical offset to center the header
+  addhoffset=-\dimexpr\footskip+\footheight\relax, % Adjust horizontal offset to center the header
+  width=\dimexpr\headsep+\headheight+\textheight+\footskip+\footheight\relax, % Adjust width to center the header
+  height=\dimexpr\textwidth\relax, % Swap width and height to match the landscape orientation
+  contents=\rotatebox{90}{\parbox{\layerheight}{\centering\headmark}}
+]{lscape.head}
+
+\DeclareNewPageStyleByLayers{lscape}{lscape.foot,lscape.head}
+
+% \VignetteIndexEntry{Introduction to the package sfaR}
+
+\newcommand{\sfar}{\pkg{sfaR}}
+
+\SweaveOpts{engine=R, eps=FALSE, keep.source = TRUE}
+<<preliminaries, echo=FALSE, results=hide>>=
+options(prompt = "R> ", continue = "+  ", width = 70, useFancyQuotes = FALSE)
+library("sfaR")
+@
+
+%% -- Article metainformation (author, title, ...) -----------------------------
+
+\author{K Herv\'e Dakpo~\orcidlink{0000-0002-6114-7896}\\Universit\'e 
+Paris-Saclay INRAE \\ AgroParisTech, PSAE\\ Palaiseau, F-91120, France \AND
+Yann Desjeux ~ \\INRAE, Bordeaux School of Economics, \\ University Bordeaux, 
+Pessac, France \AND Arne Henningsen ~ \\ Dept. of Food and Resource Economics,\\ 
+University of Copenhagen, Frederiksberg C, Denmark \AND Laure Latruffe ~ \\
+INRAE, Bordeaux School of Economics, \\ University Bordeaux, 
+Pessac, France}
+\Plainauthor{K Herv\'e Dakpo, Yann Desjeux, Arne Henningsen, Laure Latruffe}
+
+\title{Stochastic Frontier Analysis Using \pkg{sfaR}}
+\Plaintitle{Stochastic Frontier Analysis Using sfaR}
+\Shorttitle{\pkg{sfaR}: SFA using R}
+
+%% - \Abstract{} almost as usual
+\Abstract{
+  This article gives an overview of the capabilities of the \pkg{sfaR} package
+  in estimating stochastic frontier (SF) models. It extends the commonly used
+  \pkg{frontier} package by including new models for cross-section and panel 
+  data. Many of the recent advances in the field like the latent class SF models 
+  and a few of its variants (zero inefficiency SF, contaminated noise SF, and
+  multimodal inefficiency SF), the metafrontier SF, and the sample selection SF 
+  are included in the \pkg{sfaR} package. For many of the models, several 
+  distributions are possible for the one-sided error term (e.g., half-normal, 
+  truncated normal, exponential, rayleigh, generalized exponential, truncated
+  skewed-laplace, uniform, gamma, weibull, and log-normal distributions. Another 
+  advantage of the \pkg{sfaR} package is to allow many possibilities (eleven) in 
+  terms of optimization algorithm. A description of the main functions in the 
+  \pkg{sfaR} package, in addition with illustration using real data are provided.
+}
+
+%% - \Keywords{} with LaTeX markup, at least one required
+%% - \Plainkeywords{} without LaTeX markup (if necessary)
+%% - Should be comma-separated and in sentence case.
+\Keywords{standard stochastic frontiers, latent class stochastic frontiers, 
+metafrontiers, sample selection stochastic frontier, zero inefficiency stochastic
+frontiers, cross-section data, panel data, \proglang{R}}
+\Plainkeywords{standard stochastic frontiers, latent class stochastic frontiers, 
+metafrontiers, sample selection stochastic frontier, zero inefficiency stochastic
+frontiers, cross-section data, panel data, R}
+
+%% - \Address{} of at least one author
+%% - May contain multiple affiliations for each author
+%%   (in extra lines, separated by \emph{and}\\).
+%% - May contain multiple authors for the same affiliation
+%%   (in the same first line, separated by comma).
+\Address{
+  K Herv\'e Dakpo\\
+  Journal of Statistical Software\\
+  Universit\'e Paris-Saclay INRAE\\
+  AgroParisTech, PSAE\\
+  Palaiseau, F-91120, France\\
+  E-mail: \email{k-herve.dakpo@inrae.fr}\\
+  URL: \url{https://www6.versailles-grignon.inrae.fr/psae_eng/PersonalPages2/Herve-Dakpo}
+}
+
+ 
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+%% -- Introduction -------------------------------------------------------------
+
+%% - In principle "as usual".
+%% - But should typically have some discussion of both _software_ and _methods_.
+%% - Use \proglang{}, \pkg{}, and \code{} markup throughout the manuscript.
+%% - If such markup is in (sub)section titles, a plain text version has to be
+%%   added as well.
+%% - All software mentioned should be properly \cite-d.
+%% - All abbreviations should be introduced.
+%% - Unless the expansions of abbreviations are proper names (like "Journal
+%%   of Statistical Software" above) they should be in sentence case (like
+%%   "generalized linear models" below).
+
+\section[Introduction]{Introduction} \label{sec:intro}
+
+Since its inception over 40 years ago by \citet{aig77, mee77, batt77}, the 
+stochastic frontier analysis (SFA) has been used as a proeminent performance 
+benchmarking tool in many aspects of decision making units (DMUs). Since then 
+several models have been developed to tackle different situations (data type, 
+technological heterogeneity, endogeneity, $\cdots$). Overall, SFA can be used 
+to evaluate different performance indicators for DMUs (technical and economic 
+efficiencies, productivity, $\cdots$). By estimating the efficiency scores of 
+DMUs, we can compare them, find out who is under-performing, and learn from the 
+best practices. This can help make better policies or subsidies to improve the 
+efficiency of both private and public sectors \citep{par14}. 
+
+SFA has been used in a variety of areas and for different purposes. For 
+instance, SFA has been used to measure productivity growth and its sources 
+\citep{orea02}, or to examine the effects of regulation and competition on 
+performance \citep{myd20, kang02}, to evaluate eco-efficiency of firms 
+\citep{mada23}, to analyze the impact of environmental factors \citep{li19}. 
+SFA has been use in agriculture \citep{latruffe23}, banking \citep{badu21}, 
+health care \citep{ji20}, manufacturing sector \citep{boy19}, $\cdots$. 
+
+The scope of SFA is so huge that it spreads from pure research objectives to 
+practitionners and policy makers. As such, the \pkg{sfaR} package intends to 
+provide a platform for the basics but also for some of the recent advances in 
+this field of performance benchmarking using the software 
+\proglang{R}.\footnote{SFA has been implemented in other sofware like 
+\proglang{Limdep}, \proglang{Stata}, \proglang{Ox}, $\cdots$}. In \proglang{R}, 
+the package \pkg{frontier} is without any doubt the biggest attempt in 
+an open software \citep{frontier}.\footnote{The package \pkg{frontier} uses the 
+Fortran source codes of \proglang{Frontier 4.1} originally developed by Tim 
+Coelli.} However, this package is only limited to a few distributions for the 
+inefficiency term and a few panel models. For instance, only the half-normal and
+truncated normal distributions are possible in \pkg{frontier}. Regading the panel
+models, \pkg{frontier} implements the time-invariant inefficiency model by 
+\citet{pl81} and the time-varying efficiency model by \citet{batco92}. \pkg{sfaR} 
+goes a step further and provide more alternative in the time-varying inefficiency
+models \citep{kum90, batco92, lees93, cue00, cue02, feng09, kw05, al06}.
+
+Recently, the package \pkg{npsf} by \citet{npsf} has extended the \pkg{frontier}
+package to new panel models (e.g., the generalized true random effects as 
+discussed in \citet{colomb14, klh14, tk14}).\footnote{Many other packages can be
+found in the literature. For instance, the \pkg{Benchmarking} package contains 
+a very basic SFA model \citep{bench}, \pkg{sfadv} provides one methodology to 
+deal with endogeneity in SFA \citep{sfadv}, \pkg{semsfa}, and \pkg{dsfa} offer semi- and 
+non-parametric SFA models \citep{semsfa, dsfa}, and \pkg{ssfa} allows for spatial 
+stochastic frontiers \citep{ssfa}. In addition to these packages, several R codes can be found
+online to conduct some SFA \citep{si20, si22, nguyen22}.} Still, many 
+of the recent developments are still lacking, especially regarding technological
+heterogeneity. For instance, the latent class stochastic frontier models, and 
+many of its variants are not covered by any of aforementioned packages. For instance,
+\pkg{sfaR} includes the latent class SF, the zero inefficiency SF, the 
+contaminated noise SF, and the multi-modal inefficiency SF \citep{orea04, 
+greene05, kum13, rho15, wheat19}. The same is true for the metafrontier 
+\citep{batt04, huang14, am17}, and the sample selection bias 
+\citep{greene10}. 
+
+With \pkg{sfaR} we do propose not an exhaustive universe of the 
+stochastic frontier (SF) models, but maybe a first step towards this direction. 
+As we expect the package to grow and even include other developers extension. As of
+now, the package, in summary, can handle cross-section but also panel data depending on the 
+models. It offers more flexibility in terms of the distributions for the 
+inefficiency term, but also the possibility to use several optimization 
+algorithms. Regarding the models, 296 likelihood functions are currently 
+implemented and grouped into ten main functions. This article summarizes the main information 
+about each group of models implemented and illustrate them using real life data.
+The structure of the paper is as follows. Section \ref{sec:modelstandar} gives 
+a brief overview of the standard SF models in the literature for cross-section
+and panel data. Section \ref{sec:modelcm} describes the latent class SF in
+addition to its variants. Finally, section \ref{sec:other} presents the other 
+SF models present the \pkg{sfaR}, namely the metafrontiers and the sample 
+selection SF. Practically, section \ref{sec:prespackage} draws a skeleton
+of the \pkg{sfaR} package focusing on the main functions and some postestimation
+routines, and section \ref{sec:illus} provides some empirical applications. The
+last section offers some discussions and conclusions.
+
+\section{Standard models for cross-section and panel data} \label{sec:modelstandar}
+
+\subsection{Standard cross-sectional SFA models}
+
+\subsubsection{Densities}
+
+Let's consider the standard production function \footnote{Other specifications 
+for the production technology can also be used, e.g. distance functions, profit,
+cost or revenue functions, input/output requirement functions.} 
+%
+\begin{equation}\label{eq:1}
+y_i = \mathbf{x_i'}\bm{\beta} + v_i - Su_i \quad \text{with} \quad i = 1, \cdots, N
+\end{equation}
+%
+where $S = 1$ for production function and $S = -1$ for cost function. $v$ is the 
+two-sided (idiosyncratic) error, which is generally assumed to follow a normal distribution 
+$\mathcal{N}(0, \sigma_v^2)$. 
+
+The spearhead for the SFA is the assumption regarding the distibution of $u$. 
+In the \pkg{sfaR} package, ten different distributions with $u \geq 0$ are 
+possible for the standard model. Table~\ref{table:dens} presents the density 
+function of all the distributions allowed by \pkg{sfaR}.\footnote{Moments associated
+with each distribution can be found in Table \ref{table:momentdesn} in the 
+Appendix.} For each of the distribution, the parameters can be obtained by 
+maximizing the log-likelihood giving the convolution of $\epsilon_i=v_i - Su_i$. 
+
+The most commonly used distributions are the one-parameter half-normal 
+\citep{aig77}, and exponential distributions \citep{mee77}. Their large success 
+is attributed to the simplicity of their density function and their availability 
+in most statistical software (especially for the half-normal distribution). 
+However, these distributions assumed a zero mode for the inefficiency implying 
+that most DMUs will be deemed efficient. Two-parameter distributions like the 
+truncated normal \citep{ste80, kum87}, and the gamma \citep{ste80, beckers87, greene90, greene03}
+were later introduced to shift away from the zero mode distributions. 
+A particular feature of these two distributions is that, under specific 
+conditions they nest the half-normal and the exponential distributions, 
+respectively. In the case of the gamma distribution, the density corresponding 
+to $\epsilon_i$ does not have a close form, and \citet{greene03} suggested the 
+use of maximum simulated likelihood (MSL). If the previous four distributions 
+are the standard in the stochastic frontier framework, other 
+distributions are also introduced. For instance, the rayleigh \citep{oliv14, 
+hajar15, wang20}, and the generalized exponential \citep{papa21} are 
+one-parameter distributions, which have non-zero mode. Another alternative 
+two-parameter distribution is the log-normal \citep{wang20}, 
+which can be a good choice for certain type of datasets \citep{migon01, rama12}.
+
+A common feature of all the previous distributions is their positive skewness, 
+which supposed a negative third moment for the distribution of 
+$\epsilon_i$ when $S=1$. However, in practice, the third moment of 
+$\epsilon_i$ can be positive \citep{sw09}. This generate a type I error, which 
+might prevent the identification of the inefficiency distribution parameters 
+\citep{olson80}. According to \citet{wald82}, the "wrong" skewness implies that 
+the maximum likelihood and the OLS estimates of equation~\ref{eq:1} will have 
+the same slopes and there are no inefficiencies. A long debate has then emerged 
+around the "wrong" skewness. An advantage of the weibull and 
+the truncated skewed-laplace distributions is to allow positive 
+or negative skeweness \citep{tsionas07, wang12}, and therefore identifying inefficiencies even when the OLS
+residuals has the "wrong" skewness. On another hand, the uniform distribution 
+\citet{li96, nguyen10, lee14}, which has a zero skewness, has been introduced to  
+handle situations where the inefficiency distribution is symmetric around the 
+mean. In this latter case, the OLS residuals will also be symmetric, and based on 
+the previous distributions, no inefficiencies can be measured. Another advantage
+of the uniform distribution is to set a threshold on the inefficiency, which can
+provide useful economic information \citep{lee14}.
+
+\textbf{Do distributional assumptions even matter?} If as underlined by 
+\citet[p.~16]{kum20} the "choice of $u$ is often driven through available statistical 
+software to implement the method rather than an underlying theoretical link 
+between a model of productive inefficiency and the exact shape of the 
+corresponding distribution", the \pkg{sfaR} package will fill in some gaps and 
+allow practionners to rigorously check differences in their results.\footnote{See 
+also \citet[p.~214-216]{par14} for more discussion on the matter of the choice of $u$ distribution.}
+It is worth mentioning that if one is only interested on the features of the 
+frontier, as long as inefficiency is not conditional on some variables, the OLS
+results should be sufficient.
+
+
+%\begin{landscape}
+\begin{table}[t]
+%\setlength{\arrayrulewidth}{.01em}
+\renewcommand{\arraystretch}{1.3}
+\centering
+%\begin{adjustbox}{max width=1\textwidth}
+\begin{tabular}{@{}cc@{}}
+\toprule
+Distributions & Densities \\
+\midrule
+Half-Normal & $f(u) = \frac{2}{\sigma_u}\phi\left(\frac{u_i}{
+\sigma_u}\right)$ \\[1em]
+%\hdashline
+Truncated-Normal & $f(u) = \frac{\frac{1}{\sigma_u}\phi\left(
+\frac{u_i-\mu}{\sigma_u}\right)}{1 - \Phi\left(-\frac{\mu}{\sigma_u}\right)}$ \\[1em]
+%\hdashline
+Exponential & $f(u) = \frac{1}{\sigma_u}\exp{\left(
+-\frac{u}{\sigma_u}\right)}$ \\[1em]
+%\hdashline
+Rayleigh & $f(u) = u\exp{\left(-\frac{u^2}{2\sigma_u^2}\right)}/
+\sigma_u^2$\\[1em]
+%\hdashline
+Gamma & $f(u) = \frac{\sigma_u^{-P}}{\Gamma\left(P\right)}\exp{
+\left(-u/\sigma_u\right)}u^{P-1}$ with $P > 0$\\[1em]
+%\hdashline
+Log-Normal & $f(u) = \frac{1}{u\sigma_u}\phi\left(\frac{
+\ln{u}-\mu}{\sigma_u}\right)$\\[1em]
+%\hdashline
+Weibull & $f(u) = \frac{k}{\sigma_u}\left(\frac{u}{\sigma_u}
+\right)^{k-1}\exp{\left(-\left(u/\sigma_u\right)^{k}\right)}$ with $k > 0$\\[1em]
+%\hdashline
+Generalized Exponential & $f(u) = \frac{2}{\sigma_u}\left[1-\exp{
+\left(-u/\sigma_u\right)}\right]\exp{\left(-u/\sigma_u\right)}$ \\[1em]
+%\hdashline
+Truncated Skewed-Laplace & $f(u) =\frac{1+\lambda}{\sigma_u\left(
+2\lambda+1\right)}\left\{2\exp{\left(-\frac{u}{\sigma_u}\right)}-
+\exp{\left(-\frac{\left(1+\lambda\right)u}{\sigma_u}\right)}\right\}$ with 
+$\lambda > 0$\\[1em]
+%\hdashline
+Uniform & $f(u) = \frac{1}{\theta}$ with $u \in [0, \theta]$\\[1em]
+\bottomrule
+\end{tabular}
+%\end{adjustbox}
+\caption{List of distributions for $u$}
+\label{table:dens}
+\end{table}
+%\end{landscape}
+
+
+The convolution of $\epsilon$ associated with each of the distribution in 
+Table~\ref{table:dens} are presented in Table~\ref{table:mlsfcross} in the 
+Appendix.\footnote{Proof of the derivation of these densities can be found in 
+the corresponding literature or from the authors upon request.} For estimation 
+purposes, the variances of $u$ and $v$ are parameterized as follows:
+$\sigma_u^2 = \exp{\left(W_u\right)}$ and $\sigma_v^2 = \exp{\left(W_v\right)}$.
+In the case of the uniform distribution we have $\theta = \sqrt{12\sigma_u^2}$.
+Heteroscedasticity is handled in both error terms, and the variances are again 
+parameterized as
+%
+\begin{align*}
+\sigma_{u,i}^2 &=\exp\left(\mathbf{z'_{u,i}}\bm\delta\right) \\
+\sigma_{v,i}^2 &=\exp\left( \mathbf{z'_{v, i}}\bm\varphi\right)
+\end{align*}
+%
+Allowing heteroscedasticity in the variance of the one-sided error term $u$ 
+allows to examine the determinants of inefficiency. This parametrization has 
+been discussed in \citet{reif91, cau93, cau95, had99}. Moreover, according to 
+\citet{wang02}, not accounting for the heteroscedasticity in the efficiency  
+component can lead to inconsistent results. As underlined in 
+\citet[p.~115]{kum14}, "the early literature adopts a two-step procedure to investigate 
+the relationship", which was later proved by \citet{wang02} to poduce biased results.
+In the case of the truncated normal distribution, \citet{kum91, hua94, batt95}
+suggested to only parameterize the mean of the distribution as 
+$\mu_i = \mathbf{z}'_{\bm\mu, \mathbf{i}}\bm\zeta$ when examining the 
+inefficiency determinants. However, to account for non-monotonicity in the 
+determinants of inefficiency, \citet{wang02b} suggested to parameterized both the 
+mean and and the variance of the pre-truncated distribution. The same process
+can also be applied to the log-normal distribution.
+
+Regarding the truncated normal distribution, \citet{wang02} have formulated a 
+different strategy for modelling the inefficiency variable:
+
+$$u_i \sim h(\mathbf{z}_i, \bm\delta)u_*$$
+
+where $h() \geq 0$ (\textit{scaling factor}) is observation-specific and 
+non-stochastic and $u_*$ is a random (\textit{common}) variable that follows 
+here a truncated normal distribution $\mathcal{N}^+\left(\tau, \sigma_u^2\right)$. 
+Following \cite{kum14}, we re-parameterize the truncated normal distribution as 
+$\mathcal{N}^+\left(\tau, \exp{\left(c_u\right)}\right)$. Then
+
+$$u \equiv \exp\left(\mathbf{z'_{u,i}}\bm\delta\right)\mathcal{N}^+
+\left(\tau, \exp{\left(c_u\right)}\right)=\mathcal{N}^+\left(\tau\exp\left(
+\mathbf{z'_{u,i}}\bm\delta\right), \exp{\left(c_u + 2\mathbf{z'_{u,i}}
+\bm\delta\right)}\right)$$
+
+The advantage of the scaling property is that $u_*$, also known as the \textit{base
+inefficiency}, anhd its distribution the \textit{base distribution}
+\citep{wang02, al06}, does not depend on $\mathbf{z}$. This implies
+that the distribution of $u_i$ has the same shape for all the firms, and the 
+scaling function $h(\dot)$ expands or contracts the scale of the 
+distribution.\footnote{According to \citet[p.~203]{al06}, "the basic random 
+variable $u_*$ can be seen as the firms's base efficiency level which captures 
+things like the manager's natural skills, which we view as random. How well 
+these natural skills are exploited to manage the firm efficiently depends on the 
+other variables $\mathbf{z}$, which might include the manager's education or 
+experience, or measures of the environment in which the firm operates, for example."} 
+When determinants of inefficiency are evaluated, so does the marginal impact of 
+each $z$ variable on inefficiency. This marginal impact is estimated using the
+derivatives $\partial E\left[u_i\right]/\partial z\left[k\right]$ and
+$\partial V\left[u_i\right]/\partial z\left[k\right]$, which vary 
+depending the distribution of $u$.
+
+
+
+\subsubsection{Efficiency estimation} 
+
+After estimating the model parameters, the other interest is to derive observation 
+specific (in)efficiency. If we take the example of the half-normal distribution, 
+after the estimation, we can obtain a value for $\sigma_u^2$, which is enough if
+one is interested in the average inefficiency 
+($E\left[u\right]=\sigma_u\sqrt{\frac{2}{\pi}}$). However, to obtain individual
+observation inefficiency, $\sigma_u^2$ is not anymore enough.\footnote{Unless 
+inefficiency determinants are considered.} An early solution was proposed by \citet{jon82}
+who suggested to compute $E\left[u_i|\hat{\epsilon}_i\right]$. \citet{jon82} also 
+formulated an alternative to the conditional mean estimator, viz., the 
+conditional mode $M\left[u_i|\hat{\epsilon}_i\right]$. Once point estimates of 
+$u_i$ are obtained, technical efficiency can be computed as 
+$\exp{\left(-\hat{u}_i\right)}$. Later, \citet{batt88} proposed to 
+derive the conditional mean efficiency using $E\left[\exp{\left(-u_i\right)|\hat{\epsilon}_i}\right]$.
+We went a step further in the \pkg{sfaR} package to also provide the reciprocal
+mean efficiency: $E\left[\exp{\left(u_i\right)|\hat{\epsilon}_i}\right]$.
+Also whenever possible we also provide the confidence intervall of the (in)efficiency
+scores \citep{horrace96}. Table~\ref{table:effcross}, in the Appendix, summarizes the main (in)efficiency measures. For the 
+weibull and log-normal distributions, all (in)efficiency measures are evaluated
+by solving a numerical integration (in \pkg{sfaR}, this 
+is solved using adaptive multidimensional integration over hypercubes). For the
+uniform distribution, different (in)efficiency scores can be derived when
+$\theta \rightarrow \infty$.
+
+
+\subsection{Panel stochastic frontier models}
+
+If all the previous model are also valid for pooled cross-sectional data, they 
+do not take advantage of the panel structure of the data when this is available. 
+In the case of the panel data, some of the latent unobserved heterogeneity can 
+be accounted for as inefficiency or individual specific heterogeneity. In the 
+\pkg{sfaR}, we group the panel models into three categories. The first generation
+of panel models consider the time invariant heterogeneity as if it were inefficiency, 
+the second generation of models simultaneously consider firm heterogeneity in addition 
+to inefficiency. Finally, the third generation model considers firm heterogeneity, 
+and persistent and transient inefficiency components. All the panel models 
+considered in \pkg{sfaR} are distribution-based models.
+
+\subsubsection{Time-invariant inefficiency models}
+
+The first to consider the panel dimension when estimating SF is \citet{pl81} who
+considered the following model
+
+\begin{equation} \label{eq:2}
+y_{it} = \mathbf{x_{it}'}\bm{\beta} + v_{it} - Su_i \quad \text{with} \quad i = 1, \cdots, N \quad \text{and} \quad t = 1, \cdots, T
+\end{equation}
+
+where the random effect $u_i$ is considered to be the inefficiency. If this model
+has only been developed for a few distributions for $u_i$, e.g., half-normal \citep{pl81}, 
+truncated normal \citep{batt88}, rayleigh \citep{hajar15}, uniform \citep{nguyen10}, we extend it in the \pkg{sfaR} package to all the
+other distributions.\footnote{Proofs for the derivation of the density function
+of $f(\epsilon)$ is available from the authors upon request.} 
+An overview of the density of $\epsilon_i$ can be found in 
+Table~\ref{table:mlpl81}, in the Appendix.\footnote{A distribution-free 
+estimation of this model has been discussed in \citet{sl84}.}
+
+Heterogeneity and heteroscedasticity can be handled in the \citet{pl81} model.
+However, the determinant variables $\mathbf{z}$ have to be time invariant \citep{kum2000}. In the
+\pkg{sfaR}, we suggest several ways to obtain time invariant determinants (see section \ref{sec:prespackage}).
+Regarding the (in)efficiency scores, they are computed the same way as in the 
+cross-sectional models using the formulas in Table~\ref{table:effcross} in the 
+Appendix.
+
+\subsubsection{Time-varying inefficiency models}
+
+Assuming that inefficiency is persistent over time may be quite restrictive 
+especially for moderate to large time span data. It also implies that DMUs
+never learn over time. The time-varying inefficiency models overcome the 
+previous issues, and can be represented by equation~\ref{eq:3}.
+
+\begin{equation} \label{eq:3}
+y_{it} = \mathbf{x_{it}'}\bm{\beta} + v_{it} - SG(t)u_i \quad \text{with} \quad i = 1, \cdots, N \quad \text{and} \quad t = 1, \cdots, T
+\end{equation}
+
+All the developments for time-varying inefficiency models are based on the 
+functional form assumed for $G(t)$.\footnote{A distribution-free approach has 
+been discussed in \citet{css90, lees93}.} The different possibilities of $G(t)$ in 
+the \pkg{sfaR} are summarized in Table~\ref{table:gt}. \citet{kum90} was the 
+first to suggest an ML estimation of time-varying inefficiency. Later \citet{batco92}
+developed the "time-decay" model along with two other alternatives. Many other
+models were suggested as documented in Table~\ref{table:gt}. 
+
+\begin{table}
+%\setlength{\arrayrulewidth}{.01em}
+\renewcommand{\arraystretch}{1.3}
+\centering
+\begin{tabular}{@{}cc@{}}
+\toprule
+References & $G(t)$ \\[1em]
+\midrule
+\citet{kum90} & $G(t)=\left[1+\exp{\left(\eta_1t + \eta_2t^2\right)}\right]^{-1}$ \\[1em]
+%\hdashline
+\citet{batco92} "time-decay" & $G(t)=\exp{\left[-\eta(t-T)\right]}$ \\[1em]
+%\hdashline
+\citet{batco92} & $G(t)= 1 + \eta_1(t-T) + \eta_2(t-T)^2$ \\[1em]
+%\hdashline
+Modified \citet{lees93} & $G(t)=\exp{\left[-\eta_t(t-T)\right]}$ \\[1em] 
+%\hdashline
+\citet{cue00} & $G(t)=\exp{\left[-\eta_i(t-T)\right]}$ \\[1em] 
+%\hdashline
+\citet{cue02, feng09} & $G(t)=\exp{\left[-\eta_1(t-T)-\eta_2(t-T)^2\right]}$ \\[1em] 
+%\hdashline
+\citet{kw05} & $G(t)=\exp{\left[-\eta(t-t_1)\right]}$ \\[1em]
+%\hdashline 
+\citet{al06} & $G(t)=\exp{\left(\bm{\eta}'\mathbf{z}_{git}\right)}$ \\[1em]
+\bottomrule
+\end{tabular}
+\caption{List of functional forms for $G(t)$}
+\label{table:gt}
+\end{table}
+
+In \pkg{sfaR}, we also presented a modified version of the \citet{lees93} model. 
+For this model, the last period parameter is not identifiable so we set 
+$\eta_T=1$ \citep[p.~304]{par14}. As previously, \pkg{sfaR} includes
+time-varying inefficiency for all the ten distributions initially mentioned.
+In terms of efficiency determinants, the only model that allows for time-varying
+efficiency driver is the one by \citet{al06}. For all the other models, efficiency
+drivers are modelled as in the case of the time-invariant inefficiency models. 
+For the (in)efficiency estimates, see formula in Table~\ref{table:effpanel}.
+
+With the time-invariant inefficiency models, the ones developed in this subsection
+constitute the first generation of panel SF models in the \pkg{sfaR} package.
+
+%\subsection{Second generation of panel SF models}
+
+%\subsection{Third generation of panel SF models}
+
+\section{Latent class stochastic frontiers and variants} \label{sec:modelcm}
+
+\subsection{Latent class stochastic frontier}
+
+The latent class SF model (LCM) handles production heterogeneity
+through a mixture of production functions. The standard finite mixture models have
+been extended to the SF framework by \citet{cau03, orea04}. In the next subsections, 
+we describe the LCM for both pooled cross-section and panel data.
+
+\subsubsection{For cross-sectional data}
+
+In the case of a pooled cross-section data, the equation associated with the LCM can
+be written as
+
+\begin{equation} \label{eq:4}
+y_{it} = \mathbf{x_{it}'}\bm{\beta}_j + v_{it,j} - Su_{it,j} \quad \text{with} \quad i = 1, \cdots, N \quad \text{and} \quad j = 1, \cdots, J
+\end{equation}
+
+In Equation~\ref{eq:4}, the LCM is implied by a $j$ class-specific
+technological parameters. Assuming the half-normal distribution for the 
+inefficiency term, the contribution of observation $i$ in period $t$ to the 
+likelihood conditional on class $j$ is defined as: 
+
+\begin{equation}\label{eq:5}
+P(it|j) = \frac{2}{\sqrt{\sigma_{u|j}^2 + 
+ \sigma_{v|j}^2}}\phi\left(\frac{S\epsilon_{it|j}}{\sqrt{
+ \sigma_{u|j}^2 +\sigma_{v|j}^2}}\right)\Phi\left(\frac{
+ \mu_{it*|j}}{\sigma_{*|j}}\right)
+\end{equation}
+
+where 
+
+$$\mu_{it*|j}=\frac{- S\epsilon_{it|j}\sigma_{u|j}^2}{\sigma_{u|j}^2 +
+\sigma_{v|j}^2}$$
+
+ $$\sigma_*^2 = \frac{\sigma_{u|j}^2 \sigma_{v|j}^2}{\sigma_{u|j}^2 + 
+ \sigma_{v|j}^2}$$
+
+The distribution of observations into classes is based
+on prior probability that can depend on some covariates. This probability can 
+be modelled using a logit distribution as
+
+\begin{equation} \label{eq:6}
+\pi_{itj} = \frac{\exp{\left(\mathbf{q}'_{it}\bm{\lambda}_j\right)}}{
+\sum_{m=1}^J \exp{\left(\mathbf{q}'_{it}\bm{\lambda}_m\right)}
+}
+\end{equation}
+
+such that $\bm{\lambda}_J = 0$. 
+
+The unconditional likelihood of observation $i$ in period $t$ is simply the average
+ over the $J$ classes:
+
+ $$P(it) = \sum_{m=1}^{J}\pi(it,m)P(it|m)$$
+
+ The number of classes to retain can be based on information criterion (AIC, BIC).
+ Moreover, class assignment is based on the largest posterior probability. This
+ probability is obtained using Bayes' rule, as follows for class $j$:
+
+ $$w\left(j|it\right)=\frac{P\left(it|j\right)
+ \pi\left(it,j\right)}{\sum_{m=1}^JP\left(it|m\right)
+ \pi\left(it, m\right)}$$
+ 
+ As in the standard cases, heteroscedasticity can be accommodated during the 
+ estimation. It is worth noting that the \pkg{sfaR} package, currently, only considers
+ the latent class SF model with the half-normal distribution.
+
+\subsubsection{For panel data}
+
+The difference with the pooled LCM is that the probability of belonging to 
+a class is fixed over time. The logit distribution is \ref{eq:6} becomes
+
+\begin{equation} \label{eq:7}
+\pi_{ij} = \frac{\exp{\left(\mathbf{q}'_{i}\bm{\lambda}_j\right)}}{
+\sum_{m=1}^J \exp{\left(\mathbf{q}'_{i}\bm{\lambda}_m\right)}
+}
+\end{equation}
+
+In the \pkg{sfaR} package, the time invariant covariates are obtained by taking
+the average of the variables for each cross-section. As previously, only the 
+half-normal distribution is implemented. The latent class SF models in the 
+case of panel data is centered around the first generation panel models. For
+example, in the case of time-varying inefficiency models, the the contribution 
+of cross section $i$ to the likelihood conditional on class $j$ is defined as: 
+
+\begin{equation}\label{eq:8}
+ P(i|j) = \frac{2\sigma_*}{\sigma_u\sigma_v^T\left(2\pi\right)^{\frac{T}{2}}}\exp{\left[-\frac{1}{2}\left(-\frac{\mu_{i*}^2}{\sigma_*^2} + \frac{\sum_{t=1}^T\epsilon_{it}^2}{\sigma_v^2}\right)\right]}\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)
+\end{equation}
+
+where
+
+$$\mu_{i*} = \frac{-S\sigma_u^2\sum_{t=1}^TG(t)\epsilon_{it}}{\sigma_u^2\sum_{t=1}^TG(t)^2 + \sigma_v^2}$$
+
+and
+
+$$\sigma_*^2=\frac{\sigma_u^2\sigma_v^2}{\sigma_u^2\sum_{t=1}^TG(t)^2 + \sigma_v^2}$$
+
+As previously, the unconditional likelihood of cross-section $i$ is simply the average
+ over the $J$ classes:
+
+$$P(i) = \sum_{m=1}^{J}\pi(i,m)P(i|m)$$
+
+The panel LCM model also handles heteroscedasticity in the error terms.
+
+\subsection{Zero inefficiency stochastic frontier}
+
+The zero inefficiency SF model (ZISF) has been introduced by \citet{kpt13}. The 
+philosophy of the model is that there are two groups of observations, one that is
+efficient and the other is not. The probability of being in one of the group can 
+depend, as in the LCM case, on some covariates. Technically we have
+
+\begin{equation}\label{eq:9}
+y_i = \begin{cases}
+\alpha + \mathbf{x_i^{\prime}}\bm{\beta} + 
+ v_i - Su_i & \text{with probability} \quad p \\
+ \alpha + \mathbf{x_i^{\prime}}\bm{\beta} +
+  v_i & \text{with probability} \quad 1-p
+\end{cases}
+\end{equation}
+
+The prior probability of belonging to the inefficient class can depend on 
+some covariates using four possible specifications: 
+
+\begin{itemize} \itemsep 12pt
+\item logit specification
+
+$$p_i = \frac{\exp{(\mathbf{z}_{i}^{\prime}\bm{\theta})}}{1-
+\exp{(\mathbf{z}_{i}^{\prime}\bm{\theta})}}$$
+
+\item probit specification
+
+$$p_i = \Phi\left(\mathbf{z}_{i}^{\prime}\bm{\theta}\right)$$
+
+\item cauchit specification
+
+$$p_i = 1/\pi\arctan(\mathbf{z}_{i}^{\prime}\bm{\theta})+1/2$$
+
+\item cloglog specification
+
+$$p_i = 1-\exp\left(-\exp(\mathbf{z}_{i}^{\prime} \bm{\theta})\right)$$
+
+\end{itemize}
+
+In the case of the truncated normal distribution, the convolution of $u_i$ and 
+$v_i$ is:
+
+ $$f(\epsilon_i)=\frac{p_i}{\sqrt{\sigma_u^2 + 
+ \sigma_v^2}}\phi\left(\frac{S\epsilon_i + \mu}{\sqrt{
+ \sigma_u^2 + \sigma_v^2}}\right)\Phi\left(\frac{
+ \mu_{i\ast}}{\sigma_\ast}\right)\Big/\Phi\left(
+ \frac{\mu}{\sigma_u}\right) + \frac{1-p_i}{\sigma_v}
+ \Phi\left(\frac{S\epsilon}{\sigma_v}\right)$$
+
+ where
+
+ $$\mu_{i*}=\frac{\mu\sigma_v^2 - 
+ S\epsilon_i\sigma_u^2}{\sigma_u^2 + \sigma_v^2}$$
+
+ and
+
+ $$\sigma_*^2 = \frac{\sigma_u^2 
+ \sigma_v^2}{\sigma_u^2 + \sigma_v^2}$$
+ 
+ The ZISF is also implemented for the other nine distributions in the package.
+ As in the case of LCM, class assignment is based on the largest posterior 
+ probability. The model presented so far assumed common noise variable $v$ for 
+ the two classes of observation. \pkg{sfaR} allows to estimate the ZISF model
+ with different noise term depending on the class.\footnote{For now the
+ \pkg{sfaR} package estimates the ZISF for cross-section or pooled data.}
+
+\subsection{Contaminated noise stochastic frontier}
+
+The contaminated noise SF (CNSF), is another variant for the LCM first discussed 
+by \citet{wheat19} to handle outliers. Here the observations are split into 
+two groups for which the idiosyncratic error is different. Practically we have
+
+\begin{equation}\label{eq:10}
+y_i = \begin{cases}
+\alpha + \mathbf{x_i^{\prime}}\bm{\beta} + 
+ v_{1i} - Su_i & \text{with probability} \quad p \\
+ \alpha + \mathbf{x_i^{\prime}}\bm{\beta} + 
+v_{2i} - Su_i & \text{with probability} \quad 1-p
+\end{cases}
+\end{equation}
+
+All the other developments are similar to the ZISF case. The prior probability
+of belonging to a class can be specified using either the logit, probit, cauchit
+and cloglog distributions. The CNSF is also available for the ten distributions.
+
+A slight extension of the CNSF model compared to \citet{wheat19}, is that the 
+\pkg{sfaR} allows for the possibility to also have different inefficiency term 
+between the two groups of observations.
+
+\subsection{Multi-modal inefficiency stochastic frontier}
+
+The multi-modal inefficiency SF (MISF) is an extension in the \pkg{sfaR} package, 
+which splits the observations into two groups, but with different inefficiency
+error term. Basically we have:
+
+\begin{equation}\label{eq:11}
+y_i = \begin{cases}
+\alpha + \mathbf{x_i^{\prime}}\bm{\beta} + 
+ v_{i} - Su_{1i} & \text{with probability} \quad p \\
+ \alpha + \mathbf{x_i^{\prime}}\bm{\beta} + 
+v_{i} - Su_{2i} & \text{with probability} \quad 1-p
+\end{cases}
+\end{equation}
+
+All the other derivations are similar to the ZISF and CNSF previously introduced.
+
+\section{Other models} \label{sec:other}
+
+\subsection{Metafrontiers}
+
+\subsection{Sample selection stochastic frontier} \label{subsec:ss}
+
+
+\section[Introduction to the sfaR package]{Introduction to the \pkg{sfaR} package} \label{sec:prespackage}
+
+\subsection{Interface to main functions}
+
+The \pkg{sfaR} package embeds ten main functions for the different groups of SFA
+models. The name of each function is chosen so that its purpose is very 
+explicit. For cross-sectional or pooled data we have the following functions:
+%
+\begin{itemize} \itemsep 10pt
+\item \code{sfacross} for the standard SFA models 
+\item \code{sfalcmcross} for latent class SF models
+\item \code{sfagzisfcross} for the generalized zero-inefficiency SF models
+\item \code{sfacnsfcross} for the contaminated noise SF models
+\item \code{sfamisfcross} for the multi-modal inefficiency SF models
+\item \code{sfazisfcross} for the zero-inefficiency SF models
+\item \code{sfametacross} for the metafrontier models
+\item \code{sfaselectioncross} for the sample selection SF model.
+\end{itemize}
+%
+In the case of the panel data, two/three main functions are implemented in \pkg{sfaR} 
+%
+\begin{itemize} \itemsep 10pt
+\item \code{sfapanel1} for the first generation SF models using panel data
+\item \code{sfalcmpanel} for the latent class SF models using panel data.
+\end{itemize}
+%
+All these functions are formula based for the estimation of the parameters of the 
+production technology. Moreover, linearity is assumed for all the parameters.
+In most cases \code{formula} is used to define the main part of the technology. 
+\code{sfaselectioncross} requires \code{selectionF} for the selection
+equation, and \code{frontierF} for the frontier equation. Heteroscedasticity in 
+the variances of the one-sided and the two-sided error terms $u$ and $v$ are 
+also defined using one-sided formulas (only right arguments e.g. \code{~x}) 
+with \code{uhet} and \code{vhet}, respectively. Similarly, when some 
+distributions are chosen, heterogeneity in the inefficiency term can be 
+introduced using the one-sided formula based option \code{muhet}. By default, 
+it is assumed that a log-linear function is to be estimated (e.g. Cobb-Douglas, 
+or Translog). If this is not the case, the user can set the argument 
+\code{logDepVar} to \code{FALSE} (e.g. quadratic production function).
+
+For consistency with the common \code{lm} functions, arguments \code{data} (which 
+must be a \code{data.frame}), \code{subset}, and \code{weights} are also 
+present. Several additional arguments, some common between the functions and 
+other specific, allow many possibilities in the model to estimate and how the 
+estimation can be conducted. For instance \code{udist} allows the choice of 
+the distribution for the one-sided error term $u$. For functions like 
+\code{sfacross}, \code{sfacnsfcross}, \code{sfamisfcross}, \code{sfazisfcross}, 
+and \code{sfametacross}, the ten aforementioned distributions are possible:
+%
+\begin{itemize} \itemsep 10pt
+\item \code{"hnormal"} for the half-normal distribution
+\item \code{"exponential"} for the exponential distribution
+\item \code{"tnormal"} for the truncated normal distribution
+\item \code{"rayleigh"} for the rayleigh distribution
+\item \code{"uniform"} for the uniform distribution
+\item \code{"gamma"} for the gamma distribution
+\item \code{"lognormal"} for the lognormal distribution
+\item \code{"weibull"} for the weibull distribution
+\item \code{"genexponential"} for the generalized exponential distribution
+\item \code{"tslaplace"} for the truncated skewed-laplace distribution.
+\end{itemize}
+%
+For \code{sfacross}, the scaling property discussed by \cite{wang02} is obtained
+by setting the \code{scaling} to \code{TRUE}. In the case of the gamma, 
+log-normal, and weibull distributions, the log-likelihood is estimated using 
+simulation. By default, the quasi-random numbers are draws from 
+Halton sequences (\code{simType = "halton"}). Seven other possibilities can be 
+used:
+%
+\begin{itemize} \itemsep 10pt
+\item \code{"ghalton"} for generalized Halton sequences
+\item \code{"sobol"} for Sobol sequences
+\item \code{"rsobol"} for randomized Sobol sequences \footnote{The generalized
+Halton and the Sobol sequences are derived from the \pkg{qrng} package \citep{qrng}.}
+\item \code{"richtmyer"} for Richtmyer sequences
+\item \code{"rrichtmyer"} for randomized Richtmyer sequences \footnote{Richtmyer sequences
+are obtained from the \pkg{mnorm} package \citep{mnorm}.}
+\item \code{"uniform"} for uniform draws 
+\item \code{"mlhs"} for the Modified Latin Hypercube sequences.
+\end{itemize}
+%
+For each of the random number generator, the number of draws can be chosen with
+the argument \code{Nsim} (\code{100} by default).\footnote{For more 
+possibilities on the draws see corresponding function help in the package
+documentation.}
+
+Regarding the \code{sfalcmcross}, \code{sfagzisfcross}, and the 
+\code{sfaselectioncross}, due to their complexity, only the half-normal 
+distribution is currently possible. For the case of \code{sfalcmcross}, and 
+\code{sfagzisfcross}, up to five classes can be estimated (\code{lcmClasses}, 
+and \code{gzisfClasses} arguments). For all the other variants of the latent
+classes SF (CNSF, MISF, and ZISF), as presented in the previous section, two 
+classes of observations are estimated. While for the \code{sfalcmcross} and 
+\code{sfagzisfcross} functions, the probability of belonging to a class is 
+parameterized as a logit model, for \code{sfacnsfcross}, \code{sfamisfcross}, and
+\code{sfazisfcross}, four models are possible through the \code{linkF} argument:
+%
+\begin{itemize} \itemsep 10pt
+\item "logit" for the logit model (default)
+\item "probit" for the probit model
+\item "cauchit" for the cauchit model
+\item "cloglog" for the cloglog model
+\end{itemize}
+%
+In the case of the \code{sfacnsfcross} function, the \code{sigmauType} argument
+allows to have \code{"common"} or \code{"different"} parameters for the 
+inefficiency distribution among the two classes. For the \code{sfazisfcross}, 
+the argument \code{sigmavType} allows the same thing but for the two-sided error
+term $v$.
+
+\code{sfaselectioncross}
+
+\code{sfametacross}
+
+As mentioned in the Introduction section, an advantage of the \pkg{sfaR} is to
+offer multiple possibilities for the optimization algorithm used to solve the
+M(S)L. Currently, eleven algorithms are included with the argument \code{method}
+%
+\begin{itemize} \itemsep 10pt
+\item \code{"bfgs"} for Broyden-Fletcher-Goldfarb-Shanno (default algorithm)
+\item \code{"bhhh"} for Berndt-Hall-Hall-Hausman
+\item \code{"nr"} for Newton-Raphson
+\item \code{"nm"} for Nelder-Mead
+\item \code{"cg"} for Conjugate Gradient
+\item \code{"sann"} for Simulated Annealing\footnote{"bfgs", "bhhh", "nr", "nm", 
+"cg", and "sann" algorithms are derived from the \pkg{maxLik} package \citep{maxlik}.} 
+\item \code{"ucminf"} for a quasi-Newton type optimization with BFGS updating 
+of the inverse Hessian and soft line search with a trust region type monitoring 
+of the input to the line search algorithm \footnote{"ucminf" is implemented in 
+the \pkg{ucminf} package \citep{ucminf}.}
+\item \code{"mla"} for general-purpose optimization based on Marquardt-Levenberg 
+algorithm \footnote{"mla" is implemented in 
+the \pkg{marqLevAlg} package \citep{mla}.}
+\item \code{"sr1"} for Symmetric Rank 1 
+\item \code{"sparse"} for trust regions and sparse Hessian \footnote{"sr1" and 
+"sparse" are implemented in the \pkg{trustOptim} package \citep{trust}.}
+\item \code{"nlminb"} for optimization using PORT routines. \footnote{"nlminb" 
+is implemented in the \pkg{stats} package \citep{stats}.}
+\end{itemize}
+%
+
+As non-linear optimization is well known to converge at local optimum, the
+\pkg{sfaR} allows the user to set the starting values\footnote{In most cases the 
+starting values are obtained from the method of moments or from a simpler M(S)L 
+estimation}, and to allow for a random start (\code{randStart} argument). The
+random starting values are obtained by taking the initial starting values and 
+adding random numbers drawn from a normal distribution with zero mean and 
+standard value of $0.01$.
+
+The \code{sfacross} encloses all the previous distributions and provide many 
+additional options for the M(S)L estimation. It is a formula based function.
+The help file of the function is a good starting point to have an overview of 
+all the possibilities. For the illustration, we first consider the utility data 
+contained in the package, and replicate Table 4.1 in . 
+First load the package using 
+
+\subsection{Inherited methods}
+
+Two main methods are directly associated with SF estimation functions. The first
+method is \code{efficiencies} to compute several efficiency variables. In all 
+the cases the inefficiency scores are derived following \cite{jon82}. Using
+the latter, the efficiency scores are obtained using 
+$\exp{E\left[\left(-u|\epsilon\right)\right]}$. Another conditional efficiency
+scores variable is also derived following \cite{batt95}. 
+reciprocal efficiencies.
+
+in some cases and depending on the distribution, the mode and the confidence
+intervals associated with the (in)efficiency scores are also returned.
+
+In the case of the LCM and its variants, additional variables are returned: 
+the posterior probability of beloging to any class, which is then used to affect 
+every observation to the class with the highest probability.
+
+\section{Applications} \label{sec:illus}
+
+\subsection[Replication of Kumbhakar et al.2014, p. 119]{Replication of~\citet[p.~119]{kum14}}
+
+For the first illustration of the capacities of the \pkg{sfaR}, we replicate the 
+the results in Table 4.1 in \cite[p.~119]{kum14}. The data used is on fossil fuel
+fired steam electric power generation plants in the United States. The dataset
+is part of the package under the name \code{utility}, and is well described under
+the help file associated with it.\footnote{We thank \cite{kum14} for allowing
+us to use the data in the package.} The estimated model is a cost function 
+considering one output and three input prices (labor and maintenance, fuel, 
+and capital). A translog cost function is estimated with a normalization using
+fuel input price to ensure the price homogeneity property of cost functions. For
+the SF models, three distributions are considered: half-normal, exponential, and
+truncated normal. For the latter distribution, the scaling property is also 
+considered. Hence, all the models are estimated by also estimating the effect of
+regulation (dummy variable \code{regu}) on the inefficiency. The code to estimate
+the four models, in addition to the OLS one are presented below:
+
+<<table4.1>>=
+ols <- lm(log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
+ log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+ I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)), 
+ data = utility)
+
+hlf <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
+ log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+ I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+ udist = 'hnormal', uhet = ~ regu, data = utility, S = -1, method = 'bfgs')
+
+trnorm <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
+ log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+ I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+ udist = 'tnormal', muhet = ~ regu, data = utility, S = -1, method = 'bfgs')
+
+tscal <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
+ log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+ I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+ udist = 'tnormal', muhet = ~ regu, uhet = ~ regu, data = utility, 
+ S = -1, method = 'bfgs', scaling = TRUE)
+
+expo <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
+ log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+ I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+ udist = 'exponential', uhet = ~ regu, data = utility, S = -1, method = 'bfgs')
+@
+
+Before presenting the results of the previously estimated model, let's have a 
+glance at the OLS residuals. Basically here, since we are estimating a cost 
+function we expect the OLS residuals to have the "right" positive skeweness. 
+A plot of the OLS residuals, and for a symmetric normal distribution can be 
+found on Figure~\ref{fig:1}. In this particular case, we are "lucky" that the 
+OLS residuals exhibit the "right" positive skewness.
+
+\begin{figure}[t!]
+\centering
+<<densityplots, echo=FALSE, fig=TRUE, height=5.2, width=7>>=
+library(ggplot2)
+theme_gg <- function(base_size = 14) {
+  theme_bw(base_size = base_size) %+replace%
+    theme(
+      # L'ensemble de la figure
+      plot.title = element_text(size = rel(1), face = "bold", margin = margin(0,0,5,0), hjust = 0),
+      # Zone où se situe le graphique
+      panel.grid.minor = element_blank(),
+      panel.border = element_blank(),
+      # Les axes
+      axis.title = element_text(size = rel(0.85), face = "bold"),
+      axis.text = element_text(size = rel(0.70), face = "bold"),
+      axis.line = element_line(color = "black", arrow = arrow(length = unit(0.3, "lines"), type = "closed")),
+      # La légende
+      legend.title = element_text(size = rel(0.85), face = "bold"),
+      legend.text = element_text(size = rel(0.70), face = "bold"),
+      legend.key = element_rect(fill = "transparent", colour = NA),
+      legend.key.size = unit(1.5, "lines"),
+      legend.background = element_rect(fill = "transparent", colour = NA),
+      # Les étiquettes dans le cas d'un facetting
+      strip.background = element_rect(fill = "#17252D", color = "#17252D"),
+      strip.text = element_text(size = rel(0.85), face = "bold", color = "white", margin = margin(5,0,5,0))
+    )
+}
+ggplot(data.frame(residuals = residuals(ols)), aes(residuals)) + 
+  stat_function(fun = dnorm, n = nrow(utility), 
+                args = list(mean = 0, sd = sigma(ols)), 
+                linewidth = 1.5, linetype = "longdash", colour = "#008b46") + 
+  geom_density(linewidth = 1.5, linetype = "solid", colour = "#990000") + 
+  geom_vline(xintercept = 0, linetype="dotted", 
+                color = "blue", linewidth=1.5) + xlab("OLS Residuals") + theme_gg()
+@
+\caption{\label{fig:1} OLS residuals plot vs a symmetric normal distribution.}
+\end{figure}
+
+The estimation of the four different SF models (half-normal, truncated normal, 
+truncated normal with scaling property, and exponential) is conducted using the 
+default \textit{bfgs} optimization algorithm. The \code{summary} method returns
+and prints in light of the \code{lm} function, the summary of estimation. 
+Additionally, more information to assess the quality of the estimation is 
+provided, e.g. the gradient norm, or the condition number associated with the 
+hessian matrix. In the case of the object obtained using the half normal 
+distibution the summary is
+
+<<summary>>=
+summary(hlf)
+@
+
+The \pkg{sfaR} includes an \code{extract} option compatible with the 
+\pkg{texreg} package \citep{texreg13}. The following code generates Table~\ref{table:3}.
+
+<<table4.1, echo=TRUE, results=hide>>=
+library(texreg)
+texreg(list(ols, hlf, trnorm, tscal, expo), stars = c(0.01, 0.05, 0.1), digits = 3, 
+  custom.model.names = c("ols", "hnormal", "tnormal", "trunc. scal.", "expo"), 
+  table = FALSE)
+@
+
+\begin{table}
+\centering
+\begin{adjustbox}{width=1\textwidth}
+\small
+%\begin{longtable}{l c c c c c}
+<<table4.1, echo=FALSE, results=tex>>=
+texreg(list(ols, hlf, trnorm, tscal, expo), stars = c(0.01, 0.05, 0.1), digits = 3, 
+  custom.model.names = c("ols", "hnormal", "tnormal", "trunc. scal.", "expo"), 
+  table = FALSE)
+@
+%\end{longtable}
+\end{adjustbox}
+\caption{Replication Table 4.1 in \citet[p.~119]{kum14}}
+\label{table:3}
+\end{table}
+
+A summary of the (in)efficiency scores and the marginal impacts can be found in 
+Table~\ref{table:4}.
+
+<<effimarg, echo=FALSE, results=tex>>=
+library(kableExtra)
+library(xtable)
+options(knitr.table.format = "latex")
+# library(fBasics)
+# basicStats(cbind(hlfeff, hlfmarg))["mean", ]
+hlfeff <- efficiencies(hlf)
+hlfmarg <- marginal(hlf)
+treff <- efficiencies(trnorm)
+trmarg <- marginal(trnorm)
+trseff <- efficiencies(tscal)
+trsmarg <- marginal(tscal)
+expoeff <- efficiencies(expo)
+expomarg <- marginal(expo)
+dkum14 <- as.data.frame(rbind(c(apply(hlfeff, 2, mean), apply(hlfmarg, 2, mean)), 
+                c(apply(treff, 2, mean), apply(trmarg, 2, mean)), 
+                c(apply(trseff, 2, mean), apply(trsmarg, 2, mean)), 
+                c(apply(expoeff, 2, mean), apply(expomarg, 2, mean))))
+dkum14 <- cbind(Distributions = c("Half-Normal", "Truncated Normal", "Scaling", "exponential"), 
+                dkum14)
+dkum14 <- dkum14[, c("Distributions", "u", "teJLMS", "teBC", "teBC_reciprocal", "Eu_regu", "Vu_regu")]
+names(dkum14) <- c("Distributions", "$E\\left[u|\\epsilon\\right]$",
+                   "$\\exp{\\left(-E\\left[u|\\epsilon\\right]\\right)}$",
+                   "$E\\left[\\exp{\\left(-u\\right)}|\\epsilon\\right]$",
+                   "$E\\left[\\exp{\\left(u\\right)}|\\epsilon\\right]$", 
+                   "$\\frac{\\partial E[u]}{\\partial regu}$", 
+                   "$\\frac{\\partial V[u]}{\\partial regu}$")
+xtable(dkum14, caption = "Mean (in)efficiency scores and marginal impacts", 
+       label = "table:4", digits = 3) %>% 
+  xtable2kable(booktabs = T, sanitize.text.function = function(x){x}, 
+               include.rownames = getOption("xtable.include.colnames", FALSE), 
+               scalebox = getOption("xtable.scalebox", 0.8)) 
+@
+
+For comparison purposes, we extend the analysis to new distributions, as the 
+\pkg{sfaR} allows us to test different distribution.
+
+<<otherdist>>=
+ray <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
+ log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+ I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+ udist = 'rayleigh', uhet = ~ regu, data = utility, S = -1, method = 'bfgs')
+ge <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
+ log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+ I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+ udist = 'genexponential', uhet = ~ regu, data = utility, S = -1, method = 'bfgs')
+ga <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
+ log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+ I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+ udist = 'gamma', uhet = ~ regu, data = utility, S = -1, method = 'bfgs', Nsim = 300)
+we <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
+ log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+ I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+ udist = 'weibull', uhet = ~ regu, data = utility, S = -1, method = 'bfgs', Nsim = 300)
+lg <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
+ log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+ I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+ udist = 'lognormal', uhet = ~ regu, data = utility, S = -1, method = 'bfgs', Nsim = 300)
+ray <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
+ log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+ I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+ udist = 'tslaplace', uhet = ~ regu, data = utility, S = -1, method = 'bfgs')
+ray <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
+ log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+ I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+ udist = 'uniform', uhet = ~ regu, data = utility, S = -1, method = 'bfgs')
+@
+
+put this table summary in appendix
+
+
+using sfaR to compute productivity (us states data)
+
+
+using sfaR to compute environmental efficiency
+
+lcm as random parameters...
+
+run for gamma in limdep to see!!!
+maybe rayleigh also
+
+if clear, exercice with fuglie data
+restropo and tobon: maybe just give the link and they download it
+
+%% -- Bibliography -------------------------------------------------------------
+%% - References need to be provided in a .bib BibTeX database.
+%% - All references should be made with \cite, \citet, \citep, \citealp etc.
+%%   (and never hard-coded). See the FAQ for details.
+%% - JSS-specific markup (\proglang, \pkg, \code) should be used in the .bib.
+%% - Titles in the .bib should be in title case.
+%% - DOIs should be included where available.
+
+\bibliography{sfaR-bib}
+
+
+\newpage
+
+\begin{appendix}
+
+\section{More on $u$ distributions}\label{app:moredens}
+
+\setcounter{table}{0}
+\renewcommand{\thetable}{\Alph{section}\arabic{table}}
+
+%\begin{landscape}
+\begin{table}[h]
+%\setlength{\arrayrulewidth}{.01em}
+\renewcommand{\arraystretch}{1.3}
+\centering
+\begin{adjustbox}{max width=1\textwidth}
+\begin{tabular}{@{}cccc@{}}
+\toprule
+Distributions & $E\left[u\right]$ & $E\left[\exp{\left(-u\right)}\right]$ & $V\left[u\right]$ \\
+\midrule
+Half-Normal & $\sigma_u\sqrt{\frac{2}{\pi}}$ & $2\left[1-\Phi\left(\sigma_u\right)\right]\exp{\left(\frac{\sigma_u^2}{2}\right)}$ & 
+$\frac{\pi-2}{\pi}\sigma_u^2$ \\[1em]
+%\hdashline
+Truncated-Normal & $\mu + \sigma_u\frac{\phi\left(\frac{\mu}{\sigma_u}\right)}{\Phi\left(\frac{\mu}{\sigma_u}\right)}$ & 
+$\exp{\left(-\mu + \frac{1}{2}\sigma_u^2\right)}\frac{\Phi\left(\frac{\mu}{\sigma_u} - \sigma_u\right)}{\Phi\left(\frac{\mu}{\sigma_u}\right)}$ & 
+$\sigma_u^2\left[1 - \frac{\mu}{\sigma_u} \frac{\phi\left(\frac{\mu}{\sigma_u}\right)}{\Phi\left(\frac{\mu}{\sigma_u}\right)} - \left(\frac{\phi\left(\frac{\mu}{\sigma_u}\right)}{\Phi\left(\frac{\mu}{\sigma_u}\right)}\right)^2\right]$\\[1em]
+%\hdashline
+Exponential & $\sigma_u$ & $\frac{1}{1+\sigma_u}$ & $\sigma_u^2$\\[1em]
+%\hdashline
+Rayleigh & $\sigma_u\sqrt{\frac{\pi}{2}}$ & $1 - \sigma_u\sqrt{2\pi}\left[1-\Phi\left(\sigma_u\right)\right]\exp{\left(\frac{\sigma_u^2}{2}\right)}$ &
+$\frac{4-\pi}{2}\sigma_u^2$\\[1em]
+%\hdashline
+Gamma & $P\sigma_u$ & $\left(1+\sigma_u\right)^{-P}$ & $P\sigma_u^2$\\[1em]
+%\hdashline
+Log-Normal & $\exp{\left(\mu +\sigma_u^2/2\right)}$ & $\int_0^\infty \frac{\exp{\left(-u\right)}}{u\sigma_u}\phi\left(\frac{\ln{u}-\mu}{\sigma_u}\right)du$ & 
+$\left[\exp{\left(\sigma_u^2\right)}-1\right]\exp{\left(2\mu +\sigma_u^2\right)}$\\[1em]
+%\hdashline
+Weibull & $\sigma_u\Gamma\left(1+1/k\right)$ & 
+$\int_0^\infty\exp{\left(-u\right)}\frac{k}{\sigma_u}\left(\frac{u}{\sigma_u}\right)^{k-1}\exp{\left(-\left(u/\sigma_u\right)^{k}\right)}du$ & 
+$\sigma_u^2\left[\Gamma\left(1+2/k\right)-\left(\Gamma\left(1+1/k\right)\right)^2\right]$\\[1em]
+%\hdashline
+Generalized Exponential & $\frac{3}{2}\sigma_u$ & $\frac{2}{\left(\sigma_u+1\right)\left(\sigma_u+2\right)}$ & $\frac{5}{4}\sigma_u^2$\\[1em]
+%\hdashline
+Truncated Skewed-Laplace & $\sigma_u\frac{1+4\lambda+2\lambda^2}{\left(1+\lambda\right)\left(1+2\lambda\right)}$ & 
+$\frac{1+\lambda}{\left(2\lambda+1\right)}\left[\frac{2}{1+\sigma_u}-\frac{1}{1+\lambda + \sigma_u}\right]$ & 
+$\sigma_u^2\frac{1+8\lambda+16\lambda^2+12\lambda^3+4\lambda^4}{\left(1+\lambda\right)^2\left(1+2\lambda\right)^2}$\\[1em]
+%\hdashline
+Uniform & $\frac{\theta}{2}$ & $\frac{1-\exp{\left(-\theta\right)}}{\theta}$ & $\exp{\left(W_u\right)}=\frac{\theta^2}{12}$\\[1em]
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\caption{List of distributions for $u$}
+\label{table:momentdesn}
+\end{table}
+%\end{landscape}
+
+\newpage
+
+\section{Cross-sectional model tables} \label{app:sfcross}
+
+\setcounter{table}{0}
+
+\subsection{Densities of $f(\epsilon)$ for cross-sectional models}
+
+%\newgeometry{left=2cm, right=2cm}
+%\newgeometry{hmargin=2cm,vmargin=2cm}
+%\begin{landscape}
+%\pagestyle{lscape}
+\begin{table}[h]
+ \renewcommand{\arraystretch}{1.3}
+% \setlength{\arrayrulewidth}{.01em}
+ \centering
+\begin{adjustbox}{max width=1\textwidth}
+ \begin{tabular}{@{}ccc@{}}
+\toprule
+Distributions & $f(\epsilon)$ & Notes \\
+\midrule
+Half-Normal & $\frac{2\phi{\left(\frac{\epsilon}{\sqrt{\sigma_v^2 + \sigma_u^2}}
+\right)}}{\sqrt{\sigma_u^2 + \sigma_v^2}}\Phi\left(\frac{\mu_*}{\sigma_*}
+\right)$ & $\mu_{*}= \frac{-\epsilon S\sigma_u^2}{\sigma_u^2 + \sigma_v^2}$ and 
+$\sigma_*^2=\frac{\sigma_u^2\sigma_v^2}{\sigma_u^2 + \sigma_v^2}$\\
+%\hdashline 
+Truncated-Normal & $\frac{\phi{\left(\frac{S\epsilon + \mu}{\sqrt{
+\sigma_v^2 + \sigma_u^2}}\right)}}{\sqrt{\sigma_u^2 + \sigma_v^2}\Phi
+\left(\frac{\mu}{\sigma_u}\right)}\Phi\left(\frac{\mu_*}{\sigma_*}\right)$ & 
+$\mu_*= \frac{\mu\sigma_v^2 - \epsilon S\sigma_u^2}{\sigma_u^2 + \sigma_v^2}$ 
+and $\sigma_*^2=\frac{\sigma_u^2\sigma_v^2}{\sigma_u^2 + \sigma_v^2}$ \\
+%\hdashline 
+Exponential & $\frac{1}{\sigma_u}\exp{\left(\frac{\sigma_v^2}{2\sigma_u^2}+
+\frac{S\epsilon}{\sigma_u}\right)}\Phi\left(-\frac{\sigma_v}{\sigma_u} - 
+\frac{S\epsilon}{\sigma_v}\right)$ & -\\
+%\hdashline 
+Rayleigh & $\frac{\exp{\left(\frac{\mu_*^2}{2\sigma_*^2} - \frac{\epsilon^2}{
+2\sigma_v^2} \right)}}{\sigma_u^2\sigma_v}\sigma_* \left[\mu_*\Phi\left(
+\frac{\mu_*}{\sigma_*}\right) + \sigma_*\phi\left(\frac{\mu_*}{\sigma_*}
+\right)\right]$ & $\mu_{*}= \frac{-\epsilon S\sigma_u^2}{\sigma_u^2 + \sigma_v^2}$ 
+and $\sigma_*^2=\frac{\sigma_u^2\sigma_v^2}{\sigma_u^2 + \sigma_v^2}$\\
+%\hdashline
+\multirow{2}{*}{Gamma} & \multirow{2}{*}{$\frac{\exp{\left(\frac{\sigma_v^2}{2\sigma_u^2} + \frac{S\epsilon}{
+\sigma_u}\right)}}{\sigma_u^P\Gamma\left(P\right)}\Phi\left(-\frac{\sigma_v}{
+\sigma_u} - \frac{S\epsilon}{\sigma_v}\right)\hat{h}(P-1, \epsilon)$} & 
+$\hat{h}(P-1, \epsilon)= \frac{1}{R}\sum_{r = 1}^R \left[\mu + 
+\sigma_v\Phi^{-1}\left(F_{r}+ \left(1-F_{r}\right)\Phi\left(-\frac{\mu}{
+\sigma_v}\right)\right)\right]^{P-1}$\\
+& &  $\mu = -\frac{\sigma_v^2}{\sigma_u} - S\epsilon_i$ and $F_{r}$ is pseudo/quasi random draw \\
+%\hdashline 
+Log-Normal & $\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(
+\frac{\epsilon+Su_r}{\sigma_v}\right)$ & 
+$u_r=\exp{\left(\mu +\sigma_u\Phi^{-1}\left(h_r\right)\right)}$ and $h_r$ is pseudo/quasi random draw\\
+%\hdashline 
+Weibull & $\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{
+\epsilon+Su_r}{\sigma_v}\right)$ & $u_r = \sigma_u\left(-\ln{\left(1-h_r\right)}\right)^{1/k}$ and $h_r$ is pseudo/quasi random draw\\
+%\hdashline 
+\multirow{2}{*}{Generalized Exponential} & \multirow{2}{*}{$\frac{2}{\sigma_u}\exp{\left(A\right)}\Phi 
+\left(a\right)-\frac{2}{\sigma_u}\exp{\left(B\right)}\Phi\left(b\right)$} & $A=\frac{S\epsilon}{\sigma_u}+\frac{\sigma_v^2}{2\sigma_u^2}$ and 
+$B = \frac{2S\epsilon}{\sigma_u}+\frac{2\sigma_v^2}{\sigma_u^2}$\\
+& & $a = -\frac{S\epsilon}{\sigma_v}-\frac{\sigma_v}{\sigma_u}$ and $b = -\frac{S\epsilon}{\sigma_v}- \frac{2\sigma_v}{\sigma_u}$ \\
+%\hdashline 
+\multirow{2}{*}{Truncated Skewed-Laplace} & \multirow{2}{*}{$\frac{1+\lambda}{\sigma_u\left(2\lambda+1\right)}
+\left[2\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)\right]$} & 
+$A = \left(\frac{\sigma_v^2}{2\sigma_u^2}+\frac{S\epsilon}{\sigma_u}\right)$ and 
+$B = \left(\frac{\left(1+\lambda\right)^2\sigma_v^2}{2\sigma_u^2}+\frac{S\epsilon\left(1+\lambda\right)}{\sigma_u}\right)$\\
+& & $a = -\frac{\sigma_v}{\sigma_u}-\frac{S\epsilon}{\sigma_v}$ and $b = -\frac{\left(1+\lambda\right)\sigma_v}{\sigma_u}-\frac{S\epsilon}{\sigma_v}$ \\
+%\hdashline 
+Uniform &  $\frac{1}{\theta}\left[\Phi\left(\frac{\theta + S\epsilon}{\sigma_v}
+\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}\right)\right]$ & -\\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\caption{Densities of $f(\epsilon)$ for cross-section SF models}
+\label{table:mlsfcross}
+\end{table}
+%\end{landscape}
+
+%\restoregeometry
+
+\newpage
+
+\subsection{(In)efficiency estimates for cross-sectional models}
+
+%\newgeometry{left=2cm, right=2cm}
+%\begin{landscape}
+%\pagestyle{lscape}
+\begin{table}[h]
+\begin{threeparttable}
+\renewcommand{\arraystretch}{1.3}
+%\setlength{\arrayrulewidth}{.01em}
+\centering
+\begin{adjustbox}{max width=1\textwidth}
+%\small
+\begin{tabular}{@{}cccc@{}}
+\toprule
+Densities & $E\left[u_i|\epsilon_i\right]$ & $E\left[\exp{\left(-u_i\right)|\epsilon_i}\right]$ & $E\left[\exp{\left(u_i\right)|\epsilon_i}\right]$\\
+\midrule
+Half-Normal & $\mu_{i*} + \sigma_*\frac{\phi\left(\frac{\mu_{i*}}{\sigma_*}\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)}$ & 
+$\exp{\left(-\mu_{i*} + \frac{1}{2}\sigma_*^2\right)} \frac{\Phi\left(\frac{\mu_{i*}}{\sigma_*}-\sigma_*\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)}$ & 
+$\exp{\left(\mu_{i*} + \frac{1}{2}\sigma_*^2\right)} \frac{\Phi\left(\frac{\mu_{i*}}{\sigma_*}+\sigma_*\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)}$\\
+%\hdashline
+Truncated-Normal & $\mu_{i*} + \sigma_*\frac{\phi\left(\frac{\mu_{i*}}{\sigma_*}\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)}$ & 
+$\exp{\left(-\mu_{i*} + \frac{1}{2}\sigma_*^2\right)} \frac{\Phi\left(\frac{\mu_{i*}}{\sigma_*}-\sigma_*\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)}$ & 
+$\exp{\left(\mu_{i*} + \frac{1}{2}\sigma_*^2\right)} \frac{\Phi\left(\frac{\mu_{i*}}{\sigma_*}+\sigma_*\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)}$ \\
+%\hdashline
+Exponential & $\mu_{i*} + \sigma_v\frac{\phi\left(\frac{\mu_{i*}}{\sigma_v}\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_v}\right)}$ & 
+$\exp{\left(-\mu_{i*} + \frac{1}{2}\sigma_v^2\right)} \frac{\Phi\left(\frac{\mu_{i*}}{\sigma_v}-\sigma_v\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_v}\right)}$ & 
+$\exp{\left(\mu_* + \frac{1}{2}\sigma_v^2\right)} \frac{\Phi\left(\frac{\mu_*}{\sigma_v}+\sigma_v\right)}{\Phi\left(\frac{\mu_*}{\sigma_v}\right)}$\\
+%\hdashline
+Rayleigh & $\frac{\left[\sigma_*\mu_{i*}\phi\left(\frac{\mu_{i*}}{\sigma_*}\right) + \left(\mu_{i*}^2+\sigma_*^2\right)\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)\right]}{\left[\mu_{i*}\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right) + \sigma_*\phi\left(\frac{\mu_{i*}}{\sigma_*}\right)\right]}$ &
+$\exp{\left(-\mu_{i*} +\frac{\sigma_*^2}{2}\right)}\frac{\left[\left(\mu_{i*}-\sigma_*^2\right)\Phi\left(\frac{\mu_{i*}}{\sigma_*} - \sigma_*\right) + \sigma_*\phi\left(\frac{\mu_{i*}}{\sigma_*} - \sigma_*\right)\right]}{\left[\mu_{i*}\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right) + \sigma_*\phi\left(\frac{\mu_{i*}}{\sigma_*}\right)\right]}$ &
+$\exp{\left(\mu_* +\frac{\sigma_*^2}{2}\right)}\frac{\left[\left(\mu_*+\sigma_*^2\right)\Phi\left(\frac{\mu_*}{\sigma_*} + \sigma_*\right) + \sigma_*\phi\left(\frac{\mu_*}{\sigma_*} + \sigma_*\right)\right]}{\left[\mu_*\Phi\left(\frac{\mu_*}{\sigma_*}\right) + \sigma_*\phi\left(\frac{\mu_*}{\sigma_*}\right)\right]}$\\
+%\hdashline
+Gamma & $\frac{h\left(P, \epsilon\right)}{h\left(P-1, \epsilon\right)}$ & $\frac{\exp{\left(\frac{\sigma_v^2}{\sigma_u} + S\epsilon + \frac{\sigma_v^2}{2}\right)}\Phi\left(-\frac{\sigma_v}{\sigma_u} - \frac{S\epsilon}{\sigma_v} - \sigma_v\right)  \hat{g}(P-1, \epsilon)}{\Phi\left(-\frac{\sigma_v}{\sigma_u} - \frac{S\epsilon}{\sigma_v}\right)\hat{h}(P-1, \epsilon)}$ & $\frac{\exp{\left(-\frac{\sigma_v^2}{\sigma_u} - S\epsilon + \frac{\sigma_v^2}{2}\right)}\Phi\left(-\frac{\sigma_v}{\sigma_u} - \frac{S\epsilon}{\sigma_v} + \sigma_v\right)  \hat{k}(P-1, \epsilon)}{\Phi\left(-\frac{\sigma_v}{\sigma_u} - \frac{S\epsilon}{\sigma_v}\right)\hat{h}(P-1, \epsilon)}$\\
+%\hdashline
+Log-Normal & $\frac{\frac{1}{\sigma_u\sigma_v}\int_0^\infty\phi\left(\frac{\ln{u}-\mu}{\sigma_u}\right)\phi\left(\frac{\epsilon_i+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$ & 
+$\frac{\frac{1}{\sigma_u\sigma_v}\int_0^\infty \frac{\exp{\left(-u\right)}}{u} \phi\left(\frac{\ln{u}-\mu}{\sigma_u}\right)\phi\left(\frac{\epsilon_i+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$ & 
+$\frac{\frac{1}{\sigma_u\sigma_v}\int_0^\infty \frac{\exp{\left(u\right)}}{u} \phi\left(\frac{\ln{u}-\mu}{\sigma_u}\right)\phi\left(\frac{\epsilon_i+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$\\
+%\hdashline
+Weibull & $\frac{\frac{k}{\sigma_u^k\sigma_v}\int_0^\infty u^k\exp{\left(-\left(u/\sigma_u\right)^{k}\right)}\phi\left(\frac{\epsilon+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$ & 
+ $\frac{\frac{k}{\sigma_u\sigma_v}\int_0^\infty \exp{\left(-u_i\right)}\left(\frac{u}{\sigma_u}\right)^{k-1}\exp{\left(-\left(u/\sigma_u\right)^{k}\right)}\phi\left(\frac{\epsilon+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$ & 
+  $\frac{\frac{k}{\sigma_u\sigma_v}\int_0^\infty \exp{\left(u_i\right)}\left(\frac{u}{\sigma_u}\right)^{k-1}\exp{\left(-\left(u/\sigma_u\right)^{k}\right)}\phi\left(\frac{\epsilon+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$\\
+% \hdashline
+Generalized Exponential & $\sigma_v \frac{\exp{\left(A\right)}\left[\phi\left(a\right) + a\Phi\left(a\right)\right]- \exp{\left(B\right)}\left[\phi\left(b\right)+b\Phi\left(b\right)\right]}{\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$ & 
+$\frac{\exp{\left(A\right)}\exp{\left(-a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a-\sigma_v\right)-\exp{\left(B\right)}\exp{\left(-b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(b-\sigma_v\right)}{\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$ & 
+$\frac{\exp{\left(A\right)}\exp{\left(a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a+\sigma_v\right)-\exp{\left(B\right)}\exp{\left(b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(b+\sigma_v\right)}{\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$\\
+%\hdashline
+Truncated Skewed-Laplace & $\sigma_v \frac{2\exp{\left(A\right)}\left[\phi\left(a\right) + a\Phi\left(a\right)\right]- \exp{\left(B\right)}\left[\phi\left(b\right)+b\Phi\left(b\right)\right]}{2\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$ & 
+$\frac{2\exp{\left(A\right)}\exp{\left(-a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a-\sigma_v\right)-\exp{\left(B\right)}\exp{\left(-b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(b-\sigma_v\right)}{2\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$ & 
+$\frac{2\exp{\left(A\right)}\exp{\left(a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a+\sigma_v\right)-\exp{\left(B\right)}\exp{\left(b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(b+\sigma_v\right)}{2\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$\\
+%\hdashline
+Uniform & $-\sigma_v\frac{\phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon_i}{\sigma_v}\right)-\phi\left(\frac{S\epsilon_i}{\sigma_v}\right) }{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon_i}{\sigma_v}\right)-\Phi\left(\frac{S\epsilon_i}{\sigma_v}\right)} - S\epsilon_i$ & 
+$\exp{\left(S\epsilon_i+\frac{\sigma_v^2}{2}\right)}\frac{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon_i}{\sigma_v}+\sigma_v\right)-\Phi\left(\frac{S\epsilon_i}{\sigma_v}+\sigma_v\right)}{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon_i}{\sigma_v}\right)-\Phi\left(\frac{S\epsilon_i}{\sigma_v}\right)}$ & 
+$\exp{\left[-S\epsilon+\frac{\sigma_v^2}{2}\right]}\frac{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon}{\sigma_v}-\sigma_v\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}-\sigma_v\right)}{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon}{\sigma_v}\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}\right)}$\\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\begin{tablenotes}
+      \tiny
+      \item Notes: For the exponential distribution we have $\mu_{i*} = -\left(\frac{\sigma_v^2}{\sigma_u} + S\epsilon\right)$. For the gamma distribution $\hat{g}(P-1, \epsilon)= \frac{1}{R}\sum_{r = 1}^R \left[\tilde{\mu} + 
+\sigma_v\Phi^{-1}\left(F_{r}+ \left(1-F_{r}\right)\Phi\left(-\frac{\tilde{\mu}}{
+\sigma_v}\right)\right)\right]^{P-1}$ with $\tilde{\mu} = \left(-\frac{\sigma_v^2}{\sigma_u} - S\epsilon - \sigma_v^2\right)$. 
+      \item On the other hand $\hat{k}(P-1, \epsilon)= \frac{1}{R}\sum_{r = 1}^R \left[\tilde{\tilde{\mu}} + 
+\sigma_v\Phi^{-1}\left(F_{r}+ \left(1-F_{r}\right)\Phi\left(-\frac{\tilde{\tilde{\mu}}}{
+\sigma_v}\right)\right)\right]^{P-1}$ with $\tilde{\tilde{\mu}} = \left(-\frac{\sigma_v^2}{\sigma_u} - S\epsilon + \sigma_v^2\right)$. 
+For all the other variables see notes in Table~\ref{table:mlsfcross}.
+    \end{tablenotes}
+\caption{Conditional (in)efficiencies for cross-section SF models}
+\label{table:effcross}
+\end{threeparttable}
+\end{table}
+%\end{landscape}
+%\restoregeometry
+
+\newpage
+
+\section{Panel SF model tables} \label{app:sfpanel}
+
+\setcounter{table}{0}
+\subsection{Densities of $f(\epsilon)$ for time-invariant inefficiency models}
+
+
+
+%\newgeometry{left=2cm, right=2cm}
+%\begin{landscape}
+%\pagestyle{lscape}
+\begin{table}[h]
+\renewcommand{\arraystretch}{1.3}
+%\setlength{\arrayrulewidth}{.01em}
+\centering
+\begin{adjustbox}{max width=0.9\textwidth}
+%\small
+\begin{tabular}{@{}ccc@{}}
+\toprule
+Distributions & $f(\epsilon)$ & Notes \\
+\midrule
+Half-Normal & $\frac{2\sigma_*}{\sigma_u\sigma_v^T\left(2\pi\right)^{\frac{T}{2}}}\exp{\left[-\frac{1}{2}\left(-\frac{\mu_*^2}{\sigma_*^2} + \frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}\right)\right]}\Phi\left(\frac{\mu_*}{\sigma_*}\right)$ & $\mu_{*}= \frac{-S\sigma_u^2\sum_{t=1}^T\epsilon_{t}}{T\sigma_u^2 + \sigma_v^2}$ and 
+$\sigma_*^2=\frac{\sigma_u^2\sigma_v^2}{T\sigma_u^2 + \sigma_v^2}$\\
+%\hdashline 
+Truncated-Normal &  $\frac{\sigma_*}{\sigma_u\sigma_v^T\left(2\pi\right)^{\frac{T}{2}}\Phi\left(\frac{\mu}{\sigma_u}\right)}\exp{\left[-\frac{1}{2}\left(-\frac{\mu_*^2}{\sigma_*^2} + \frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2} + \frac{\mu^2}{\sigma_u^2}\right)\right]}\Phi\left(\frac{\mu_*}{\sigma_*}\right)$ & 
+$\mu_{*}= \frac{\mu\sigma_v^2-S\sigma_u^2\sum_{t=1}^T\epsilon_{t}}{T\sigma_u^2+\sigma_v^2}$ and 
+$\sigma_*^2=\frac{\sigma_u^2\sigma_v^2}{T\sigma_u^2 + \sigma_v^2}$\\
+%\hdashline 
+Exponential & $\frac{\sigma_*}{\sigma_u\sigma_v^T\left(2\pi\right)^{\frac{T-1}{2}}}\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}\Phi\left(\frac{\mu_*}{\sigma_*}\right)$ & 
+$\mu_* = -\left(\frac{\sigma_v^2}{T\sigma_u}+\frac{S\sum_{t=1}^T\epsilon_t}{T}\right)$ and 
+$\sigma_*^2 = \frac{\sigma_v^2}{T}$\\
+%\hdashline 
+Rayleigh & $\frac{\sigma_*}{\sigma_u^2\sigma_v^T\left(2\pi\right)^{\frac{T-1}{2}}}\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}\left[\mu_*\Phi\left(\frac{\mu_*}{\sigma_*}\right)+\sigma_*\phi\left(\frac{\mu_*}{\sigma_*}\right)\right]$ & 
+$\mu_* = -\frac{S\sigma_u^2\sum_{t=1}^T\epsilon_t}{T\sigma_u^2+\sigma_v^2}$ and $\sigma_*^2 = \frac{\sigma_u^2\sigma_v^2}{T\sigma_u^2+\sigma_v^2}$\\
+%\hdashline
+\multirow{2}{*}{Gamma} & \multirow{2}{*}{$\frac{\sigma_*}{\sigma_u^P\sigma_v^{T}\left(2\pi\right)^{\frac{T-1}{2}}\Gamma(P)}\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}
+\Phi\left(\frac{\mu_*}{\sigma_*}\right) \hat{h}(P-1, \epsilon)$} & 
+$h(P-1, \epsilon)=\frac{1}{R}\sum_{r = 1}^R \left(\mu_* + \sigma_*\Phi^{-1}\left[PL + F_r \times \left(1 - PL\right)\right]\right)^{P-1}$ and 
+$\mu_* = -\left(\frac{\sigma_v^2}{T\sigma_u}+\frac{S\sum_{t=1}^T\epsilon_t}{T}\right)$\\
+& & $\sigma_*^2 = \frac{\sigma_v^2}{T}$ and $F_r$ is pseudo/quasi random draw\\
+%\hdashline 
+Log-Normal & $\frac{1}{R}\sum_{r = 1}^R\frac{1}{\left(2\pi\right)^{T/2}\sigma_v^T}\exp{\left(-\frac{\sum_{t=1}^T\left(\epsilon_t+Su_r\right)^2}{2\sigma_v^2}\right)}$ & 
+$u_r=\exp{\left(\mu +\sigma_u\Phi^{-1}\left(h_r\right)\right)}$ and $h_r$ is pseudo/quasi random draw\\
+%\hdashline 
+Weibull & $\frac{1}{R}\sum_{r = 1}^R\frac{1}{\left(2\pi\right)^{T/2}\sigma_v^T}\exp{\left(-\frac{\sum_{t=1}^T\left(\epsilon_t+Su_r\right)^2}{2\sigma_v^2}\right)}$ & 
+$u_r = \sigma_u\left(-\ln{\left(1-h_r\right)}\right)^{1/k}$ and $h_r$ is pseudo/quasi random draw\\
+%\hdashline 
+\multirow{2}{*}{Generalized Exponential} & \multirow{2}{*}{$\frac{2\sigma_*}{\sigma_u\sigma_v^T\left(2\pi\right)^{\frac{T-1}{2}}}\left\{\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}\Phi\left(\frac{\mu_*}{\sigma_*}\right)-\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*'^2}{\sigma_*^2}\right)\right]}\Phi\left(\frac{\mu_*'}{\sigma_*}\right)\right\}$} & $\mu_* = -\left(\frac{\sigma_v^2}{T\sigma_u}+\frac{S\sum_{t=1}^T\epsilon_t}{T}\right)$ and 
+$\mu_*' = -\left(\frac{2\sigma_v^2}{T\sigma_u}+\frac{S\sum_{t=1}^T\epsilon_t}{T}\right)$\\
+& & $\sigma_*^2 = \frac{\sigma_v^2}{T}$\\
+%\hdashline 
+\multirow{2}{*}{Truncated Skewed-Laplace} & \multirow{2}{*}{$\frac{\left(1+\lambda\right)\sigma_*}{\sigma_u\sigma_v^T\left(2\pi\right)^{\frac{T-1}{2}}\left(2\lambda+1\right)}\left\{2\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}\Phi\left(\frac{\mu_*}{\sigma_*}\right)-\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*'^2}{\sigma_*^2}\right)\right]}\Phi\left(\frac{\mu_*'}{\sigma_*}\right)\right\}$} & 
+$\mu_* = -\left(\frac{\sigma_v^2}{T\sigma_u}+\frac{S\sum_{t=1}^T\epsilon_t}{T}\right)$ and $\mu_*' = -\left(\frac{\left(1+\lambda\right)\sigma_v^2}{T\sigma_u}+\frac{S\sum_{t=1}^T\epsilon_t}{T}\right)$\\
+& & $\sigma_*^2 = \frac{\sigma_v^2}{T}$ \\
+%\hdashline 
+Uniform & $\frac{\sigma_*}{\theta\sigma_v^T\left(2\pi\right)^{\frac{T-1}{2}}}\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}\left[\Phi\left(\frac{\theta-\mu_*}{\sigma_*}\right)-\Phi\left(-\frac{\mu_*}{\sigma_*}\right)\right]$ & 
+$\mu_* = -\frac{S\sum_{t=1}^T\epsilon_t}{T}$ and $\sigma_*^2 = \frac{\sigma_v^2}{T}$\\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\caption{Densities of $f(\epsilon)$ for time-invariant inefficiency models}
+\label{table:mlpl81}
+\end{table}
+%\end{landscape}
+%\restoregeometry
+
+\newpage
+
+\subsection{Densities of $f(\epsilon)$ for time-varying inefficiency models}
+
+%\newgeometry{left=2cm, right=2cm}
+%\begin{landscape}
+\pagestyle{lscape}
+\begin{table}[h]
+\renewcommand{\arraystretch}{1.3}
+%\setlength{\arrayrulewidth}{.01em}
+\centering
+\begin{adjustbox}{max width=0.9\textwidth}
+%\small
+\begin{tabular}{@{}ccc@{}}
+\toprule
+Distributions & $f(\epsilon)$ & Notes \\
+\midrule
+Half-Normal & $\frac{2\sigma_*}{\sigma_u\sigma_v^T\left(2\pi\right)^{\frac{T}{2}}}\exp{\left[-\frac{1}{2}\left(-\frac{\mu_*^2}{\sigma_*^2} + \frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}\right)\right]}\Phi\left(\frac{\mu_*}{\sigma_*}\right)$ & $\mu_{*}= \frac{-S\sigma_u^2\sum_{t=1}^TG(t)\epsilon_{t}}{\sigma_u^2\sum_{t=1}^TG(t)^2 + \sigma_v^2}$ and 
+$\sigma_*^2=\frac{\sigma_u^2\sigma_v^2}{\sigma_u^2\sum_{t=1}^TG(t)^2 + \sigma_v^2}$\\
+%\hdashline 
+Truncated-Normal &  $\frac{\sigma_*}{\sigma_u\sigma_v^T\left(2\pi\right)^{\frac{T}{2}}\Phi\left(\frac{\mu}{\sigma_u}\right)}\exp{\left[-\frac{1}{2}\left(-\frac{\mu_*^2}{\sigma_*^2} + \frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2} + \frac{\mu^2}{\sigma_u^2}\right)\right]}\Phi\left(\frac{\mu_*}{\sigma_*}\right)$ & 
+$\mu_{*}= \frac{\mu\sigma_v^2-S\sigma_u^2\sum_{t=1}^TG(t)\epsilon_t}{\sigma_u^2\sum_{t=1}G(t)^2+\sigma_v^2}$ and 
+$\sigma_*^2=\frac{\sigma_u^2\sigma_v^2}{\sigma_u^2\sum_{t=1}^TG(t)^2 + \sigma_v^2}$\\
+%\hdashline 
+Exponential & $\frac{\sigma_*}{\sigma_u\sigma_v^T\left(2\pi\right)^{\frac{T-1}{2}}}\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}\Phi\left(\frac{\mu_*}{\sigma_*}\right)$ & 
+$\mu_* = -\left(\frac{\sigma_v^2}{\sigma_u\sum_{t=1}G(t)^2}+\frac{S\sum_{t=1}^TG(t)\epsilon_t}{\sum_{t=1}G(t)^2}\right)$ and 
+$\sigma_*^2 = \frac{\sigma_v^2}{\sum_{t=1}G(t)^2}$\\
+%\hdashline 
+Rayleigh & $\frac{\sigma_*}{\sigma_u^2\sigma_v^T\left(2\pi\right)^{\frac{T-1}{2}}}\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}\left[\mu_*\Phi\left(\frac{\mu_*}{\sigma_*}\right)+\sigma_*\phi\left(\frac{\mu_*}{\sigma_*}\right)\right]$ & 
+$\mu_* = -\frac{S\sigma_u^2\sum_{t=1}^TG(t)\epsilon_t}{\sigma_u^2\sum_{t=1}G(t)^2+\sigma_v^2}$ and $\sigma_*^2 = \frac{\sigma_u^2\sigma_v^2}{\sigma_u^2\sum_{t=1}G(t)^2+\sigma_v^2}$\\
+%\hdashline
+\multirow{2}{*}{Gamma} & \multirow{2}{*}{$\frac{\sigma_*}{\sigma_u^P\sigma_v^{T}\left(2\pi\right)^{\frac{T-1}{2}}\Gamma(P)}\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}
+\Phi\left(\frac{\mu_*}{\sigma_*}\right) \hat{h}(P-1, \epsilon)$} & 
+$h(P-1, \epsilon)=\frac{1}{R}\sum_{r = 1}^R \left(\mu_* + \sigma_*\Phi^{-1}\left[PL + F_r \times \left(1 - PL\right)\right]\right)^{P-1}$ and 
+$\mu_* = -\left(\frac{\sigma_v^2}{\sigma_u\sum_{t=1}G(t)^2}+\frac{S\sum_{t=1}^TG(t)\epsilon_t}{\sum_{t=1}G(t)^2}\right)$\\
+& & $\sigma_*^2 = \frac{\sigma_v^2}{\sum_{t=1}G(t)^2}$ and $F_r$ is pseudo/quasi random draw\\
+%\hdashline 
+Log-Normal & $\frac{1}{R}\sum_{r = 1}^R\frac{1}{\left(2\pi\right)^{T/2}\sigma_v^T}\exp{\left(-\frac{\sum_{t=1}^T\left(\epsilon_t+SG(t)u_r\right)^2}{2\sigma_v^2}\right)}$ & 
+$u_r=\exp{\left(\mu +\sigma_u\Phi^{-1}\left(h_r\right)\right)}$ and $h_r$ is pseudo/quasi random draw\\
+%\hdashline 
+Weibull & $\frac{1}{R}\sum_{r = 1}^R\frac{1}{\left(2\pi\right)^{T/2}\sigma_v^T}\exp{\left(-\frac{\sum_{t=1}^T\left(\epsilon_t+SG(t)u_r\right)^2}{2\sigma_v^2}\right)}$ & 
+$u_r = \sigma_u\left(-\ln{\left(1-h_r\right)}\right)^{1/k}$ and $h_r$ is pseudo/quasi random draw\\
+%\hdashline 
+\multirow{2}{*}{Generalized Exponential} & \multirow{2}{*}{$\frac{2\sigma_*}{\sigma_u\sigma_v^T\left(2\pi\right)^{\frac{T-1}{2}}}\left\{\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}\Phi\left(\frac{\mu_*}{\sigma_*}\right)-\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*'^2}{\sigma_*^2}\right)\right]}\Phi\left(\frac{\mu_*'}{\sigma_*}\right)\right\}$} & $\mu_* = -\left(\frac{\sigma_v^2}{\sigma_u\sum_{t=1}G(t)^2}+\frac{S\sum_{t=1}^TG(t)\epsilon_t}{\sum_{t=1}G(t)^2}\right)$ and 
+$\mu_*' = -\left(\frac{2\sigma_v^2}{\sigma_u\sum_{t=1}G(t)^2}+\frac{S\sum_{t=1}^TG(t)\epsilon_t}{\sum_{t=1}G(t)^2}\right)$\\
+& & $\sigma_*^2 = \frac{\sigma_v^2}{\sum_{t=1}G(t)^2}$\\
+%\hdashline 
+\multirow{2}{*}{Truncated Skewed-Laplace} & \multirow{2}{*}{$\frac{\left(1+\lambda\right)\sigma_*}{\sigma_u\sigma_v^T\left(2\pi\right)^{\frac{T-1}{2}}\left(2\lambda+1\right)}\left\{2\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}\Phi\left(\frac{\mu_*}{\sigma_*}\right)-\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*'^2}{\sigma_*^2}\right)\right]}\Phi\left(\frac{\mu_*'}{\sigma_*}\right)\right\}$} & 
+$\mu_* = -\left(\frac{\sigma_v^2}{\sigma_u\sum_{t=1}G(t)^2}+\frac{S\sum_{t=1}^TG(t)\epsilon_t}{\sum_{t=1}G(t)^2}\right)$ and $\mu_*' = -\left(\frac{\left(1+\lambda\right)\sigma_v^2}{\sigma_u\sum_{t=1}G(t)^2}+\frac{S\sum_{t=1}^TG(t)\epsilon_t}{\sum_{t=1}G(t)^2}\right)$\\
+& & $\sigma_*^2 = \frac{\sigma_v^2}{\sum_{t=1}G(t)^2}$ \\
+%\hdashline 
+Uniform & $\frac{\sigma_*}{\theta\sigma_v^T\left(2\pi\right)^{\frac{T-1}{2}}}\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}\left[\Phi\left(\frac{\theta-\mu_*}{\sigma_*}\right)-\Phi\left(-\frac{\mu_*}{\sigma_*}\right)\right]$ & 
+$\mu_* = -\frac{S\sum_{t=1}^TG(t)\epsilon_t}{\sum_{t=1}G(t)^2}$ and $\sigma_*^2 = \frac{\sigma_v^2}{\sum_{t=1}G(t)^2}$\\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\caption{Densities of $f(\epsilon)$ for time-varying inefficiency models}
+\label{table:mlgzit}
+\end{table}
+%\end{landscape}
+%\restoregeometry
+
+\newpage
+
+\subsection{(In)efficiencies for time-varying inefficiency models}
+
+%\newgeometry{left=2cm, right=2cm}
+%\begin{landscape}
+%\pagestyle{lscape}
+\begin{table}
+\renewcommand{\arraystretch}{1.3}
+%\setlength{\arrayrulewidth}{.01em}
+\centering
+\begin{adjustbox}{max width=0.9\textwidth}
+%\small
+\begin{tabular}{@{}cccc@{}}
+\toprule
+Densities & $E\left[G(t)u_i|\bm{\epsilon}_i\right]$ & $E\left[\exp{\left(-G(t)u_i\right)|\epsilon_i}\right]$ & $E\left[\exp{\left(G(t)u_i\right)|\epsilon_i}\right]$\\
+Half-Normal & & $\exp{\left[\frac{1}{2}\sigma_*^2G(t)^2-\mu_*G(t)\right]\frac{\Phi\left(\frac{\mu_*}{\sigma_*}-G(t)\sigma_*\right)}{\Phi\left(\frac{\mu_*}{\sigma_*}\right)}}$
+&  $\exp{\left[\frac{1}{2}\sigma_*^2G(t)^2+\mu_*G(t)\right]\frac{\Phi\left(\frac{\mu_*}{\sigma_*}+G(t)\sigma_*\right)}{\Phi\left(\frac{\mu_*}{\sigma_*}\right)}}$ \\
+%\hdashline 
+Truncated-Normal & & $\exp{\left[\frac{1}{2}\sigma_*^2G(t)^2-\mu_*G(t)\right]\frac{\Phi\left(\frac{\mu_*}{\sigma_*}-G(t)\sigma_*\right)}{\Phi\left(\frac{\mu_*}{\sigma_*}\right)}}$
+&  $\exp{\left[\frac{1}{2}\sigma_*^2G(t)^2+\mu_*G(t)\right]\frac{\Phi\left(\frac{\mu_*}{\sigma_*}+G(t)\sigma_*\right)}{\Phi\left(\frac{\mu_*}{\sigma_*}\right)}}$  \\
+%\hdashline 
+Exponential & $\mu_{i*} + \sigma_v\frac{\phi\left(\frac{\mu_{i*}}{\sigma_v}\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)}$ & 
+$\exp{\left(-G(t)\mu_{i*} + \frac{1}{2}G(t)^2\sigma_v^2\right)} \frac{\Phi\left(\frac{\mu_{i*}}{\sigma_v}-G(t)\sigma_v\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_v}\right)}$ & 
+$\exp{\left(G(t)\mu_* + \frac{1}{2}G(t)^2\sigma_v^2\right)} \frac{\Phi\left(\frac{\mu_*}{\sigma_v}+G(t)\sigma_v\right)}{\Phi\left(\frac{\mu_*}{\sigma_v}\right)}$\\
+%\hdashline
+Rayleigh & $\frac{\left[\sigma_*\mu_{i*}\phi\left(\frac{\mu_{i*}}{\sigma_*}\right) + \left(\mu_{i*}^2+\sigma_*^2\right)\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)\right]}{\left[\mu_{i*}\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right) + \sigma_*\phi\left(\frac{\mu_{i*}}{\sigma_*}\right)\right]}$ &
+$\exp{\left(-G(t)\mu_{i*} +\frac{G(t)^2\sigma_*^2}{2}\right)}\frac{\left[\left(G(t)\mu_{i*}-G(t)^2\sigma_*^2\right)\Phi\left(\frac{\mu_{i*}}{\sigma_*} - G(t)\sigma_*\right) + G(t)\sigma_*\phi\left(\frac{\mu_{i*}}{\sigma_*} - G(t)\sigma_*\right)\right]}{\left[\mu_{i*}\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right) + \sigma_*\phi\left(\frac{\mu_{i*}}{\sigma_*}\right)\right]}$ &
+$\exp{\left(G(t)\mu_* +\frac{G(t)^2\sigma_*^2}{2}\right)}\frac{\left[\left(G(t)\mu_*+G(t)^2\sigma_*^2\right)\Phi\left(\frac{\mu_*}{\sigma_*} + \sigma_*\right) + \sigma_*\phi\left(\frac{\mu_*}{\sigma_*} + \sigma_*\right)\right]}{\left[\mu_*\Phi\left(\frac{\mu_*}{\sigma_*}\right) + \sigma_*\phi\left(\frac{\mu_*}{\sigma_*}\right)\right]}$\\
+%\hdashline
+Gamma & $\frac{h\left(P, \epsilon\right)}{h\left(P-1, \epsilon\right)}$ & $\frac{\exp{\left(\frac{\sigma_v^2}{\sigma_u} + S\epsilon + \frac{\sigma_v^2}{2}\right)}\Phi\left(-\frac{\sigma_v}{\sigma_u} - \frac{S\epsilon}{\sigma_v} - \sigma_v\right)  \hat{g}(P-1, \epsilon)}{\Phi\left(-\frac{\sigma_v}{\sigma_u} - \frac{S\epsilon}{\sigma_v}\right)\hat{h}(P-1, \epsilon)}$ & $\frac{\exp{\left(-\frac{\sigma_v^2}{\sigma_u} - S\epsilon + \frac{\sigma_v^2}{2}\right)}\Phi\left(-\frac{\sigma_v}{\sigma_u} - \frac{S\epsilon}{\sigma_v} + \sigma_v\right)  \hat{k}(P-1, \epsilon)}{\Phi\left(-\frac{\sigma_v}{\sigma_u} - \frac{S\epsilon}{\sigma_v}\right)\hat{h}(P-1, \epsilon)}$\\
+%\hdashline
+Log-Normal & $\frac{\frac{1}{\sigma_u\sigma_v}\int_0^\infty\phi\left(\frac{\ln{u}-\mu}{\sigma_u}\right)\phi\left(\frac{\epsilon_i+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$ & 
+$\frac{\frac{1}{\sigma_u\sigma_v}\int_0^\infty \frac{\exp{\left(-u\right)}}{u} \phi\left(\frac{\ln{u}-\mu}{\sigma_u}\right)\phi\left(\frac{\epsilon_i+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$ & 
+$\frac{\frac{1}{\sigma_u\sigma_v}\int_0^\infty \frac{\exp{\left(u\right)}}{u} \phi\left(\frac{\ln{u}-\mu}{\sigma_u}\right)\phi\left(\frac{\epsilon_i+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$\\
+%\hdashline
+Weibull & $\frac{\frac{k}{\sigma_u^k\sigma_v}\int_0^\infty u^k\exp{\left(-\left(u/\sigma_u\right)^{k}\right)}\phi\left(\frac{\epsilon+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$ & 
+ $\frac{\frac{k}{\sigma_u\sigma_v}\int_0^\infty \exp{\left(-u_i\right)}\left(\frac{u}{\sigma_u}\right)^{k-1}\exp{\left(-\left(u/\sigma_u\right)^{k}\right)}\phi\left(\frac{\epsilon+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$ & 
+  $\frac{\frac{k}{\sigma_u\sigma_v}\int_0^\infty \exp{\left(u_i\right)}\left(\frac{u}{\sigma_u}\right)^{k-1}\exp{\left(-\left(u/\sigma_u\right)^{k}\right)}\phi\left(\frac{\epsilon+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$\\
+ % \hdashline
+Generalized Exponential & $\sigma_v \frac{\exp{\left(A\right)}\left[\phi\left(a\right) + a\Phi\left(a\right)\right]- \exp{\left(B\right)}\left[\phi\left(b\right)+b\Phi\left(b\right)\right]}{\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$ & 
+$\frac{\exp{\left(A\right)}\exp{\left(-a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a-\sigma_v\right)-\exp{\left(B\right)}\exp{\left(-b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(b-\sigma_v\right)}{\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$ & 
+$\frac{\exp{\left(A\right)}\exp{\left(a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a+\sigma_v\right)-\exp{\left(B\right)}\exp{\left(b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(b+\sigma_v\right)}{\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$\\
+%\hdashline
+Truncated Skewed-Laplace & $\sigma_v \frac{2\exp{\left(A\right)}\left[\phi\left(a\right) + a\Phi\left(a\right)\right]- \exp{\left(B\right)}\left[\phi\left(b\right)+b\Phi\left(b\right)\right]}{2\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$ & 
+$\frac{2\exp{\left(A\right)}\exp{\left(-a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a-\sigma_v\right)-\exp{\left(B\right)}\exp{\left(-b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(b-\sigma_v\right)}{2\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$ & 
+$\frac{2\exp{\left(A\right)}\exp{\left(a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a+\sigma_v\right)-\exp{\left(B\right)}\exp{\left(b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(b+\sigma_v\right)}{2\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$\\
+%\hdashline
+Uniform & $-\sigma_v\frac{\phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon_i}{\sigma_v}\right)-\phi\left(\frac{S\epsilon_i}{\sigma_v}\right) }{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon_i}{\sigma_v}\right)-\Phi\left(\frac{S\epsilon_i}{\sigma_v}\right)} - S\epsilon_i$ & 
+$\exp{\left(S\epsilon_i+\frac{\sigma_v^2}{2}\right)}\frac{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon_i}{\sigma_v}+\sigma_v\right)-\Phi\left(\frac{S\epsilon_i}{\sigma_v}+\sigma_v\right)}{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon_i}{\sigma_v}\right)-\Phi\left(\frac{S\epsilon_i}{\sigma_v}\right)}$ & 
+$\exp{\left[-S\epsilon+\frac{\sigma_v^2}{2}\right]}\frac{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon}{\sigma_v}-\sigma_v\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}-\sigma_v\right)}{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon}{\sigma_v}\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}\right)}$\\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\caption{Conditional (in)efficiencies for time-varying inefficiency models}
+\label{table:effpanel}
+\end{table}
+%\end{landscape}
+%\restoregeometry
+
+
+\end{appendix}
+
+\end{document}
