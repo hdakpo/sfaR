@@ -9,13 +9,14 @@
 # Data: Cross sectional data & Pooled data                                     #
 #------------------------------------------------------------------------------#
 
-#' Sample selection in stochastic frontier estimation using cross-section data
+#' Sample selection in stochastic frontier estimation using cross-section or 
+#' pooled data
 #'
 #' @description
 #' \code{\link{sfaselectioncross}} is a symbolic formula based function for the
 #' estimation of the stochastic frontier model in the presence of sample
-#' selection. The model accommodates cross-sectional or pooled cross-sectional data. 
-#' The model can be estimated using different quadrature approaches or 
+#' selection. The model accommodates cross-sectional or pooled cross-sectional 
+#' data. The model can be estimated using different quadrature approaches or 
 #' maximum simulated likelihood (MSL). See Greene (2010).
 #'
 #' Only the half-normal distribution is possible for the one-sided error term.
@@ -25,27 +26,29 @@
 #' two-sided error terms, as in Reifschneider and Stevenson (1991), Caudill and
 #' Ford (1993), Caudill \emph{et al.} (1995) and Hadri (1999).
 #'
-#' @aliases sfaselectioncross print.sfaselectioncross
+#' @aliases sfaselectioncross bread.sfaselectioncross estfun.sfaselectioncross 
+#' print.sfaselectioncross
 #'
 #' @param selectionF A symbolic (formula) description of the selection equation.
-#' @param frontierF A symbolic (formula) description of the outcome (frontier) equation.
+#' @param frontierF A symbolic (formula) description of the outcome (frontier) 
+#' equation.
 #' @param uhet A one-part formula to consider heteroscedasticity in the
 #' one-sided error variance (see section \sQuote{Details}).
 #' @param vhet A one-part formula to consider heteroscedasticity in the
 #' two-sided error variance (see section \sQuote{Details}).
-#' @param modelType Character string. Model used to solve the selection bias. Only the 
-#' model discussed in Greene (2010) is currently available.
+#' @param modelType Character string. Model used to solve the selection bias. 
+#' Only the model discussed in Greene (2010) is currently available.
 #' @param logDepVar Logical. Informs whether the dependent variable is logged
 #' (\code{TRUE}) or not (\code{FALSE}). Default = \code{TRUE}.
 #' @param data The data frame containing the data.
 #' @param subset An optional vector specifying a subset of observations to be
 #' used in the optimization process.
-#' @param weights An optional vector of weights to be used for weighted log-likelihood.
-#' Should be \code{NULL} or numeric vector with positive values. When \code{NULL}, 
-#' a numeric vector of 1 is used.
-#' @param wscale Logical. When \code{weights} is not \code{NULL}, a scaling transformation
-#' is used such that the \code{weights} sum to the sample size. Default \code{TRUE}.
-#' When \code{FALSE} no scaling is used.
+#' @param weights An optional vector of weights to be used for weighted 
+#' log-likelihood. Should be \code{NULL} or numeric vector with positive values. 
+#' When \code{NULL}, a numeric vector of 1 is used.
+#' @param wscale Logical. When \code{weights} is not \code{NULL}, a scaling 
+#' transformation is used such that the \code{weights} sum to the sample size. 
+#' Default \code{TRUE}. When \code{FALSE} no scaling is used.
 #' @param S If \code{S = 1} (default), a production (profit) frontier is
 #' estimated: \eqn{\epsilon_i = v_i-u_i}. If \code{S = -1}, a cost frontier is
 #' estimated: \eqn{\epsilon_i = v_i+u_i}.
@@ -54,6 +57,11 @@
 #' implemented.
 #' @param start Numeric vector. Optional starting values for the maximum
 #' likelihood (ML) estimation.
+#' @param randStart Logical. Define if random starting values should be used for
+#' M(S)L estimation. New starting values are obtained as old ones + draws from
+#' normal distribution with std. deviation of 0.01. \code{'seed'} is not 
+#' considered here, then each run will provide different starting values 
+#' (unless a seed is set by the user before the run).
 #' @param method Optimization algorithm used for the estimation.  Default =
 #' \code{'bfgs'}. 11 algorithms are available: \itemize{ \item \code{'bfgs'},
 #' for Broyden-Fletcher-Goldfarb-Shanno (see
@@ -61,39 +69,49 @@
 #' Berndt-Hall-Hall-Hausman (see \code{\link[maxLik:maxBHHH]{maxBHHH}}) \item
 #' \code{'nr'}, for Newton-Raphson (see \code{\link[maxLik:maxNR]{maxNR}})
 #' \item \code{'nm'}, for Nelder-Mead (see \code{\link[maxLik:maxNM]{maxNM}}) 
-#' \item \code{'cg'}, for Conjugate Gradient (see \code{\link[maxLik:maxCG]{maxCG}})
-#' \item \code{'sann'}, for Simulated Annealing (see \code{\link[maxLik:maxSANN]{maxSANN}})
-#' \item \code{'ucminf'}, for a quasi-Newton type optimization with BFGS updating of the
-#' inverse Hessian and soft line search with a trust region type monitoring of
-#' the input to the line search algorithm (see \code{\link[ucminf:ucminf]{ucminf}})
+#' \item \code{'cg'}, for Conjugate Gradient (see 
+#' \code{\link[maxLik:maxCG]{maxCG}}) \item \code{'sann'}, for Simulated 
+#' Annealing (see \code{\link[maxLik:maxSANN]{maxSANN}}) \item \code{'ucminf'}, 
+#' for a quasi-Newton type optimization with BFGS updating of the inverse 
+#' Hessian and soft line search with a trust region type monitoring of
+#' the input to the line search algorithm (see 
+#' \code{\link[ucminf:ucminf]{ucminf}})
 #' \item \code{'mla'}, for general-purpose optimization based on
 #' Marquardt-Levenberg algorithm (see \code{\link[marqLevAlg:mla]{mla}})
 #' \item \code{'sr1'}, for Symmetric Rank 1 (see
-#' \code{\link[trustOptim:trust.optim]{trust.optim}}) \item \code{'sparse'}, for trust
-#' regions and sparse Hessian (see \code{\link[trustOptim:trust.optim]{trust.optim}}) \item
+#' \code{\link[trustOptim:trust.optim]{trust.optim}}) \item \code{'sparse'}, 
+#' for trust regions and sparse Hessian (see 
+#' \code{\link[trustOptim:trust.optim]{trust.optim}}) \item
 #' \code{'nlminb'}, for optimization using PORT routines (see
 #' \code{\link[stats:nlminb]{nlminb}})}
 #' @param hessianType Integer. If \code{1}, analytic Hessian is
 #' returned. If \code{2}, bhhh Hessian is estimated (\eqn{g'g}). bhhh hessian is
 #' estimated by default as the estimation is conducted in two steps.
-#' @param lType Specifies the way the likelihood is estimated. Five possibilities are
-#' available: \code{kronrod} for Gauss-Kronrod quadrature 
+#' @param lType Specifies the way the likelihood is estimated. Five 
+#' possibilities are available: \code{kronrod} for Gauss-Kronrod quadrature 
 #' (see \code{\link[stats:integrate]{integrate}}), \code{hcubature} and
 #' \code{pcubature} for adaptive integration over hypercubes 
 #' (see \code{\link[cubature:hcubature]{hcubature}} and 
-#' \code{\link[cubature:pcubature]{pcubature}}), \code{ghermite} for Gauss-Hermite
-#' quadrature (see \code{\link[fastGHQuad:gaussHermiteData]{gaussHermiteData}}), and
+#' \code{\link[cubature:pcubature]{pcubature}}), \code{ghermite} for 
+#' Gauss-Hermite quadrature (see 
+#' \code{\link[fastGHQuad:gaussHermiteData]{gaussHermiteData}}), and
 #' \code{msl} for maximum simulated likelihood. Default \code{ghermite}.
-#' @param Nsub Integer. Number of subdivisions/nodes used for quadrature approaches. 
-#' Default \code{Nsub = 100}.
-#' @param uBound Numeric. Upper bound for the inefficiency component when solving
-#' integrals using quadrature approaches except Gauss-Hermite for which the upper
-#' bound is automatically infinite (\code{Inf}). Default \code{uBound = Inf}.
+#' @param Nsub Integer. Number of subdivisions/nodes used for quadrature 
+#' approaches. Default \code{Nsub = 100}.
+#' @param uBound Numeric. Upper bound for the inefficiency component when 
+#' solving integrals using quadrature approaches except Gauss-Hermite for which 
+#' the upper bound is automatically infinite (\code{Inf}). Default 
+#' \code{uBound = Inf}.
 #' @param simType Character string. If \code{simType = 'halton'} (Default),
 #' Halton draws are used for maximum simulated likelihood (MSL). If
-#' \code{simType = 'ghalton'}, Generalized-Halton draws are used for MSL. If
-#' \code{simType = 'sobol'}, Sobol draws are used for MSL. If \code{simType =
-#' 'uniform'}, uniform draws are used for MSL. (see section \sQuote{Details}).
+#' \code{simType = 'ghalton'}, Generalized-Halton  draws are used for MSL. If
+#' \code{simType = 'sobol'} or \code{simType = 'rsobol'}, Sobol draws or 
+#' randomized Sobol draws are used for MSL, respectively. If 
+#' \code{simType = 'richtmyer'}, or \code{simType = 'rrichtmyer'}, 
+#' Richtmyer sequence or randomized Richtmyer sequence is used for MSL 
+#' estimation, respectively. If \code{simType = 'mlhs'}, modified latin 
+#' hypercube sampling is performed. If \code{simType = 'uniform'}, uniform draws 
+#' are used for MSL. (see section \sQuote{Details}).
 #' @param Nsim Number of draws for MSL (default 100).
 #' @param prime Prime number considered for Halton and Generalized-Halton
 #' draws. Default = \code{2}.
@@ -120,14 +138,17 @@
 #' step length is decreased while also moving closer to the pure gradient
 #' direction. See \code{\link[maxLik:maxBHHH]{maxBHHH}} and
 #' \code{\link[maxLik:maxNR]{maxNR}}.
-#' @param x an object of class sfaselectioncross (returned by the function \code{\link{sfaselectioncross}}).
+#' @param x an object of class sfaselectioncross (returned by the function 
+#' \code{\link{sfaselectioncross}}).
 #' @param ... additional arguments of frontier are passed to sfaselectioncross; 
-#' additional arguments of the print, bread, estfun, nobs methods are currently ignored.
+#' additional arguments of the print, bread, and estfun methods are currently 
+#' ignored.
 #' 
 #' @details 
-#' The current model is an extension of Heckman (1976, 1979) sample selection model to
-#' nonlinear models particularly stochastic frontier model. The model has first been discussed in 
-#' Greene (2010), and an application can be found in Dakpo et al. (2021). Practically, we have:
+#' The current model is an extension of Heckman (1976, 1979) sample selection 
+#' model to nonlinear models particularly stochastic frontier model. The model 
+#' has first been discussed in Greene (2010), and an application can be found 
+#' in Dakpo et al. (2021). Practically, we have:
 #' 
 #' \deqn{
 #' y_{1i} =  \left\{ \begin{array}{ll}
@@ -167,11 +188,12 @@
 #' between the two symmetric random components \eqn{v_i} and \eqn{w_i}:
 #' 
 #' \deqn{
-#' (v_i, w_i) \sim \mathcal{N}_2\left\lbrack(0,0), (1, \rho \sigma_v, \sigma_v^2) \right\rbrack
+#' (v_i, w_i) \sim \mathcal{N}_2\left\lbrack(0,0), (1, \rho \sigma_v, 
+#' \sigma_v^2) \right\rbrack
 #' }
 #' 
-#' Conditionaly on \eqn{|U_i|}, the probability associated to each observation is:
-#' 
+#' Conditionaly on \eqn{|U_i|}, the probability associated to each observation 
+#' is:
 #' 
 #' \deqn{
 #' Pr \left\lbrack y_{1i}^* \leq 0 \right\rbrack^{1-y_{1i}} \cdot \left\lbrace 
@@ -195,8 +217,8 @@
 #' Using the properties of a bivariate normal distribution, we have:
 #' 
 #' \deqn{
-#' y_{i1}^* | y_{i2} \sim N\left(\mathbf{Z_{si}^{\prime}} \bm{\gamma}+\frac{\rho}{
-#' \sigma_v}v_i, 1-\rho^2\right)
+#' y_{i1}^* | y_{i2} \sim N\left(\mathbf{Z_{si}^{\prime}} \bm{\gamma}+
+#' \frac{\rho}{\sigma_v}v_i, 1-\rho^2\right)
 #' }
 #' 
 #' Hence conditionally on \eqn{|U_i|}, we have:
@@ -223,66 +245,78 @@
 #' the conditional likelihood to be considered is:
 #' 
 #' \deqn{
-#' L_i\big||U_i| = \frac{1}{\sigma_v}\phi\left(\frac{y_{2i}-\mathbf{x_{i}^{\prime}} 
-#' \bm{\beta} + S\sigma_u|U_i|}{\sigma_v}\right) \Phi\left(\frac{\mathbf{Z_{si}^{\prime}} 
-#' \bm{\gamma}+\frac{\rho}{\sigma_v}\left(y_{2i}-\mathbf{x_{i}^{\prime}} \bm{\beta} + 
-#' S\sigma_u|U_i|\right)}{\sqrt{1-\rho^2}}\right) 
+#' L_i\big||U_i| = \frac{1}{\sigma_v}\phi\left(\frac{y_{2i}-
+#' \mathbf{x_{i}^{\prime}} \bm{\beta} + S\sigma_u|U_i|}{\sigma_v}\right) 
+#' \Phi\left(\frac{\mathbf{Z_{si}^{\prime}} \bm{\gamma}+\frac{\rho}{\sigma_v}
+#' \left(y_{2i}-\mathbf{x_{i}^{\prime}} \bm{\beta} + S\sigma_u|U_i|\right)}{
+#' \sqrt{1-\rho^2}}\right) 
 #' }
 #' 
-#' The unconditional likelihood is obtained by integrating \eqn{|U_i|} out of the conditional likelihood. Thus
+#' The unconditional likelihood is obtained by integrating \eqn{|U_i|} out of 
+#' the conditional likelihood. Thus
 #' 
 #' \deqn{
-#' L_i\\ = \int_{|U_i|} \frac{1}{\sigma_v}\phi\left(\frac{y_{2i}-\mathbf{x_{i}^{\prime}} 
-#' \bm{\beta} + S\sigma_u|U_i|}{\sigma_v}\right) \Phi\left(\frac{\mathbf{Z_{si}^{\prime}} 
-#' \bm{\gamma}+ \frac{\rho}{\sigma_v}\left(y_{2i}-\mathbf{x_{i}^{\prime}} \bm{\beta} + 
-#' S\sigma_u|U_i|\right)}{\sqrt{1-\rho^2}}\right)p\left(|U_i|\right)d|U_i|
+#' L_i\\ = \int_{|U_i|} \frac{1}{\sigma_v}\phi\left(\frac{y_{2i}-
+#' \mathbf{x_{i}^{\prime}} \bm{\beta} + S\sigma_u|U_i|}{\sigma_v}\right) 
+#' \Phi\left(\frac{\mathbf{Z_{si}^{\prime}} \bm{\gamma}+ \frac{\rho}{\sigma_v}
+#' \left(y_{2i}-\mathbf{x_{i}^{\prime}} \bm{\beta} + S\sigma_u|U_i|\right)}{
+#' \sqrt{1-\rho^2}}\right)p\left(|U_i|\right)d|U_i|
 #' }
 #' 
-#' To simplifiy the estimation, the likelihood can be estimated using a two-step approach.
-#' In the first step, the probit model can be run and estimate of \eqn{\gamma} can be obtained.
-#' Then, in the second step, the following model is estimated:
+#' To simplifiy the estimation, the likelihood can be estimated using a two-step 
+#' approach. In the first step, the probit model can be run and estimate of 
+#' \eqn{\gamma} can be obtained. Then, in the second step, the following model 
+#' is estimated:
 #' 
 #' \deqn{
-#' L_i\\ = \int_{|U_i|} \frac{1}{\sigma_v}\phi\left(\frac{y_{2i}-\mathbf{x_{i}^{\prime}} 
-#' \bm{\beta} + S\sigma_u|U_i|}{\sigma_v}\right) \Phi\left(\frac{a_i + 
-#' \frac{\rho}{\sigma_v}\left(y_{2i}-\mathbf{x_{i}^{\prime}} \bm{\beta} + 
-#' S\sigma_u|U_i|\right)}{\sqrt{1-\rho^2}}\right)p\left(|U_i|\right)d|U_i| 
+#' L_i\\ = \int_{|U_i|} \frac{1}{\sigma_v}\phi\left(\frac{y_{2i}-
+#' \mathbf{x_{i}^{\prime}} \bm{\beta} + S\sigma_u|U_i|}{\sigma_v}\right) 
+#' \Phi\left(\frac{a_i + \frac{\rho}{\sigma_v}\left(y_{2i}-
+#' \mathbf{x_{i}^{\prime}} \bm{\beta} + S\sigma_u|U_i|\right)}{\sqrt{1-\rho^2}}
+#' \right)p\left(|U_i|\right)d|U_i| 
 #' }
 #' 
-#' where \eqn{a_i = \mathbf{Z_{si}^{\prime}} \hat{\bm{\gamma}}}. This likelihood can be estimated using 
-#' five different approaches: Gauss-Kronrod quadrature, adaptive integration over hypercubes 
-#' (hcubature and pcubature), Gauss-Hermite quadrature, and
-#'  maximum simulated likelihood. We also use the BHHH estimator to obtain 
-#'  the asymptotic standard errors for the parameter estimators.
+#' where \eqn{a_i = \mathbf{Z_{si}^{\prime}} \hat{\bm{\gamma}}}. This likelihood 
+#' can be estimated using five different approaches: Gauss-Kronrod quadrature, 
+#' adaptive integration over hypercubes (hcubature and pcubature), Gauss-Hermite 
+#' quadrature, and maximum simulated likelihood. We also use the BHHH estimator 
+#' to obtain the asymptotic standard errors for the parameter estimators.
 #'  
-#'  \code{sfaselectioncross} allows for the maximization of weighted log-likelihood.
-#' When option \code{weights} is specified and \code{wscale = TRUE}, the weights
-#' are scaled as: 
+#'  \code{sfaselectioncross} allows for the maximization of weighted 
+#'  log-likelihood. When option \code{weights} is specified and 
+#'  \code{wscale = TRUE}, the weights are scaled as: 
 #' 
 #' \deqn{
-#' new_{weights} = sample_{size} \times \frac{old_{weights}}{\sum(old_{weights})}
+#' new_{weights} = sample_{size} \times \frac{old_{weights}}{
+#' \sum(old_{weights})}
 #' }
 #' 
-#' For complex problems, non-gradient methods (e.g. \code{nm} or \code{sann}) can be 
-#' used to warm start the optimization and zoom in the neighborhood of the 
-#' solution. Then a gradient-based methods is recommended in the second step. In the case
-#' of \code{sann}, we recommend to significantly increase the iteration limit 
-#' (e.g. \code{itermax = 20000}). The Conjugate Gradient (\code{cg}) can also be used
-#' in the first stage.
+#' For complex problems, non-gradient methods (e.g. \code{nm} or \code{sann}) 
+#' can be used to warm start the optimization and zoom in the neighborhood of 
+#' the solution. Then a gradient-based methods is recommended in the second 
+#' step. In the case of \code{sann}, we recommend to significantly increase the 
+#' iteration limit (e.g. \code{itermax = 20000}). The Conjugate Gradient 
+#' (\code{cg}) can also be used in the first stage.
 #' 
-#' A set of extractor functions for fitted model objects is available for objects of class
-#' \code{'sfaselectioncross'} including methods to the generic functions \code{\link[=print.sfaselectioncross]{print}},
-#' \code{\link[=summary.sfaselectioncross]{summary}}, \code{\link[=coef.sfaselectioncross]{coef}}, 
-#' \code{\link[=fitted.sfaselectioncross]{fitted}}, \code{\link[=logLik.sfaselectioncross]{logLik}}, 
-#' \code{\link[=residuals.sfaselectioncross]{residuals}}, \code{\link[=vcov.sfaselectioncross]{vcov}}, 
-#' \code{\link[=efficiencies.sfaselectioncross]{efficiencies}}, \code{\link[=ic.sfaselectioncross]{ic}}, 
+#' A set of extractor functions for fitted model objects is available for 
+#' objects of class
+#' \code{'sfaselectioncross'} including methods to the generic functions 
+#' \code{\link[=print.sfaselectioncross]{print}},
+#'  \code{\link[=summary.sfaselectioncross]{summary}}, 
+#'  \code{\link[=coef.sfaselectioncross]{coef}}, 
+#' \code{\link[=fitted.sfaselectioncross]{fitted}}, 
+#' \code{\link[=logLik.sfaselectioncross]{logLik}}, 
+#' \code{\link[=residuals.sfaselectioncross]{residuals}}, 
+#' \code{\link[=vcov.sfaselectioncross]{vcov}}, 
+#' \code{\link[=efficiencies.sfaselectioncross]{efficiencies}}, 
+#' \code{\link[=ic.sfaselectioncross]{ic}}, 
 #' \code{\link[=marginal.sfaselectioncross]{marginal}}, 
 #' \code{\link[=estfun.sfaselectioncross]{estfun}} and 
-#' \code{\link[=bread.sfaselectioncross]{bread}} (from the \CRANpkg{sandwich} package), 
-#' [lmtest::coeftest()] (from the \CRANpkg{lmtest} package).
+#' \code{\link[=bread.sfaselectioncross]{bread}} (from the \CRANpkg{sandwich} 
+#' package), [lmtest::coeftest()] (from the \CRANpkg{lmtest} package).
 #' 
-#' @return \code{\link{sfaselectioncross}} returns a list of class \code{'sfaselectioncross'}
-#' containing the following elements:
+#' @return \code{\link{sfaselectioncross}} returns a list of class 
+#' \code{'sfaselectioncross'} containing the following elements:
 #'
 #' \item{call}{The matched call.}
 #'
@@ -319,27 +353,33 @@
 #'
 #' \item{startVal}{Numeric vector. Starting value for M(S)L estimation.}
 #'
-#' \item{dataTable}{A data frame (tibble format) containing information on data
+#' \item{dataTable}{A data frame containing information on data
 #' used for optimization along with residuals and fitted values of the OLS and
-#' M(S)L estimations, and the individual observation log-likelihood. When argument \code{weights}
-#' is specified, an additional variable is provided in \code{dataTable}.}
+#' M(S)L estimations, and the individual observation log-likelihood. When 
+#' argument \code{weights} is specified, an additional variable is provided in 
+#' \code{dataTable}.}
 #' 
 #' \item{lpmObj}{Linear probability model used for initializing the first step
 #' probit model.}
 #' 
-#' \item{probitObj}{Probit model. Object of class \code{'maxLik'} and \code{'maxim'}.}
+#' \item{probitObj}{Probit model. Object of class \code{'maxLik'} and 
+#' \code{'maxim'}.}
 #'
 #' \item{ols2stepParam}{Numeric vector. OLS second step estimates for 
 #' selection correction. Inverse Mills Ratio is introduced as an additional 
 #' explanatory variable.}
 #'
-#' \item{ols2stepStder}{Numeric vector. Standard errors of OLS second step estimates.}
+#' \item{ols2stepStder}{Numeric vector. Standard errors of OLS second step 
+#' estimates.}
 #'
-#' \item{ols2stepSigmasq}{Numeric. Estimated variance of OLS second step random error.}
+#' \item{ols2stepSigmasq}{Numeric. Estimated variance of OLS second step random 
+#' error.}
 #'
-#' \item{ols2stepLoglik}{Numeric. Log-likelihood value of OLS second step estimation.}
+#' \item{ols2stepLoglik}{Numeric. Log-likelihood value of OLS second step 
+#' estimation.}
 #'
-#' \item{ols2stepSkew}{Numeric. Skewness of the residuals of the OLS second step estimation.}
+#' \item{ols2stepSkew}{Numeric. Skewness of the residuals of the OLS second step 
+#' estimation.}
 #'
 #' \item{ols2stepM3Okay}{Logical. Indicating whether the residuals of the OLS
 #' second step estimation have the expected skewness.}
@@ -353,7 +393,8 @@
 #' \item{isWeights}{Logical. If \code{TRUE} weighted log-likelihood is
 #' maximized.}
 #' 
-#' \item{lType}{Type of likelihood estimated. See the section \sQuote{Arguments}.}
+#' \item{lType}{Type of likelihood estimated. See the section 
+#' \sQuote{Arguments}.}
 #'
 #' \item{optType}{Optimization algorithm used.}
 #'
@@ -376,6 +417,8 @@
 #'
 #' \item{invHessian}{Covariance matrix of the parameters obtained from the
 #' M(S)L estimation.}
+#' 
+#' \item{conditionNums}{Matrix. Condition number adding columns one by one.}
 #'
 #' \item{hessianType}{The argument \code{'hessianType'}. See the section
 #' \sQuote{Arguments}.}
@@ -392,57 +435,61 @@
 #' 'msl'}.}
 #' 
 #' \item{gHermiteData}{List. Gauss-Hermite quadrature rule as provided by 
-#' \code{\link[fastGHQuad:gaussHermiteData]{gaussHermiteData}}. Only if \code{lType = 
-#' 'ghermite'}.}
+#' \code{\link[fastGHQuad:gaussHermiteData]{gaussHermiteData}}. Only if 
+#' \code{lType = 'ghermite'}.}
 #' 
 #' \item{Nsub}{Number of subdivisions used for quadrature approaches.}
 #' 
 #' \item{uBound}{Upper bound for the inefficiency component when solving
-#' integrals using quadrature approaches except Gauss-Hermite for which the upper
-#' bound is automatically infinite (\code{Inf}).}
+#' integrals using quadrature approaches except Gauss-Hermite for which the 
+#' upper bound is automatically infinite (\code{Inf}).}
 #' 
-#' \item{intol}{Integration tolerance for quadrature approaches except Gauss-Hermite.}
+#' \item{intol}{Integration tolerance for quadrature approaches except 
+#' Gauss-Hermite.}
 #'
 #' @note For the Halton draws, the code is adapted from the \pkg{mlogit}
 #' package.
 #'
 # @author K Hervé Dakpo, Yann Desjeux, and Laure Latruffe
 #'
-#' @seealso \code{\link[=print.sfaselectioncross]{print}} for printing \code{sfaselectioncross} object.
+#' @seealso \code{\link[=print.sfaselectioncross]{print}} for printing 
+#' \code{sfaselectioncross} object.
 #' 
 #' \code{\link[=summary.sfaselectioncross]{summary}} for creating and printing
 #' summary results.
 #'
-#' \code{\link[=coef.sfaselectioncross]{coef}} for extracting coefficients of the
-#' estimation.
+#' \code{\link[=coef.sfaselectioncross]{coef}} for extracting coefficients of 
+#' the estimation.
 #'
 #' \code{\link[=efficiencies.sfaselectioncross]{efficiencies}} for computing
 #' (in-)efficiency estimates.
 #'
-#' \code{\link[=fitted.sfaselectioncross]{fitted}} for extracting the fitted frontier
-#' values.
+#' \code{\link[=fitted.sfaselectioncross]{fitted}} for extracting the fitted 
+#' frontier values.
 #'
 #' \code{\link[=ic.sfaselectioncross]{ic}} for extracting information criteria.
 #'
 #' \code{\link[=logLik.sfaselectioncross]{logLik}} for extracting log-likelihood
 #' value(s) of the estimation.
 #'
-#' \code{\link[=marginal.sfaselectioncross]{marginal}} for computing marginal effects of
-#' inefficiency drivers.
+#' \code{\link[=marginal.sfaselectioncross]{marginal}} for computing marginal 
+#' effects of inefficiency drivers.
 #'
-#' \code{\link[=residuals.sfaselectioncross]{residuals}} for extracting residuals of the
-#' estimation.
+#' \code{\link[=residuals.sfaselectioncross]{residuals}} for extracting 
+#' residuals of the estimation.
 #'
-#' \code{\link[=vcov.sfaselectioncross]{vcov}} for computing the variance-covariance
-#' matrix of the coefficients.
+#' \code{\link[=vcov.sfaselectioncross]{vcov}} for computing the 
+#' variance-covariance matrix of the coefficients.
 #' 
-#' \code{\link[=bread.sfaselectioncross]{bread}} for bread for sandwich estimator.
+#' \code{\link[=bread.sfaselectioncross]{bread}} for bread for sandwich 
+#' estimator.
 #' 
-#' \code{\link[=estfun.sfaselectioncross]{estfun}} for gradient extraction for each 
-#' observation.
+#' \code{\link[=estfun.sfaselectioncross]{estfun}} for gradient extraction for 
+#' each observation.
 #'
-#' @references Caudill, S. B., and Ford, J. M. 1993. Biases in frontier estimation due to
-#' heteroscedasticity. \emph{Economics Letters}, \bold{41}(1), 17--20.
+#' @references Caudill, S. B., and Ford, J. M. 1993. Biases in frontier 
+#' estimation due to heteroscedasticity. \emph{Economics Letters}, 
+#' \bold{41}(1), 17--20.
 #'
 #' Caudill, S. B., Ford, J. M., and Gropper, D. M. 1995. Frontier estimation
 #' and firm-specific inefficiency measures in the presence of
@@ -459,11 +506,12 @@
 #' 
 #' Dakpo, K. H., Latruffe, L., Desjeux, Y., Jeanneaux, P., 2022. 
 #' Modeling heterogeneous technologies in the presence of sample selection: 
-#' The case of dairy farms and the adoption of agri-environmental schemes in France.
-#' \emph{Agricultural Economics}, \bold{53}(3), 422-438.
+#' The case of dairy farms and the adoption of agri-environmental schemes in 
+#' France. \emph{Agricultural Economics}, \bold{53}(3), 422-438.
 #' 
 #' Greene, W., 2010. A stochastic frontier model with correction 
-#' for sample selection. \emph{Journal of Productivity Analysis}. \bold{34}, 15--24.
+#' for sample selection. \emph{Journal of Productivity Analysis}. \bold{34}, 
+#' 15--24.
 #' 
 #' Hadri, K. 1999. Estimation of a doubly heteroscedastic stochastic frontier
 #' cost function. \emph{Journal of Business & Economic Statistics},
@@ -485,7 +533,7 @@
 #' 
 #' \dontrun{
 #' 
-#' ## Simulated example
+#' # Simulated example
 #' 
 #' N <- 2000  # sample size
 #' set.seed(12345)
@@ -503,10 +551,10 @@
 #' y <- x1 + x2 + e2 - u
 #' data <- cbind(y = y, x1 = x1, x2 = x2, z1 = z1, z2 = z2, d = d)
 #' 
-#' ## Estimation using quadrature (Gauss-Kronrod)
+#' # Estimation using quadrature (Gauss-Kronrod)
 #' 
-#' selecRes1 <- sfaselectioncross(selectionF = d ~ z1 + z2, frontierF = y ~ x1 + x2, 
-#' modelType = 'greene10', method = 'bfgs',
+#' selecRes1 <- sfaselectioncross(selectionF = d ~ z1 + z2, 
+#' frontierF = y ~ x1 + x2, modelType = 'greene10', method = 'bfgs',
 #' logDepVar = TRUE, data = as.data.frame(data),
 #' S = 1L, udist = 'hnormal', lType = 'kronrod', Nsub = 100, uBound = Inf,
 #' simType = 'halton', Nsim = 300, prime = 2L, burn = 10, antithetics = FALSE,
@@ -514,10 +562,10 @@
 #' 
 #' summary(selecRes1)
 #' 
-#' ## Estimation using maximum simulated likelihood
+#' # Estimation using maximum simulated likelihood
 #' 
-#' selecRes2 <- sfaselectioncross(selectionF = d ~ z1 + z2, frontierF = y ~ x1 + x2, 
-#' modelType = 'greene10', method = 'bfgs',
+#' selecRes2 <- sfaselectioncross(selectionF = d ~ z1 + z2, 
+#' frontierF = y ~ x1 + x2, modelType = 'greene10', method = 'bfgs',
 #' logDepVar = TRUE, data = as.data.frame(data),
 #' S = 1L, udist = 'hnormal', lType = 'msl', Nsub = 100, uBound = Inf,
 #' simType = 'halton', Nsim = 300, prime = 2L, burn = 10, antithetics = FALSE,
@@ -528,12 +576,11 @@
 #' }
 #' 
 #' @export
-sfaselectioncross <- function(selectionF, frontierF, uhet, vhet,
-  modelType = "greene10", logDepVar = TRUE, data, subset, weights,
-  wscale = TRUE, S = 1L, udist = "hnormal", start = NULL, method = "bfgs",
-  hessianType = 2L, lType = "ghermite", Nsub = 100, uBound = Inf,
-  simType = "halton", Nsim = 100, prime = 2L, burn = 10, antithetics = FALSE,
-  seed = 12345, itermax = 2000, printInfo = FALSE, intol = 1e-06,
+sfaselectioncross <- function(selectionF, frontierF, uhet, vhet, modelType = "greene10",
+  logDepVar = TRUE, data, subset, weights, wscale = TRUE, S = 1L, udist = "hnormal",
+  start = NULL, randStart = FALSE, method = "bfgs", hessianType = 2L, lType = "ghermite",
+  Nsub = 100, uBound = Inf, simType = "halton", Nsim = 100, prime = 2L, burn = 10,
+  antithetics = FALSE, seed = 12345, itermax = 2000, printInfo = FALSE, intol = 1e-06,
   tol = 1e-12, gradtol = 1e-06, stepmax = 0.1, qac = "marquardt") {
   # u distribution check -------
   udist <- tolower(udist)
@@ -544,20 +591,16 @@ sfaselectioncross <- function(selectionF, frontierF, uhet, vhet,
   # selection model check -------
   modelType <- tolower(modelType)
   if (modelType != "greene10") {
-    stop("Currently only Greene (2010) selection model is available ... ",
-      call. = FALSE)
+    stop("Currently only Greene (2010) selection model is available ... ", call. = FALSE)
   }
   # method to solve selection model -------
   lType <- tolower(lType)
-  if (!(lType %in% c("kronrod", "hcubature", "pcubature", "ghermite",
-    "msl"))) {
-    stop("Unknown inefficiency distribution: ", paste(lType),
-      call. = FALSE)
+  if (!(lType %in% c("kronrod", "hcubature", "pcubature", "ghermite", "msl"))) {
+    stop("Unknown inefficiency distribution: ", paste(lType), call. = FALSE)
   }
   # Formula manipulation -------
   if (length(Formula(selectionF))[2] != 1) {
-    stop("argument 'selectionF' must have one RHS part",
-      call. = FALSE)
+    stop("argument 'selectionF' must have one RHS part", call. = FALSE)
   }
   if (length(Formula(frontierF))[2] != 1) {
     stop("argument 'frontierF' must have one RHS part", call. = FALSE)
@@ -565,8 +608,7 @@ sfaselectioncross <- function(selectionF, frontierF, uhet, vhet,
   cl <- match.call()
   mc <- match.call(expand.dots = FALSE)
   ## Selection formula -------
-  m_S <- match(c("selectionF", "data", "subset", "weights"),
-    names(mc), nomatch = 0L)
+  m_S <- match(c("selectionF", "data", "subset", "weights"), names(mc), nomatch = 0L)
   mc_S <- mc[c(1L, m_S)]
   mc_S$drop.unused.levels <- TRUE
   selectionF <- interCheckSelection(formula = selectionF)
@@ -590,16 +632,14 @@ sfaselectioncross <- function(selectionF, frontierF, uhet, vhet,
   }
   wProbit <- as.vector(model.weights(mc_S))
   if (length(wscale) != 1 || !is.logical(wscale[1])) {
-    stop("argument 'wscale' must be a single logical value",
-      call. = FALSE)
+    stop("argument 'wscale' must be a single logical value", call. = FALSE)
   }
   if (!is.null(wProbit)) {
     if (!is.numeric(wProbit)) {
       stop("'weights' must be a numeric vector", call. = FALSE)
     } else {
       if (any(wProbit < 0 | is.na(wProbit)))
-        stop("missing or negative weights not allowed",
-          call. = FALSE)
+        stop("missing or negative weights not allowed", call. = FALSE)
     }
     if (wscale) {
       wProbit <- wProbit/sum(wProbit) * N_S
@@ -608,8 +648,7 @@ sfaselectioncross <- function(selectionF, frontierF, uhet, vhet,
     wProbit <- rep(1, N_S)
   }
   ## frontier formula -------
-  m_F <- match(c("frontierF", "data", "subset", "weights"),
-    names(mc), nomatch = 0L)
+  m_F <- match(c("frontierF", "data", "subset", "weights"), names(mc), nomatch = 0L)
   mc_F <- mc[c(1L, m_F)]
   mc_F$drop.unused.levels <- TRUE
   frontierF <- interCheckMain(formula = frontierF, data = data)
@@ -637,8 +676,8 @@ sfaselectioncross <- function(selectionF, frontierF, uhet, vhet,
   } else {
     vhet <- ~1
   }
-  formula <- formDist_sfaselectioncross(udist = udist, formula = frontierF,
-    uhet = uhet, vhet = vhet)
+  formula <- formDist_sfaselectioncross(udist = udist, formula = frontierF, uhet = uhet,
+    vhet = vhet)
   mtuH <- delete.response(terms(formula, data = data, rhs = 2))
   uHvar <- model.matrix(mtuH, mc_F)[Yvar_S == 1, , drop = FALSE]
   nuZUvar <- ncol(uHvar)
@@ -657,83 +696,93 @@ sfaselectioncross <- function(selectionF, frontierF, uhet, vhet,
     "Stochastic Cost Frontier, e = v + u"
   }
   if (length(logDepVar) != 1 || !is.logical(logDepVar[1])) {
-    stop("argument 'logDepVar' must be a single logical value",
-      call. = FALSE)
+    stop("argument 'logDepVar' must be a single logical value", call. = FALSE)
   }
   # Number of parameters -------
   nParm <- nXvar_F + nuZUvar + nvZVvar + 1
   # Checking starting values when provided -------
   if (!is.null(start)) {
     if (length(start) != nParm) {
-      stop("Wrong number of initial values: model has ",
-        nParm, " parameters", call. = FALSE)
+      stop("Wrong number of initial values: model has ", nParm, " parameters",
+        call. = FALSE)
     }
   }
   if (nParm > N_F) {
     stop("Model has more parameters than observations", call. = FALSE)
   }
+  # Set std. Error when random start is allowed -------
+  sdStart <- if (randStart)
+    0.01 else NULL
   # Check algorithms -------
   method <- tolower(method)
-  if (!(method %in% c("ucminf", "bfgs", "bhhh", "nr", "nm",
-    "cg", "sann", "sr1", "mla", "sparse", "nlminb"))) {
-    stop("Unknown or non-available optimization algorithm: ",
-      paste(method), call. = FALSE)
+  if (!(method %in% c("ucminf", "bfgs", "bhhh", "nr", "nm", "cg", "sann", "sr1",
+    "mla", "sparse", "nlminb"))) {
+    stop("Unknown or non-available optimization algorithm: ", paste(method),
+      call. = FALSE)
   }
   # Check hessian type
-  if (length(hessianType) != 1 || !(hessianType %in% c(1L,
-    2L))) {
-    stop("argument 'hessianType' must equal either 1 or 2",
-      call. = FALSE)
+  if (length(hessianType) != 1 || !(hessianType %in% c(1L, 2L))) {
+    stop("argument 'hessianType' must equal either 1 or 2", call. = FALSE)
   }
   # Draws for MSL -------
   if (lType == "msl") {
-    if (!(simType %in% c("halton", "ghalton", "sobol", "uniform"))) {
-      stop("Unknown or non-available random draws method",
-        call. = FALSE)
+    if (!(simType %in% c("halton", "ghalton", "sobol", "rsobol", "richtmyer",
+                         "rrichtmyer", "uniform", "mlhs"))) {
+      stop("Unknown or non-available random draws method", call. = FALSE)
     }
     if (!is.numeric(Nsim) || length(Nsim) != 1) {
-      stop("argument 'Nsim' must be a single numeric scalar",
-        call. = FALSE)
+      stop("argument 'Nsim' must be a single numeric scalar", call. = FALSE)
     }
     if (!is.numeric(burn) || length(burn) != 1) {
-      stop("argument 'burn' must be a single numeric scalar",
-        call. = FALSE)
+      stop("argument 'burn' must be a single numeric scalar", call. = FALSE)
     }
     if (!is_prime(prime)) {
-      stop("argument 'prime' must be a single prime number",
-        call. = FALSE)
+      stop("argument 'prime' must be a single prime number", call. = FALSE)
     }
     if (length(antithetics) != 1 || !is.logical(antithetics[1])) {
-      stop("argument 'antithetics' must be a single logical value",
-        call. = FALSE)
+      stop("argument 'antithetics' must be a single logical value", call. = FALSE)
     }
     if (antithetics && (Nsim%%2) != 0) {
       Nsim <- Nsim + 1
     }
     simDist <- if (simType == "halton") {
-      "Halton"
+      "Halton Sequence"
     } else {
       if (simType == "ghalton") {
-        "Generalized Halton"
+        "Generalized Halton Sequence"
       } else {
-        if (simType == "sobol") {
-          "Sobol"
+        if (simType == "rhalton") {
+          "Randomized Halton Sequence"
         } else {
-          if (simType == "uniform") {
-          "Uniform"
+          if (simType == "sobol") {
+          "Sobol Sequence"
+          } else {
+          if (simType == "rsobol") {
+            "Randomized Sobol Sequence"
+          } else {
+            if (simType == "richtmyer") {
+            "Richtmyer Sequence"
+            } else {
+            if (simType == "rrichtmyer") {
+              "Randomized Richtmyer Sequence"
+            } else {
+              if (simType == "uniform") {
+              "Uniform Sequence"
+              }
+            }
+            }
+          }
           }
         }
       }
     }
     cat("Initialization of", Nsim, simDist, "draws per observation ...\n")
-    FiMat <- drawMat(N = N_F, Nsim = Nsim, simType = simType,
-      prime = prime, burn = burn, antithetics = antithetics,
-      seed = seed)
+    FiMat <- drawMatUniDim(N = N_F, Nsim = Nsim, simType = simType, prime = prime,
+      burn = burn, antithetics = antithetics, seed = seed)
   }
   # Other optimization options -------
   if (!is.numeric(Nsub) || length(Nsub) != 1) {
-    stop("argument 'Nsub' must be a single numeric scalar",
-      call. = FALSE)
+    stop("argument 'Nsub' must be a single numeric scalar", call. = FALSE)
   }
   if (Nsub != round(Nsub)) {
     stop("argument 'Nsub' must be an integer", call. = FALSE)
@@ -744,8 +793,7 @@ sfaselectioncross <- function(selectionF, frontierF, uhet, vhet,
   Nsub <- as.integer(Nsub)
   uBound <- abs(uBound)
   if (!is.numeric(itermax) || length(itermax) != 1) {
-    stop("argument 'itermax' must be a single numeric scalar",
-      call. = FALSE)
+    stop("argument 'itermax' must be a single numeric scalar", call. = FALSE)
   }
   if (itermax != round(itermax)) {
     stop("argument 'itermax' must be an integer", call. = FALSE)
@@ -755,8 +803,7 @@ sfaselectioncross <- function(selectionF, frontierF, uhet, vhet,
   }
   itermax <- as.integer(itermax)
   if (length(printInfo) != 1 || !is.logical(printInfo[1])) {
-    stop("argument 'printInfo' must be a single logical value",
-      call. = FALSE)
+    stop("argument 'printInfo' must be a single logical value", call. = FALSE)
   }
   if (!is.numeric(intol) || length(intol) != 1) {
     stop("argument 'intol' must be numeric", call. = FALSE)
@@ -783,8 +830,7 @@ sfaselectioncross <- function(selectionF, frontierF, uhet, vhet,
     stop("argument 'stepmax' must be non-negative", call. = FALSE)
   }
   if (!(qac %in% c("marquardt", "stephalving"))) {
-    stop("argument 'qac' must be either 'marquardt' or 'stephalving'",
-      call. = FALSE)
+    stop("argument 'qac' must be either 'marquardt' or 'stephalving'", call. = FALSE)
   }
   # Nodes for Gauss Hermite quadrature -------
   if (lType == "ghermite") {
@@ -797,16 +843,14 @@ sfaselectioncross <- function(selectionF, frontierF, uhet, vhet,
     if (dim(Xvar_S)[2] == 1) {
       lm(Yvar_S ~ 1)
     } else {
-      lm(Yvar_S ~ ., data = as.data.frame(Xvar_S[, -1,
-        drop = FALSE]), weights = wProbit)
+      lm(Yvar_S ~ ., data = as.data.frame(Xvar_S[, -1, drop = FALSE]), weights = wProbit)
     }
   } else {
     lm(Yvar_S ~ -1 + ., data = as.data.frame(Xvar_S), weights = wProbit)
   }
   if (any(is.na(lpm$coefficients))) {
-    stop("at least one of the 'selectionF' coefficients is NA: ",
-      paste(colnames(Xvar_S)[is.na(lpm$coefficients)],
-        collapse = ", "), "This may be due to a singular matrix
+    stop("at least one of the 'selectionF' coefficients is NA: ", paste(colnames(Xvar_S)[is.na(lpm$coefficients)],
+      collapse = ", "), "This may be due to a singular matrix
    due to potential perfect multicollinearity",
       call. = FALSE)
   }
@@ -814,8 +858,8 @@ sfaselectioncross <- function(selectionF, frontierF, uhet, vhet,
   cat("First step probit model...\n")
   probRes <- maxLik::maxLik(logLik = probit_likelihood, grad = probit_gradient,
     start = coefficients(lpm), method = "bfgs", control = list(iterlim = itermax,
-      printLevel = printInfo, reltol = tol, tol = tol,
-      qac = qac), Xvar = Xvar_S, Yvar = Yvar_S, wHvar = wProbit)
+      printLevel = printInfo, reltol = tol, tol = tol, qac = qac), Xvar = Xvar_S,
+    Yvar = Yvar_S, wHvar = wProbit)
   probitParam <- probRes$estimate
   ## heckit model using IMR and OLS -------
   if (inherits(data, "pdata.frame")) {
@@ -825,25 +869,22 @@ sfaselectioncross <- function(selectionF, frontierF, uhet, vhet,
   }
   dataTable <- data.frame(cbind(dataTable, data[, c(all.vars(terms(selectionF)),
     all.vars(terms(frontierF)))], weights = wProbit))
-  dataTable$PROBIT_PREDICTIONS <- as.numeric(crossprod(matrix(probitParam),
-    t(Xvar_S)))
+  dataTable$PROBIT_PREDICTIONS <- as.numeric(crossprod(matrix(probitParam), t(Xvar_S)))
   dataTable$IMR <- dnorm(dataTable[["PROBIT_PREDICTIONS"]])/pnorm(dataTable[["PROBIT_PREDICTIONS"]])
   ols2step <- if (colnames(Xvar_F)[1] == "(Intercept)") {
     if (dim(Xvar_F)[2] == 1) {
       lm(Yvar_F ~ 1)
     } else {
-      lm(Yvar_F ~ ., data = as.data.frame(cbind(Xvar_F[,
-        -1, drop = FALSE], IMR = dataTable$IMR[Yvar_S ==
-        1])), weights = wHvar)
+      lm(Yvar_F ~ ., data = as.data.frame(cbind(Xvar_F[, -1, drop = FALSE],
+        IMR = dataTable$IMR[Yvar_S == 1])), weights = wHvar)
     }
   } else {
-    lm(Yvar_F ~ -1 + ., data = as.data.frame(cbind(Xvar_F,
-      IMR = dataTable$IMR[Yvar_S == 1])), weights = wHvar)
+    lm(Yvar_F ~ -1 + ., data = as.data.frame(cbind(Xvar_F, IMR = dataTable$IMR[Yvar_S ==
+      1])), weights = wHvar)
   }
   if (any(is.na(ols2step$coefficients))) {
-    stop("at least one of the 'frontierF' coefficients is NA: ",
-      paste(colnames(Xvar_F)[is.na(ols2step$coefficients)],
-        collapse = ", "), "This may be due to a singular matrix
+    stop("at least one of the 'frontierF' coefficients is NA: ", paste(colnames(Xvar_F)[is.na(ols2step$coefficients)],
+      collapse = ", "), "This may be due to a singular matrix
    due to potential perfect multicollinearity",
       call. = FALSE)
   }
@@ -856,12 +897,11 @@ sfaselectioncross <- function(selectionF, frontierF, uhet, vhet,
   dataTable$ols2stepResiduals[Yvar_S == 1] <- residuals(ols2step)
   dataTable$ols2stepFitted <- NA
   dataTable$ols2stepFitted[Yvar_S == 1] <- fitted(ols2step)
-  # possibility to have duplicated columns if ID or TIME
-  # appears in ols in the case of panel data
+  # possibility to have duplicated columns if ID or TIME appears in ols in the
+  # case of panel data
   dataTable <- dataTable[!duplicated(as.list(dataTable))]
   ## skewness is run on the 2step model -------
-  ols2stepSkew <- skewness(dataTable[["ols2stepResiduals"]][Yvar_S ==
-    1])
+  ols2stepSkew <- skewness(dataTable[["ols2stepResiduals"]][Yvar_S == 1])
   ols2stepM3Okay <- if (S * ols2stepSkew < 0) {
     "Residuals have the expected skeweness"
   } else {
@@ -876,67 +916,58 @@ sfaselectioncross <- function(selectionF, frontierF, uhet, vhet,
   model misspecification or sample 'bad luck'",
       call. = FALSE)
   }
-  CoelliM3Test <- c(z = sum(dataTable[["ols2stepResiduals"]]^3,
-    na.rm = TRUE)/N_F/sqrt(6 * (sum(dataTable[["ols2stepResiduals"]]^2,
-    na.rm = TRUE)/N_F)^3/N_F), p.value = 2 * pnorm(-abs(sum(dataTable[["ols2stepResiduals"]]^3,
-    na.rm = TRUE)/N_F/sqrt(6 * (sum(dataTable[["ols2stepResiduals"]]^2,
-    na.rm = TRUE)/N_F)^3/N_F))))
-  AgostinoTest <- dagoTest(dataTable[["ols2stepResiduals"]][Yvar_S ==
-    1])
+  CoelliM3Test <- c(z = sum(dataTable[["ols2stepResiduals"]]^3, na.rm = TRUE)/N_F/sqrt(6 *
+    (sum(dataTable[["ols2stepResiduals"]]^2, na.rm = TRUE)/N_F)^3/N_F), p.value = 2 *
+    pnorm(-abs(sum(dataTable[["ols2stepResiduals"]]^3, na.rm = TRUE)/N_F/sqrt(6 *
+      (sum(dataTable[["ols2stepResiduals"]]^2, na.rm = TRUE)/N_F)^3/N_F))))
+  AgostinoTest <- dagoTest(dataTable[["ols2stepResiduals"]][Yvar_S == 1])
   class(AgostinoTest) <- "dagoTest"
   # Step 2: MLE arguments -------
   FunArgs <- if (lType %in% c("kronrod", "hcubature", "pcubature")) {
-    list(start = start, olsParam = ols2stepParam, dataTable = dataTable,
-      nXvar = nXvar_F, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar_F, Xvar = Xvar_F,
-      selectDum = Yvar_S, wHvar = wHvar, S = S, PREDICTIONS = dataTable[["PROBIT_PREDICTIONS"]][Yvar_S ==
-        1], uBound = uBound, subdivisions = Nsub, intol,
-      method = method, printInfo = printInfo, itermax = itermax,
-      stepmax = stepmax, tol = tol, gradtol = gradtol,
-      hessianType = hessianType, qac = qac)
+    list(start = start, randStart = randStart, sdStart = sdStart, olsParam = ols2stepParam,
+      dataTable = dataTable, nXvar = nXvar_F, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar_F, Xvar = Xvar_F, selectDum = Yvar_S,
+      wHvar = wHvar, S = S, PREDICTIONS = dataTable[["PROBIT_PREDICTIONS"]][Yvar_S ==
+        1], uBound = uBound, subdivisions = Nsub, intol, method = method,
+      printInfo = printInfo, itermax = itermax, stepmax = stepmax, tol = tol,
+      gradtol = gradtol, hessianType = hessianType, qac = qac)
   } else {
     if (lType == "ghermite") {
-      list(start = start, olsParam = ols2stepParam, dataTable = dataTable,
-        nXvar = nXvar_F, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar_F,
-        Xvar = Xvar_F, selectDum = Yvar_S, wHvar = wHvar,
-        S = S, PREDICTIONS = dataTable[["PROBIT_PREDICTIONS"]][Yvar_S ==
-          1], gH = gH, N = N_F, method = method, printInfo = printInfo,
-        itermax = itermax, stepmax = stepmax, tol = tol,
-        gradtol = gradtol, hessianType = hessianType,
+      list(start = start, randStart = randStart, sdStart = sdStart, olsParam = ols2stepParam,
+        dataTable = dataTable, nXvar = nXvar_F, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar_F, Xvar = Xvar_F, selectDum = Yvar_S,
+        wHvar = wHvar, S = S, PREDICTIONS = dataTable[["PROBIT_PREDICTIONS"]][Yvar_S ==
+          1], gH = gH, N = N_F, method = method, printInfo = printInfo, itermax = itermax,
+        stepmax = stepmax, tol = tol, gradtol = gradtol, hessianType = hessianType,
         qac = qac)
     } else {
       if (lType == "msl") {
-        list(start = start, olsParam = ols2stepParam,
-          dataTable = dataTable, nXvar = nXvar_F, nuZUvar = nuZUvar,
-          nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
-          Yvar = Yvar_F, Xvar = Xvar_F, selectDum = Yvar_S,
+        list(start = start, randStart = randStart, sdStart = sdStart, olsParam = ols2stepParam,
+          dataTable = dataTable, nXvar = nXvar_F, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
+          uHvar = uHvar, vHvar = vHvar, Yvar = Yvar_F, Xvar = Xvar_F, selectDum = Yvar_S,
           wHvar = wHvar, S = S, PREDICTIONS = dataTable[["PROBIT_PREDICTIONS"]][Yvar_S ==
-          1], FiMat = FiMat, N = N_F, method = method,
-          printInfo = printInfo, itermax = itermax, stepmax = stepmax,
-          tol = tol, gradtol = gradtol, hessianType = hessianType,
-          qac = qac)
+          1], FiMat = FiMat, N = N_F, method = method, printInfo = printInfo,
+          itermax = itermax, stepmax = stepmax, tol = tol, gradtol = gradtol,
+          hessianType = hessianType, qac = qac)
       }
     }
   }
   ## MLE run -------
   cat("Second step Frontier model...\n")
-  mleList <- tryCatch(switch(lType, kronrod = do.call(halfnormAlgOpt_ss_GK,
-    FunArgs), hcubature = do.call(halfnormAlgOpt_ss_HCUB,
-    FunArgs), pcubature = do.call(halfnormAlgOpt_ss_PCUB,
-    FunArgs), ghermite = do.call(halfnormAlgOpt_ss_GH, FunArgs),
-    msl = do.call(halfnormAlgOpt_ss_MSL, FunArgs)), error = function(e) e)
+  mleList <- tryCatch(switch(lType, kronrod = do.call(halfnormAlgOpt_ss_GK, FunArgs),
+    hcubature = do.call(halfnormAlgOpt_ss_HCUB, FunArgs), pcubature = do.call(halfnormAlgOpt_ss_PCUB,
+      FunArgs), ghermite = do.call(halfnormAlgOpt_ss_GH, FunArgs), msl = do.call(halfnormAlgOpt_ss_MSL,
+      FunArgs)), error = function(e) e)
   if (inherits(mleList, "error")) {
-    stop("The current error occurs during optimization:\n",
-      mleList$message, call. = FALSE)
+    stop("The current error occurs during optimization:\n", mleList$message,
+      call. = FALSE)
   }
   # Inverse Hessian + other -------
   mleList$invHessian <- vcovObj(mleObj = mleList$mleObj, hessianType = hessianType,
     method = method, nParm = nParm)
   mleList <- c(mleList, if (method == "ucminf") {
     list(type = "ucminf max.", nIter = unname(mleList$mleObj$info["neval"]),
-      status = mleList$mleObj$message, mleLoglik = -mleList$mleObj$value,
-      gradient = mleList$mleObj$gradient)
+      status = mleList$mleObj$message, mleLoglik = -mleList$mleObj$value, gradient = mleList$mleObj$gradient)
   } else {
     if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
       list(type = substr(mleList$mleObj$type, 1, 27), nIter = mleList$mleObj$iterations,
@@ -944,15 +975,13 @@ sfaselectioncross <- function(selectionF, frontierF, uhet, vhet,
         gradient = mleList$mleObj$gradient)
     } else {
       if (method == "sr1") {
-        list(type = "SR1 max.", nIter = mleList$mleObj$iterations,
-          status = mleList$mleObj$status, mleLoglik = -mleList$mleObj$fval,
-          gradient = -mleList$mleObj$gradient)
+        list(type = "SR1 max.", nIter = mleList$mleObj$iterations, status = mleList$mleObj$status,
+          mleLoglik = -mleList$mleObj$fval, gradient = -mleList$mleObj$gradient)
       } else {
         if (method == "mla") {
-          list(type = "Lev. Marquardt max.", nIter = mleList$mleObj$ni,
-          status = switch(mleList$mleObj$istop, `1` = "convergence criteria were satisfied",
-            `2` = "maximum number of iterations was reached",
-            `4` = "algorithm encountered a problem in the function computation"),
+          list(type = "Lev. Marquardt max.", nIter = mleList$mleObj$ni, status = switch(mleList$mleObj$istop,
+          `1` = "convergence criteria were satisfied", `2` = "maximum number of iterations was reached",
+          `4` = "algorithm encountered a problem in the function computation"),
           mleLoglik = -mleList$mleObj$fn.value, gradient = -mleList$mleObj$grad)
         } else {
           if (method == "sparse") {
@@ -971,8 +1000,8 @@ sfaselectioncross <- function(selectionF, frontierF, uhet, vhet,
     }
   })
   # quick renaming -------
-  names(mleList$startVal) <- fName_uvr_sfaselectioncross(Xvar = Xvar_F,
-    uHvar = uHvar, vHvar = vHvar)
+  names(mleList$startVal) <- fName_uvr_sfaselectioncross(Xvar = Xvar_F, uHvar = uHvar,
+    vHvar = vHvar)
   names(mleList$mlParam) <- names(mleList$startVal)
   rownames(mleList$invHessian) <- colnames(mleList$invHessian) <- names(mleList$mlParam)
   names(mleList$gradient) <- names(mleList$mlParam)
@@ -1027,6 +1056,8 @@ sfaselectioncross <- function(selectionF, frontierF, uhet, vhet,
   returnObj$gradL_OBS[Yvar_S == 1, ] <- mleList$mleObj$gradL_OBS
   returnObj$gradientNorm <- sqrt(sum(mleList$gradient^2))
   returnObj$invHessian <- mleList$invHessian
+  returnObj$conditionNums <- condiNum(mleObj = mleList$mleObj, method = method,
+    nParm = nParm)
   returnObj$hessianType <- if (hessianType == 1) {
     "Analytic Hessian"
   } else {
@@ -1061,8 +1092,7 @@ print.sfaselectioncross <- function(x, ...) {
   cat(deparse(x$call))
   cat("\n\n")
   cat("Likelihood estimates using", x$optType, "\n")
-  cat("Normal-Half Normal Sample Selection Stochastic Frontier Model",
-    "\n")
+  cat("Normal-Half Normal Sample Selection Stochastic Frontier Model", "\n")
   cat("Data Type: Cross Section \n")
   cat("Status:", x$optStatus, "\n\n")
   cat(x$typeSfa, "\n")
@@ -1072,7 +1102,7 @@ print.sfaselectioncross <- function(x, ...) {
 
 # Bread for Sandwich Estimator ----------
 #' @rdname sfaselectioncross
-#' @export
+#' @exportS3Method sandwich::bread sfaselectioncross
 bread.sfaselectioncross <- function(x, ...) {
   if (x$hessianType == "Analytic Hessian") {
     return(x$invHessian * x$Nobs)
@@ -1087,45 +1117,36 @@ bread.sfaselectioncross <- function(x, ...) {
     vHvar <- model.matrix(x$formula, rhs = 3, data = x$dataTable[x$dataTable[all.vars(x$selectionF)[1]] ==
       1, ])
     if (x$lType == "kronrod") {
-      hessAnalytical <- chesshalfnormlike_ss_GK(x$mlParam,
-        nXvar = ncol(Xvar), nuZUvar = ncol(uHvar), nvZVvar = ncol(vHvar),
-        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-        wHvar = x$dataTable$weights, S = x$S, PREDICTIONS = x$dataTable[["PROBIT_PREDICTIONS"]][x$dataTable[all.vars(x$selectionF)[1]] ==
-          1], uBound = x$uBound, subdivisions = x$Nsub,
-        intol = x$intol)
+      hessAnalytical <- chesshalfnormlike_ss_GK(x$mlParam, nXvar = ncol(Xvar),
+        nuZUvar = ncol(uHvar), nvZVvar = ncol(vHvar), uHvar = uHvar, vHvar = vHvar,
+        Yvar = Yvar, Xvar = Xvar, wHvar = x$dataTable$weights, S = x$S, PREDICTIONS = x$dataTable[["PROBIT_PREDICTIONS"]][x$dataTable[all.vars(x$selectionF)[1]] ==
+          1], uBound = x$uBound, subdivisions = x$Nsub, intol = x$intol)
     } else {
       if (x$lType == "hcubature") {
-        hessAnalytical <- chesshalfnormlike_ss_HCUB(x$mlParam,
-          nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-          nvZVvar = ncol(vHvar), uHvar = uHvar, vHvar = vHvar,
+        hessAnalytical <- chesshalfnormlike_ss_HCUB(x$mlParam, nXvar = ncol(Xvar),
+          nuZUvar = ncol(uHvar), nvZVvar = ncol(vHvar), uHvar = uHvar, vHvar = vHvar,
           Yvar = Yvar, Xvar = Xvar, wHvar = x$dataTable$weights[x$dataTable[all.vars(x$selectionF)[1]] ==
           1], S = x$S, PREDICTIONS = x$dataTable[["PROBIT_PREDICTIONS"]][x$dataTable[all.vars(x$selectionF)[1]] ==
-          1], uBound = x$uBound, subdivisions = x$Nsub,
-          intol = x$intol)
+          1], uBound = x$uBound, subdivisions = x$Nsub, intol = x$intol)
       } else {
         if (x$lType == "pcubature") {
-          hessAnalytical <- chesshalfnormlike_ss_PCUB(x$mlParam,
-          nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-          nvZVvar = ncol(vHvar), uHvar = uHvar, vHvar = vHvar,
-          Yvar = Yvar, Xvar = Xvar, wHvar = x$dataTable$weights[x$dataTable[all.vars(x$selectionF)[1]] ==
+          hessAnalytical <- chesshalfnormlike_ss_PCUB(x$mlParam, nXvar = ncol(Xvar),
+          nuZUvar = ncol(uHvar), nvZVvar = ncol(vHvar), uHvar = uHvar,
+          vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = x$dataTable$weights[x$dataTable[all.vars(x$selectionF)[1]] ==
             1], S = x$S, PREDICTIONS = x$dataTable[["PROBIT_PREDICTIONS"]][x$dataTable[all.vars(x$selectionF)[1]] ==
-            1], uBound = x$uBound, subdivisions = x$Nsub,
-          intol = x$intol)
+            1], uBound = x$uBound, subdivisions = x$Nsub, intol = x$intol)
         } else {
           if (x$lType == "ghermite") {
-          hessAnalytical <- chesshalfnormlike_ss_GH(x$mlParam,
-            nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-            nvZVvar = ncol(vHvar), uHvar = uHvar, vHvar = vHvar,
-            Yvar = Yvar, Xvar = Xvar, wHvar = x$dataTable$weights[x$dataTable[all.vars(x$selectionF)[1]] ==
+          hessAnalytical <- chesshalfnormlike_ss_GH(x$mlParam, nXvar = ncol(Xvar),
+            nuZUvar = ncol(uHvar), nvZVvar = ncol(vHvar), uHvar = uHvar,
+            vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = x$dataTable$weights[x$dataTable[all.vars(x$selectionF)[1]] ==
             1], S = x$S, PREDICTIONS = x$dataTable[["PROBIT_PREDICTIONS"]][x$dataTable[all.vars(x$selectionF)[1]] ==
             1], gH = x$gHermiteData, N = x$Nobs)
           } else {
           if (x$lType == "msl") {
-            hessAnalytical <- chesshalfnormlike_ss_MSL(x$mlParam,
-            nXvar = ncol(Xvar), nuZUvar = ncol(uHvar),
-            nvZVvar = ncol(vHvar), uHvar = uHvar,
-            vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-            wHvar = x$dataTable$weights[x$dataTable[all.vars(x$selectionF)[1]] ==
+            hessAnalytical <- chesshalfnormlike_ss_MSL(x$mlParam, nXvar = ncol(Xvar),
+            nuZUvar = ncol(uHvar), nvZVvar = ncol(vHvar), uHvar = uHvar,
+            vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = x$dataTable$weights[x$dataTable[all.vars(x$selectionF)[1]] ==
               1], S = x$S, PREDICTIONS = x$dataTable[["PROBIT_PREDICTIONS"]][x$dataTable[all.vars(x$selectionF)[1]] ==
               1], FiMat = x$FiMat, N = x$Nobs)
           }
@@ -1141,7 +1162,7 @@ bread.sfaselectioncross <- function(x, ...) {
 
 # Gradients Evaluated at each Observation ----------
 #' @rdname sfaselectioncross
-#' @export
+#' @exportS3Method sandwich::estfun sfaselectioncross
 estfun.sfaselectioncross <- function(x, ...) {
   return(x$gradL_OBS[complete.cases(x$gradL_OBS), , drop = FALSE])
 }
