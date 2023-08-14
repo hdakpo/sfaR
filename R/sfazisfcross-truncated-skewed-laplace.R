@@ -2333,8 +2333,11 @@ zisftslnormAlgOpt_logit <- function(start, randStart, sdStart, olsParam, dataTab
     tol = tol)
   initTSL <- start_st$initTSL
   startVal <- start_st$StartVal
-  if (randStart)
-    startVal <- startVal + rnorm(length(startVal), sd = sdStart)
+  if (randStart) {
+    rd <- rnorm(length(startVal), sd = sdStart)
+    rd[nXvar + nuZUvar + nvZVvar + 1] <- abs(rd[nXvar + nuZUvar + nvZVvar + 1])
+    startVal <- startVal + rd
+  }
   startLoglik <- sum(czisftslnormlike_logit(startVal, nXvar = nXvar, nuZUvar = nuZUvar,
     nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
     S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar))
@@ -2452,8 +2455,11 @@ zisftslnormAlgOpt_cauchit <- function(start, randStart, sdStart, olsParam, dataT
     tol = tol)
   initTSL <- start_st$initTSL
   startVal <- start_st$StartVal
-  if (randStart)
-    startVal <- startVal + rnorm(length(startVal), sd = sdStart)
+  if (randStart) {
+    rd <- rnorm(length(startVal), sd = sdStart)
+    rd[nXvar + nuZUvar + nvZVvar + 1] <- abs(rd[nXvar + nuZUvar + nvZVvar + 1])
+    startVal <- startVal + rd
+  }
   startLoglik <- sum(czisftslnormlike_cauchit(startVal, nXvar = nXvar, nuZUvar = nuZUvar,
     nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
     S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar))
@@ -2572,8 +2578,11 @@ zisftslnormAlgOpt_probit <- function(start, randStart, sdStart, olsParam, dataTa
     tol = tol)
   initTSL <- start_st$initTSL
   startVal <- start_st$StartVal
-  if (randStart)
-    startVal <- startVal + rnorm(length(startVal), sd = sdStart)
+  if (randStart) {
+    rd <- rnorm(length(startVal), sd = sdStart)
+    rd[nXvar + nuZUvar + nvZVvar + 1] <- abs(rd[nXvar + nuZUvar + nvZVvar + 1])
+    startVal <- startVal + rd
+  }
   startLoglik <- sum(czisftslnormlike_probit(startVal, nXvar = nXvar, nuZUvar = nuZUvar,
     nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
     S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar))
@@ -2691,8 +2700,11 @@ zisftslnormAlgOpt_cloglog <- function(start, randStart, sdStart, olsParam, dataT
     tol = tol)
   initTSL <- start_st$initTSL
   startVal <- start_st$StartVal
-  if (randStart)
-    startVal <- startVal + rnorm(length(startVal), sd = sdStart)
+  if (randStart) {
+    rd <- rnorm(length(startVal), sd = sdStart)
+    rd[nXvar + nuZUvar + nvZVvar + 1] <- abs(rd[nXvar + nuZUvar + nvZVvar + 1])
+    startVal <- startVal + rd
+  }
   startLoglik <- sum(czisftslnormlike_cloglog(startVal, nXvar = nXvar, nuZUvar = nuZUvar,
     nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
     S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar))
@@ -2813,8 +2825,11 @@ mnsftslnormAlgOpt_logit <- function(start, randStart, sdStart, olsParam, dataTab
     tol = tol)
   initTSL <- start_st$initTSL
   startVal <- start_st$StartVal
-  if (randStart)
-    startVal <- startVal + rnorm(length(startVal), sd = sdStart)
+  if (randStart) {
+    rd <- rnorm(length(startVal), sd = sdStart)
+    rd[nXvar + nuZUvar + 2 * nvZVvar + 1] <- abs(rd[nXvar + nuZUvar + 2 * nvZVvar + 1])
+    startVal <- startVal + rd
+  }
   startLoglik <- sum(cmnsftslnormlike_logit(startVal, nXvar = nXvar, nuZUvar = nuZUvar,
     nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
     S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar))
@@ -2932,8 +2947,11 @@ mnsftslnormAlgOpt_cauchit <- function(start, randStart, sdStart, olsParam, dataT
     tol = tol)
   initTSL <- start_st$initTSL
   startVal <- start_st$StartVal
-  if (randStart)
-    startVal <- startVal + rnorm(length(startVal), sd = sdStart)
+  if (randStart) {
+    rd <- rnorm(length(startVal), sd = sdStart)
+    rd[nXvar + nuZUvar + 2 * nvZVvar + 1] <- abs(rd[nXvar + nuZUvar + 2 * nvZVvar + 1])
+    startVal <- startVal + rd
+  }
   startLoglik <- sum(cmnsftslnormlike_cauchit(startVal, nXvar = nXvar, nuZUvar = nuZUvar,
     nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
     S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar))
@@ -3052,8 +3070,11 @@ mnsftslnormAlgOpt_probit <- function(start, randStart, sdStart, olsParam, dataTa
     tol = tol)
   initTSL <- start_st$initTSL
   startVal <- start_st$StartVal
-  if (randStart)
-    startVal <- startVal + rnorm(length(startVal), sd = sdStart)
+  if (randStart) {
+    rd <- rnorm(length(startVal), sd = sdStart)
+    rd[nXvar + nuZUvar + 2 * nvZVvar + 1] <- abs(rd[nXvar + nuZUvar + 2 * nvZVvar + 1])
+    startVal <- startVal + rd
+  }
   startLoglik <- sum(cmnsftslnormlike_probit(startVal, nXvar = nXvar, nuZUvar = nuZUvar,
     nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
     S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar))
@@ -3171,8 +3192,11 @@ mnsftslnormAlgOpt_cloglog <- function(start, randStart, sdStart, olsParam, dataT
     tol = tol)
   initTSL <- start_st$initTSL
   startVal <- start_st$StartVal
-  if (randStart)
-    startVal <- startVal + rnorm(length(startVal), sd = sdStart)
+  if (randStart) {
+    rd <- rnorm(length(startVal), sd = sdStart)
+    rd[nXvar + nuZUvar + 2 * nvZVvar + 1] <- abs(rd[nXvar + nuZUvar + 2 * nvZVvar + 1])
+    startVal <- startVal + rd
+  }
   startLoglik <- sum(cmnsftslnormlike_cloglog(startVal, nXvar = nXvar, nuZUvar = nuZUvar,
     nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
     S = S, wHvar = wHvar, Zvar = Zvar, nZHvar = nZHvar))
