@@ -209,7 +209,7 @@ Let's consider the standard production function \footnote{Other specifications
 for the production technology can also be used, e.g. distance functions, profit,
 cost or revenue functions, input/output requirement functions.} 
 %
-\begin{equation}\label{eq:1}
+\begin{equation}\label{eq:1.1.1}
 y_i = \mathbf{x_i'}\bm{\beta} + v_i - Su_i \quad \text{with} \quad i = 1, \cdots, N
 \end{equation}
 %
@@ -251,7 +251,7 @@ $\epsilon_i$ when $S=1$. However, in practice, the third moment of
 $\epsilon_i$ can be positive \citep{sw09}. This generate a type I error, which 
 might prevent the identification of the inefficiency distribution parameters 
 \citep{olson80}. According to \citet{wald82}, the "wrong" skewness implies that 
-the maximum likelihood and the OLS estimates of equation~\ref{eq:1} will have 
+the maximum likelihood and the OLS estimates of equation~\ref{eq:1.1.1} will have 
 the same slopes and there are no inefficiencies. A long debate has then emerged 
 around the "wrong" skewness. An advantage of the weibull and 
 the truncated skewed-laplace distributions is to allow positive 
@@ -357,20 +357,20 @@ can also be applied to the log-normal distribution.
 
 Regarding the truncated normal distribution, \citet{wang02} have formulated a 
 different strategy for modelling the inefficiency variable:
-
+%
 $$u_i \sim h(\mathbf{z}_i, \bm\delta)u_*$$
-
+%
 where $h() \geq 0$ (\textit{scaling factor}) is observation-specific and 
 non-stochastic and $u_*$ is a random (\textit{common}) variable that follows 
 here a truncated normal distribution $\mathcal{N}^+\left(\tau, \sigma_u^2\right)$. 
 Following \cite{kum14}, we re-parameterize the truncated normal distribution as 
 $\mathcal{N}^+\left(\tau, \exp{\left(c_u\right)}\right)$. Then
-
+%
 $$u \equiv \exp\left(\mathbf{z'_{u,i}}\bm\delta\right)\mathcal{N}^+
 \left(\tau, \exp{\left(c_u\right)}\right)=\mathcal{N}^+\left(\tau\exp\left(
 \mathbf{z'_{u,i}}\bm\delta\right), \exp{\left(c_u + 2\mathbf{z'_{u,i}}
 \bm\delta\right)}\right)$$
-
+%
 The advantage of the scaling property is that $u_*$, also known as the \textit{base
 inefficiency}, anhd its distribution the \textit{base distribution}
 \citep{wang02, al06}, does not depend on $\mathbf{z}$. This implies
@@ -387,7 +387,6 @@ each $z$ variable on inefficiency. This marginal impact is estimated using the
 derivatives $\partial E\left[u_i\right]/\partial z\left[k\right]$ and
 $\partial V\left[u_i\right]/\partial z\left[k\right]$, which vary 
 depending the distribution of $u$.
-
 
 
 \subsubsection{Efficiency estimation} 
@@ -433,11 +432,11 @@ considered in \pkg{sfaR} are distribution-based models.
 
 The first to consider the panel dimension when estimating SF is \citet{pl81} who
 considered the following model
-
-\begin{equation} \label{eq:2}
+%
+\begin{equation} \label{eq:1.2.1}
 y_{it} = \mathbf{x_{it}'}\bm{\beta} + v_{it} - Su_i \quad \text{with} \quad i = 1, \cdots, N \quad \text{and} \quad t = 1, \cdots, T
 \end{equation}
-
+%
 where the random effect $u_i$ is considered to be the inefficiency. If this model
 has only been developed for a few distributions for $u_i$, e.g., half-normal \citep{pl81}, 
 truncated normal \citep{batt88}, rayleigh \citep{hajar15}, uniform \citep{nguyen10}, we extend it in the \pkg{sfaR} package to all the
@@ -459,12 +458,12 @@ Appendix.
 Assuming that inefficiency is persistent over time may be quite restrictive 
 especially for moderate to large time span data. It also implies that DMUs
 never learn over time. The time-varying inefficiency models overcome the 
-previous issues, and can be represented by equation~\ref{eq:3}.
-
-\begin{equation} \label{eq:3}
+previous issues, and can be represented by equation~\ref{eq:1.2.2}.
+%
+\begin{equation} \label{eq:1.2.2}
 y_{it} = \mathbf{x_{it}'}\bm{\beta} + v_{it} - SG(t)u_i \quad \text{with} \quad i = 1, \cdots, N \quad \text{and} \quad t = 1, \cdots, T
 \end{equation}
-
+%
 All the developments for time-varying inefficiency models are based on the 
 functional form assumed for $G(t)$.\footnote{A distribution-free approach has 
 been discussed in \citet{css90, lees93}.} The different possibilities of $G(t)$ in 
@@ -477,25 +476,25 @@ models were suggested as documented in Table~\ref{table:gt}.
 %\setlength{\arrayrulewidth}{.01em}
 \renewcommand{\arraystretch}{1.3}
 \centering
-\begin{tabular}{@{}cc@{}}
+\begin{tabular}{@{}ccc@{}}
 \toprule
-References & $G(t)$ \\[1em]
+References & $G(t)$ & Code in \pkg{sfaR} \\[1em]
 \midrule
-\citet{kum90} & $G(t)=\left[1+\exp{\left(\eta_1t + \eta_2t^2\right)}\right]^{-1}$ \\[1em]
+\citet{kum90} & $G(t)=\left[1+\exp{\left(\eta_1t + \eta_2t^2\right)}\right]^{-1}$ & \code{k90} \\[1em]
 %\hdashline
-\citet{batco92} "time-decay" & $G(t)=\exp{\left[-\eta(t-T)\right]}$ \\[1em]
+\citet{batco92} "time-decay" & $G(t)=\exp{\left[-\eta(t-T)\right]}$ & \code{bc92a} \\[1em]
 %\hdashline
-\citet{batco92} & $G(t)= 1 + \eta_1(t-T) + \eta_2(t-T)^2$ \\[1em]
+\citet{batco92} & $G(t)= 1 + \eta_1(t-T) + \eta_2(t-T)^2$ & \code{mbc92} \\[1em]
 %\hdashline
-Modified \citet{lees93} & $G(t)=\exp{\left[-\eta_t(t-T)\right]}$ \\[1em] 
+Modified \citet{lees93} & $G(t)=\exp{\left[-\eta_t(t-T)\right]}$ & \code{mols93} \\[1em] 
 %\hdashline
-\citet{cue00} & $G(t)=\exp{\left[-\eta_i(t-T)\right]}$ \\[1em] 
+\citet{cue00} & $G(t)=\exp{\left[-\eta_i(t-T)\right]}$ &\code{c00} \\[1em] 
 %\hdashline
-\citet{cue02, feng09} & $G(t)=\exp{\left[-\eta_1(t-T)-\eta_2(t-T)^2\right]}$ \\[1em] 
+\citet{cue02, feng09} & $G(t)=\exp{\left[-\eta_1(t-T)-\eta_2(t-T)^2\right]}$ & \code{bc92b} \\[1em] 
 %\hdashline
-\citet{kw05} & $G(t)=\exp{\left[-\eta(t-t_1)\right]}$ \\[1em]
+\citet{kw05} & $G(t)=\exp{\left[-\eta(t-t_1)\right]}$  & \code{kw05}\\[1em]
 %\hdashline 
-\citet{al06} & $G(t)=\exp{\left(\bm{\eta}'\mathbf{z}_{git}\right)}$ \\[1em]
+\citet{al06} & $G(t)=\exp{\left(\bm{\eta}'\mathbf{z}_{git}\right)}$ & \code{bc92c} \\[1em]
 \bottomrule
 \end{tabular}
 \caption{List of functional forms for $G(t)$}
@@ -531,56 +530,56 @@ we describe the LCM for both pooled cross-section and panel data.
 
 In the case of a pooled cross-section data, the equation associated with the LCM can
 be written as
-
-\begin{equation} \label{eq:4}
+%
+\begin{equation} \label{eq:2.1.1}
 y_{it} = \mathbf{x_{it}'}\bm{\beta}_j + v_{it,j} - Su_{it,j} \quad \text{with} \quad i = 1, \cdots, N \quad \text{and} \quad j = 1, \cdots, J
 \end{equation}
-
-In Equation~\ref{eq:4}, the LCM is implied by a $j$ class-specific
+%
+In Equation~\ref{eq:2.1.1}, the LCM is implied by a $j$ class-specific
 technological parameters. Assuming the half-normal distribution for the 
 inefficiency term, the contribution of observation $i$ in period $t$ to the 
 likelihood conditional on class $j$ is defined as: 
-
-\begin{equation}\label{eq:5}
+%
+\begin{equation}\label{eq:2.1.2}
 P(it|j) = \frac{2}{\sqrt{\sigma_{u|j}^2 + 
  \sigma_{v|j}^2}}\phi\left(\frac{S\epsilon_{it|j}}{\sqrt{
  \sigma_{u|j}^2 +\sigma_{v|j}^2}}\right)\Phi\left(\frac{
  \mu_{it*|j}}{\sigma_{*|j}}\right)
 \end{equation}
-
+%
 where 
-
+%
 $$\mu_{it*|j}=\frac{- S\epsilon_{it|j}\sigma_{u|j}^2}{\sigma_{u|j}^2 +
 \sigma_{v|j}^2}$$
-
+%
  $$\sigma_*^2 = \frac{\sigma_{u|j}^2 \sigma_{v|j}^2}{\sigma_{u|j}^2 + 
  \sigma_{v|j}^2}$$
-
+%
 The distribution of observations into classes is based
 on prior probability that can depend on some covariates. This probability can 
 be modelled using a logit distribution as
-
-\begin{equation} \label{eq:6}
+%
+\begin{equation} \label{eq:2.1.3}
 \pi_{itj} = \frac{\exp{\left(\mathbf{q}'_{it}\bm{\lambda}_j\right)}}{
 \sum_{m=1}^J \exp{\left(\mathbf{q}'_{it}\bm{\lambda}_m\right)}
 }
 \end{equation}
-
+%
 such that $\bm{\lambda}_J = 0$. 
 
 The unconditional likelihood of observation $i$ in period $t$ is simply the average
  over the $J$ classes:
-
+%
  $$P(it) = \sum_{m=1}^{J}\pi(it,m)P(it|m)$$
-
+%
  The number of classes to retain can be based on information criterion (AIC, BIC).
  Moreover, class assignment is based on the largest posterior probability. This
  probability is obtained using Bayes' rule, as follows for class $j$:
-
+%
  $$w\left(j|it\right)=\frac{P\left(it|j\right)
  \pi\left(it,j\right)}{\sum_{m=1}^JP\left(it|m\right)
  \pi\left(it, m\right)}$$
- 
+ %
  As in the standard cases, heteroscedasticity can be accommodated during the 
  estimation. It is worth noting that the \pkg{sfaR} package, currently, only considers
  the latent class SF model with the half-normal distribution.
@@ -589,37 +588,37 @@ The unconditional likelihood of observation $i$ in period $t$ is simply the aver
 
 The difference with the pooled LCM is that the probability of belonging to 
 a class is fixed over time. The logit distribution is \ref{eq:6} becomes
-
-\begin{equation} \label{eq:7}
+%
+\begin{equation} \label{eq:2.1.4}
 \pi_{ij} = \frac{\exp{\left(\mathbf{q}'_{i}\bm{\lambda}_j\right)}}{
 \sum_{m=1}^J \exp{\left(\mathbf{q}'_{i}\bm{\lambda}_m\right)}
 }
 \end{equation}
-
+%
 In the \pkg{sfaR} package, the time invariant covariates are obtained by taking
 the average of the variables for each cross-section. As previously, only the 
 half-normal distribution is implemented. The latent class SF models in the 
 case of panel data is centered around the first generation panel models. For
 example, in the case of time-varying inefficiency models, the the contribution 
 of cross section $i$ to the likelihood conditional on class $j$ is defined as: 
-
-\begin{equation}\label{eq:8}
+%
+\begin{equation}\label{eq:2.1.5}
  P(i|j) = \frac{2\sigma_*}{\sigma_u\sigma_v^T\left(2\pi\right)^{\frac{T}{2}}}\exp{\left[-\frac{1}{2}\left(-\frac{\mu_{i*}^2}{\sigma_*^2} + \frac{\sum_{t=1}^T\epsilon_{it}^2}{\sigma_v^2}\right)\right]}\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)
 \end{equation}
-
+%
 where
-
+%
 $$\mu_{i*} = \frac{-S\sigma_u^2\sum_{t=1}^TG(t)\epsilon_{it}}{\sigma_u^2\sum_{t=1}^TG(t)^2 + \sigma_v^2}$$
-
+%
 and
-
+%
 $$\sigma_*^2=\frac{\sigma_u^2\sigma_v^2}{\sigma_u^2\sum_{t=1}^TG(t)^2 + \sigma_v^2}$$
-
+%
 As previously, the unconditional likelihood of cross-section $i$ is simply the average
  over the $J$ classes:
-
+%
 $$P(i) = \sum_{m=1}^{J}\pi(i,m)P(i|m)$$
-
+%
 The panel LCM model also handles heteroscedasticity in the error terms.
 
 \subsection{Zero inefficiency stochastic frontier}
@@ -628,8 +627,8 @@ The zero inefficiency SF model (ZISF) has been introduced by \citet{kpt13}. The
 philosophy of the model is that there are two groups of observations, one that is
 efficient and the other is not. The probability of being in one of the group can 
 depend, as in the LCM case, on some covariates. Technically we have
-
-\begin{equation}\label{eq:9}
+%
+\begin{equation}\label{eq:2.2.1}
 y_i = \begin{cases}
 \alpha + \mathbf{x_i^{\prime}}\bm{\beta} + 
  v_i - Su_i & \text{with probability} \quad p \\
@@ -637,50 +636,50 @@ y_i = \begin{cases}
   v_i & \text{with probability} \quad 1-p
 \end{cases}
 \end{equation}
-
+%
 The prior probability of belonging to the inefficient class can depend on 
 some covariates using four possible specifications: 
 
-\begin{itemize} \itemsep 12pt
+\begin{itemize} \itemsep 10pt
 \item logit specification
-
+%
 $$p_i = \frac{\exp{(\mathbf{z}_{i}^{\prime}\bm{\theta})}}{1-
 \exp{(\mathbf{z}_{i}^{\prime}\bm{\theta})}}$$
-
+%
 \item probit specification
-
+%
 $$p_i = \Phi\left(\mathbf{z}_{i}^{\prime}\bm{\theta}\right)$$
-
+%
 \item cauchit specification
-
+%
 $$p_i = 1/\pi\arctan(\mathbf{z}_{i}^{\prime}\bm{\theta})+1/2$$
-
+%
 \item cloglog specification
-
+%
 $$p_i = 1-\exp\left(-\exp(\mathbf{z}_{i}^{\prime} \bm{\theta})\right)$$
-
+%
 \end{itemize}
 
 In the case of the truncated normal distribution, the convolution of $u_i$ and 
 $v_i$ is:
-
+%
  $$f(\epsilon_i)=\frac{p_i}{\sqrt{\sigma_u^2 + 
  \sigma_v^2}}\phi\left(\frac{S\epsilon_i + \mu}{\sqrt{
  \sigma_u^2 + \sigma_v^2}}\right)\Phi\left(\frac{
  \mu_{i\ast}}{\sigma_\ast}\right)\Big/\Phi\left(
  \frac{\mu}{\sigma_u}\right) + \frac{1-p_i}{\sigma_v}
  \Phi\left(\frac{S\epsilon}{\sigma_v}\right)$$
-
+%
  where
-
+%
  $$\mu_{i*}=\frac{\mu\sigma_v^2 - 
  S\epsilon_i\sigma_u^2}{\sigma_u^2 + \sigma_v^2}$$
-
+%
  and
-
+%
  $$\sigma_*^2 = \frac{\sigma_u^2 
  \sigma_v^2}{\sigma_u^2 + \sigma_v^2}$$
- 
+ %
  The ZISF is also implemented for the other nine distributions in the package.
  As in the case of LCM, class assignment is based on the largest posterior 
  probability. The model presented so far assumed common noise variable $v$ for 
@@ -693,8 +692,8 @@ $v_i$ is:
 The contaminated noise SF (CNSF), is another variant for the LCM first discussed 
 by \citet{wheat19} to handle outliers. Here the observations are split into 
 two groups for which the idiosyncratic error is different. Practically we have
-
-\begin{equation}\label{eq:10}
+%
+\begin{equation}\label{eq:2.3.1}
 y_i = \begin{cases}
 \alpha + \mathbf{x_i^{\prime}}\bm{\beta} + 
  v_{1i} - Su_i & \text{with probability} \quad p \\
@@ -702,7 +701,7 @@ y_i = \begin{cases}
 v_{2i} - Su_i & \text{with probability} \quad 1-p
 \end{cases}
 \end{equation}
-
+%
 All the other developments are similar to the ZISF case. The prior probability
 of belonging to a class can be specified using either the logit, probit, cauchit
 and cloglog distributions. The CNSF is also available for the ten distributions.
@@ -716,8 +715,8 @@ between the two groups of observations.
 The multi-modal inefficiency SF (MISF) is an extension in the \pkg{sfaR} package, 
 which splits the observations into two groups, but with different inefficiency
 error term. Basically we have:
-
-\begin{equation}\label{eq:11}
+%
+\begin{equation}\label{eq:2.4.1}
 y_i = \begin{cases}
 \alpha + \mathbf{x_i^{\prime}}\bm{\beta} + 
  v_{i} - Su_{1i} & \text{with probability} \quad p \\
@@ -725,15 +724,370 @@ y_i = \begin{cases}
 v_{i} - Su_{2i} & \text{with probability} \quad 1-p
 \end{cases}
 \end{equation}
-
+%
 All the other derivations are similar to the ZISF and CNSF previously introduced.
 
 \section{Other models} \label{sec:other}
 
-\subsection{Metafrontiers}
-
 \subsection{Sample selection stochastic frontier} \label{subsec:ss}
 
+The current sample selection SF model implemented in \pkg{sfaR} is an extension 
+of \citet{heck76, heck79}'s sample selection model to nonlinear models. The model 
+has first been discussed in \citet{greeneSS}, and applications can be found 
+in \citet{bravo20, dakpo22}. Practically, we have the following choice model
+%
+\begin{equation}\label{eq:3.1.1}
+d_{i} =  \begin{cases}
+1 & \text{if} \quad d_{i}^* > 0  \\
+0 & \text{if} \quad d_{i}^* \leq 0
+\end{cases}
+\end{equation}
+%
+where $d_{i}^*$ is the latent unobserved variable associated with the choice 
+variable $d_i$. $d_{i}^*$ is defined by
+%
+\begin{equation}\label{eq:3.1.2}
+d_{i}^* = \mathbf{z}_{si}^{\prime} \mathbf{\gamma} + w_i, \quad w_i \sim \mathcal{N}(0, 1)
+\end{equation}
+%
+When $d_i = 1$, we observe the following production function
+%
+\begin{equation}\label{eq:3.1.3}
+y_{i} = \mathbf{x}_{i}^{\prime} \mathbf{\beta} + v_i - Su_i 
+\end{equation}
+%
+with $v_i = \sigma_vV_i$, and $V_i \sim \mathcal{N}(0, 1)$, $u_i = \sigma_u|U_i|$, 
+and $U_i \sim \mathcal{N}(0, 1)$. The selection bias arises from the correlation 
+between the two symmetric random components $v_i$ and $w_i$:
+%
+$$(w_i, v_i) \sim \mathcal{N}\left(\begin{matrix} 0 \\ 0 \end{matrix}, \begin{bmatrix} 1 & \rho \sigma_v \\ 
+\rho \sigma_v & \sigma_v^2 \end{bmatrix} \right)$$
+%
+Conditionaly on $|U_i|$, the probability associated with each observation is:
+ %
+ \begin{equation}\label{eq:3.1.4}
+ Pr \left[d_{i}^* \leq 0 \right]^{1-d_{i}} \cdot \left\{ 
+ f(y_{i}|d_{i}^* > 0) \times Pr\left[ d_{i}^* > 0 
+ \right] \right\}^{d_{i}}
+ \end{equation}
+ %
+ Using the conditional probability formula:
+ %
+ $$P\left(A\cap B\right) = P(A) \cdot P(B|A) = P(B) \cdot P(A|B)$$
+ %
+ we have
+ %
+ $$f(y_{i}|d_{i}^* \geq 0) \cdot Pr\left[ d_{i}^* \geq 0\right] = 
+ f(y_{i}) \cdot Pr(d_{i}^* \geq 0|y_{i})$$
+ %
+ A useful property of bivariate normal distributions \citep{tong} is 
+ %
+ $$w_i|v_i \sim \mathcal{N}\left(\frac{\rho}{\sigma_v}v_i, 1 - \rho^2\right) $$
+ %
+ Then we have
+ %
+ $$d_{i}^* | y_{i} \sim N\left(\mathbf{z}_{si}^{\prime} \bm{\gamma}+
+ \frac{\rho}{\sigma_v}v_i, 1-\rho^2\right)$$
+ %
+ Hence conditionally on $|U_i|$, we have:
+ %
+ \begin{equation}\label{eq:3.1.5}
+ f(y_{i}|d_{i}^* \geq 0) \cdot Pr\left[ d_{i}^* \geq 0\right] = 
+ \frac{1}{\sigma_v}\phi\left(\frac{v_i}{\sigma_v}\right)\Phi\left(\frac{
+ \mathbf{z}_{si}^{\prime} \bm{\gamma}+\frac{\rho}{\sigma_v}v_i}{
+ \sqrt{1-\rho^2}}\right)
+ \end{equation}
+ %
+ The conditional likelihood is equal to:
+ %
+ \begin{equation}\label{eq:3.1.6}
+ L_i\big||U_i| = \Phi(-\mathbf{z}_{si}^{\prime} \bm{\gamma})^{1-d_{i}} \times 
+ \left\{ \frac{1}{\sigma_v}\phi\left(\frac{y_{i}-\mathbf{x}_{i}^{\prime}
+ \bm{\beta} + S\sigma_u|U_i|}{\sigma_v}\right)\Phi\left(\frac{
+ \mathbf{z}_{si}^{\prime} \bm{\gamma}+\frac{\rho}{\sigma_v}\left(y_{i}-
+ \mathbf{x}_{i}^{\prime} \bm{\beta} + S\sigma_u|U_i|\right)}{\sqrt{1-\rho^2}}
+ \right) \right\} ^{d_{i}}
+ \end{equation}
+ %
+ Since the non-selected observations bring no additional information, 
+ the conditional likelihood considered during the estimation is
+ %
+\begin{equation}\label{eq:3.1.7}
+  L_i\big||U_i| = \frac{1}{\sigma_v}\phi\left(\frac{y_{i}-
+ \mathbf{x}_{i}^{\prime} \bm{\beta} + S\sigma_u|U_i|}{\sigma_v}\right) 
+ \Phi\left(\frac{\mathbf{z}_{si}^{\prime} \bm{\gamma}+\frac{\rho}{\sigma_v}
+ \left(y_{i}-\mathbf{x}_{i}^{\prime} \bm{\beta} + S\sigma_u|U_i|\right)}{
+ \sqrt{1-\rho^2}}\right) 
+ \end{equation}
+%
+ The unconditional likelihood is obtained by integrating $|U_i|$ out of 
+ the conditional likelihood. Thus
+ %
+ \begin{equation}\label{eq:3.1.8}
+ L_i = \int_{|U_i|} \frac{1}{\sigma_v}\phi\left(\frac{y_{i}-
+ \mathbf{x}_{i}^{\prime} \bm{\beta} + S\sigma_u|U_i|}{\sigma_v}\right) 
+ \Phi\left(\frac{\mathbf{z}_{si}^{\prime} \bm{\gamma}+ \frac{\rho}{\sigma_v}
+ \left(y_{i}-\mathbf{x}_{i}^{\prime} \bm{\beta} + S\sigma_u|U_i|\right)}{
+ \sqrt{1-\rho^2}}\right)p\left(|U_i|\right)d|U_i|
+ \end{equation}
+ %
+ To simplifiy the estimation, the likelihood can be estimated using a two-step 
+ approach. In the first step, the probit model can be run and estimate of 
+ $\gamma$ can be obtained. Then, in the second step, the following model 
+ is estimated:
+ %
+ \begin{equation}\label{eq:3.1.9}
+ L_i = \int_{|U_i|} \frac{1}{\sigma_v}\phi\left(\frac{y_{i}-
+ \mathbf{x}_{i}^{\prime} \bm{\beta} + S\sigma_u|U_i|}{\sigma_v}\right) 
+ \Phi\left(\frac{a_i + \frac{\rho}{\sigma_v}\left(y_{i}-
+ \mathbf{x}_{i}^{\prime} \bm{\beta} + S\sigma_u|U_i|\right)}{\sqrt{1-\rho^2}}
+ \right)p\left(|U_i|\right)d|U_i| 
+ \end{equation}
+ %
+ where $a_i = \mathbf{z}_{si}^{\prime} \hat{\bm{\gamma}}$. In \pkg{sfaR}, this 
+ likelihood can be estimated using five different approaches: Gauss-Kronrod quadrature, 
+ adaptive integration over hypercubes (hcubature and pcubature), Gauss-Hermite 
+ quadrature, and maximum simulated likelihood. We also use the BHHH estimator 
+ to obtain the asymptotic standard errors for the parameter estimates.
+ 
+ The (in)efficiency scores are obtained following \citet{lai15} and the 
+ developments around the closed skew-normal distribution (CSN).\footnote{See 
+ \citet{genton04} for more on CSN.} Based on \citet{lai15} the conditional
+ efficiency scores can are obtained using the moment generating function of 
+ CSN distributions. Therefore we have
+ %
+ \begin{equation}\label{eq:3.1.10}
+ E\left[\exp{\left(tu_i\right)|\epsilon_i}\right] = M_{u|\epsilon}(t)=\frac{\Phi_2\left(\tilde{\mathbf{D}}\tilde{\bm{\Sigma}}t; \tilde{\bm{\kappa}}, \tilde{\bm{\Delta}} + \tilde{\mathbf{D}}\tilde{\bm{\Sigma}}\tilde{\mathbf{D}}' \right)}{\Phi_2\left(\mathbf{0}; \tilde{\bm{\kappa}}, \tilde{\bm{\Delta}} + \tilde{\mathbf{D}}\tilde{\bm{\Sigma}}\tilde{\mathbf{D}}'\right)}\exp{\left(t\tilde{\bm{\pi}} + \frac{1}{2}t^2\tilde{\bm{\Sigma}}\right)}
+ \end{equation}
+ %
+ where
+ %
+$$\tilde{\bm{\pi}} = \frac{\mu\sigma_v^2 - S\epsilon_i\sigma_u^2}{\sigma_v^2 + \sigma_u^2}$$
+%
+$$\tilde{\bm{\Sigma}} = \frac{\sigma_v^2\sigma_u^2}{\sigma_v^2 + \sigma_u^2}$$
+%
+$$\tilde{\mathbf{D}} = \begin{pmatrix} \frac{S\rho}{\sigma_v} \\ 1 \end{pmatrix}$$
+%
+$$\tilde{\bm{\kappa}} = \begin{pmatrix} - \mathbf{z}'_i\bm{\delta} - \frac{\rho\sigma_v\left(\epsilon_i + S\mu\right)}{\sigma_v^2 + \sigma_u^2}\\ -\mu + \frac{S\sigma_u^2\left(\epsilon_i + S\mu\right)}{\sigma_v^2 + \sigma_u^2} \end{pmatrix}$$
+%
+$$\tilde{\bm{\Delta}} = \begin{pmatrix}1-\rho^2 & 0 \\ 0 & 0\end{pmatrix}$$
+%
+The derivation of the efficiency and the reciprocal inefficiency is obtained by replacing
+$t = -1$ and $t =1$, respectively. To obtain the inefficiency as $E\left[u_i|\epsilon_i\right]$ is more
+complicated as it requires the derivation of a multivariate normal cdf. We have:
+%
+ \begin{equation}\label{eq:3.1.11}
+ E\left[u_i|\epsilon_i\right] = \left. \frac{\partial M_{u|\epsilon}(t)}{\partial t}\right\rvert_{t = 0}
+ \end{equation}
+ %
+ 
+\subsection{Metafrontiers}
+
+The stochastic frontier model for the cross-sectional data is defined for 
+ unit $i$ belonging to group $h_i$ as
+ %
+ \begin{equation}\label{eq:3.2.1}
+ y_{i} = \mathbf{x}'_i\bm{\beta}_{h_i} + v_{i,{h_i}} - Su_{i,{h_i}}
+ \end{equation}
+ %
+ Even though, we only observe $g = h_i$, the concept of the metafrontier is 
+ based on assessing by how much unit $i$ could have produced if it had used the 
+ technology of a different group. Conceptually, we have 
+ %
+ \begin{equation}\label{eq:3.2.2}
+ y_{ig} = \mathbf{x}'_i\bm{\beta}_g + v_{ig} - Su_{ig} \;\; \text{with} 
+ \;\; g = 1, \cdots, G
+ \end{equation}
+ %
+  The first step is the estimation of each group frontier. The second step, 
+ which is the metafrontier estimation varies depending on the methodology.
+ \citet{batt04} suggested a deterministic way for estimating the 
+ metafrontier. The metafrontier is defined as
+ %
+\begin{equation}\label{eq:3.2.3}
+ y_i^* =\mathbf{x}'_i\bm{\beta}^*
+ \end{equation}
+ %
+ such that 
+ %
+ $$\mathbf{x}'_i\bm{\beta}^* \geq \mathbf{x}'_i\bm{\beta}_g$$
+ %
+ The parameters $\bm{\beta}^*$ can be obtained by solving either a linear 
+ program:
+ %
+ $$\begin{matrix} 
+ \min L \equiv \sum_{i = 1} \left(\mathbf{x}'_i\bm{\beta}^* - 
+ \mathbf{x}'_i\bm{\beta}_g\right) \\[1em]
+ \text{s.t.} \; \mathbf{x}'_i\bm{\beta}^* \geq \mathbf{x}'_i\bm{\beta}_g
+  \end{matrix}$$
+  %
+ or a quadratic program:
+ %
+$$\begin{matrix} 
+ \min L \equiv \sum_{i = 1} \left(\mathbf{x}'_i\bm{\beta}^* - 
+ \mathbf{x}'_i\bm{\beta}_g\right)^2 \\[1em]
+ \text{s.t.} \; \mathbf{x}'_i\bm{\beta}^* \geq \mathbf{x}'_i\bm{\beta}_g
+  \end{matrix}$$
+  %
+The thechnology gap ratio is obtained as (assuming that $y_i$ is expressed in logarithm)
+%
+ \begin{equation}\label{eq:3.2.4}
+ TGR_i = \frac{\exp{\left(\mathbf{x}'_i\bm{\beta}_g\right)}}{
+ \exp{\left(\mathbf{x}'_i\bm{\beta}^*\right)}}
+ \end{equation}
+ %
+ \citet{huang14} suggested a stochastic version of the metafrontier. Let's
+ assume that $\ln f_i^g=\mathbf{x}'_i\bm{\beta}_g$ and 
+ $\ln f_i^M = \mathbf{x}'_i\bm{\beta}^*$. \citet{huang14} assumed the 
+ following relation
+ %
+ \begin{equation}\label{eq:3.2.5}
+ \ln f_i^g = \ln f_i^M - u_{i,M}
+ \end{equation}
+ %
+ where $\exp{\left(u_{i,M}\right)}$ is the TGR.
+ 
+ Since $\ln f_i^g$ is not observed, \citet{huang14} suggested the 
+ following approximation
+ %
+ \begin{equation}\label{eq:3.2.6}
+ \ln \hat{f}_i^g = \ln f_i^M - u_{i,M} + v_{i,M}
+ \end{equation}
+ %
+ where $\ln \hat{f}_i^g$ is the predicted frontier obtained from the 
+ individual group frontier.
+ 
+ The new quasi-maximum likelihood estimator requires a correction of the 
+ standard error in order to account for heteroscedasticity. The robust
+ sandwich-form of the variance-covariance matrix estimator is used to 
+ correct for the standard errors.
+
+ A new stochastic metafrontier has also been suggested in 
+ \citet{am17}. Based on the previous developments, The stochastic 
+ frontiers corresponding to each group are defined as
+ %
+ \begin{equation}\label{eq:3.2.7}
+ f_{ig} = \mathbf{x}'_i\bm{\beta}_g + v_{ig} \;\; \text{with} 
+ \;\; g= 1, \cdots, G
+ \end{equation}
+ %
+ \citet{am17} defined the stochastic metafrontier in the case of a 
+ production function as 
+ %
+ \begin{equation}\label{eq:3.2.8}
+ f_i = \max\left[f_{i1}, \cdots, f_{iG}\right]
+ \end{equation}
+ %
+ The following decomposition can then be obtained 
+ %
+ \begin{equation}\label{eq:3.2.9}
+ \left(f_i - y_i\right)=\left(f_{i,h_i} - y_i\right) + 
+ \left(f_i - f_{i,h_i}\right)
+ \end{equation}
+ %
+ This equation is also equivalent to
+ %
+  \begin{equation}\label{eq:3.2.10}
+ U_i=U_{i, h_i} + M_{i, h_i}
+ \end{equation}
+ %
+ where $U_{i, h_i}$ is the one-sided technical inefficiency for unit 
+ $i$ in the stochastic frontier model for group $h_i$, and 
+ $M_{i, h_i}$, which is the metafrontier distance, can be evaluated
+ based on different assumptions in relation to the total error term 
+ ($\epsilon = v-u$).
+ 
+ For simplicity, let's write
+ %
+ $$U=U_{h} + M_{h}$$
+ %
+ and assume that $U$, $U_h$, and $M_h$ can be evaluated unconditionnally to 
+ $\epsilon$. Therefore, in terms of expected values, we have
+ %
+ $$\mu = \mu_h + \tau_h$$
+ %
+ In the case $u_h$ follows a half normal distribution, we have
+ %
+ $$\mu_h = E\left[U_h\right] = \sqrt{\frac{2}{\pi}}\sigma_{u,h}$$
+ %
+ On the other hand $\tau_h = E\left[M_h\right]$. As underlined by 
+ \citet{am17}, treating the frontiers as stochastic given $\mathbf{x}$ yields
+ %
+\begin{equation}\label{eq:3.2.11}
+ f_s \sim \left[\mathbf{x}'\bm{\beta} + \mathcal{N}
+ \left(0, \sigma_{v,s}^2\right)\right]
+ \end{equation}
+ %
+ or equivalently
+ %
+\begin{equation}\label{eq:3.2.12}
+ f_s \sim \mathcal{N}\left(\mathbf{x}'\bm{\beta}, 
+ \sigma_{v,s}^2\right)
+ \end{equation}
+ %
+ Then $f = \max\left(f_1, \cdots, f_S\right)$ is the maximum of a set of 
+ normal distributions. The expectation of a set of $P$ normal random 
+ variables is not known. Therefore \citet{am17} suggested the use of 
+ simulation. For replication $r \; (r = 1, \cdots, R)$, take draws 
+ $f_1^{(r)}, \cdots, f_S^{(r)}$ from the normal distributions of 
+ $f_1, \cdots, f_S$, and calculate the metafrontier 
+ $f^{(r)} = \max(f_1^{(r)}, \cdots, f_S^{(r)})$. Then 
+ $M_h^{(r)} = f^{(r)}-f_h^{(r)}$. Finally 
+ %
+\begin{equation}\label{eq:3.2.13}
+ \tau_h = \frac{1}{R}\sum_{r = 1}^{R}M_h^{(r)}
+ \end{equation}
+ %
+ Conditioning now on $\epsilon$, we have $\mu_h^*=E\left[U|\epsilon\right]$, 
+ which can be obtained following \citet{jon82}. On the other hand, for 
+ $\tau_h^*=E\left[M_h|\epsilon\right]$, we need to derive the distribution 
+ of $v|\epsilon$. In the case of the half normal distribution, we have
+ %
+\begin{equation}\label{eq:3.2.14}
+ f(v|\epsilon)=\frac{1}{\sigma^*\Phi\left(-a^*\right)\sqrt{2\pi}}
+ \exp\left\{-\frac{1}{2}\left[\frac{v-\mu}{\sigma_*}\right]^2\right\}
+ \end{equation}
+ %
+ where $-\frac{\epsilon - \mu}{\sigma^*}=-a^*$ and 
+ $\mu = \frac{\sigma_v^2}{\sigma_u^2 + \sigma_v^2}\epsilon$.
+ 
+ The previous pdf is equivalent to a normal distribution 
+ $\mathcal{N}\left(\mu, \sigma_*^2\right)$ truncated on the left at 
+ $\epsilon$.
+ 
+ As previously, the evaluation of $\tau_h^*$ requires simulation. It  is 
+ worth noting that for state $h$, conditioning on $\epsilon$ matters, 
+ while for other states $s\neq h$, conditioning on $\epsilon$ does not 
+ matter. Therefore, for each replication $r$, and for $s\neq h$, 
+ draw $f_s^{(r)}$ as explained in the previous subsection. However, for 
+ group $h$, draw $f_h^{(r)}$ equal to $\mathbf{x}'\bm{\beta}$ plus a draw from 
+ the distribution of $v|\epsilon$.
+ 
+ Both the approaches suggested by \citet{am17} can be extended to 
+ assuming that the $v_{is}$ are not independent.
+
+Overall, \pkg{sfaR} allows to estimate seven different metafrontiers as summarized
+in Table~\ref{table:meta}.
+
+\begin{table}[t]
+\renewcommand{\arraystretch}{1.3}
+\centering
+\begin{tabular}{@{}ccc@{}}
+\toprule
+References & Particularities & Code in \pkg{sfaR} \\
+\midrule
+\citet{batt04} & Linear Programming & \code{bpo04a} \\[1em]
+\citet{batt04} & Quadratic programming & \code{bpo04b} \\[1em]
+\citet{huang14} & Stochastic metafrontier function & \code{hhl14} \\[1em]
+\citet{am17} & Unconditional on $\epsilon$ $+$ independence of $v_{is}$ & \code{aos17a} \\[1em]
+\citet{am17} & Conditional on $\epsilon$ $+$ independence of $v_{is}$ & \code{aos17b} \\[1em]
+\citet{am17} & Unconditional on $\epsilon$ $+$ dependence of $v_{is}$ & \code{aos17c} \\[1em]
+\citet{am17} & Conditional on $\epsilon$ $+$ dependence of $v_{is}$ & \code{aos17d} \\[1em]
+\bottomrule
+\end{tabular}
+\caption{Metafrontier models}
+\label{table:meta}
+\end{table}
 
 \section[Introduction to the sfaR package]{Introduction to the \pkg{sfaR} package} \label{sec:prespackage}
 
@@ -754,26 +1108,124 @@ explicit. For cross-sectional or pooled data we have the following functions:
 \item \code{sfaselectioncross} for the sample selection SF model.
 \end{itemize}
 %
-In the case of the panel data, two/three main functions are implemented in \pkg{sfaR} 
+In the case of the panel data, two main functions are implemented in \pkg{sfaR} 
 %
 \begin{itemize} \itemsep 10pt
 \item \code{sfapanel1} for the first generation SF models using panel data
 \item \code{sfalcmpanel} for the latent class SF models using panel data.
 \end{itemize}
 %
+The general syntax for each of the function is presented below
+
+\begin{Schunk}
+\begin{Soutput}
+sfacross(formula, muhet, uhet, vhet, logDepVar = TRUE, data, subset,
+  weights, wscale = TRUE, S = 1L, udist = 'hnormal', scaling = FALSE, 
+  start = NULL,   randStart = FALSE, method = 'bfgs', hessianType = 1L, 
+  simType = 'halton', Nsim = 100, prime = 2L, burn = 10, antithetics = FALSE, 
+  seed = 12345, itermax = 2000, printInfo = FALSE, tol = 1e-12, gradtol = 1e-06, 
+  stepmax = 0.1, qac = 'marquardt')
+\end{Soutput}
+\begin{Soutput}
+sfalcmcross(formula, uhet, vhet, thet, logDepVar = TRUE, data, subset,
+ weights, wscale = TRUE, S = 1L, udist = 'hnormal', start = NULL, 
+ randStart = FALSE, whichStart = 2L, initAlg = 'nm', initIter = 500, 
+ lcmClasses = 2, method = 'bfgs', hessianType = 1, itermax = 2000L, 
+ printInfo = FALSE, tol = 1e-12, gradtol = 1e-06, stepmax = 0.1, 
+ qac = 'marquardt')
+\end{Soutput}
+\begin{Soutput}
+sfagzisfcross(formula, uhet, vhet, thet, logDepVar = TRUE, data, subset,
+  weights, wscale = TRUE, S = 1L, udist = 'hnormal', start = NULL, 
+  randStart = FALSE, whichStart = 2L, initAlg = 'nm', initIter = 500, 
+  gzisfClasses = 2, method = 'bfgs', hessianType = 1, itermax = 2000L, 
+  printInfo = FALSE, tol = 1e-12, gradtol = 1e-06, stepmax = 0.1, 
+  qac = 'marquardt')
+\end{Soutput}
+\begin{Soutput}
+sfacnsfcross(formula, muhet, uhet, vhet, thet, logDepVar = TRUE, data,
+  subset, weights, wscale = TRUE, S = 1L, udist = 'hnormal', 
+  sigmauType = 'common', linkF = 'logit', start = NULL, randStart = FALSE, 
+  whichStart = 2L, initAlg = 'nm', initIter = 500, method = 'bfgs', 
+  hessianType = 1, simType = 'halton', Nsim = 100, prime = 2L, burn = 10, 
+  antithetics = FALSE, seed = 12345, itermax = 2000L, printInfo = FALSE, 
+  tol = 1e-12, gradtol = 1e-06, stepmax = 0.1, qac = 'marquardt')
+\end{Soutput}
+\begin{Soutput}
+sfamisfcross(formula, muhet, uhet, vhet, thet, logDepVar = TRUE, data,
+  subset, weights, wscale = TRUE, S = 1L, udist = 'hnormal', linkF = 'logit', 
+  start = NULL,  randStart = FALSE, whichStart = 2L, initAlg = 'nm', 
+  initIter = 500, method = 'bfgs', hessianType = 1, simType = 'halton', 
+  Nsim = 100, prime = 2L, burn = 10, antithetics = FALSE, seed = 12345, 
+  itermax = 2000L, printInfo = FALSE, tol = 1e-12, gradtol = 1e-06, 
+  stepmax = 0.1, qac = 'marquardt')
+\end{Soutput}
+\begin{Soutput}
+sfazisfcross(formula, muhet, uhet, vhet, thet, logDepVar = TRUE, data,
+  subset, weights, wscale = TRUE, S = 1L, udist = 'hnormal', 
+  sigmavType = 'common', linkF = 'logit', start = NULL, randStart = FALSE, 
+  whichStart = 2L, initAlg = 'nm', initIter = 500, method = 'bfgs', 
+  hessianType = 1, simType = 'halton', Nsim = 100, prime = 2L, burn = 10, 
+  antithetics = FALSE, seed = 12345, itermax = 2000L, printInfo = FALSE, 
+  tol = 1e-12, gradtol = 1e-06, stepmax = 0.1, qac = 'marquardt')
+\end{Soutput}
+\begin{Soutput}
+sfametacross(formula, muhet, uhet, vhet, ghet, logDepVar = TRUE, data,
+  subset, weights, wscale = TRUE, S = 1L, modelType = 'hhl14', udist = 'hnormal',
+  start = NULL, randStart = FALSE, method = 'bfgs', hessianType = 1, 
+  metaSim = 5000, simType = 'halton', Nsim = 300, prime = 2L, burn = 10, 
+  antithetics = FALSE, seed = 12345, itermax = 2000L, printInfo = FALSE, 
+  tol = 1e-12, gradtol = 1e-06, 
+  stepmax = 0.1, qac = 'marquardt')
+\end{Soutput}
+\begin{Soutput}
+sfaselectioncross(selectionF, frontierF, uhet, vhet, modelType = 'greene10',
+  logDepVar = TRUE, data, subset, weights, wscale = TRUE, S = 1L, 
+  udist = 'hnormal', start = NULL, randStart = FALSE, method = 'bfgs', 
+  hessianType = 2L, lType = 'ghermite', Nsub = 100, uBound = Inf, 
+  simType = 'halton', Nsim = 100, prime = 2L, burn = 10, antithetics = FALSE, 
+  seed = 12345, itermax = 2000, printInfo = FALSE, intol = 1e-06, tol = 1e-12, 
+  gradtol = 1e-06, stepmax = 0.1, qac = 'marquardt')
+\end{Soutput}
+\begin{Soutput}
+sfapanel1(formula, muhet, uhet, vhet, logDepVar = TRUE, data, idVar = NULL,
+  timeVar = NULL, subset, weights, wscale = TRUE, S = 1L, modelType = 'bc92a',
+  udist = 'hnormal', start = NULL, randStart = FALSE, whichStart = 2L, 
+  initAlg = 'nm', initIter = 500, invariance = 2L, method = 'bfgs', 
+  hessianType = 1L, simType = 'halton', Nsim = 100, prime = 2L, burn = 10, 
+  antithetics = FALSE, seed = 12345, itermax = 2000, printInfo = FALSE, 
+  tol = 1e-12, gradtol = 1e-06, stepmax = 0.1, qac = 'marquardt')
+\end{Soutput}
+\begin{Soutput}
+sfalcmpanel(formula, uhet, vhet, thet, logDepVar = TRUE, data, idVar = NULL,
+  timeVar = NULL, subset, weights, wscale = TRUE, S = 1L, modelType = 'bc92a',
+  udist = 'hnormal', start = NULL, randStart = FALSE, whichStart = 2L, 
+  initAlg = 'nm', initIter = 500, invariance = 2L, lcmClasses = 2, 
+  method = 'bfgs', hessianType = 1, itermax = 2000L, printInfo = FALSE, 
+  tol = 1e-12, gradtol = 1e-06, stepmax = 0.1, qac = 'marquardt')
+\end{Soutput}
+\end{Schunk}
+
 All these functions are formula based for the estimation of the parameters of the 
 production technology. Moreover, linearity is assumed for all the parameters.
 In most cases \code{formula} is used to define the main part of the technology. 
 \code{sfaselectioncross} requires \code{selectionF} for the selection
-equation, and \code{frontierF} for the frontier equation. Heteroscedasticity in 
+equation, and \code{frontierF} for the frontier equation. In the case of 
+\code{sfametacross}, the different groups used for the metafrontier is 
+specified as a formula using the option \code{ghet}. For the latent class models
+and variants, the variables used to estimate the probability of being in a 
+specific class are included in the fomula based option \code{thet}. Heteroscedasticity in 
 the variances of the one-sided and the two-sided error terms $u$ and $v$ are 
 also defined using one-sided formulas (only right arguments e.g. \code{~x}) 
 with \code{uhet} and \code{vhet}, respectively. Similarly, when some 
-distributions are chosen, heterogeneity in the inefficiency term can be 
-introduced using the one-sided formula based option \code{muhet}. By default, 
-it is assumed that a log-linear function is to be estimated (e.g. Cobb-Douglas, 
-or Translog). If this is not the case, the user can set the argument 
-\code{logDepVar} to \code{FALSE} (e.g. quadratic production function).
+distributions are chosen (truncated normal, lognormal), heterogeneity in the 
+inefficiency term can be introduced using the one-sided formula based option 
+\code{muhet}. In \pkg{sfaR}, we made it compulsory to have an intercept in the 
+variances and the mean parameters of the one-sided error distributions.
+
+By default, it is assumed that a log-linear function is to be estimated 
+(e.g. Cobb-Douglas, or Translog). If this is not the case, the user can set the 
+argument \code{logDepVar} to \code{FALSE} (e.g. quadratic production function).
 
 For consistency with the common \code{lm} functions, arguments \code{data} (which 
 must be a \code{data.frame}), \code{subset}, and \code{weights} are also 
@@ -821,14 +1273,14 @@ the argument \code{Nsim} (\code{100} by default).\footnote{For more
 possibilities on the draws see corresponding function help in the package
 documentation.}
 
-Regarding the \code{sfalcmcross}, \code{sfagzisfcross}, and the 
-\code{sfaselectioncross}, due to their complexity, only the half-normal 
+Regarding the \code{sfalcmcross}, \code{sfagzisfcross}, \code{sfaselectioncross}, 
+and the \code{sfalcmpanel} functions, due to their complexity, only the half-normal 
 distribution is currently possible. For the case of \code{sfalcmcross}, and 
 \code{sfagzisfcross}, up to five classes can be estimated (\code{lcmClasses}, 
 and \code{gzisfClasses} arguments). For all the other variants of the latent
 classes SF (CNSF, MISF, and ZISF), as presented in the previous section, two 
-classes of observations are estimated. While for the \code{sfalcmcross} and 
-\code{sfagzisfcross} functions, the probability of belonging to a class is 
+classes of observations are estimated. While for the \code{sfalcmcross}, 
+\code{sfalcmpanel} and \code{sfagzisfcross} functions, the probability of belonging to a class is 
 parameterized as a logit model, for \code{sfacnsfcross}, \code{sfamisfcross}, and
 \code{sfazisfcross}, four models are possible through the \code{linkF} argument:
 %
@@ -845,9 +1297,21 @@ inefficiency distribution among the two classes. For the \code{sfazisfcross},
 the argument \code{sigmavType} allows the same thing but for the two-sided error
 term $v$.
 
-\code{sfaselectioncross}
-
-\code{sfametacross}
+\code{sfaselectioncross} allows the estimation of the log-likelihood using 
+five possibilities
+%
+\begin{itemize} \itemsep 10pt
+\item \code{ghermite} for Gauss-Hermite quadrature
+\item \code{kronrod} for Gauss-Kronrod quadrature
+\item \code{hcubature} for adaptive integration over hypercubes (hcubature)
+\item \code{pcubature} adaptive integration over hypercubes (pcubature)
+\item \code{msl} for maximum simulated likelihood
+\end{itemize}
+%
+For the standard SF models using panel data, the different models in \code{sfapanel1}
+are presented in Table~\ref{table:dens} and can be chosen using the option
+\code{modelType}. The same option is alsop available in the function \code{sfametacross}
+to choose between the different metafrontiers.
 
 As mentioned in the Introduction section, an advantage of the \pkg{sfaR} is to
 offer multiple possibilities for the optimization algorithm used to solve the
@@ -875,38 +1339,47 @@ the \pkg{marqLevAlg} package \citep{mla}.}
 is implemented in the \pkg{stats} package \citep{stats}.}
 \end{itemize}
 %
-
 As non-linear optimization is well known to converge at local optimum, the
 \pkg{sfaR} allows the user to set the starting values\footnote{In most cases the 
-starting values are obtained from the method of moments or from a simpler M(S)L 
+starting values are obtained from the method of moments or from a simpler homoscedastic M(S)L 
 estimation}, and to allow for a random start (\code{randStart} argument). The
 random starting values are obtained by taking the initial starting values and 
 adding random numbers drawn from a normal distribution with zero mean and 
 standard value of $0.01$.
 
-The \code{sfacross} encloses all the previous distributions and provide many 
-additional options for the M(S)L estimation. It is a formula based function.
-The help file of the function is a good starting point to have an overview of 
-all the possibilities. For the illustration, we first consider the utility data 
-contained in the package, and replicate Table 4.1 in . 
-First load the package using 
-
-\subsection{Inherited methods}
+\subsection{Inherited methods for postestimation commands}
 
 Two main methods are directly associated with SF estimation functions. The first
 method is \code{efficiencies} to compute several efficiency variables. In all 
 the cases the inefficiency scores are derived following \cite{jon82}. Using
 the latter, the efficiency scores are obtained using 
-$\exp{E\left[\left(-u|\epsilon\right)\right]}$. Another conditional efficiency
-scores variable is also derived following \cite{batt95}. 
-reciprocal efficiencies.
+$\exp{\{E\left[\left(-u|\epsilon\right)\right]\}}$. Another conditional efficiency
+scores variable is also derived following \cite{batt95}. \pkg{sfaR} also allows
+to compute the reciprocal efficiencies. In some cases and depending on the 
+distribution, the mode and the confidence intervals associated with the 
+(in)efficiency scores are also returned. For the LCM and its variants, additional 
+variables are returned: the posterior probability of belonging to any class, 
+which is then used to affect every observation to the class with the highest 
+probability.
 
-in some cases and depending on the distribution, the mode and the confidence
-intervals associated with the (in)efficiency scores are also returned.
+The second main function is \code{marginal} that estimates the marginal effects
+of $\mathbf{z}$ variables on inefficiency. Currently, the \code{marginal}
+method is only implemented for cross-sectional data.
 
-In the case of the LCM and its variants, additional variables are returned: 
-the posterior probability of beloging to any class, which is then used to affect 
-every observation to the class with the highest probability.
+Other methods are available in \pkg{sfaR}
+%
+\begin{itemize}
+\item \code{extract} for compatibility with \pkg{texreg}
+\item \code{bread} and \code{estfun} for compatibility with \pkg{sandwich}
+\item \code{coef} for extracting coefficients
+\item \code{nobs} for extracting number of observations
+\item \code{ic} for extraction information criteria
+\item \code{fitted} for obtaining fitted values (frontier)
+\item \code{residuals} for extracting the residuals $v_i -Su_i$
+\item \code{summary} for the summary of the main functions
+\item \code{vcov} for extracting the variance-covariance matrix
+\end{itemize}
+%
 
 \section{Applications} \label{sec:illus}
 
@@ -923,29 +1396,34 @@ and capital). A translog cost function is estimated with a normalization using
 fuel input price to ensure the price homogeneity property of cost functions. For
 the SF models, three distributions are considered: half-normal, exponential, and
 truncated normal. For the latter distribution, the scaling property is also 
-considered. Hence, all the models are estimated by also estimating the effect of
+considered. Hence, all the models are estimated by considering the effect of
 regulation (dummy variable \code{regu}) on the inefficiency. The code to estimate
 the four models, in addition to the OLS one are presented below:
 
 \begin{Schunk}
 \begin{Sinput}
+R> ## OLS model
 R> ols <- lm(log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
 +   log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
 +   I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)), 
 +   data = utility)
+R> ## half normal distribution for u
 R> hlf <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
 +   log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
 +   I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
 +   udist = 'hnormal', uhet = ~ regu, data = utility, S = -1, method = 'bfgs')
+R> ## truncated normal distribution for u
 R> trnorm <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
 +   log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
 +   I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
 +   udist = 'tnormal', muhet = ~ regu, data = utility, S = -1, method = 'bfgs')
+R> ## truncated normal distribution + scaling property
 R> tscal <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
 +   log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
 +   I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
 +   udist = 'tnormal', muhet = ~ regu, uhet = ~ regu, data = utility, 
 +   S = -1, method = 'bfgs', scaling = TRUE)
+R> ## exponential distribution
 R> expo <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
 +   log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
 +   I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
@@ -1035,23 +1513,18 @@ I(log(y) * log(wk/wf))        -0.06686    0.04171 -1.6032 0.108898
 -------------------------------------------------------------------------------- 
                   Parameter in variance of u (one-sided error) 
 -------------------------------------------------------------------------------- 
-                           Coefficient Std. Error  z value  Pr(>|z|)
-Zu_(Intercept)                -2.61708    0.11081 -23.6179 < 2.2e-16
-Zu_regu                        1.05260    0.11702   8.9948 < 2.2e-16
-                              
-Zu_(Intercept)             ***
-Zu_regu                    ***
+                           Coefficient Std. Error  z value  Pr(>|z|)    
+Zu_(Intercept)                -2.61708    0.11081 -23.6179 < 2.2e-16 ***
+Zu_regu                        1.05260    0.11702   8.9948 < 2.2e-16 ***
 -------------------------------------------------------------------------------- 
                  Parameters in variance of v (two-sided error) 
 -------------------------------------------------------------------------------- 
-                           Coefficient Std. Error z value  Pr(>|z|)
-Zv_(Intercept)                -5.21487    0.21616 -24.125 < 2.2e-16
-                              
-Zv_(Intercept)             ***
+                           Coefficient Std. Error z value  Pr(>|z|)    
+Zv_(Intercept)                -5.21487    0.21616 -24.125 < 2.2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 -------------------------------------------------------------------------------- 
-Model was estimated on : août sam. 12, 2023 at 16:51:24 
+Model was estimated on : août mar. 15, 2023 at 15:48:47 
 Log likelihood status: successful convergence  
 -------------------------------------------------------------------------------- 
 \end{Soutput}
@@ -1063,9 +1536,9 @@ The \pkg{sfaR} includes an \code{extract} option compatible with the
 \begin{Schunk}
 \begin{Sinput}
 R> library(texreg)
-R> texreg(list(ols, hlf, trnorm, tscal, expo), stars = c(0.01, 0.05, 0.1), digits = 3, 
-+    custom.model.names = c("ols", "hnormal", "tnormal", "trunc. scal.", "expo"), 
-+    table = FALSE)
+R> texreg(list(ols, hlf, trnorm, tscal, expo), stars = c(0.01, 0.05, 0.1), 
++         digits = 3, custom.model.names = c("ols", "hnormal", "tnormal", 
++        "trunc. scal.", "expo"), table = FALSE)
 \end{Sinput}
 \end{Schunk}
 
@@ -1157,52 +1630,73 @@ For comparison purposes, we extend the analysis to new distributions, as the
 R> ray <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
 +   log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
 +   I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
-+   udist = 'rayleigh', uhet = ~ regu, data = utility, S = -1, method = 'bfgs')
++   udist = 'rayleigh', uhet = ~ regu, data = utility, S = -1)
 R> ge <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
 +   log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
 +   I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
-+   udist = 'genexponential', uhet = ~ regu, data = utility, S = -1, method = 'bfgs')
++   udist = 'genexponential', uhet = ~ regu, data = utility, S = -1)
 R> ga <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
 +   log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
 +   I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
-+   udist = 'gamma', uhet = ~ regu, data = utility, S = -1, method = 'bfgs', Nsim = 300)
++   udist = 'gamma', uhet = ~ regu, data = utility, S = -1, Nsim = 300)
 \end{Sinput}
 \begin{Soutput}
 Initialization of 300 Halton draws per observation ...
+
 \end{Soutput}
 \begin{Sinput}
 R> we <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
 +   log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
 +   I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
-+   udist = 'weibull', uhet = ~ regu, data = utility, S = -1, method = 'bfgs', Nsim = 300)
++   udist = 'weibull', uhet = ~ regu, data = utility, S = -1, Nsim = 300)
 \end{Sinput}
 \begin{Soutput}
 Initialization of 300 Halton draws per observation ...
+
 \end{Soutput}
 \begin{Sinput}
 R> lg <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
 +   log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
 +   I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
-+   udist = 'lognormal', uhet = ~ regu, data = utility, S = -1, method = 'bfgs', Nsim = 300)
++   udist = 'lognormal', uhet = ~ regu, data = utility, S = -1, Nsim = 300)
 \end{Sinput}
 \begin{Soutput}
 Initialization of 300 Halton draws per observation ...
+
 \end{Soutput}
 \begin{Sinput}
 R> ray <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
 +   log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
 +   I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
-+   udist = 'tslaplace', uhet = ~ regu, data = utility, S = -1, method = 'bfgs')
++   udist = 'tslaplace', uhet = ~ regu, data = utility, S = -1)
 R> ray <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
 +   log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
 +   I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
-+   udist = 'uniform', uhet = ~ regu, data = utility, S = -1, method = 'bfgs')
++   udist = 'uniform', uhet = ~ regu, data = utility, S = -1)
 \end{Sinput}
 \end{Schunk}
+
+
+\subsection{Latent class SF and variants for cross-sectional data}
+
+To illustrate the LCM SF along with its variants, we consider the Spanish dairy 
+farms
+
+
+\subsection{Standard Panel SF models}
+
+Here we consider the Swiss railway
+
+\subsection{Metafrontier: replication of }
+
+\subsection{Latent class SF for panel data}
+
+\section{Discussion and conclusion}
 
 put this table summary in appendix
 
 
+I use all these as exercice using FUglie data!!!!
 using sfaR to compute productivity (us states data)
 
 
