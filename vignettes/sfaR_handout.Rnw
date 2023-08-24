@@ -58,7 +58,7 @@ library("sfaR")
 \author{K Herv\'e Dakpo~\orcidlink{0000-0002-6114-7896}\\Universit\'e 
 Paris-Saclay INRAE \\ AgroParisTech, PSAE\\ Palaiseau, F-91120, France \AND
 Yann Desjeux ~ \\INRAE, Bordeaux School of Economics, \\ University Bordeaux, 
-Pessac, France \AND Arne Henningsen ~ \\ Dept. of Food and Resource Economics,\\ 
+Pessac, France \AND Arne Henningsen~\orcidlink{0000-0002-6720-0264}\\ Dept. of Food and Resource Economics,\\ 
 University of Copenhagen, Frederiksberg C, Denmark \AND Laure Latruffe ~ \\
 INRAE, Bordeaux School of Economics, \\ University Bordeaux, 
 Pessac, France}
