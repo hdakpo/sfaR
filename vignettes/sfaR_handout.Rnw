@@ -1593,10 +1593,59 @@ ray <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
 To illustrate the LCM SF along with its variants, we consider the Spanish dairy 
 farms
 
+<<>>=
+lcm <- sfalcmcross(formula = ly ~ lk + ll + yr,data = worldprod, 
+                   lcmClasses = 2, printInfo = T)
+gzisf <- sfagzisfcross(formula = ly ~ lk + ll + yr,data = worldprod, 
+                   gzisfClasses = 2, printInfo = T)
+cnsf <- sfalcmcross(formula = ly ~ lk + ll + yr,data = worldprod, 
+                   printInfo = T)
+misf <- sfamisfcross(formula = ly ~ lk + ll + yr,data = worldprod, 
+                   printInfo = T)
+zisf <- sfazisfcross(formula = ly ~ lk + ll + yr,data = worldprod, 
+                   printInfo = T)
+@
+
+
 
 \subsection{Standard Panel SF models}
 
 Here we consider the Swiss railway
+
+<<>>=
+pl81h <- sfapanel1(formula = LNCT ~ LNQ2 + LNQ3 + LNNET + LNPK + LNPL + 
+  factor(YEAR), modelType = "pl81", idVar = "ID", timeVar = "YEAR", S = -1, 
+  data = swissrailways)
+pl81t <- sfapanel1(formula = LNCT ~ LNQ2 + LNQ3 + LNNET + LNPK + LNPL + 
+  factor(YEAR), modelType = "pl81", idVar = "ID", timeVar = "YEAR", S = -1, 
+  udist = "tnormal", data = swissrailways)
+k90 <- sfapanel1(formula = LNCT ~ LNQ2 + LNQ3 + LNNET + LNPK + LNPL +
+  factor(YEAR), modelType = "k90", idVar = "ID", timeVar = "YEAR", S = -1, 
+  data = swissrailways)
+bc92a <- sfapanel1(formula = LNCT ~ LNQ2 + LNQ3 + LNNET + LNPK + LNPL + 
+  factor(YEAR), modelType = "bc92a", idVar = "ID", timeVar = "YEAR", S = -1, 
+  data = swissrailways)
+bc92b <- sfapanel1(formula = LNCT ~ LNQ2 + LNQ3 + LNNET + LNPK + LNPL,
+  modelType = "bc92b", idVar = "ID", timeVar = "YEAR", S = -1, 
+  data = swissrailways)
+bc92c <- sfapanel1(formula = LNCT ~ LNQ2 + LNQ3 + LNNET + LNPK + LNPL, 
+  modelType = "bc92c", idVar = "ID", timeVar = "YEAR", S = -1, 
+  data = swissrailways)
+kw05 <- sfapanel1(formula = LNCT ~ LNQ2 + LNQ3 + LNNET + LNPK + LNPL, 
+  modelType = "kw05", idVar = "ID", timeVar = "YEAR", S = -1, 
+  data = swissrailways)
+mols93 <- sfapanel1(formula = LNCT ~ LNQ2 + LNQ3 + LNNET + LNPK + LNPL,
+  modelType = "mols93", idVar = "ID", timeVar = "YEAR", S = -1, 
+  data = swissrailways)
+mbc92 <- sfapanel1(formula = LNCT ~ LNQ2 + LNQ3 + LNNET + LNPK + LNPL,
+  modelType = "mbc92", idVar = "ID", timeVar = "YEAR", S = -1, 
+  data = swissrailways)
+
+c00 <- sfapanel1(formula = LNCT ~ LNQ2 + LNQ3 + LNNET + LNPK + LNPL,
+  modelType = "c00", idVar = "ID", timeVar = "YEAR", S = -1, 
+  data = swissrailways)
+@
+
 
 \subsection{Metafrontier: replication of }
 
