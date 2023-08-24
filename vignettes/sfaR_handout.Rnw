@@ -106,7 +106,7 @@ frontiers, cross-section data, panel data, R}
 %%   (in the same first line, separated by comma).
 \Address{
   K Herv\'e Dakpo\\
-  Journal of Statistical Software\\
+%  Journal of Statistical Software\\
   Universit\'e Paris-Saclay INRAE\\
   AgroParisTech, PSAE\\
   Palaiseau, F-91120, France\\
