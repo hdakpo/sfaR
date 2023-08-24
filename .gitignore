@@ -10,11 +10,15 @@
 vignettes/*.html
 vignettes/*.pdf
 .httr-oauth
+*.bbl
 *_cache/
 /cache/
 *.utf8.md
 *.knit.md
+*.log
 .Renviron
 .DS_Store
-
 inst/doc
+vignettes/sfaR_handout-concordance.tex
+vignettes/sfaR_handout.synctex.gz
+vignettes/sfaR_handout.tex

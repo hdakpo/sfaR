@@ -47,6 +47,10 @@
 
 \newcommand{\sfar}{\pkg{sfaR}}
 
+\usepackage{draftwatermark}
+\SetWatermarkText{Preliminary Unfinished Draft}
+\SetWatermarkScale{0.4}
+
 \SweaveOpts{engine=R, eps=FALSE, keep.source = TRUE}
 <<preliminaries, echo=FALSE, results=hide>>=
 options(prompt = "R> ", continue = "+  ", width = 80, useFancyQuotes = FALSE)
@@ -58,7 +62,7 @@ library("sfaR")
 \author{K Herv\'e Dakpo~\orcidlink{0000-0002-6114-7896}\\Universit\'e 
 Paris-Saclay INRAE \\ AgroParisTech, PSAE\\ Palaiseau, F-91120, France \AND
 Yann Desjeux ~ \\INRAE, Bordeaux School of Economics, \\ University Bordeaux, 
-Pessac, France \AND Arne Henningsen ~ \\ Dept. of Food and Resource Economics,\\ 
+Pessac, France \AND Arne Henningsen~\orcidlink{0000-0002-6720-0264}\\ Dept. of Food and Resource Economics,\\ 
 University of Copenhagen, Frederiksberg C, Denmark \AND Laure Latruffe ~ \\
 INRAE, Bordeaux School of Economics, \\ University Bordeaux, 
 Pessac, France}
@@ -72,17 +76,17 @@ Pessac, France}
 \Abstract{
   This article gives an overview of the capabilities of the \pkg{sfaR} package
   in estimating stochastic frontier (SF) models. It extends the commonly used
-  \pkg{frontier} package by including new models for cross-section and panel 
-  data. Many of the recent advances in the field like the latent class SF models 
+  \pkg{frontier} package by including recently developed SF models for cross-sectional and panel 
+  data. For instance, the \pkg{sfaR} package includes many of the recent advances in the field like latent-class SF models 
   and a few of its variants (zero inefficiency SF, contaminated noise SF, and
-  multimodal inefficiency SF), the metafrontier SF, and the sample selection SF 
-  are included in the \pkg{sfaR} package. For many of the models, several 
-  distributions are possible for the one-sided error term (e.g., half-normal, 
+  multimodal inefficiency SF), metafrontier SF, and sample-selection SF. 
+  For many of these models, several 
+  different distributions can be chosen for the one-sided error term (e.g., half-normal, 
   truncated normal, exponential, rayleigh, generalized exponential, truncated
-  skewed-laplace, uniform, gamma, weibull, and log-normal distributions. Another 
-  advantage of the \pkg{sfaR} package is to allow many possibilities (eleven) in 
-  terms of optimization algorithm. A description of the main functions in the 
-  \pkg{sfaR} package, in addition with illustration using real data are provided.
+  skewed-laplace, uniform, gamma, weibull, and log-normal distributions). Another 
+  advantage of the \pkg{sfaR} package is the availability of many (currently eleven) different
+  optimization algorithms. This document describes the main functions provided by the 
+  \pkg{sfaR} package and illustrates their use with real-word data.
 }
 
 %% - \Keywords{} with LaTeX markup, at least one required
@@ -102,7 +106,7 @@ frontiers, cross-section data, panel data, R}
 %%   (in the same first line, separated by comma).
 \Address{
   K Herv\'e Dakpo\\
-  Journal of Statistical Software\\
+%  Journal of Statistical Software\\
   Universit\'e Paris-Saclay INRAE\\
   AgroParisTech, PSAE\\
   Palaiseau, F-91120, France\\
