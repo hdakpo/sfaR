@@ -47,6 +47,10 @@
 
 \newcommand{\sfar}{\pkg{sfaR}}
 
+\usepackage{draftwatermark}
+\SetWatermarkText{Preliminary Unfinished Draft}
+\SetWatermarkScale{0.4}
+
 \SweaveOpts{engine=R, eps=FALSE, keep.source = TRUE}
 <<preliminaries, echo=FALSE, results=hide>>=
 options(prompt = "R> ", continue = "+  ", width = 80, useFancyQuotes = FALSE)
