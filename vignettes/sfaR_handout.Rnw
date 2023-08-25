@@ -133,15 +133,15 @@ frontier, cross-sectional data, panel data, R}
 
 \section[Introduction]{Introduction} \label{sec:intro}
 
-Since its inception over 40 years ago by \citet{aig77, mee77, batt77}, the 
-stochastic frontier analysis (SFA) has been used as a proeminent performance 
-benchmarking tool in many aspects of decision making units (DMUs). Since then 
-several models have been developed to tackle different situations (data type, 
-technological heterogeneity, endogeneity, $\cdots$). Overall, SFA can be used 
-to evaluate different performance indicators for DMUs (technical and economic 
-efficiencies, productivity, $\cdots$). By estimating the efficiency scores of 
+Since its inception by \citet{aig77}, \citet{mee77}, and \citet{batt77} more than 40~years ago,
+stochastic frontier analysis (SFA) has been used as a prominent tool for 
+benchmarking many different performance aspects of various types of decision making units (DMUs). Since then 
+several extensions have been developed to tackle different situations (e.g., data type, 
+technological heterogeneity, endogeneity, \ldots). Overall, SFA can be used 
+to evaluate different performance indicators for DMUs (e.g., technical and economic 
+efficiencies, productivity, \ldots). By estimating the efficiency scores of 
 DMUs, we can compare them, find out who is under-performing, and learn from the 
-best practices. This can help make better policies or subsidies to improve the 
+best practices. This can help make better policies to improve the 
 efficiency of both private and public sectors \citep{par14}. 
 
 SFA has been used in a variety of areas and for different purposes. For 
