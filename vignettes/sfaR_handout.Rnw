@@ -74,7 +74,7 @@ Pessac, France}
 
 %% - \Abstract{} almost as usual
 \Abstract{
-  This article gives an overview of the capabilities of the \pkg{sfaR} package
+  This article gives an overview of the capabilities of the \proglang{R} package \pkg{sfaR}
   in estimating stochastic frontier (SF) models. It extends the commonly used
   \pkg{frontier} package by including recently developed SF models for cross-sectional and panel 
   data. For instance, the \pkg{sfaR} package includes many of the recent advances in the field like latent-class SF models 
@@ -92,12 +92,12 @@ Pessac, France}
 %% - \Keywords{} with LaTeX markup, at least one required
 %% - \Plainkeywords{} without LaTeX markup (if necessary)
 %% - Should be comma-separated and in sentence case.
-\Keywords{standard stochastic frontiers, latent class stochastic frontiers, 
-metafrontiers, sample selection stochastic frontier, zero inefficiency stochastic
-frontiers, cross-section data, panel data, \proglang{R}}
-\Plainkeywords{standard stochastic frontiers, latent class stochastic frontiers, 
-metafrontiers, sample selection stochastic frontier, zero inefficiency stochastic
-frontiers, cross-section data, panel data, R}
+\Keywords{stochastic frontier analysis, latent class stochastic frontier, 
+metafrontier, sample selection stochastic frontier, zero inefficiency stochastic
+frontier, cross-sectional data, panel data, \proglang{R}}
+\Plainkeywords{stochastic frontier analysis, latent class stochastic frontier, 
+metafrontier, sample selection stochastic frontier, zero inefficiency stochastic
+frontier, cross-sectional data, panel data, R}
 
 %% - \Address{} of at least one author
 %% - May contain multiple affiliations for each author
@@ -133,24 +133,25 @@ frontiers, cross-section data, panel data, R}
 
 \section[Introduction]{Introduction} \label{sec:intro}
 
-Since its inception over 40 years ago by \citet{aig77, mee77, batt77}, the 
-stochastic frontier analysis (SFA) has been used as a proeminent performance 
-benchmarking tool in many aspects of decision making units (DMUs). Since then 
-several models have been developed to tackle different situations (data type, 
-technological heterogeneity, endogeneity, $\cdots$). Overall, SFA can be used 
-to evaluate different performance indicators for DMUs (technical and economic 
-efficiencies, productivity, $\cdots$). By estimating the efficiency scores of 
+Since its inception by \citet{aig77}, \citet{mee77}, and \citet{batt77} more than 40~years ago,
+stochastic frontier analysis (SFA) has been used as a prominent tool for 
+benchmarking many different performance aspects of various types of decision making units (DMUs). Since then 
+several extensions have been developed to tackle different situations (e.g., data type, 
+technological heterogeneity, endogeneity, \ldots). Overall, SFA can be used 
+to evaluate different performance indicators for DMUs (e.g., technical and economic 
+efficiencies, productivity, \ldots). By estimating the efficiency scores of 
 DMUs, we can compare them, find out who is under-performing, and learn from the 
-best practices. This can help make better policies or subsidies to improve the 
+best practices. This can help make better policies to improve the 
 efficiency of both private and public sectors \citep{par14}. 
 
 SFA has been used in a variety of areas and for different purposes. For 
 instance, SFA has been used to measure productivity growth and its sources 
-\citep{orea02}, or to examine the effects of regulation and competition on 
-performance \citep{myd20, kang02}, to evaluate eco-efficiency of firms 
-\citep{mada23}, to analyze the impact of environmental factors \citep{li19}. 
-SFA has been use in agriculture \citep{latruffe23}, banking \citep{badu21}, 
-health care \citep{ji20}, manufacturing sector \citep{boy19}, $\cdots$. 
+\citep[e.g.,][]{orea02}, to examine the effects of regulation and competition on 
+performance \citep[e.g.,][]{myd20, kang02}, to evaluate eco-efficiency of firms 
+\citep[e.g.,][]{mada23}, or to analyze the impact of environmental factors \citep[e.g.,][]{li19}. 
+SFA has been used in many different sectors including, e.g., agriculture \citep[e.g.,][]{latruffe23}, banking \citep[e.g.,][]{badu21}, 
+health care \citep[e.g.,][]{ji20}, manufacturing \citep[e.g.,][]{boy19}, 
+and museums \citep[e.g.,][]{price23}. 
 
 The scope of SFA is so huge that it spreads from pure research objectives to 
 practitionners and policy makers. As such, the \pkg{sfaR} package intends to 
