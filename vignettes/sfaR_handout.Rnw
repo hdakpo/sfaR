@@ -1564,10 +1564,10 @@ tsl <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
  I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
  udist = 'tslaplace', uhet = ~ regu, data = utility, S = -1)
 ## uniform distribution for u
-uni <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
- log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
- I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
- udist = 'uniform', uhet = ~ regu, data = utility, S = -1)
+# uni <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
+#  log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+#  I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+#  udist = 'uniform', uhet = ~ regu, data = utility, S = -1)
 @
 
 \begin{table}
@@ -1615,23 +1615,22 @@ lgeff <- efficiencies(lg)
 lgmarg <- marginal(lg)
 tsleff <- efficiencies(tsl)
 tslmarg <- marginal(tsl)
-unieff <- efficiencies(uni)
-unimarg <- marginal(uni)
-dkum14 <- as.data.frame(rbind(c(apply(hlfeff, 2, mean), apply(hlfmarg, 2, mean)), 
-                c(apply(treff, 2, mean), apply(trmarg, 2, mean)), 
-                c(apply(trseff, 2, mean), apply(trsmarg, 2, mean)), 
-                c(apply(expoeff, 2, mean), apply(expomarg, 2, mean)),
-                c(apply(rayeff, 2, mean), apply(raymarg, 2, mean)), 
-                c(apply(geeff, 2, mean), apply(gemarg, 2, mean)), 
-                c(apply(ga2eff, 2, mean), apply(ga2marg, 2, mean)), 
-                c(apply(weeff, 2, mean), apply(wemarg, 2, mean)), 
-                c(apply(lgeff, 2, mean), apply(lgmarg, 2, mean)), 
-                c(apply(tsleff, 2, mean), apply(tslmarg, 2, mean)), 
-                c(apply(unieff, 2, mean), apply(unimarg, 2, mean))))
+# unieff <- efficiencies(uni)
+# unimarg <- marginal(uni)
+nameselect <- c("Distributions", "u", "teJLMS", "teBC", "teBC_reciprocal")
+dkum14 <- as.data.frame(rbind(c(apply(hlfeff, 2, mean)[nameselect], apply(hlfmarg, 2, mean)), 
+                c(apply(treff, 2, mean)[nameselect], apply(trmarg, 2, mean)), 
+                c(apply(trseff, 2, mean)[nameselect], apply(trsmarg, 2, mean)), 
+                c(apply(expoeff, 2, mean)[nameselect], apply(expomarg, 2, mean)),
+                c(apply(rayeff, 2, mean)[nameselect], apply(raymarg, 2, mean)), 
+                c(apply(geeff, 2, mean)[nameselect], apply(gemarg, 2, mean)), 
+                c(apply(ga2eff, 2, mean)[nameselect], apply(ga2marg, 2, mean)), 
+                c(apply(weeff, 2, mean)[nameselect], apply(wemarg, 2, mean)), 
+                c(apply(lgeff, 2, mean)[nameselect], apply(lgmarg, 2, mean)), 
+                c(apply(tsleff, 2, mean)[nameselect], apply(tslmarg, 2, mean))))
 dkum14 <- cbind(Distributions = c("Half-Normal", "Truncated Normal", "Scaling", "Exponential", 
                                   "Raleigh", "Gen. Exponential", "Gamma", "Weibull", 
-                                  "Log-normal", "Trunc. Skewed Laplace", 
-                                  "Uniform"), 
+                                  "Log-normal", "Trunc. Skewed Laplace"), 
                 dkum14)
 dkum14 <- dkum14[, c("Distributions", "u", "teJLMS", "teBC", "teBC_reciprocal", "Eu_regu", "Vu_regu")]
 names(dkum14) <- c("Distributions", "$E\\left[u|\\epsilon\\right]$",
