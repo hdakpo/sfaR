@@ -74,7 +74,7 @@ Pessac, France}
 
 %% - \Abstract{} almost as usual
 \Abstract{
-  This article gives an overview of the capabilities of the \pkg{sfaR} package
+  This article gives an overview of the capabilities of the \proglang{R} package \pkg{sfaR}
   in estimating stochastic frontier (SF) models. It extends the commonly used
   \pkg{frontier} package by including recently developed SF models for cross-sectional and panel 
   data. For instance, the \pkg{sfaR} package includes many of the recent advances in the field like latent-class SF models 
@@ -92,12 +92,12 @@ Pessac, France}
 %% - \Keywords{} with LaTeX markup, at least one required
 %% - \Plainkeywords{} without LaTeX markup (if necessary)
 %% - Should be comma-separated and in sentence case.
-\Keywords{standard stochastic frontiers, latent class stochastic frontiers, 
-metafrontiers, sample selection stochastic frontier, zero inefficiency stochastic
-frontiers, cross-section data, panel data, \proglang{R}}
-\Plainkeywords{standard stochastic frontiers, latent class stochastic frontiers, 
-metafrontiers, sample selection stochastic frontier, zero inefficiency stochastic
-frontiers, cross-section data, panel data, R}
+\Keywords{stochastic frontier analysis, latent class stochastic frontier, 
+metafrontier, sample selection stochastic frontier, zero inefficiency stochastic
+frontier, cross-sectional data, panel data, \proglang{R}}
+\Plainkeywords{stochastic frontier analysis, latent class stochastic frontier, 
+metafrontier, sample selection stochastic frontier, zero inefficiency stochastic
+frontier, cross-sectional data, panel data, R}
 
 %% - \Address{} of at least one author
 %% - May contain multiple affiliations for each author
