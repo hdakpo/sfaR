@@ -419,7 +419,7 @@ scores \citep{horrace96}. Table~\ref{table:effcross}, in the Appendix, summarize
 weibull and log-normal distributions, all (in)efficiency measures are evaluated
 by solving a numerical integration (in \pkg{sfaR}, this 
 is solved using adaptive multidimensional integration over hypercubes\footnote{This 
-is done using the \pgk{cubature} package \citep{cubature}}). For the
+is done using the \pkg{cubature} package \citep{cubature}}). For the
 uniform distribution, different (in)efficiency scores can be derived when
 $\theta \rightarrow \infty$.
 
