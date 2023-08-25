@@ -419,7 +419,7 @@ scores \citep{horrace96}. Table~\ref{table:effcross}, in the Appendix, summarize
 weibull and log-normal distributions, all (in)efficiency measures are evaluated
 by solving a numerical integration (in \pkg{sfaR}, this 
 is solved using adaptive multidimensional integration over hypercubes\footnote{This 
-is done using the \pgk{cubature} package \citep{cubature}}). For the
+is done using the \pgk{cubature} package \citep{cubature}). For the
 uniform distribution, different (in)efficiency scores can be derived when
 $\theta \rightarrow \infty$.
 
@@ -1717,7 +1717,7 @@ zisfeff <- efficiencies(zisf)
 obsC <- as.data.frame(cbind(table(lcmeff$Group_c), table(gzisfeff$Group_c), table(cnsfeff$Group_c), 
       table(misfeff$Group_c), table(zisfeff$Group_c)))
 obsC <- cbind(c("Class 1", "Class2"), obsC)
-names(obsC) <- c("LCM", "GZISF", "CNSF", "MISF", "ZISF")
+names(obsC) <- c("Classes", "LCM", "GZISF", "CNSF", "MISF", "ZISF")
 xtable(obsC, caption = "Number of observations per class", 
        label = "table:lcmGroup", digits = 3) %>% 
   xtable2kable(booktabs = T, sanitize.text.function = function(x){x}, 
@@ -1742,7 +1742,7 @@ obsC <- as.data.frame(cbind(aggregate(lcmeff$teJLMS_c, by = list(lcmeff$Group_c)
       aggregate(misfeff$teJLMS_c, by = list(misfeff$Group_c), FUN = mean)[, 2], 
       aggregate(zisfeff$teJLMS_c, by = list(zisfeff$Group_c), FUN = mean)[, 2]))
 obsC <- cbind(c("Class 1", "Class2"), obsC)
-names(obsC) <- c("LCM", "GZISF", "CNSF", "MISF", "ZISF")
+names(obsC) <- c("Classes", "LCM", "GZISF", "CNSF", "MISF", "ZISF")
 xtable(obsC, caption = "Efficiency scores per class", 
        label = "table:lcmEff", digits = 3) %>% 
   xtable2kable(booktabs = T, sanitize.text.function = function(x){x}, 
@@ -1830,6 +1830,7 @@ obsC <- as.data.frame(c(mean(pl81heff$teJLMS), mean(pl81teff$teJLMS), mean(k90ef
 obsC <- cbind(c("PL81 hnormal", "PL81 tnormal", 
                                           "K90", "BC92a", "BC92b", "BC92c", "KW05", 
                                           "MOLS93", "MBC92"), obsC)
+names(obsC) <- c("Models", "Efficiencies")
 xtable(obsC, caption = "Efficiency scores for different panel SF models", 
        label = "table:panel1gEff", digits = 3) %>% 
   xtable2kable(booktabs = T, sanitize.text.function = function(x){x}, 
