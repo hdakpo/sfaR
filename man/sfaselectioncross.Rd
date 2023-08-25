@@ -457,7 +457,7 @@ The unconditional likelihood is obtained by integrating \eqn{|U_i|} out of
 the conditional likelihood. Thus
 
 \deqn{
-L_i\\ = \int_{|U_i|} \frac{1}{\sigma_v}\phi\left(\frac{y_{2i}-
+L_i = \int_{|U_i|} \frac{1}{\sigma_v}\phi\left(\frac{y_{2i}-
 \mathbf{x_{i}^{\prime}} \bm{\beta} + S\sigma_u|U_i|}{\sigma_v}\right) 
 \Phi\left(\frac{\mathbf{Z_{si}^{\prime}} \bm{\gamma}+ \frac{\rho}{\sigma_v}
 \left(y_{2i}-\mathbf{x_{i}^{\prime}} \bm{\beta} + S\sigma_u|U_i|\right)}{
@@ -470,7 +470,7 @@ approach. In the first step, the probit model can be run and estimate of
 is estimated:
 
 \deqn{
-L_i\\ = \int_{|U_i|} \frac{1}{\sigma_v}\phi\left(\frac{y_{2i}-
+L_i = \int_{|U_i|} \frac{1}{\sigma_v}\phi\left(\frac{y_{2i}-
 \mathbf{x_{i}^{\prime}} \bm{\beta} + S\sigma_u|U_i|}{\sigma_v}\right) 
 \Phi\left(\frac{a_i + \frac{\rho}{\sigma_v}\left(y_{2i}-
 \mathbf{x_{i}^{\prime}} \bm{\beta} + S\sigma_u|U_i|\right)}{\sqrt{1-\rho^2}}

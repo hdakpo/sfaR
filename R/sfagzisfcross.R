@@ -69,16 +69,16 @@
 #' @param initAlg Character string specifying the algorithm used for 
 #' initialization and obtain the starting values (when \code{'whichStart = 2'}).
 #' Only \pkg{maxLik} package algorithms are available: 
-#' \itemize{ \item \code{'bfgs'}, for Broyden-Fletcher-Goldfarb-Shanno - 
-#' Default - (see \code{\link[maxLik:maxBFGS]{maxBFGS}})
+#' \itemize{ \item \code{'bfgs'}, for Broyden-Fletcher-Goldfarb-Shanno 
+#' (see \code{\link[maxLik:maxBFGS]{maxBFGS}})
 #'  \item \code{'bhhh'}, for Berndt-Hall-Hall-Hausman 
 #'  (see \code{\link[maxLik:maxBHHH]{maxBHHH}}) 
 #'  \item \code{'nr'}, for Newton-Raphson (see 
-#'  \code{\link[maxLik:maxNR]{maxNR}}) \item \code{'nm'}, for Nelder-Mead (see 
-#'  \code{\link[maxLik:maxNM]{maxNM}}) \item \code{'cg'}, for Conjugate Gradient 
+#'  \code{\link[maxLik:maxNR]{maxNR}}) \item \code{'nm'}, for Nelder-Mead - 
+#'  Default - (see \code{\link[maxLik:maxNM]{maxNM}})
+#' \item \code{'cg'}, for Conjugate Gradient 
 #' (see \code{\link[maxLik:maxCG]{maxCG}}) \item \code{'sann'}, for Simulated 
-#' Annealing (see \code{\link[maxLik:maxSANN]{maxSANN}})
-#' }
+#' Annealing (see \code{\link[maxLik:maxSANN]{maxSANN}})}
 #' @param initIter Maximum number of iterations for initialization algorithm.
 #' Default \code{500}.
 #' @param gzisfClasses Number of classes to be estimated (default = \code{2}). A
@@ -412,7 +412,7 @@
 #' @export
 sfagzisfcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE, data, subset,
   weights, wscale = TRUE, S = 1L, udist = "hnormal", start = NULL, randStart = FALSE,
-  whichStart = 2L, initAlg = "bfgs", initIter = 500, gzisfClasses = 2, method = "bfgs",
+  whichStart = 2L, initAlg = "nm", initIter = 500, gzisfClasses = 2, method = "bfgs",
   hessianType = 1, itermax = 2000L, printInfo = FALSE, tol = 1e-12, gradtol = 1e-06,
   stepmax = 0.1, qac = "marquardt") {
   # u distribution check -------

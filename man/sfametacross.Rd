@@ -522,7 +522,7 @@ For replication \eqn{r (r = 1, \cdots, R)}, take draws
 \eqn{f^{(r)} = \max(f_1^{(r)}, \cdots, f_S^{(r)})}. Then
 \eqn{M_d^{(r)} = f^{(r)}-f_d^{(r)}}. Finally
 
-\deqn{\tau_d = \sum_{r = 1}^{R}M_d^{(r)}}
+\deqn{\tau_d = \frac{1}{R}\sum_{r = 1}^{R}M_d^{(r)}}
 
 Conditioning now on \eqn{\epsilon}, we have
 \eqn{\mu_d^*=E\left[U|\epsilon\right]}, which can be obtained following
@@ -552,7 +552,7 @@ group \eqn{d}, draw \eqn{f_d^{(r)}} equal to
 \eqn{v|\epsilon}.
 
 Both the approaches suggested by Amsler et al. (2017) can be extended to
-assuming that the \eqn{v_{is} are not independent.}
+assuming that the \eqn{v_{is}} are not independent.
 }
 \examples{
 \dontrun{

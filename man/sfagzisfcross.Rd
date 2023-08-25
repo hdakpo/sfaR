@@ -22,7 +22,7 @@ sfagzisfcross(
   start = NULL,
   randStart = FALSE,
   whichStart = 2L,
-  initAlg = "bfgs",
+  initAlg = "nm",
   initIter = 500,
   gzisfClasses = 2,
   method = "bfgs",
@@ -96,16 +96,16 @@ cross section SFA model. \code{'whichStart = 1'} can be fast.}
 \item{initAlg}{Character string specifying the algorithm used for
 initialization and obtain the starting values (when \code{'whichStart = 2'}).
 Only \pkg{maxLik} package algorithms are available:
-\itemize{ \item \code{'bfgs'}, for Broyden-Fletcher-Goldfarb-Shanno -
-Default - (see \code{\link[maxLik:maxBFGS]{maxBFGS}})
+\itemize{ \item \code{'bfgs'}, for Broyden-Fletcher-Goldfarb-Shanno
+(see \code{\link[maxLik:maxBFGS]{maxBFGS}})
 \item \code{'bhhh'}, for Berndt-Hall-Hall-Hausman
 (see \code{\link[maxLik:maxBHHH]{maxBHHH}})
 \item \code{'nr'}, for Newton-Raphson (see
-\code{\link[maxLik:maxNR]{maxNR}}) \item \code{'nm'}, for Nelder-Mead (see
-\code{\link[maxLik:maxNM]{maxNM}}) \item \code{'cg'}, for Conjugate Gradient
+\code{\link[maxLik:maxNR]{maxNR}}) \item \code{'nm'}, for Nelder-Mead -
+Default - (see \code{\link[maxLik:maxNM]{maxNM}})
+\item \code{'cg'}, for Conjugate Gradient
 (see \code{\link[maxLik:maxCG]{maxCG}}) \item \code{'sann'}, for Simulated
-Annealing (see \code{\link[maxLik:maxSANN]{maxSANN}})
-}}
+Annealing (see \code{\link[maxLik:maxSANN]{maxSANN}})}}
 
 \item{initIter}{Maximum number of iterations for initialization algorithm.
 Default \code{500}.}
