@@ -80,8 +80,8 @@ Pessac, France}
   data. For instance, the \pkg{sfaR} package includes many of the recent advances in the field like latent-class SF models 
   and a few of its variants (zero inefficiency SF, contaminated noise SF, and
   multimodal inefficiency SF), metafrontier SF, and sample-selection SF. 
-  For many of these models, several 
-  different distributions can be chosen for the one-sided error term (e.g., half-normal, 
+  For many of these models, several distributions can be chosen for 
+  the one-sided error term (e.g., half-normal, 
   truncated normal, exponential, rayleigh, generalized exponential, truncated
   skewed-laplace, uniform, gamma, weibull, and log-normal distributions). Another 
   advantage of the \pkg{sfaR} package is the availability of many (currently eleven) different
@@ -180,7 +180,7 @@ stochastic frontiers \citep{ssfa}. In addition to these packages, several R code
 online to conduct some SFA \citep{si20, si22, nguyen22}.} Still, many 
 of the recent developments are still lacking, especially regarding technological
 heterogeneity. For instance, the latent class stochastic frontier models, and 
-many of its variants are not covered by any of aforementioned packages. For instance,
+many of its variants are not covered by any of the aforementioned packages. For instance,
 \pkg{sfaR} includes the latent class SF, the zero inefficiency SF, the 
 contaminated noise SF, and the multi-modal inefficiency SF \citep{orea04, 
 greene05, kum13, rho15, wheat19}. The same is true for the metafrontier 
@@ -379,10 +379,10 @@ $$u \equiv \exp\left(\mathbf{z'_{u,i}}\bm\delta\right)\mathcal{N}^+
 \bm\delta\right)}\right)$$
 %
 The advantage of the scaling property is that $u_*$, also known as the \textit{base
-inefficiency}, anhd its distribution the \textit{base distribution}
+inefficiency}, and its distribution the \textit{base distribution}
 \citep{wang02, al06}, does not depend on $\mathbf{z}$. This implies
 that the distribution of $u_i$ has the same shape for all the firms, and the 
-scaling function $h(\dot)$ expands or contracts the scale of the 
+scaling function $h(\cdot)$ expands or contracts the scale of the 
 distribution.\footnote{According to \citet[p.~203]{al06}, "the basic random 
 variable $u_*$ can be seen as the firms's base efficiency level which captures 
 things like the manager's natural skills, which we view as random. How well 
@@ -393,7 +393,7 @@ When determinants of inefficiency are evaluated, so does the marginal impact of
 each $z$ variable on inefficiency. This marginal impact is estimated using the
 derivatives $\partial E\left[u_i\right]/\partial z\left[k\right]$ and
 $\partial V\left[u_i\right]/\partial z\left[k\right]$, which vary 
-depending the distribution of $u$.
+depending on the distribution of $u$.
 
 
 \subsubsection{Efficiency estimation} 
@@ -417,7 +417,8 @@ Also whenever possible we also provide the confidence intervall of the (in)effic
 scores \citep{horrace96}. Table~\ref{table:effcross}, in the Appendix, summarizes the main (in)efficiency measures. For the 
 weibull and log-normal distributions, all (in)efficiency measures are evaluated
 by solving a numerical integration (in \pkg{sfaR}, this 
-is solved using adaptive multidimensional integration over hypercubes). For the
+is solved using adaptive multidimensional integration over hypercubes\footnote{This 
+is done using the \pgk{cubature} package \citep{cubature}}). For the
 uniform distribution, different (in)efficiency scores can be derived when
 $\theta \rightarrow \infty$.
 
@@ -513,7 +514,7 @@ For this model, the last period parameter is not identifiable so we set
 $\eta_T=1$ \citep[p.~304]{par14}. As previously, \pkg{sfaR} includes
 time-varying inefficiency for all the ten distributions initially mentioned.
 In terms of efficiency determinants, the only model that allows for time-varying
-efficiency driver is the one by \citet{al06}. For all the other models, efficiency
+efficiency drivers is the one by \citet{al06}. For all the other models, efficiency
 drivers are modelled as in the case of the time-invariant inefficiency models. 
 For the (in)efficiency estimates, see formula in Table~\ref{table:effpanel}.
 
@@ -1489,7 +1490,7 @@ summary(hlf)
 @
 
 The \pkg{sfaR} includes an \code{extract} option compatible with the 
-\pkg{texreg} package \citep{texreg13}. The following code generates Table~\ref{table:3}.
+\pkg{texreg} package \citep{texreg13}. The following code generates Table~\ref{table:replikum}.
 
 <<table4.1, echo=TRUE, results=hide>>=
 library(texreg)
@@ -1511,11 +1512,81 @@ texreg(list(ols, hlf, trnorm, tscal, expo), stars = c(0.01, 0.05, 0.1),
 %\end{longtable}
 \end{adjustbox}
 \caption{Replication Table 4.1 in \citet[p.~119]{kum14}}
-\label{table:3}
+\label{table:replikum}
+\end{table}
+
+For comparison purposes, we extend the analysis to new distributions, as the 
+\pkg{sfaR} allows us to test different distribution. The following codes run the
+estimation for the rayleigh, generalized exponential, gamma, weibull, log-normal, 
+truncated skewed laplace, and uniform distributions. For the gamma distribution, 
+the hessian matrix is ill-conditionned leading to \code{NA} value in the standard
+errors. As a solution to this problem, we re-run the estimation using the ML
+parameters estimates as starting values, and a second order optimization 
+alogorithm (here the Newton-Raphson). This strategy worked well for this case. The
+estimation results are summarized in Table \ref{table:repliotherdist}.
+
+<<labe ='otherdist', strip.white=false>>=
+## rayleigh distribution for u
+ray <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
+ log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+ I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+ udist = 'rayleigh', uhet = ~ regu, data = utility, S = -1)
+## generalized exponential distribution for u
+ge <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
+ log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+ I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+ udist = 'genexponential', uhet = ~ regu, data = utility, S = -1)
+## gamma distribution for u
+ga1 <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
+ log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+ I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+ udist = 'gamma', uhet = ~ regu, data = utility, S = -1, Nsim = 100)
+### ill-conditionned hessian matrix
+ga2 <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
+ log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+ I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+ udist = 'gamma', uhet = ~ regu, start = ga1$mlParam, method = "nr",
+ data = utility, S = -1, Nsim = 100)
+## weibull distribution for u
+we <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
+ log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+ I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+ udist = 'weibull', uhet = ~ regu, data = utility, S = -1, Nsim = 100)
+## lognormal distribution for u
+lg <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
+ log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+ I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+ udist = 'lognormal', uhet = ~ regu, data = utility, S = -1, Nsim = 100)
+## truncated skewed laplace distribution
+tsl <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
+ log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+ I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+ udist = 'tslaplace', uhet = ~ regu, data = utility, S = -1)
+## uniform distribution for u
+uni <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
+ log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+ I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+ udist = 'uniform', uhet = ~ regu, data = utility, S = -1)
+@
+
+\begin{table}
+\centering
+\begin{adjustbox}{width=1\textwidth}
+\small
+%\begin{longtable}{l c c c c c}
+<<table4.1newdist, echo=FALSE, results=tex>>=
+texreg(list(ray, ge, ga2, we, lg, tsl, uni), stars = c(0.01, 0.05, 0.1), 
+       digits = 3, custom.model.names = c("rayleigh", "gexpo", "gamma", 
+        "weibull", "lognorm", "tsl", "uni"), table = FALSE)
+@
+%\end{longtable}
+\end{adjustbox}
+\caption{Other distributions using data from Table 4.1 in \citet[p.~119]{kum14}}
+\label{table:repliotherdist}
 \end{table}
 
 A summary of the (in)efficiency scores and the marginal impacts can be found in 
-Table~\ref{table:4}.
+Table~\ref{table:replikeff}.
 
 <<effimarg, echo=FALSE, results=tex>>=
 library(kableExtra)
@@ -1531,11 +1602,35 @@ trseff <- efficiencies(tscal)
 trsmarg <- marginal(tscal)
 expoeff <- efficiencies(expo)
 expomarg <- marginal(expo)
+rayeff <- efficiencies(ray)
+raymarg <- marginal(ray)
+geeff <- efficiencies(ge)
+gemarg <- marginal(ge)
+ga2eff <- efficiencies(ga2)
+ga2marg <- marginal(ga2)
+weeff <- efficiencies(we)
+wemarg <- marginal(we)
+lgeff <- efficiencies(lg)
+lgmarg <- marginal(lg)
+tsleff <- efficiencies(tsl)
+tslmarg <- marginal(tsl)
+unieff <- efficiencies(uni)
+unimarg <- marginal(uni)
 dkum14 <- as.data.frame(rbind(c(apply(hlfeff, 2, mean), apply(hlfmarg, 2, mean)), 
                 c(apply(treff, 2, mean), apply(trmarg, 2, mean)), 
                 c(apply(trseff, 2, mean), apply(trsmarg, 2, mean)), 
-                c(apply(expoeff, 2, mean), apply(expomarg, 2, mean))))
-dkum14 <- cbind(Distributions = c("Half-Normal", "Truncated Normal", "Scaling", "exponential"), 
+                c(apply(expoeff, 2, mean), apply(expomarg, 2, mean)),
+                c(apply(rayeff, 2, mean), apply(raymarg, 2, mean)), 
+                c(apply(geeff, 2, mean), apply(gemarg, 2, mean)), 
+                c(apply(ga2eff, 2, mean), apply(ga2marg, 2, mean)), 
+                c(apply(weeff, 2, mean), apply(wemarg, 2, mean)), 
+                c(apply(lgeff, 2, mean), apply(lgmarg, 2, mean)), 
+                c(apply(tsleff, 2, mean), apply(tslmarg, 2, mean)), 
+                c(apply(unieff, 2, mean), apply(unimarg, 2, mean))))
+dkum14 <- cbind(Distributions = c("Half-Normal", "Truncated Normal", "Scaling", "Exponential", 
+                                  "Raleigh", "Gen. Exponential", "Gamma", "Weibull", 
+                                  "Log-normal", "Trunc. Skewed Laplace", 
+                                  "Uniform"), 
                 dkum14)
 dkum14 <- dkum14[, c("Distributions", "u", "teJLMS", "teBC", "teBC_reciprocal", "Eu_regu", "Vu_regu")]
 names(dkum14) <- c("Distributions", "$E\\left[u|\\epsilon\\right]$",
@@ -1545,96 +1640,139 @@ names(dkum14) <- c("Distributions", "$E\\left[u|\\epsilon\\right]$",
                    "$\\frac{\\partial E[u]}{\\partial regu}$", 
                    "$\\frac{\\partial V[u]}{\\partial regu}$")
 xtable(dkum14, caption = "Mean (in)efficiency scores and marginal impacts", 
-       label = "table:4", digits = 3) %>% 
+       label = "table:replikeff", digits = 3) %>% 
   xtable2kable(booktabs = T, sanitize.text.function = function(x){x}, 
                include.rownames = getOption("xtable.include.colnames", FALSE), 
                scalebox = getOption("xtable.scalebox", 0.8)) 
 @
 
-For comparison purposes, we extend the analysis to new distributions, as the 
-\pkg{sfaR} allows us to test different distribution.
-
-<<labe ='otherdist', strip.white=FALSE>>=
-ray <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
- log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
- I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
- udist = 'rayleigh', uhet = ~ regu, data = utility, S = -1)
-
-ge <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
- log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
- I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
- udist = 'genexponential', uhet = ~ regu, data = utility, S = -1)
-
-ga <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
- log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
- I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
- udist = 'gamma', uhet = ~ regu, data = utility, S = -1, Nsim = 300)
-
-we <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
- log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
- I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
- udist = 'weibull', uhet = ~ regu, data = utility, S = -1, Nsim = 300)
-
-lg <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
- log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
- I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
- udist = 'lognormal', uhet = ~ regu, data = utility, S = -1, Nsim = 300)
-
-ray <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
- log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
- I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
- udist = 'tslaplace', uhet = ~ regu, data = utility, S = -1)
-
-ray <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
- log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
- I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
- udist = 'uniform', uhet = ~ regu, data = utility, S = -1)
-@
-
-
 \subsection{Latent class SF and variants for cross-sectional data}
 
-To illustrate the LCM SF along with its variants, we consider the Spanish dairy 
-farms
+To illustrate the LCM SF along with its variants, we consider the world
+production dataset. The estimation results can be found in Tables \ref{table:lcmgzisf}
+and \ref{{table:lcmvariants}}.
 
 <<>>=
+## LCM 2 classes
 lcm <- sfalcmcross(formula = ly ~ lk + ll + yr,data = worldprod, 
-                   lcmClasses = 2, printInfo = T)
+                   lcmClasses = 2)
+## GZISF 2 classes
 gzisf <- sfagzisfcross(formula = ly ~ lk + ll + yr,data = worldprod, 
-                   gzisfClasses = 2, printInfo = T)
-cnsf <- sfalcmcross(formula = ly ~ lk + ll + yr,data = worldprod, 
-                   printInfo = T)
-misf <- sfamisfcross(formula = ly ~ lk + ll + yr,data = worldprod, 
-                   printInfo = T)
-zisf <- sfazisfcross(formula = ly ~ lk + ll + yr,data = worldprod, 
-                   printInfo = T)
+                   gzisfClasses = 2)
+## CNSF
+cnsf <- sfacnsfcross(formula = ly ~ lk + ll + yr,data = worldprod)
+## MISF
+misf <- sfamisfcross(formula = ly ~ lk + ll + yr,data = worldprod)
+## ZISF
+zisf <- sfazisfcross(formula = ly ~ lk + ll + yr,data = worldprod)
 @
 
+\begin{table}
+\centering
+\begin{adjustbox}{width=1\textwidth}
+\small
+%\begin{longtable}{l c c c c c}
+<<lcmgzisf, echo=FALSE, results=tex>>=
+texreg(list(lcm, gzisf), stars = c(0.01, 0.05, 0.1), 
+       digits = 3, custom.model.names = c("LCM 2 Classes", "GZISF 2 Classes"), table = FALSE)
+@
+%\end{longtable}
+\end{adjustbox}
+\caption{LCM and GZISF illustrations}
+\label{table:lcmgzisf}
+\end{table}
 
+\begin{table}
+\centering
+\begin{adjustbox}{width=1\textwidth}
+\small
+%\begin{longtable}{l c c c c c}
+<<lcmvariants, echo=FALSE, results=tex>>=
+texreg(list(cnsf, misf, zisf), stars = c(0.01, 0.05, 0.1), 
+       digits = 3, custom.model.names = c("CNSF", "MISF", "ZISF"), table = FALSE)
+@
+%\end{longtable}
+\end{adjustbox}
+\caption{CNSF, MISF and ZISF illustrations}
+\label{table:lcmvariants}
+\end{table}
+
+The \code{efficiencies} method provides the classification of observations into
+different groups (see Table \ref{table:lcmGroup}), and efficiency scores 
+(see Table \ref{table:lcmEff}). The command also provides posterior probabilities
+for each class, which as suggested by \citet{greene05} can be used to compute 
+individual specific parameters, in light of the random parameters model.
+
+<<groupC, echo=FALSE, results=tex>>=
+# library(kableExtra)
+# library(xtable)
+options(knitr.table.format = "latex")
+# library(fBasics)
+# basicStats(cbind(hlfeff, hlfmarg))["mean", ]
+lcmeff <- efficiencies(lcm)
+gzisfeff <- efficiencies(gzisf)
+cnsfeff <- efficiencies(cnsf)
+misfeff <- efficiencies(misf)
+zisfeff <- efficiencies(zisf)
+obsC <- as.data.frame(cbind(table(lcmeff$Group_c), table(gzisfeff$Group_c), table(cnsfeff$Group_c), 
+      table(misfeff$Group_c), table(zisfeff$Group_c)))
+obsC <- cbind(c("Class 1", "Class2"), obsC)
+names(obsC) <- c("LCM", "GZISF", "CNSF", "MISF", "ZISF")
+xtable(obsC, caption = "Number of observations per class", 
+       label = "table:lcmGroup", digits = 3) %>% 
+  xtable2kable(booktabs = T, sanitize.text.function = function(x){x}, 
+               include.rownames = getOption("xtable.include.colnames", FALSE), 
+               scalebox = getOption("xtable.scalebox", 0.8)) 
+@
+
+<<effC, echo=FALSE, results=tex>>=
+# library(kableExtra)
+# library(xtable)
+options(knitr.table.format = "latex")
+# library(fBasics)
+# basicStats(cbind(hlfeff, hlfmarg))["mean", ]
+lcmeff <- efficiencies(lcm)
+gzisfeff <- efficiencies(gzisf)
+cnsfeff <- efficiencies(cnsf)
+misfeff <- efficiencies(misf)
+zisfeff <- efficiencies(zisf)
+obsC <- as.data.frame(cbind(aggregate(lcmeff$teJLMS_c, by = list(lcmeff$Group_c), FUN = mean)[, 2], 
+                            aggregate(gzisfeff$teJLMS_c, by = list(gzisfeff$Group_c), FUN = mean)[, 2], 
+                            aggregate(cnsfeff$teJLMS_c, by = list(cnsfeff$Group_c), FUN = mean)[, 2], 
+      aggregate(misfeff$teJLMS_c, by = list(misfeff$Group_c), FUN = mean)[, 2], 
+      aggregate(zisfeff$teJLMS_c, by = list(zisfeff$Group_c), FUN = mean)[, 2]))
+obsC <- cbind(c("Class 1", "Class2"), obsC)
+names(obsC) <- c("LCM", "GZISF", "CNSF", "MISF", "ZISF")
+xtable(obsC, caption = "Efficiency scores per class", 
+       label = "table:lcmEff", digits = 3) %>% 
+  xtable2kable(booktabs = T, sanitize.text.function = function(x){x}, 
+               include.rownames = getOption("xtable.include.colnames", FALSE), 
+               scalebox = getOption("xtable.scalebox", 0.8)) 
+@
 
 \subsection{Standard Panel SF models}
 
-Here we consider the Swiss railway
+Here we consider the Swiss railway dataset.
 
 <<>>=
-pl81h <- sfapanel1(formula = LNCT ~ LNQ2 + LNQ3 + LNNET + LNPK + LNPL + 
-  factor(YEAR), modelType = "pl81", idVar = "ID", timeVar = "YEAR", S = -1, 
+pl81h <- sfapanel1(formula = LNCT ~ LNQ2 + LNQ3 + LNNET + LNPK + LNPL, 
+                   modelType = "pl81", idVar = "ID", timeVar = "YEAR", S = -1, 
   data = swissrailways)
-pl81t <- sfapanel1(formula = LNCT ~ LNQ2 + LNQ3 + LNNET + LNPK + LNPL + 
-  factor(YEAR), modelType = "pl81", idVar = "ID", timeVar = "YEAR", S = -1, 
+pl81t <- sfapanel1(formula = LNCT ~ LNQ2 + LNQ3 + LNNET + LNPK + LNPL, 
+                   modelType = "pl81", idVar = "ID", timeVar = "YEAR", S = -1, 
   udist = "tnormal", data = swissrailways)
-k90 <- sfapanel1(formula = LNCT ~ LNQ2 + LNQ3 + LNNET + LNPK + LNPL +
-  factor(YEAR), modelType = "k90", idVar = "ID", timeVar = "YEAR", S = -1, 
+k90 <- sfapanel1(formula = LNCT ~ LNQ2 + LNQ3 + LNNET + LNPK + LNPL, 
+                 modelType = "k90", idVar = "ID", timeVar = "YEAR", S = -1, 
   data = swissrailways)
-bc92a <- sfapanel1(formula = LNCT ~ LNQ2 + LNQ3 + LNNET + LNPK + LNPL + 
-  factor(YEAR), modelType = "bc92a", idVar = "ID", timeVar = "YEAR", S = -1, 
+bc92a <- sfapanel1(formula = LNCT ~ LNQ2 + LNQ3 + LNNET + LNPK + LNPL, 
+                   modelType = "bc92a", idVar = "ID", timeVar = "YEAR", S = -1, 
   data = swissrailways)
 bc92b <- sfapanel1(formula = LNCT ~ LNQ2 + LNQ3 + LNNET + LNPK + LNPL,
   modelType = "bc92b", idVar = "ID", timeVar = "YEAR", S = -1, 
   data = swissrailways)
 bc92c <- sfapanel1(formula = LNCT ~ LNQ2 + LNQ3 + LNNET + LNPK + LNPL, 
   modelType = "bc92c", idVar = "ID", timeVar = "YEAR", S = -1, 
-  data = swissrailways)
+  uhet = ~ VIRAGE + TUNNEL + NETWORK, data = swissrailways)
 kw05 <- sfapanel1(formula = LNCT ~ LNQ2 + LNQ3 + LNNET + LNPK + LNPL, 
   modelType = "kw05", idVar = "ID", timeVar = "YEAR", S = -1, 
   data = swissrailways)
@@ -1644,12 +1782,60 @@ mols93 <- sfapanel1(formula = LNCT ~ LNQ2 + LNQ3 + LNNET + LNPK + LNPL,
 mbc92 <- sfapanel1(formula = LNCT ~ LNQ2 + LNQ3 + LNNET + LNPK + LNPL,
   modelType = "mbc92", idVar = "ID", timeVar = "YEAR", S = -1, 
   data = swissrailways)
-
-c00 <- sfapanel1(formula = LNCT ~ LNQ2 + LNQ3 + LNNET + LNPK + LNPL,
-  modelType = "c00", idVar = "ID", timeVar = "YEAR", S = -1, 
-  data = swissrailways)
+# c00 <- sfapanel1(formula = LNCT ~ LNQ2 + LNQ3 + LNNET + LNPK + LNPL,
+#   modelType = "c00", idVar = "ID", timeVar = "YEAR", S = -1, 
+#   data = swissrailways)
 @
 
+The results of the estimation can be found in Table \ref{table:panel1g}. The 
+efficiency scores are displayed in Table \ref{table:panel1gEff}.
+
+\begin{table}
+\centering
+\begin{adjustbox}{width=1\textwidth}
+\small
+%\begin{longtable}{l c c c c c}
+<<panel, echo=FALSE, results=tex>>=
+texreg(list(pl81h, pl81t, k90, bc92a, bc92b, bc92c, kw05, 
+            mols93, mbc92), stars = c(0.01, 0.05, 0.1), 
+       digits = 3, custom.model.names = c("PL81 hnormal", "PL81 tnormal", 
+                                          "K90", "BC92a", "BC92b", "BC92c", "KW05", 
+                                          "MOLS93", "MBC92"), table = FALSE)
+@
+%\end{longtable}
+\end{adjustbox}
+\caption{First generation panel SF models illustrations}
+\label{table:panel1g}
+\end{table}
+
+<<effC, echo=FALSE, results=tex>>=
+# library(kableExtra)
+# library(xtable)
+options(knitr.table.format = "latex")
+# library(fBasics)
+# basicStats(cbind(hlfeff, hlfmarg))["mean", ]
+pl81heff <- efficiencies(pl81h)
+pl81teff <- efficiencies(pl81t)
+k90eff <- efficiencies(k90)
+bc92aeff <- efficiencies(bc92a)
+bc92beff <- efficiencies(bc92b)
+bc92ceff <- efficiencies(bc92c)
+kw05eff <- efficiencies(kw05)
+mols93eff <- efficiencies(mols93)
+mbc92eff <- efficiencies(mbc92)
+obsC <- as.data.frame(c(mean(pl81heff$teJLMS), mean(pl81teff$teJLMS), mean(k90eff$teJLMS),  
+                      mean(bc92aeff$teJLMS), mean(bc92beff$teJLMS), 
+                      mean(bc92ceff$teJLMS), mean(kw05eff$teJLMS), 
+                      mean(mols93eff$teJLMS), mean(mbc92eff$teJLMS)))
+obsC <- cbind(c("PL81 hnormal", "PL81 tnormal", 
+                                          "K90", "BC92a", "BC92b", "BC92c", "KW05", 
+                                          "MOLS93", "MBC92"), obsC)
+xtable(obsC, caption = "Efficiency scores for different panel SF models", 
+       label = "table:panel1gEff", digits = 3) %>% 
+  xtable2kable(booktabs = T, sanitize.text.function = function(x){x}, 
+               include.rownames = getOption("xtable.include.colnames", FALSE), 
+               scalebox = getOption("xtable.scalebox", 0.8)) 
+@
 
 \subsection{Metafrontier: replication of }
 
@@ -1657,22 +1843,22 @@ c00 <- sfapanel1(formula = LNCT ~ LNQ2 + LNQ3 + LNNET + LNPK + LNPL,
 
 \section{Discussion and conclusion}
 
-put this table summary in appendix
-
-
-I use all these as exercice using FUglie data!!!!
-using sfaR to compute productivity (us states data)
-
-
-using sfaR to compute environmental efficiency
-
-lcm as random parameters...
-
-run for gamma in limdep to see!!!
-maybe rayleigh also
-
-if clear, exercice with fuglie data
-restropo and tobon: maybe just give the link and they download it
+% put this table summary in appendix
+% 
+% 
+% I use all these as exercice using FUglie data!!!!
+% using sfaR to compute productivity (us states data)
+% 
+% 
+% using sfaR to compute environmental efficiency
+% 
+% lcm as random parameters...
+% 
+% run for gamma in limdep to see!!!
+% maybe rayleigh also
+% 
+% if clear, exercice with fuglie data
+% restropo and tobon: maybe just give the link and they download it
 
 %% -- Bibliography -------------------------------------------------------------
 %% - References need to be provided in a .bib BibTeX database.
