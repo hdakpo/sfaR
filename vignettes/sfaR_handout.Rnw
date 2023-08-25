@@ -1576,9 +1576,9 @@ tsl <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
 \small
 %\begin{longtable}{l c c c c c}
 <<table4.1newdist, echo=FALSE, results=tex>>=
-texreg(list(ray, ge, ga2, we, lg, tsl, uni), stars = c(0.01, 0.05, 0.1), 
+texreg(list(ray, ge, ga2, we, lg, tsl), stars = c(0.01, 0.05, 0.1), 
        digits = 3, custom.model.names = c("rayleigh", "gexpo", "gamma", 
-        "weibull", "lognorm", "tsl", "uni"), table = FALSE)
+        "weibull", "lognorm", "tsl"), table = FALSE)
 @
 %\end{longtable}
 \end{adjustbox}
