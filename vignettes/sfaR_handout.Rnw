@@ -146,11 +146,12 @@ efficiency of both private and public sectors \citep{par14}.
 
 SFA has been used in a variety of areas and for different purposes. For 
 instance, SFA has been used to measure productivity growth and its sources 
-\citep{orea02}, or to examine the effects of regulation and competition on 
-performance \citep{myd20, kang02}, to evaluate eco-efficiency of firms 
-\citep{mada23}, to analyze the impact of environmental factors \citep{li19}. 
-SFA has been use in agriculture \citep{latruffe23}, banking \citep{badu21}, 
-health care \citep{ji20}, manufacturing sector \citep{boy19}, $\cdots$. 
+\citep[e.g.,][]{orea02}, to examine the effects of regulation and competition on 
+performance \citep[e.g.,][]{myd20, kang02}, to evaluate eco-efficiency of firms 
+\citep[e.g.,][]{mada23}, or to analyze the impact of environmental factors \citep[e.g.,][]{li19}. 
+SFA has been used in many different sectors including, e.g., agriculture \citep[e.g.,][]{latruffe23}, banking \citep[e.g.,][]{badu21}, 
+health care \citep[e.g.,][]{ji20}, manufacturing \citep[e.g.,][]{boy19}, 
+and museums \citep[e.g.,][]{price23}. 
 
 The scope of SFA is so huge that it spreads from pure research objectives to 
 practitionners and policy makers. As such, the \pkg{sfaR} package intends to 
