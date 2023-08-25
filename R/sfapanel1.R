@@ -269,24 +269,24 @@
 #' where \eqn{G(t)} is defined following different specifications:
 #' 
 #' \deqn{\begin{array}{lll}
-#' \text{References} & \text{Options in function} & \text{Formula} \\
-#' \text{Kumbhakar (1990)} & \text{\code{'modelType = 'k90''}} & 
+#' \text{References} & \text{\code{modelType}} & \text{Formula} \\
+#' \text{Kumbhakar (1990)} & \text{\code{k90}} & 
 #' G(t)=\left[1+\exp{\left(\eta_1t + \eta_2t^2\right)}\right]^{-1}\\ 
-#' \text{Battese and Coelli (1992)} & \text{\code{'modelType = 'bc92a''}} & 
+#' \text{Battese and Coelli (1992)} & \text{\code{bc92a}} & 
 #' G(t)=\exp{\left[-\eta(t-T)\right]} \\
 #' \text{Cuesta and Orea (2002),  Feng and Serletis (2009)} & 
-#' \text{\code{'modelType = 'bc92b''}} & 
+#' \text{\code{bc92b}} & 
 #' G(t)=\exp{\left[-\eta_1(t-T)-\eta_2(t-T)^2\right]} \\
-#' \text{Alvarez et al. (2006)} & \text{\code{'modelType = 'bc92c''}} & 
+#' \text{Alvarez et al. (2006)} & \text{\code{bc92c}} & 
 #' G(t)=\exp{\left(\bm{\eta}'\mathbf{Z}_{git}\right)} \\
-#' \text{Battese and Coelli (1992)} & \text{\code{'modelType = 'mbc92''}} & 
+#' \text{Battese and Coelli (1992)} & \text{\code{mbc92}} & 
 #' G(t)= 1 + \eta_1(t-T) + \eta_2(t-T)^2\\
-#' \text{Cuesta (2000)} & \text{\code{'modelType = 'c00''}} & 
+#' \text{Cuesta (2000)} & \text{\code{c00}} & 
 #' G(t)=\exp{\left[-\eta_i(t-T)\right]} \\
-#' \text{Kumbhakar and Wang (2005)} & \text{\code{'modelType = 'kw05''}} & 
+#' \text{Kumbhakar and Wang (2005)} & \text{\code{kw05}} & 
 #' G(t)=\exp{\left[-\eta(t-t_1)\right]} \\
 #' \text{Modified Lee and Schmidt (1993)} & 
-#' \text{\code{'modelType = 'mols93''}} & G(t)=\exp{\left[-\eta_t(t-T)\right]}
+#' \text{\code{mols93}} & G(t)=\exp{\left[-\eta_t(t-T)\right]}
 #' \end{array}
 #' }
 #' 
@@ -1438,8 +1438,8 @@ sfapanel1 <- function(formula, muhet, uhet, vhet, logDepVar = TRUE, data, idVar 
   returnObj$gradL_OBS <- datGradL
   returnObj$gradientNorm <- sqrt(sum(mleList$gradient^2))
   returnObj$invHessian <- mleList$invHessian
-  returnObj$conditionNums <- condiNum(mleObj = mleList$mleObj, method = method,
-    nParm = nParm)
+  returnObj$conditionNums <- tryCatch(condiNum(mleObj = mleList$mleObj, method = method,
+    nParm = nParm), error = function(e) return(NA))
   returnObj$hessianType <- if (hessianType == 1) {
     "Analytic/Numeric Hessian"
   } else {

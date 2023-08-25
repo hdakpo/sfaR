@@ -4154,10 +4154,15 @@ print.summary.sfapanel1 <- function(x, digits = max(3, getOption("digits") - 2),
   cat("Log likelihood gradient norm:", paste0(rep(" ", lengthSum - 2 - nchar("Log likelihood gradient norm:") -
     nchar(formatC(x$gradientNorm, digits = digits, format = "e"))), collapse = ""),
     formatC(x$gradientNorm, digits = digits, format = "e"), "\n")
-  cat("Hessian condition number:", paste0(rep(" ", lengthSum - 2 - nchar("Hessian condition number:") -
-    nchar(formatC(x$conditionNums[nrow(x$conditionNums), ], digits = digits,
-      format = "e"))), collapse = ""), formatC(x$conditionNums[nrow(x$conditionNums),
-    ], digits = digits, format = "e"), "\n")
+  if (is.na(x$conditionNums[nrow(x$conditionNums), ])) {
+    cat("Hessian condition number:", paste0(rep(" ", lengthSum - 2 - nchar("Hessian condition number:") -
+      2), collapse = ""), NA, "\n")
+  } else {
+    cat("Hessian condition number:", paste0(rep(" ", lengthSum - 2 - nchar("Hessian condition number:") -
+      nchar(formatC(x$conditionNums[nrow(x$conditionNums), ], digits = digits,
+        format = "e"))), collapse = ""), formatC(x$conditionNums[nrow(x$conditionNums),
+      ], digits = digits, format = "e"), "\n")
+  }
   cat("Estimation based on:", paste0(rep(" ", lengthSum - 2 - nchar("Estimation based on:") -
     nchar(x$Nobs) - nchar(x$nParm) - nchar("Nobs = ") - nchar("and K = ") - 3),
     collapse = ""), "Nobs = ", x$Nobs, "and K = ", x$nParm, "\n")

@@ -148,6 +148,25 @@ extract.sfalcmcross <- function(model, ...) {
 
 setMethod("extract", signature = className("sfalcmcross", "sfaR"), definition = extract.sfalcmcross)
 
+# sfagzisfcross extraction for texreg ------
+#' @rdname extract
+#' @exportS3Method texreg::extract sfagzisfcross
+extract.sfagzisfcross <- function(model, ...) {
+  co <- coef.sfagzisfcross(model)
+  names <- names(co)
+  se <- sqrt(diag(model$invHessian))
+  pval <- 2 * pnorm(-abs(co/se))
+  gof <- c(-2 * model$mlLoglik + 2 * model$nParm, -2 * model$mlLoglik + log(model$Nobs) *
+    model$nParm, model$mlLoglik, model$Nobs)
+  gof.names <- c("AIC", "BIC", "log-likelihood", "Num. obs.")
+  tr <- texreg::createTexreg(coef.names = names, coef = co, se = se, pvalues = pval,
+    gof.names = gof.names, gof = gof, gof.decimal = c(TRUE, TRUE, TRUE, FALSE),
+    model.name = paste0("gzisf", model$nClasses, " Classes"))
+  return(tr)
+}
+
+setMethod("extract", signature = className("sfagzisfcross", "sfaR"), definition = extract.sfagzisfcross)
+
 # sfaselectioncross extraction for texreg ------
 #' @rdname extract
 #' @exportS3Method texreg::extract sfaselectioncross
@@ -231,8 +250,8 @@ extract.sfametacross <- function(model, ...) {
   frChoice <- displayMenu(c(group_var_list, "metafrontier"), title = "Which frontier do you want? ")
   if ((frChoice == model$Ngroup + 1) && model$modelType %in% c("aos17a", "aos17b",
     "aos17c", "aos17d")) {
-    stop("No parameters are estimated for the metafontier for models 'aos17a', 'aos17b', 'aos17c', 'aos17d' \n", 
-         call. = FALSE)
+    stop("No parameters are estimated for the metafontier for models 'aos17a', 'aos17b', 'aos17c', 'aos17d' \n",
+      call. = FALSE)
   }
   co <- coef.sfametacross(model)[, frChoice]
   names <- names(co)
