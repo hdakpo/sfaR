@@ -84,8 +84,8 @@ Pessac, France}
   the one-sided error term (e.g., half-normal, 
   truncated normal, exponential, rayleigh, generalized exponential, truncated
   skewed-laplace, uniform, gamma, weibull, and log-normal distributions). Another 
-  advantage of the \pkg{sfaR} package is the availability of many (currently eleven) different
-  optimization algorithms. This document describes the main functions provided by the 
+  advantage of the \pkg{sfaR} package is the availability of  different
+  optimization algorithms. This article describes the main functions provided by the 
   \pkg{sfaR} package and illustrates their use with real-word data.
 }
 
@@ -149,9 +149,11 @@ instance, SFA has been used to measure productivity growth and its sources
 \citep[e.g.,][]{orea02}, to examine the effects of regulation and competition on 
 performance \citep[e.g.,][]{myd20, kang02}, to evaluate eco-efficiency of firms 
 \citep[e.g.,][]{mada23}, or to analyze the impact of environmental factors \citep[e.g.,][]{li19}. 
-SFA has been used in many different sectors including, e.g., agriculture \citep[e.g.,][]{latruffe23}, banking \citep[e.g.,][]{badu21}, 
-health care \citep[e.g.,][]{ji20}, manufacturing \citep[e.g.,][]{boy19}, 
-and museums \citep[e.g.,][]{price23}. 
+SFA has been used in many different sectors including, e.g., agriculture 
+\citep[e.g.,][]{latruffe23}, banking \citep[e.g.,][]{badu21}, education \citep[e.g., ][]{aga19}, 
+energy demand or distribution \citep[e.g., ][]{filipp15, kop11}, health care \citep[e.g.,][]{ji20}, manufacturing \citep[e.g.,][]{boy19}, 
+museums \citep[e.g.,][]{price23}, and transportation \citep[e.g., ][]{coelli99, 
+}. 
 
 The scope of SFA is so huge that it spreads from pure research objectives to 
 practitionners and policy makers. As such, the \pkg{sfaR} package intends to 
@@ -419,10 +421,9 @@ scores \citep{horrace96}. Table~\ref{table:effcross}, in the Appendix, summarize
 weibull and log-normal distributions, all (in)efficiency measures are evaluated
 by solving a numerical integration (in \pkg{sfaR}, this 
 is solved using adaptive multidimensional integration over hypercubes\footnote{This 
-is done using the \pgk{cubature} package \citep{cubature}). For the
+is done using the \pkg{cubature} package \citep{cubature}}). For the
 uniform distribution, different (in)efficiency scores can be derived when
 $\theta \rightarrow \infty$.
-
 
 \subsection{Panel stochastic frontier models}
 
@@ -1524,7 +1525,8 @@ the hessian matrix is ill-conditionned leading to \code{NA} value in the standar
 errors. As a solution to this problem, we re-run the estimation using the ML
 parameters estimates as starting values, and a second order optimization 
 alogorithm (here the Newton-Raphson). This strategy worked well for this case. The
-estimation results are summarized in Table \ref{table:repliotherdist}.
+estimation results are summarized in Tables \ref{table:repliotherdist1} and 
+\ref{table:repliotherdist2}.
 
 <<labe ='otherdist', strip.white=false>>=
 ## rayleigh distribution for u
@@ -1564,26 +1566,42 @@ tsl <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
  I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
  udist = 'tslaplace', uhet = ~ regu, data = utility, S = -1)
 ## uniform distribution for u
-# uni <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
-#  log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
-#  I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
-#  udist = 'uniform', uhet = ~ regu, data = utility, S = -1)
+uni <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
+ log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
+ I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
+ udist = 'uniform', uhet = ~ regu, data = utility, S = -1)
 @
 
 \begin{table}
 \centering
-\begin{adjustbox}{width=1\textwidth}
+\begin{adjustbox}{width=0.9\textwidth}
 \small
 %\begin{longtable}{l c c c c c}
 <<table4.1newdist, echo=FALSE, results=tex>>=
-texreg(list(ray, ge, ga2, we, lg, tsl), stars = c(0.01, 0.05, 0.1), 
+texreg(list(ray, ge, ga2, we), stars = c(0.01, 0.05, 0.1), 
        digits = 3, custom.model.names = c("rayleigh", "gexpo", "gamma", 
-        "weibull", "lognorm", "tsl"), table = FALSE)
+        "weibull"), table = FALSE)
 @
 %\end{longtable}
 \end{adjustbox}
-\caption{Other distributions using data from Table 4.1 in \citet[p.~119]{kum14}}
-\label{table:repliotherdist}
+\caption{Other distributions using data from Table 4.1 in \citet[p.~119]{kum14}, Part 1}
+\label{table:repliotherdist1}
+\end{table}
+
+
+\begin{table}
+\centering
+\begin{adjustbox}{width=0.8\textwidth}
+\small
+%\begin{longtable}{l c c c c c}
+<<table4.1newdist, echo=FALSE, results=tex>>=
+texreg(list(lg, tsl, uni), stars = c(0.01, 0.05, 0.1), 
+       digits = 3, custom.model.names = c("lognorm", "tsl", "uni"), table = FALSE)
+@
+%\end{longtable}
+\end{adjustbox}
+\caption{Other distributions using data from Table 4.1 in \citet[p.~119]{kum14}, Part 2}
+\label{table:repliotherdist2}
 \end{table}
 
 A summary of the (in)efficiency scores and the marginal impacts can be found in 
@@ -1669,7 +1687,7 @@ zisf <- sfazisfcross(formula = ly ~ lk + ll + yr,data = worldprod)
 
 \begin{table}
 \centering
-\begin{adjustbox}{width=1\textwidth}
+\begin{adjustbox}{width=0.7\textwidth}
 \small
 %\begin{longtable}{l c c c c c}
 <<lcmgzisf, echo=FALSE, results=tex>>=
@@ -1684,7 +1702,7 @@ texreg(list(lcm, gzisf), stars = c(0.01, 0.05, 0.1),
 
 \begin{table}
 \centering
-\begin{adjustbox}{width=1\textwidth}
+\begin{adjustbox}{width=0.8\textwidth}
 \small
 %\begin{longtable}{l c c c c c}
 <<lcmvariants, echo=FALSE, results=tex>>=
