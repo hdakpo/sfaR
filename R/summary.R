@@ -471,10 +471,15 @@ print.summary.sfacross <- function(x, digits = max(3, getOption("digits") - 2), 
   cat("Log likelihood gradient norm:", paste0(rep(" ", lengthSum - 2 - nchar("Log likelihood gradient norm:") -
     nchar(formatC(x$gradientNorm, digits = digits, format = "e"))), collapse = ""),
     formatC(x$gradientNorm, digits = digits, format = "e"), "\n")
-  cat("Hessian condition number:", paste0(rep(" ", lengthSum - 2 - nchar("Hessian condition number:") -
-    nchar(formatC(x$conditionNums[nrow(x$conditionNums), ], digits = digits,
-      format = "e"))), collapse = ""), formatC(x$conditionNums[nrow(x$conditionNums),
-    ], digits = digits, format = "e"), "\n")
+  if (is.na(x$conditionNums[nrow(x$conditionNums), ])) {
+    cat("Hessian condition number:", paste0(rep(" ", lengthSum - 2 - nchar("Hessian condition number:") -
+      2), collapse = ""), NA, "\n")
+  } else {
+    cat("Hessian condition number:", paste0(rep(" ", lengthSum - 2 - nchar("Hessian condition number:") -
+      nchar(formatC(x$conditionNums[nrow(x$conditionNums), ], digits = digits,
+        format = "e"))), collapse = ""), formatC(x$conditionNums[nrow(x$conditionNums),
+      ], digits = digits, format = "e"), "\n")
+  }
   cat("Estimation based on:", paste0(rep(" ", lengthSum - 2 - nchar("Estimation based on:") -
     nchar(x$Nobs) - nchar(x$nParm) - nchar("N = ") - nchar("and K = ") - 3),
     collapse = ""), "N = ", x$Nobs, "and K = ", x$nParm, "\n")
@@ -909,10 +914,15 @@ print.summary.sfalcmcross <- function(x, digits = max(3, getOption("digits") - 2
   cat("Log likelihood gradient norm:", paste0(rep(" ", lengthSum - 2 - nchar("Log likelihood gradient norm:") -
     nchar(formatC(x$gradientNorm, digits = digits, format = "e"))), collapse = ""),
     formatC(x$gradientNorm, digits = digits, format = "e"), "\n")
-  cat("Hessian condition number:", paste0(rep(" ", lengthSum - 2 - nchar("Hessian condition number:") -
-    nchar(formatC(x$conditionNums[nrow(x$conditionNums), ], digits = digits,
-      format = "e"))), collapse = ""), formatC(x$conditionNums[nrow(x$conditionNums),
-    ], digits = digits, format = "e"), "\n")
+  if (is.na(x$conditionNums[nrow(x$conditionNums), ])) {
+    cat("Hessian condition number:", paste0(rep(" ", lengthSum - 2 - nchar("Hessian condition number:") -
+      2), collapse = ""), NA, "\n")
+  } else {
+    cat("Hessian condition number:", paste0(rep(" ", lengthSum - 2 - nchar("Hessian condition number:") -
+      nchar(formatC(x$conditionNums[nrow(x$conditionNums), ], digits = digits,
+        format = "e"))), collapse = ""), formatC(x$conditionNums[nrow(x$conditionNums),
+      ], digits = digits, format = "e"), "\n")
+  }
   cat("Estimation based on:", paste0(rep(" ", lengthSum - 2 - nchar("Estimation based on:") -
     nchar(x$Nobs) - nchar(x$nParm) - nchar("N = ") - nchar("and K = ") - 3),
     collapse = ""), "N = ", x$Nobs, "and K = ", x$nParm, "\n")
@@ -1326,10 +1336,15 @@ print.summary.sfagzisfcross <- function(x, digits = max(3, getOption("digits") -
   cat("Log likelihood gradient norm:", paste0(rep(" ", lengthSum - 2 - nchar("Log likelihood gradient norm:") -
     nchar(formatC(x$gradientNorm, digits = digits, format = "e"))), collapse = ""),
     formatC(x$gradientNorm, digits = digits, format = "e"), "\n")
-  cat("Hessian condition number:", paste0(rep(" ", lengthSum - 2 - nchar("Hessian condition number:") -
-    nchar(formatC(x$conditionNums[nrow(x$conditionNums), ], digits = digits,
-      format = "e"))), collapse = ""), formatC(x$conditionNums[nrow(x$conditionNums),
-    ], digits = digits, format = "e"), "\n")
+  if (is.na(x$conditionNums[nrow(x$conditionNums), ])) {
+    cat("Hessian condition number:", paste0(rep(" ", lengthSum - 2 - nchar("Hessian condition number:") -
+      2), collapse = ""), NA, "\n")
+  } else {
+    cat("Hessian condition number:", paste0(rep(" ", lengthSum - 2 - nchar("Hessian condition number:") -
+      nchar(formatC(x$conditionNums[nrow(x$conditionNums), ], digits = digits,
+        format = "e"))), collapse = ""), formatC(x$conditionNums[nrow(x$conditionNums),
+      ], digits = digits, format = "e"), "\n")
+  }
   cat("Estimation based on:", paste0(rep(" ", lengthSum - 2 - nchar("Estimation based on:") -
     nchar(x$Nobs) - nchar(x$nParm) - nchar("N = ") - nchar("and K = ") - 3),
     collapse = ""), "N = ", x$Nobs, "and K = ", x$nParm, "\n")
@@ -1817,10 +1832,15 @@ print.summary.sfacnsfcross <- function(x, digits = max(3, getOption("digits") - 
   cat("Log likelihood gradient norm:", paste0(rep(" ", lengthSum - 2 - nchar("Log likelihood gradient norm:") -
     nchar(formatC(x$gradientNorm, digits = digits, format = "e"))), collapse = ""),
     formatC(x$gradientNorm, digits = digits, format = "e"), "\n")
-  cat("Hessian condition number:", paste0(rep(" ", lengthSum - 2 - nchar("Hessian condition number:") -
-    nchar(formatC(x$conditionNums[nrow(x$conditionNums), ], digits = digits,
-      format = "e"))), collapse = ""), formatC(x$conditionNums[nrow(x$conditionNums),
-    ], digits = digits, format = "e"), "\n")
+  if (is.na(x$conditionNums[nrow(x$conditionNums), ])) {
+    cat("Hessian condition number:", paste0(rep(" ", lengthSum - 2 - nchar("Hessian condition number:") -
+      2), collapse = ""), NA, "\n")
+  } else {
+    cat("Hessian condition number:", paste0(rep(" ", lengthSum - 2 - nchar("Hessian condition number:") -
+      nchar(formatC(x$conditionNums[nrow(x$conditionNums), ], digits = digits,
+        format = "e"))), collapse = ""), formatC(x$conditionNums[nrow(x$conditionNums),
+      ], digits = digits, format = "e"), "\n")
+  }
   cat("Estimation based on:", paste0(rep(" ", lengthSum - 2 - nchar("Estimation based on:") -
     nchar(x$Nobs) - nchar(x$nParm) - nchar("N = ") - nchar("and K = ") - 3),
     collapse = ""), "N = ", x$Nobs, "and K = ", x$nParm, "\n")
@@ -2390,10 +2410,15 @@ print.summary.sfamisfcross <- function(x, digits = max(3, getOption("digits") - 
   cat("Log likelihood gradient norm:", paste0(rep(" ", lengthSum - 2 - nchar("Log likelihood gradient norm:") -
     nchar(formatC(x$gradientNorm, digits = digits, format = "e"))), collapse = ""),
     formatC(x$gradientNorm, digits = digits, format = "e"), "\n")
-  cat("Hessian condition number:", paste0(rep(" ", lengthSum - 2 - nchar("Hessian condition number:") -
-    nchar(formatC(x$conditionNums[nrow(x$conditionNums), ], digits = digits,
-      format = "e"))), collapse = ""), formatC(x$conditionNums[nrow(x$conditionNums),
-    ], digits = digits, format = "e"), "\n")
+  if (is.na(x$conditionNums[nrow(x$conditionNums), ])) {
+    cat("Hessian condition number:", paste0(rep(" ", lengthSum - 2 - nchar("Hessian condition number:") -
+      2), collapse = ""), NA, "\n")
+  } else {
+    cat("Hessian condition number:", paste0(rep(" ", lengthSum - 2 - nchar("Hessian condition number:") -
+      nchar(formatC(x$conditionNums[nrow(x$conditionNums), ], digits = digits,
+        format = "e"))), collapse = ""), formatC(x$conditionNums[nrow(x$conditionNums),
+      ], digits = digits, format = "e"), "\n")
+  }
   cat("Estimation based on:", paste0(rep(" ", lengthSum - 2 - nchar("Estimation based on:") -
     nchar(x$Nobs) - nchar(x$nParm) - nchar("N = ") - nchar("and K = ") - 3),
     collapse = ""), "N = ", x$Nobs, "and K = ", x$nParm, "\n")
@@ -2800,10 +2825,15 @@ print.summary.sfazisfcross <- function(x, digits = max(3, getOption("digits") - 
   cat("Log likelihood gradient norm:", paste0(rep(" ", lengthSum - 2 - nchar("Log likelihood gradient norm:") -
     nchar(formatC(x$gradientNorm, digits = digits, format = "e"))), collapse = ""),
     formatC(x$gradientNorm, digits = digits, format = "e"), "\n")
-  cat("Hessian condition number:", paste0(rep(" ", lengthSum - 2 - nchar("Hessian condition number:") -
-    nchar(formatC(x$conditionNums[nrow(x$conditionNums), ], digits = digits,
-      format = "e"))), collapse = ""), formatC(x$conditionNums[nrow(x$conditionNums),
-    ], digits = digits, format = "e"), "\n")
+  if (is.na(x$conditionNums[nrow(x$conditionNums), ])) {
+    cat("Hessian condition number:", paste0(rep(" ", lengthSum - 2 - nchar("Hessian condition number:") -
+      2), collapse = ""), NA, "\n")
+  } else {
+    cat("Hessian condition number:", paste0(rep(" ", lengthSum - 2 - nchar("Hessian condition number:") -
+      nchar(formatC(x$conditionNums[nrow(x$conditionNums), ], digits = digits,
+        format = "e"))), collapse = ""), formatC(x$conditionNums[nrow(x$conditionNums),
+      ], digits = digits, format = "e"), "\n")
+  }
   cat("Estimation based on:", paste0(rep(" ", lengthSum - 2 - nchar("Estimation based on:") -
     nchar(x$Nobs) - nchar(x$nParm) - nchar("N = ") - nchar("and K = ") - 3),
     collapse = ""), "N = ", x$Nobs, "and K = ", x$nParm, "\n")
@@ -3289,10 +3319,15 @@ print.summary.sfaselectioncross <- function(x, digits = max(3, getOption("digits
   cat("Log likelihood gradient norm:", paste0(rep(" ", lengthSum - 2 - nchar("Log likelihood gradient norm:") -
     nchar(formatC(x$gradientNorm, digits = digits, format = "e"))), collapse = ""),
     formatC(x$gradientNorm, digits = digits, format = "e"), "\n")
-  cat("Hessian condition number:", paste0(rep(" ", lengthSum - 2 - nchar("Hessian condition number:") -
-    nchar(formatC(x$conditionNums[nrow(x$conditionNums), ], digits = digits,
-      format = "e"))), collapse = ""), formatC(x$conditionNums[nrow(x$conditionNums),
-    ], digits = digits, format = "e"), "\n")
+  if (is.na(x$conditionNums[nrow(x$conditionNums), ])) {
+    cat("Hessian condition number:", paste0(rep(" ", lengthSum - 2 - nchar("Hessian condition number:") -
+      2), collapse = ""), NA, "\n")
+  } else {
+    cat("Hessian condition number:", paste0(rep(" ", lengthSum - 2 - nchar("Hessian condition number:") -
+      nchar(formatC(x$conditionNums[nrow(x$conditionNums), ], digits = digits,
+        format = "e"))), collapse = ""), formatC(x$conditionNums[nrow(x$conditionNums),
+      ], digits = digits, format = "e"), "\n")
+  }
   cat("Estimation based on:", paste0(rep(" ", lengthSum - 2 - nchar("Estimation based on:") -
     nchar(x$Nobs) - nchar(x$nParm) - nchar("N = ") - nchar("of") - nchar(x$Ninit) -
     nchar("obs.") - nchar("and K = ") - 6), collapse = ""), "N = ", x$Nobs, "of",
@@ -3674,10 +3709,16 @@ print.summary.sfametacross <- function(x, digits = max(3, getOption("digits") - 
         nchar("Log likelihood gradient norm:") - nchar(formatC(x$gradientNorm[frChoice],
         digits = digits, format = "e"))), collapse = ""), formatC(x$gradientNorm[frChoice],
         digits = digits, format = "e"), "\n")
-      cat("Hessian condition number:", paste0(rep(" ", lengthSum - 2 - nchar("Hessian condition number:") -
-        nchar(formatC(x$conditionNums[[frChoice]][nrow(x$conditionNums[[frChoice]]),
+
+      if (is.na(x$conditionNums[nrow(x$conditionNums), ])) {
+        cat("Hessian condition number:", paste0(rep(" ", lengthSum - 2 -
+          nchar("Hessian condition number:") - 2), collapse = ""), NA, "\n")
+      } else {
+        cat("Hessian condition number:", paste0(rep(" ", lengthSum - 2 -
+          nchar("Hessian condition number:") - nchar(formatC(x$conditionNums[[frChoice]][nrow(x$conditionNums[[frChoice]]),
           ], digits = digits, format = "e"))), collapse = ""), formatC(x$conditionNums[[frChoice]][nrow(x$conditionNums[[frChoice]]),
-        ], digits = digits, format = "e"), "\n")
+          ], digits = digits, format = "e"), "\n")
+      }
       cat("Estimation based on:", paste0(rep(" ", lengthSum - 2 - nchar("Estimation based on:") -
         nchar(x$Nobs[frChoice]) - nchar(x$nParm) - nchar("N = ") - nchar("and K = ") -
         3), collapse = ""), "N = ", x$Nobs[frChoice], "and K = ", x$nParm,
@@ -4753,10 +4794,15 @@ print.summary.sfalcmpanel <- function(x, digits = max(3, getOption("digits") - 2
   cat("Log likelihood gradient norm:", paste0(rep(" ", lengthSum - 2 - nchar("Log likelihood gradient norm:") -
     nchar(formatC(x$gradientNorm, digits = digits, format = "e"))), collapse = ""),
     formatC(x$gradientNorm, digits = digits, format = "e"), "\n")
-  cat("Hessian condition number:", paste0(rep(" ", lengthSum - 2 - nchar("Hessian condition number:") -
-    nchar(formatC(x$conditionNums[nrow(x$conditionNums), ], digits = digits,
-      format = "e"))), collapse = ""), formatC(x$conditionNums[nrow(x$conditionNums),
-    ], digits = digits, format = "e"), "\n")
+  if (is.na(x$conditionNums[nrow(x$conditionNums), ])) {
+    cat("Hessian condition number:", paste0(rep(" ", lengthSum - 2 - nchar("Hessian condition number:") -
+      2), collapse = ""), NA, "\n")
+  } else {
+    cat("Hessian condition number:", paste0(rep(" ", lengthSum - 2 - nchar("Hessian condition number:") -
+      nchar(formatC(x$conditionNums[nrow(x$conditionNums), ], digits = digits,
+        format = "e"))), collapse = ""), formatC(x$conditionNums[nrow(x$conditionNums),
+      ], digits = digits, format = "e"), "\n")
+  }
   cat("Estimation based on:", paste0(rep(" ", lengthSum - 2 - nchar("Estimation based on:") -
     nchar(x$Nobs) - nchar(x$nParm) - nchar("Nobs = ") - nchar("and K = ") - 3),
     collapse = ""), "Nobs = ", x$Nobs, "and K = ", x$nParm, "\n")

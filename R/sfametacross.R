@@ -1110,8 +1110,8 @@ sfametacross <- function(formula, muhet, uhet, vhet, ghet, logDepVar = TRUE, dat
     gradL_OBS[[which(group_var_list == g)]] <- mleList$mleObj$gradL_OBS
     gradientNorm[[which(group_var_list == g)]] <- sqrt(sum(mleList$gradient^2))
     invHessian[[which(group_var_list == g)]] <- mleList$invHessian
-    conditionNums[[which(group_var_list == g)]] <- condiNum(mleObj = mleList$mleObj,
-      method = method, nParm = nParm)
+    conditionNums[[which(group_var_list == g)]] <- tryCatch(condiNum(mleObj = mleList$mleObj,
+      method = method, nParm = nParm), error = function(e) return(NA))
     if (udist %in% c("gamma", "lognormal", "weibull")) {
       FiMat[[which(group_var_list == g)]] <- FiMatg
     }
@@ -1288,8 +1288,8 @@ sfametacross <- function(formula, muhet, uhet, vhet, ghet, logDepVar = TRUE, dat
     gradL_OBS[[Ngroup + 1]] <- mleList$mleObj$gradL_OBS
     gradientNorm[[Ngroup + 1]] <- sqrt(sum(mleList$gradient^2))
     invHessian[[Ngroup + 1]] <- mleList$invHessian
-    conditionNums[[Ngroup + 1]] <- condiNum(mleObj = mleList$mleObj, method = method,
-      nParm = nParm)
+    conditionNums[[Ngroup + 1]] <- tryCatch(condiNum(mleObj = mleList$mleObj,
+      method = method, nParm = nParm), error = function(e) return(NA))
     dataTable[[Ngroup + 1]]$mlResiduals <- Yvarm - as.numeric(crossprod(matrix(mleList$mlParam[1:nXvar]),
       t(Xvar)))
     dataTable[[Ngroup + 1]]$mlFitted <- as.numeric(crossprod(matrix(mleList$mlParam[1:nXvar]),

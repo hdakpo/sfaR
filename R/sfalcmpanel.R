@@ -417,9 +417,9 @@
 #' # World production data
 #' dataW <- worldprod
 #' dataW$trend <- as.numeric(dataW$yr)
-#' dataW <- plm::pdata.frame(dataW, index = c("code", "yr"))
+#' dataW <- plm::pdata.frame(dataW, index = c('code', 'yr'))
 #' 
-#' lcm2c <- sfalcmpanel(formula = ly ~ lk + ll + trend, modelType = "bc92a", 
+#' lcm2c <- sfalcmpanel(formula = ly ~ lk + ll + trend, modelType = 'bc92a', 
 #' data = dataW)
 #' 
 #' summary(lcm2c)
@@ -488,7 +488,7 @@ sfalcmpanel <- function(formula, uhet, vhet, thet, logDepVar = TRUE, data, idVar
   if (modelType == "bc92c") {
     if (length(attr(terms(uhet), "term.labels")) == 0) {
       stop("at least one exogeneous variable must be provided for the scaling option for modelType = 'bc92c'",
-           call. = FALSE)
+        call. = FALSE)
     } else {
       ghet <- plhsCheck_u_bc92c(formula = uhet)
       uhet <- ~1
@@ -1046,8 +1046,8 @@ sfalcmpanel <- function(formula, uhet, vhet, thet, logDepVar = TRUE, data, idVar
   returnObj$gradL_OBS <- datGradL
   returnObj$gradientNorm <- sqrt(sum(mleList$gradient^2))
   returnObj$invHessian <- mleList$invHessian
-  returnObj$conditionNums <- condiNum(mleObj = mleList$mleObj, method = method,
-    nParm = nParm)
+  returnObj$conditionNums <- tryCatch(condiNum(mleObj = mleList$mleObj, method = method,
+    nParm = nParm), error = function(e) return(NA))
   returnObj$hessianType <- if (hessianType == 1) {
     "Analytic/Numeric Hessian"
   } else {

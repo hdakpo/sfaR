@@ -727,7 +727,7 @@ sfaselectioncross <- function(selectionF, frontierF, uhet, vhet, modelType = "gr
   # Draws for MSL -------
   if (lType == "msl") {
     if (!(simType %in% c("halton", "ghalton", "sobol", "rsobol", "richtmyer",
-                         "rrichtmyer", "uniform", "mlhs"))) {
+      "rrichtmyer", "uniform", "mlhs"))) {
       stop("Unknown or non-available random draws method", call. = FALSE)
     }
     if (!is.numeric(Nsim) || length(Nsim) != 1) {
@@ -1056,8 +1056,8 @@ sfaselectioncross <- function(selectionF, frontierF, uhet, vhet, modelType = "gr
   returnObj$gradL_OBS[Yvar_S == 1, ] <- mleList$mleObj$gradL_OBS
   returnObj$gradientNorm <- sqrt(sum(mleList$gradient^2))
   returnObj$invHessian <- mleList$invHessian
-  returnObj$conditionNums <- condiNum(mleObj = mleList$mleObj, method = method,
-    nParm = nParm)
+  returnObj$conditionNums <- tryCatch(condiNum(mleObj = mleList$mleObj, method = method,
+    nParm = nParm), error = function(e) return(NA))
   returnObj$hessianType <- if (hessianType == 1) {
     "Analytic Hessian"
   } else {
