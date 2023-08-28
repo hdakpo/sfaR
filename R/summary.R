@@ -3709,8 +3709,8 @@ print.summary.sfametacross <- function(x, digits = max(3, getOption("digits") - 
         nchar("Log likelihood gradient norm:") - nchar(formatC(x$gradientNorm[frChoice],
         digits = digits, format = "e"))), collapse = ""), formatC(x$gradientNorm[frChoice],
         digits = digits, format = "e"), "\n")
-
-      if (is.na(x$conditionNums[nrow(x$conditionNums), ])) {
+      if (is.na(x$conditionNums[[frChoice]][nrow(x$conditionNums[[frChoice]]),
+        ])) {
         cat("Hessian condition number:", paste0(rep(" ", lengthSum - 2 -
           nchar("Hessian condition number:") - 2), collapse = ""), NA, "\n")
       } else {
