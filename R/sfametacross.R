@@ -1406,7 +1406,6 @@ sfametacross <- function(formula, muhet, uhet, vhet, ghet, logDepVar = TRUE, dat
           ### simulation -------
           betaMat <- do.call(cbind, mlParam)
           fittedMat <- Xvar %*% betaMat[1:nXvar, , drop = FALSE]
-          epsilonMat <- sweep(-fittedMat, MARGIN = 1, STATS = Yvar, FUN = "+")
           if (udist %in% c("tnormal", "lognormal")) {
           muMat <- muHvar %*% betaMat[(nXvar + 1):(nXvar + nmuZUvar), ,
             drop = FALSE]
@@ -1424,8 +1423,11 @@ sfametacross <- function(formula, muhet, uhet, vhet, ghet, logDepVar = TRUE, dat
           p <- progressr::progressor(N)
           MetaList <- list()
           for (i in seq_len(N)) {
-          draws <- mnorm::rmnorm(n = metaSim, mean = fittedMat[i, ], sigma = diag(exp(WvMat[i,
-            ])))
+          draws <- matrix(nrow = metaSim, ncol = Ngroup)
+          for (k in seq_len(Ngroup)) {
+            draws[, k] <- rnorm(n = metaSim, mean = fittedMat[i, k], sd = exp(WvMat[i,
+            k]/2))
+          }
           if (S == 1) {
             metaFrontier <- apply(draws, 1, max)
           } else {
@@ -1549,16 +1551,21 @@ sfametacross <- function(formula, muhet, uhet, vhet, ghet, logDepVar = TRUE, dat
             sigmavsq <- exp(WvMat[i, ])
             sigmausq <- exp(WuMat[i, ])
             sigmasq <- sigmausq + sigmavsq
+            draws <- matrix(nrow = metaSim, ncol = Ngroup)
+            vdraws <- matrix(nrow = metaSim, ncol = Ngroup)
+            for (k in seq_len(Ngroup)) {
+            draws[, k] <- rnorm(n = metaSim, mean = fittedMat[i, k],
+              sd = sqrt(sigmavsq[k]))
             if (S == 1) {
-            vdraws <- tmvtnorm::rtmvnorm(n = metaSim, mean = sigmavsq *
-              epsilonMat[i, ]/sigmasq, sigma = diag(sigmausq * sigmavsq/sigmasq),
-              lower = epsilonMat[i, ], algorithm = "gibbs")
+              vdraws[, k] <- tmvtnorm::rtmvnorm(n = metaSim, mean = sigmavsq[k] *
+              epsilonMat[i, k]/sigmasq[k], sigma = as.numeric((sigmausq *
+              sigmavsq/sigmasq)[k]), lower = epsilonMat[i, k], algorithm = "gibbs")
             } else {
-            vdraws <- tmvtnorm::rtmvnorm(n = metaSim, mean = sigmavsq *
-              epsilonMat[i, ]/sigmasq, sigma = diag(sigmausq * sigmavsq/sigmasq),
-              upper = epsilonMat[i, ], algorithm = "gibbs")
+              vdraws[, k] <- tmvtnorm::rtmvnorm(n = metaSim, mean = sigmavsq[k] *
+              epsilonMat[i, k]/sigmasq[k], sigma = as.numeric((sigmausq *
+              sigmavsq/sigmasq)[k]), upper = epsilonMat[i, k], algorithm = "gibbs")
             }
-            draws <- mnorm::rmnorm(metaSim, mean = fittedMat[i, ], sigma = diag(sigmavsq))
+            }
             draws[, which(group_var_list == group_var[i, ])] <- fittedMat[i,
             which(group_var_list == group_var[i, ])] + vdraws[, which(group_var_list ==
             group_var[i, ])]
@@ -1619,7 +1626,8 @@ sfametacross <- function(formula, muhet, uhet, vhet, ghet, logDepVar = TRUE, dat
             ### simulation -------
             betaMat <- do.call(cbind, mlParam)
             fittedMat <- Xvar %*% betaMat[1:nXvar, , drop = FALSE]
-            epsilonMat <- sweep(-fittedMat, MARGIN = 1, STATS = Yvar, FUN = "+")
+            # epsilonMat <- sweep(-fittedMat, MARGIN = 1, STATS = Yvar, FUN =
+            # '+')
             if (udist %in% c("tnormal", "lognormal")) {
             muMat <- muHvar %*% betaMat[(nXvar + 1):(nXvar + nmuZUvar),
               , drop = FALSE]
@@ -1770,17 +1778,23 @@ sfametacross <- function(formula, muhet, uhet, vhet, ghet, logDepVar = TRUE, dat
               sigmavsq <- exp(WvMat[i, ])
               sigmausq <- exp(WuMat[i, ])
               sigmasq <- sigmausq + sigmavsq
+              draws <- matrix(nrow = metaSim, ncol = Ngroup)
+              vdraws <- matrix(nrow = metaSim, ncol = Ngroup)
+              for (k in seq_len(Ngroup)) {
+              draws[, k] <- rnorm(n = metaSim, mean = fittedMat[i,
+                k], sd = sqrt(sigmavsq[k]))
               if (S == 1) {
-              vdraws <- tmvtnorm::rtmvnorm(n = metaSim, mean = sigmavsq *
-                epsilonMat[i, ]/sigmasq, sigma = diag(sigmausq * sigmavsq/sigmasq),
-                lower = epsilonMat[i, ], algorithm = "gibbs")
+                vdraws[, k] <- tmvtnorm::rtmvnorm(n = metaSim, mean = sigmavsq[k] *
+                epsilonMat[i, k]/sigmasq[k], sigma = as.numeric((sigmausq *
+                sigmavsq/sigmasq)[k]), lower = epsilonMat[i, k],
+                algorithm = "gibbs")
               } else {
-              vdraws <- tmvtnorm::rtmvnorm(n = metaSim, mean = sigmavsq *
-                epsilonMat[i, ]/sigmasq, sigma = diag(sigmausq * sigmavsq/sigmasq),
-                upper = epsilonMat[i, ], algorithm = "gibbs")
+                vdraws[, k] <- tmvtnorm::rtmvnorm(n = metaSim, mean = sigmavsq[k] *
+                epsilonMat[i, k]/sigmasq[k], sigma = as.numeric((sigmausq *
+                sigmavsq/sigmasq)[k]), upper = epsilonMat[i, k],
+                algorithm = "gibbs")
               }
-              draws <- mnorm::rmnorm(metaSim, mean = fittedMat[i, ],
-              sigma = diag(sigmavsq))
+              }
               draws[, which(group_var_list == group_var[i, ])] <- fittedMat[i,
               which(group_var_list == group_var[i, ])] + vdraws[, which(group_var_list ==
               group_var[i, ])]
