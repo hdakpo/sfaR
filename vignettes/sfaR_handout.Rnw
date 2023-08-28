@@ -153,7 +153,7 @@ SFA has been used in many different sectors including, e.g., agriculture
 \citep[e.g.,][]{latruffe23}, banking \citep[e.g.,][]{badu21}, education \citep[e.g., ][]{aga19}, 
 energy demand or distribution \citep[e.g., ][]{filipp15, kop11}, health care \citep[e.g.,][]{ji20}, manufacturing \citep[e.g.,][]{boy19}, 
 museums \citep[e.g.,][]{price23}, and transportation \citep[e.g., ][]{coelli99, 
-}. 
+filipp16}. 
 
 The scope of SFA is so huge that it spreads from pure research objectives to 
 practitionners and policy makers. As such, the \pkg{sfaR} package intends to 
@@ -202,8 +202,8 @@ about each group of models implemented and illustrate them using real life data.
 The structure of the paper is as follows. Section \ref{sec:modelstandar} gives 
 a brief overview of the standard SF models in the literature for cross-section
 and panel data. Section \ref{sec:modelcm} describes the latent class SF in
-addition to its variants. Finally, section \ref{sec:other} presents the other 
-SF models present the \pkg{sfaR}, namely the metafrontiers and the sample 
+addition to its variants. Section \ref{sec:other} presents the other 
+SF models present in \pkg{sfaR}, namely the metafrontiers and the sample 
 selection SF. Practically, section \ref{sec:prespackage} draws a skeleton
 of the \pkg{sfaR} package focusing on the main functions and some postestimation
 routines, and section \ref{sec:illus} provides some empirical applications. The
@@ -231,7 +231,7 @@ The spearhead for the SFA is the assumption regarding the distibution of $u$.
 In the \pkg{sfaR} package, ten different distributions with $u \geq 0$ are 
 possible for the standard model. Table~\ref{table:dens} presents the density 
 function of all the distributions allowed by \pkg{sfaR}.\footnote{Moments associated
-with each distribution can be found in Table \ref{table:momentdesn} in the 
+with each distribution can be found in Tables \ref{table:momentdesn1} and \ref{table:momentdesn2} in the 
 Appendix.} For each of the distribution, the parameters can be obtained by 
 maximizing the log-likelihood giving the convolution of $\epsilon_i=v_i - Su_i$. 
 
@@ -248,7 +248,7 @@ conditions they nest the half-normal and the exponential distributions,
 respectively. In the case of the gamma distribution, the density corresponding 
 to $\epsilon_i$ does not have a close form, and \citet{greene03} suggested the 
 use of maximum simulated likelihood (MSL). If the previous four distributions 
-are the standard in the stochastic frontier framework, other 
+are the standards in the stochastic frontier framework, other 
 distributions are also introduced. For instance, the rayleigh \citep{oliv14, 
 hajar15, wang20}, and the generalized exponential \citep{papa21} are 
 one-parameter distributions, which have non-zero mode. Another alternative 
@@ -356,7 +356,7 @@ been discussed in \citet{reif91, cau93, cau95, had99}. Moreover, according to
 \citet{wang02}, not accounting for the heteroscedasticity in the efficiency  
 component can lead to inconsistent results. As underlined in 
 \citet[p.~115]{kum14}, "the early literature adopts a two-step procedure to investigate 
-the relationship", which was later proved by \citet{wang02} to poduce biased results.
+the relationship", which was later proved by \citet{wang02} to generate biased results.
 In the case of the truncated normal distribution, \citet{kum91, hua94, batt95}
 suggested to only parameterize the mean of the distribution as 
 $\mu_i = \mathbf{z}'_{\bm\mu, \mathbf{i}}\bm\zeta$ when examining the 
@@ -368,13 +368,14 @@ can also be applied to the log-normal distribution.
 Regarding the truncated normal distribution, \citet{wang02} have formulated a 
 different strategy for modelling the inefficiency variable:
 %
-$$u_i \sim h(\mathbf{z}_i, \bm\delta)u_*$$
+$$u_i \sim h(\mathbf{z}_{u,i}, \bm\delta)u_*$$
 %
 where $h() \geq 0$ (\textit{scaling factor}) is observation-specific and 
 non-stochastic and $u_*$ is a random (\textit{common}) variable that follows 
 here a truncated normal distribution $\mathcal{N}^+\left(\tau, \sigma_u^2\right)$. 
 Following \cite{kum14}, we re-parameterize the truncated normal distribution as 
-$\mathcal{N}^+\left(\tau, \exp{\left(c_u\right)}\right)$. Then
+$\mathcal{N}^+\left(\tau, \exp{\left(c_u\right)}\right)$, and 
+$h(\mathbf{z}_{u,i}, \bm\delta) = \exp\left(\mathbf{z'_{u,i}}\bm\delta\right)$. Then
 %
 $$u \equiv \exp\left(\mathbf{z'_{u,i}}\bm\delta\right)\mathcal{N}^+
 \left(\tau, \exp{\left(c_u\right)}\right)=\mathcal{N}^+\left(\tau\exp\left(
@@ -412,18 +413,19 @@ who suggested to compute $E\left[u_i|\hat{\epsilon}_i\right]$. \citet{jon82} als
 formulated an alternative to the conditional mean estimator, viz., the 
 conditional mode $M\left[u_i|\hat{\epsilon}_i\right]$. Once point estimates of 
 $u_i$ are obtained, technical efficiency can be computed as 
-$\exp{\left(-\hat{u}_i\right)}$. Later, \citet{batt88} proposed to 
+$\exp{\left(-\hat{u}_i|\hat{\epsilon}_i\right)}$. Later, \citet{batt88} proposed to 
 derive the conditional mean efficiency using $E\left[\exp{\left(-u_i\right)|\hat{\epsilon}_i}\right]$.
 We went a step further in the \pkg{sfaR} package to also provide the reciprocal
 mean efficiency: $E\left[\exp{\left(u_i\right)|\hat{\epsilon}_i}\right]$.
 Also whenever possible we also provide the confidence intervall of the (in)efficiency
-scores \citep{horrace96}. Table~\ref{table:effcross}, in the Appendix, summarizes the main (in)efficiency measures. For the 
+scores \citep{horrace96}. Tables~\ref{table:effcross1}, \ref{table:effcross2}, 
+and \ref{table:effcross3}, in the Appendix, summarizes the main (in)efficiency measures. For the 
 weibull and log-normal distributions, all (in)efficiency measures are evaluated
 by solving a numerical integration (in \pkg{sfaR}, this 
 is solved using adaptive multidimensional integration over hypercubes\footnote{This 
 is done using the \pkg{cubature} package \citep{cubature}}). For the
-uniform distribution, different (in)efficiency scores can be derived when
-$\theta \rightarrow \infty$.
+uniform distribution, different (in)efficiency scores can be derived when $\theta$
+is finite or, $\theta \rightarrow \infty$.
 
 \subsection{Panel stochastic frontier models}
 
@@ -460,8 +462,8 @@ Heterogeneity and heteroscedasticity can be handled in the \citet{pl81} model.
 However, the determinant variables $\mathbf{z}$ have to be time invariant \citep{kum2000}. In the
 \pkg{sfaR}, we suggest several ways to obtain time invariant determinants (see section \ref{sec:prespackage}).
 Regarding the (in)efficiency scores, they are computed the same way as in the 
-cross-sectional models using the formulas in Table~\ref{table:effcross} in the 
-Appendix.
+cross-sectional models using the formulas in Tables~\ref{table:effcross1}, \ref{table:effcross2}, 
+and \ref{table:effcross3} in the Appendix.
 
 \subsubsection{Time-varying inefficiency models}
 
@@ -486,6 +488,7 @@ models were suggested as documented in Table~\ref{table:gt}.
 %\setlength{\arrayrulewidth}{.01em}
 \renewcommand{\arraystretch}{1.3}
 \centering
+\begin{adjustbox}{max width=1\textwidth}
 \begin{tabular}{@{}ccc@{}}
 \toprule
 References & $G(t)$ & Code in \pkg{sfaR} \\[1em]
@@ -505,8 +508,11 @@ Modified \citet{lees93} & $G(t)=\exp{\left[-\eta_t(t-T)\right]}$ & \code{mols93}
 \citet{kw05} & $G(t)=\exp{\left[-\eta(t-t_1)\right]}$  & \code{kw05}\\[1em]
 %\hdashline 
 \citet{al06} & $G(t)=\exp{\left(\bm{\eta}'\mathbf{z}_{git}\right)}$ & \code{bc92c} \\[1em]
+%\hdashline 
+\citet{pl81} & $G(t) = 1$ & \code{pl81} \\[1em]
 \bottomrule
 \end{tabular}
+\end{adjustbox}
 \caption{List of functional forms for $G(t)$}
 \label{table:gt}
 \end{table}
@@ -518,7 +524,8 @@ time-varying inefficiency for all the ten distributions initially mentioned.
 In terms of efficiency determinants, the only model that allows for time-varying
 efficiency drivers is the one by \citet{al06}. For all the other models, efficiency
 drivers are modelled as in the case of the time-invariant inefficiency models. 
-For the (in)efficiency estimates, see formula in Table~\ref{table:effpanel}.
+For the (in)efficiency estimates, see formula in Tables~\ref{table:effpanel1}, 
+\ref{table:effpanel2} and \ref{table:effpanel3} in the Appendix.
 
 With the time-invariant inefficiency models, the ones developed in this subsection
 constitute the first generation of panel SF models in the \pkg{sfaR} package.
@@ -566,11 +573,11 @@ $$\mu_{it*|j}=\frac{- S\epsilon_{it|j}\sigma_{u|j}^2}{\sigma_{u|j}^2 +
  \sigma_{v|j}^2}$$
 %
 The distribution of observations into classes is based
-on prior probability that can depend on some covariates. This probability can 
+on a prior probability that can depend on some covariates. This probability can 
 be modelled using a logit distribution as
 %
 \begin{equation} \label{eq:2.1.3}
-\pi_{itj} = \frac{\exp{\left(\mathbf{q}'_{it}\bm{\lambda}_j\right)}}{
+\pi_{it,j} = \frac{\exp{\left(\mathbf{q}'_{it}\bm{\lambda}_j\right)}}{
 \sum_{m=1}^J \exp{\left(\mathbf{q}'_{it}\bm{\lambda}_m\right)}
 }
 \end{equation}
@@ -597,10 +604,10 @@ The unconditional likelihood of observation $i$ in period $t$ is simply the aver
 \subsubsection{For panel data}
 
 The difference with the pooled LCM is that the probability of belonging to 
-a class is fixed over time. The logit distribution is \ref{eq:6} becomes
+a class is fixed over time. The logit distribution in \ref{eq:2.1.3} becomes
 %
 \begin{equation} \label{eq:2.1.4}
-\pi_{ij} = \frac{\exp{\left(\mathbf{q}'_{i}\bm{\lambda}_j\right)}}{
+\pi_{i,j} = \frac{\exp{\left(\mathbf{q}'_{i}\bm{\lambda}_j\right)}}{
 \sum_{m=1}^J \exp{\left(\mathbf{q}'_{i}\bm{\lambda}_m\right)}
 }
 \end{equation}
@@ -653,20 +660,20 @@ some covariates using four possible specifications:
 \begin{itemize} \itemsep 10pt
 \item logit specification
 %
-$$p_i = \frac{\exp{(\mathbf{z}_{i}^{\prime}\bm{\theta})}}{1-
+$$p_i = \frac{\exp{(\mathbf{q}_{i}^{\prime}\bm{\theta})}}{1-
 \exp{(\mathbf{z}_{i}^{\prime}\bm{\theta})}}$$
 %
 \item probit specification
 %
-$$p_i = \Phi\left(\mathbf{z}_{i}^{\prime}\bm{\theta}\right)$$
+$$p_i = \Phi\left(\mathbf{q}_{i}^{\prime}\bm{\theta}\right)$$
 %
 \item cauchit specification
 %
-$$p_i = 1/\pi\arctan(\mathbf{z}_{i}^{\prime}\bm{\theta})+1/2$$
+$$p_i = 1/\pi\arctan(\mathbf{q}_{i}^{\prime}\bm{\theta})+1/2$$
 %
 \item cloglog specification
 %
-$$p_i = 1-\exp\left(-\exp(\mathbf{z}_{i}^{\prime} \bm{\theta})\right)$$
+$$p_i = 1-\exp\left(-\exp(\mathbf{q}_{i}^{\prime} \bm{\theta})\right)$$
 %
 \end{itemize}
 
@@ -695,7 +702,19 @@ $v_i$ is:
  probability. The model presented so far assumed common noise variable $v$ for 
  the two classes of observation. \pkg{sfaR} allows to estimate the ZISF model
  with different noise term depending on the class.\footnote{For now the
- \pkg{sfaR} package estimates the ZISF for cross-section or pooled data.}
+ \pkg{sfaR} package estimates the ZISF for cross-section or pooled data.} In 
+ this case we have:
+ 
+ %
+\begin{equation}\label{eq:2.2.2}
+y_i = \begin{cases}
+\alpha + \mathbf{x_i^{\prime}}\bm{\beta} + 
+ v_{1i} - Su_i & \text{with probability} \quad p \\
+ \alpha + \mathbf{x_i^{\prime}}\bm{\beta} +
+  v_{2i} & \text{with probability} \quad 1-p
+\end{cases}
+\end{equation}
+%
 
 \subsection{Contaminated noise stochastic frontier}
 
@@ -712,13 +731,23 @@ v_{2i} - Su_i & \text{with probability} \quad 1-p
 \end{cases}
 \end{equation}
 %
-All the other developments are similar to the ZISF case. The prior probability
+All the derivations are similar to the ZISF case. The prior probability
 of belonging to a class can be specified using either the logit, probit, cauchit
 and cloglog distributions. The CNSF is also available for the ten distributions.
 
 A slight extension of the CNSF model compared to \citet{wheat19}, is that the 
 \pkg{sfaR} allows for the possibility to also have different inefficiency term 
-between the two groups of observations.
+between the two groups of observations. In this case we have:
+%
+\begin{equation}\label{eq:2.3.2}
+y_i = \begin{cases}
+\alpha + \mathbf{x_i^{\prime}}\bm{\beta} + 
+ v_{1i} - Su_{1i} & \text{with probability} \quad p \\
+ \alpha + \mathbf{x_i^{\prime}}\bm{\beta} + 
+v_{2i} - Su_{2i} & \text{with probability} \quad 1-p
+\end{cases}
+\end{equation}
+%
 
 \subsection{Multi-modal inefficiency stochastic frontier}
 
@@ -878,7 +907,7 @@ $$\tilde{\bm{\Sigma}} = \frac{\sigma_v^2\sigma_u^2}{\sigma_v^2 + \sigma_u^2}$$
 %
 $$\tilde{\mathbf{D}} = \begin{pmatrix} \frac{S\rho}{\sigma_v} \\ 1 \end{pmatrix}$$
 %
-$$\tilde{\bm{\kappa}} = \begin{pmatrix} - \mathbf{z}'_i\bm{\delta} - \frac{\rho\sigma_v\left(\epsilon_i + S\mu\right)}{\sigma_v^2 + \sigma_u^2}\\ -\mu + \frac{S\sigma_u^2\left(\epsilon_i + S\mu\right)}{\sigma_v^2 + \sigma_u^2} \end{pmatrix}$$
+$$\tilde{\bm{\kappa}} = \begin{pmatrix} - \mathbf{z}'_{si}\bm{\delta} - \frac{\rho\sigma_v\left(\epsilon_i + S\mu\right)}{\sigma_v^2 + \sigma_u^2}\\ -\mu + \frac{S\sigma_u^2\left(\epsilon_i + S\mu\right)}{\sigma_v^2 + \sigma_u^2} \end{pmatrix}$$
 %
 $$\tilde{\bm{\Delta}} = \begin{pmatrix}1-\rho^2 & 0 \\ 0 & 0\end{pmatrix}$$
 %
@@ -968,7 +997,8 @@ The thechnology gap ratio is obtained as (assuming that $y_i$ is expressed in lo
  individual group frontier.
  
  The new quasi-maximum likelihood estimator requires a correction of the 
- standard error in order to account for heteroscedasticity. The robust
+ standard error in order to account for heteroscedasticity, as the error term
+ in \ref{eq:3.2.6} contains the residuals from estimating the group frontiers. The robust
  sandwich-form of the variance-covariance matrix estimator is used to 
  correct for the standard errors.
 
@@ -1074,7 +1104,7 @@ The thechnology gap ratio is obtained as (assuming that $y_i$ is expressed in lo
  the distribution of $v|\epsilon$.
  
  Both the approaches suggested by \citet{am17} can be extended to 
- assuming that the $v_{is}$ are not independent.
+ assuming that the $v_{is}$ are not independent between groups.
 
 Overall, \pkg{sfaR} allows to estimate seven different metafrontiers as summarized
 in Table~\ref{table:meta}.
@@ -1088,11 +1118,11 @@ References & Particularities & Code in \pkg{sfaR} \\
 \midrule
 \citet{batt04} & Linear Programming & \code{bpo04a} \\[1em]
 \citet{batt04} & Quadratic programming & \code{bpo04b} \\[1em]
-\citet{huang14} & Stochastic metafrontier function & \code{hhl14} \\[1em]
-\citet{am17} & Unconditional on $\epsilon$ $+$ independence of $v_{is}$ & \code{aos17a} \\[1em]
-\citet{am17} & Conditional on $\epsilon$ $+$ independence of $v_{is}$ & \code{aos17b} \\[1em]
-\citet{am17} & Unconditional on $\epsilon$ $+$ dependence of $v_{is}$ & \code{aos17c} \\[1em]
-\citet{am17} & Conditional on $\epsilon$ $+$ dependence of $v_{is}$ & \code{aos17d} \\[1em]
+\citet{huang14} & Stochastic metafrontier (SM) & \code{hhl14} \\[1em]
+\citet{am17} & SM unconditional on $\epsilon$ $+$ independence of $v_{is}$ & \code{aos17a} \\[1em]
+\citet{am17} & SM conditional on $\epsilon$ $+$ independence of $v_{is}$ & \code{aos17b} \\[1em]
+\citet{am17} & SM unconditional on $\epsilon$ $+$ dependence of $v_{is}$ & \code{aos17c} \\[1em]
+\citet{am17} & SM conditional on $\epsilon$ $+$ dependence of $v_{is}$ & \code{aos17d} \\[1em]
 \bottomrule
 \end{tabular}
 \caption{Metafrontier models}
@@ -1309,9 +1339,17 @@ five possibilities
 \end{itemize}
 %
 For the standard SF models using panel data, the different models in \code{sfapanel1}
-are presented in Table~\ref{table:dens} and can be chosen using the option
-\code{modelType}. The same option is alsop available in the function \code{sfametacross}
-to choose between the different metafrontiers.
+are presented in Table~\ref{table:gt} and can be chosen using the option
+\code{modelType}. The same option is also available in the function \code{sfametacross}
+to choose between the different metafrontiers as in Table~\ref{table:meta}.
+
+In the case of \code{sfapanel1}, or \code{sfalcmpanel}, except in the case of 
+\code{modelType = 'bc92c'}, in the presence of heteroscedasticity, variables are 
+supposed to be constant over time for each cross section. When this is not the case, three options 
+are suggested to create constant variables: when \code{invariance = 1L}, 
+the first period observation is used; when \code{invariance = 2L}, the last
+period observation is used (this is the default option); and when 
+\code{invariance = 3L}, the period mean is used.
 
 As mentioned in the Introduction section, an advantage of the \pkg{sfaR} is to
 offer multiple possibilities for the optimization algorithm used to solve the
@@ -1368,7 +1406,7 @@ method is only implemented for cross-sectional data.
 
 Other methods are available in \pkg{sfaR}
 %
-\begin{itemize}
+\begin{itemize} \itemsep 10pt
 \item \code{extract} for compatibility with \pkg{texreg}
 \item \code{bread} and \code{estfun} for compatibility with \pkg{sandwich}
 \item \code{coef} for extracting coefficients
@@ -1377,7 +1415,7 @@ Other methods are available in \pkg{sfaR}
 \item \code{fitted} for obtaining fitted values (frontier)
 \item \code{residuals} for extracting the residuals $v_i -Su_i$
 \item \code{summary} for the summary of the main functions
-\item \code{vcov} for extracting the variance-covariance matrix
+\item \code{vcov} for extracting the variance-covariance matrix.
 \end{itemize}
 %
 
@@ -1440,7 +1478,7 @@ A plot of the OLS residuals, and for a symmetric normal distribution can be
 found on Figure~\ref{fig:1}. In this particular case, we are "lucky" that the 
 OLS residuals exhibit the "right" positive skewness.
 
-\begin{figure}[t!]
+\begin{figure}%[t!]
 \centering
 <<densityplots, echo=FALSE, fig=TRUE, height=5.2, width=7>>=
 library(ggplot2)
@@ -1519,14 +1557,13 @@ texreg(list(ols, hlf, trnorm, tscal, expo), stars = c(0.01, 0.05, 0.1),
 
 For comparison purposes, we extend the analysis to new distributions, as the 
 \pkg{sfaR} allows us to test different distribution. The following codes run the
-estimation for the rayleigh, generalized exponential, gamma, weibull, log-normal, 
-truncated skewed laplace, and uniform distributions. For the gamma distribution, 
-the hessian matrix is ill-conditionned leading to \code{NA} value in the standard
-errors. As a solution to this problem, we re-run the estimation using the ML
-parameters estimates as starting values, and a second order optimization 
-alogorithm (here the Newton-Raphson). This strategy worked well for this case. The
-estimation results are summarized in Tables \ref{table:repliotherdist1} and 
-\ref{table:repliotherdist2}.
+estimation for the rayleigh, generalized exponential, gamma, and log-normal 
+distributions. For the gamma distribution, the hessian matrix is ill-conditionned 
+leading to \code{NA} value in the standard errors. As a solution to this problem, 
+we re-run the estimation using the ML parameters estimates as starting values, 
+and a second order optimization algorithm (here the Newton-Raphson). This 
+strategy worked well for this case. The estimation results are summarized in 
+Tables \ref{table:repliotherdist}.
 
 <<labe ='otherdist', strip.white=false>>=
 ## rayleigh distribution for u
@@ -1544,32 +1581,17 @@ ga1 <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
  log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
  I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
  udist = 'gamma', uhet = ~ regu, data = utility, S = -1, Nsim = 100)
-### ill-conditionned hessian matrix
+### ill-conditionned hessian matrix for gamma distribution
 ga2 <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
  log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
  I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
  udist = 'gamma', uhet = ~ regu, start = ga1$mlParam, method = "nr",
  data = utility, S = -1, Nsim = 100)
-## weibull distribution for u
-we <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
- log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
- I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
- udist = 'weibull', uhet = ~ regu, data = utility, S = -1, Nsim = 100)
 ## lognormal distribution for u
 lg <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
  log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
  I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
  udist = 'lognormal', uhet = ~ regu, data = utility, S = -1, Nsim = 100)
-## truncated skewed laplace distribution
-tsl <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
- log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
- I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
- udist = 'tslaplace', uhet = ~ regu, data = utility, S = -1)
-## uniform distribution for u
-uni <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
- log(wl/wf) + log(wk/wf) + I(1/2 * (log(wl/wf))^2) + I(1/2 * (log(wk/wf))^2) +
- I(log(wl/wf) * log(wk/wf)) + I(log(y) * log(wl/wf)) + I(log(y) * log(wk/wf)),
- udist = 'uniform', uhet = ~ regu, data = utility, S = -1)
 @
 
 \begin{table}
@@ -1578,30 +1600,14 @@ uni <- sfacross(formula = log(tc/wf) ~ log(y) + I(1/2 * (log(y))^2) +
 \small
 %\begin{longtable}{l c c c c c}
 <<table4.1newdist, echo=FALSE, results=tex>>=
-texreg(list(ray, ge, ga2, we), stars = c(0.01, 0.05, 0.1), 
+texreg(list(ray, ge, ga2, lg), stars = c(0.01, 0.05, 0.1), 
        digits = 3, custom.model.names = c("rayleigh", "gexpo", "gamma", 
-        "weibull"), table = FALSE)
+        "lognormal"), table = FALSE)
 @
 %\end{longtable}
 \end{adjustbox}
-\caption{Other distributions using data from Table 4.1 in \citet[p.~119]{kum14}, Part 1}
-\label{table:repliotherdist1}
-\end{table}
-
-
-\begin{table}
-\centering
-\begin{adjustbox}{width=0.8\textwidth}
-\small
-%\begin{longtable}{l c c c c c}
-<<table4.1newdist, echo=FALSE, results=tex>>=
-texreg(list(lg, tsl, uni), stars = c(0.01, 0.05, 0.1), 
-       digits = 3, custom.model.names = c("lognorm", "tsl", "uni"), table = FALSE)
-@
-%\end{longtable}
-\end{adjustbox}
-\caption{Other distributions using data from Table 4.1 in \citet[p.~119]{kum14}, Part 2}
-\label{table:repliotherdist2}
+\caption{Other distributions using the \code{utility} data}
+\label{table:repliotherdist}
 \end{table}
 
 A summary of the (in)efficiency scores and the marginal impacts can be found in 
@@ -1627,14 +1633,8 @@ geeff <- efficiencies(ge)
 gemarg <- marginal(ge)
 ga2eff <- efficiencies(ga2)
 ga2marg <- marginal(ga2)
-weeff <- efficiencies(we)
-wemarg <- marginal(we)
 lgeff <- efficiencies(lg)
 lgmarg <- marginal(lg)
-tsleff <- efficiencies(tsl)
-tslmarg <- marginal(tsl)
-# unieff <- efficiencies(uni)
-# unimarg <- marginal(uni)
 nameselect <- c("Distributions", "u", "teJLMS", "teBC", "teBC_reciprocal")
 dkum14 <- as.data.frame(rbind(c(apply(hlfeff, 2, mean)[nameselect], apply(hlfmarg, 2, mean)), 
                 c(apply(treff, 2, mean)[nameselect], apply(trmarg, 2, mean)), 
@@ -1643,12 +1643,9 @@ dkum14 <- as.data.frame(rbind(c(apply(hlfeff, 2, mean)[nameselect], apply(hlfmar
                 c(apply(rayeff, 2, mean)[nameselect], apply(raymarg, 2, mean)), 
                 c(apply(geeff, 2, mean)[nameselect], apply(gemarg, 2, mean)), 
                 c(apply(ga2eff, 2, mean)[nameselect], apply(ga2marg, 2, mean)), 
-                c(apply(weeff, 2, mean)[nameselect], apply(wemarg, 2, mean)), 
-                c(apply(lgeff, 2, mean)[nameselect], apply(lgmarg, 2, mean)), 
-                c(apply(tsleff, 2, mean)[nameselect], apply(tslmarg, 2, mean))))
+                c(apply(lgeff, 2, mean)[nameselect], apply(lgmarg, 2, mean))))
 dkum14 <- cbind(Distributions = c("Half-Normal", "Truncated Normal", "Scaling", "Exponential", 
-                                  "Raleigh", "Gen. Exponential", "Gamma", "Weibull", 
-                                  "Log-normal", "Trunc. Skewed Laplace"), 
+                                  "Raleigh", "Gen. Exponential", "Gamma", "Log-normal"), 
                 dkum14)
 dkum14 <- dkum14[, c("Distributions", "u", "teJLMS", "teBC", "teBC_reciprocal", "Eu_regu", "Vu_regu")]
 names(dkum14) <- c("Distributions", "$E\\left[u|\\epsilon\\right]$",
@@ -1663,6 +1660,10 @@ xtable(dkum14, caption = "Mean (in)efficiency scores and marginal impacts",
                include.rownames = getOption("xtable.include.colnames", FALSE), 
                scalebox = getOption("xtable.scalebox", 0.8)) 
 @
+
+\subsection{Other standard SF applications using cross-sectional data}
+
+
 
 \subsection{Latent class SF and variants for cross-sectional data}
 
@@ -1856,9 +1857,42 @@ xtable(obsC, caption = "Efficiency scores for different panel SF models",
                scalebox = getOption("xtable.scalebox", 0.8)) 
 @
 
-\subsection{Metafrontier: replication of }
+\subsection[Replication of Owusu and Bravo-Ureta, pp. 1000-1001]{Replication of~\citet[pp.~1000-1001]{owu22}}
+
+To illustrate the metafrontier estimation, we replicate Table 2 in \citep[pp. 1000-1001]{owu22}. In this article, the authors examined productivity differences
+between male and female groundnut producers in Malawi. For the estimation, 
+the authors assumed a Cobb-Douglas production function where \code{gnut} is 
+the groudnut output production in kilograms. The inputs include land in ha
+(\code{land}), labour in worker-days (\code{labor}), seed in kg (\code{seed}), 
+and agro-chemicals in MWK (\code{agrochem}). Production practices variables are also included in the production technology: use of hired labour (\code{usehirlab}), use of improved seed (\code{imprseed}), planting time (\code{earlypln}, \code{latepln}), and soil type (\code{soil3}). Additional socioeconomic variables 
+like exposure to agricultural extension (\code{extens}), social group membership
+(\code{socnet}), and whether or not farmer is affiliated with an anchor farm (
+\code{farmtyp2}), \code{farmtyp3}) are also considered. Finally, districts fixed
+effects (\code{dist1}, \code{dist2}) are also controlled for the estimation.
+
+The following code replicates the last four columns (unrestricted model) in 
+\citep[pp. 1000-1001]{owu22}.
+
+<<echo=FALSE>>=
+## download data
+obDat <- read.csv("https://tandf.figshare.com/ndownloader/files/32434483/filename.csv")
+## pooled SF
+col5 <- sfacross(formula = gnut ~ male + land + labor + seed + agrochem + 
+                   usehirlab + imprseed + earlypln + latepln + 
+                   soil3 + extens + socnet + farmtyp3 + farmtyp2 + dist1 + 
+                   dist2, data = obDat)
+## Group frontiers + metafrontiers
+col678 <- sfametacross(formula = gnut ~ land + labor + seed + agrochem + 
+                       usehirlab + imprseed + earlypln + latepln + 
+                       soil3 + extens + socnet + farmtyp3 + farmtyp2 + dist1 + 
+                       dist2, ghet = ~ male, data = obDat, 
+                     modelType = "hhl14")
+@
+
 
 \subsection{Latent class SF for panel data}
+
+We illustrate the LCM for panel data using the Spanish dairy farms data. The dataset is embedded in the \pkg{sfaR} package as \code{dairy}.
 
 \section{Discussion and conclusion}
 
@@ -1905,47 +1939,78 @@ xtable(obsC, caption = "Efficiency scores for different panel SF models",
 \renewcommand{\arraystretch}{1.3}
 \centering
 \begin{adjustbox}{max width=1\textwidth}
-\begin{tabular}{@{}cccc@{}}
+\begin{tabular}{@{}ccc@{}}
 \toprule
-Distributions & $E\left[u\right]$ & $E\left[\exp{\left(-u\right)}\right]$ & $V\left[u\right]$ \\
+Distributions & $E\left[u\right]$ & $E\left[\exp{\left(-u\right)}\right]$ \\
 \midrule
-Half-Normal & $\sigma_u\sqrt{\frac{2}{\pi}}$ & $2\left[1-\Phi\left(\sigma_u\right)\right]\exp{\left(\frac{\sigma_u^2}{2}\right)}$ & 
-$\frac{\pi-2}{\pi}\sigma_u^2$ \\[1em]
+Half-Normal & $\sigma_u\sqrt{\frac{2}{\pi}}$ & $2\left[1-\Phi\left(\sigma_u\right)\right]\exp{\left(\frac{\sigma_u^2}{2}\right)}$\\[1em]
 %\hdashline
 Truncated-Normal & $\mu + \sigma_u\frac{\phi\left(\frac{\mu}{\sigma_u}\right)}{\Phi\left(\frac{\mu}{\sigma_u}\right)}$ & 
-$\exp{\left(-\mu + \frac{1}{2}\sigma_u^2\right)}\frac{\Phi\left(\frac{\mu}{\sigma_u} - \sigma_u\right)}{\Phi\left(\frac{\mu}{\sigma_u}\right)}$ & 
-$\sigma_u^2\left[1 - \frac{\mu}{\sigma_u} \frac{\phi\left(\frac{\mu}{\sigma_u}\right)}{\Phi\left(\frac{\mu}{\sigma_u}\right)} - \left(\frac{\phi\left(\frac{\mu}{\sigma_u}\right)}{\Phi\left(\frac{\mu}{\sigma_u}\right)}\right)^2\right]$\\[1em]
+$\exp{\left(-\mu + \frac{1}{2}\sigma_u^2\right)}\frac{\Phi\left(\frac{\mu}{\sigma_u} - \sigma_u\right)}{\Phi\left(\frac{\mu}{\sigma_u}\right)}$\\[1em]
 %\hdashline
-Exponential & $\sigma_u$ & $\frac{1}{1+\sigma_u}$ & $\sigma_u^2$\\[1em]
+Exponential & $\sigma_u$ & $\frac{1}{1+\sigma_u}$\\[1em]
 %\hdashline
-Rayleigh & $\sigma_u\sqrt{\frac{\pi}{2}}$ & $1 - \sigma_u\sqrt{2\pi}\left[1-\Phi\left(\sigma_u\right)\right]\exp{\left(\frac{\sigma_u^2}{2}\right)}$ &
-$\frac{4-\pi}{2}\sigma_u^2$\\[1em]
+Rayleigh & $\sigma_u\sqrt{\frac{\pi}{2}}$ & $1 - \sigma_u\sqrt{2\pi}\left[1-\Phi\left(\sigma_u\right)\right]\exp{\left(\frac{\sigma_u^2}{2}\right)}$\\[1em]
 %\hdashline
-Gamma & $P\sigma_u$ & $\left(1+\sigma_u\right)^{-P}$ & $P\sigma_u^2$\\[1em]
+Gamma & $P\sigma_u$ & $\left(1+\sigma_u\right)^{-P}$\\[1em]
 %\hdashline
-Log-Normal & $\exp{\left(\mu +\sigma_u^2/2\right)}$ & $\int_0^\infty \frac{\exp{\left(-u\right)}}{u\sigma_u}\phi\left(\frac{\ln{u}-\mu}{\sigma_u}\right)du$ & 
-$\left[\exp{\left(\sigma_u^2\right)}-1\right]\exp{\left(2\mu +\sigma_u^2\right)}$\\[1em]
+Log-Normal & $\exp{\left(\mu +\sigma_u^2/2\right)}$ & $\int_0^\infty \frac{\exp{\left(-u\right)}}{u\sigma_u}\phi\left(\frac{\ln{u}-\mu}{\sigma_u}\right)du$\\[1em]
 %\hdashline
 Weibull & $\sigma_u\Gamma\left(1+1/k\right)$ & 
-$\int_0^\infty\exp{\left(-u\right)}\frac{k}{\sigma_u}\left(\frac{u}{\sigma_u}\right)^{k-1}\exp{\left(-\left(u/\sigma_u\right)^{k}\right)}du$ & 
-$\sigma_u^2\left[\Gamma\left(1+2/k\right)-\left(\Gamma\left(1+1/k\right)\right)^2\right]$\\[1em]
+$\int_0^\infty\exp{\left(-u\right)}\frac{k}{\sigma_u}\left(\frac{u}{\sigma_u}\right)^{k-1}\exp{\left(-\left(u/\sigma_u\right)^{k}\right)}du$\\[1em]
 %\hdashline
-Generalized Exponential & $\frac{3}{2}\sigma_u$ & $\frac{2}{\left(\sigma_u+1\right)\left(\sigma_u+2\right)}$ & $\frac{5}{4}\sigma_u^2$\\[1em]
+Generalized Exponential & $\frac{3}{2}\sigma_u$ & $\frac{2}{\left(\sigma_u+1\right)\left(\sigma_u+2\right)}$\\[1em]
 %\hdashline
 Truncated Skewed-Laplace & $\sigma_u\frac{1+4\lambda+2\lambda^2}{\left(1+\lambda\right)\left(1+2\lambda\right)}$ & 
-$\frac{1+\lambda}{\left(2\lambda+1\right)}\left[\frac{2}{1+\sigma_u}-\frac{1}{1+\lambda + \sigma_u}\right]$ & 
-$\sigma_u^2\frac{1+8\lambda+16\lambda^2+12\lambda^3+4\lambda^4}{\left(1+\lambda\right)^2\left(1+2\lambda\right)^2}$\\[1em]
+$\frac{1+\lambda}{\left(2\lambda+1\right)}\left[\frac{2}{1+\sigma_u}-\frac{1}{1+\lambda + \sigma_u}\right]$\\[1em]
 %\hdashline
-Uniform & $\frac{\theta}{2}$ & $\frac{1-\exp{\left(-\theta\right)}}{\theta}$ & $\exp{\left(W_u\right)}=\frac{\theta^2}{12}$\\[1em]
+Uniform & $\frac{\theta}{2}$ & $\frac{1-\exp{\left(-\theta\right)}}{\theta}$\\[1em]
 \bottomrule
 \end{tabular}
 \end{adjustbox}
-\caption{List of distributions for $u$}
-\label{table:momentdesn}
+\caption{First moments of (in)efficiency distributions}
+\label{table:momentdesn1}
 \end{table}
 %\end{landscape}
 
-\newpage
+%\newpage
+
+\begin{table}[h]
+%\setlength{\arrayrulewidth}{.01em}
+\renewcommand{\arraystretch}{1.3}
+\centering
+\begin{adjustbox}{max width=0.6\textwidth}
+\begin{tabular}{@{}cc@{}}
+\toprule
+Distributions & $V\left[u\right]$ \\
+\midrule
+Half-Normal & $\frac{\pi-2}{\pi}\sigma_u^2$ \\[1em]
+%\hdashline
+Truncated-Normal & $\sigma_u^2\left[1 - \frac{\mu}{\sigma_u} \frac{\phi\left(\frac{\mu}{\sigma_u}\right)}{\Phi\left(\frac{\mu}{\sigma_u}\right)} - \left(\frac{\phi\left(\frac{\mu}{\sigma_u}\right)}{\Phi\left(\frac{\mu}{\sigma_u}\right)}\right)^2\right]$\\[1em]
+%\hdashline
+Exponential & $\sigma_u^2$\\[1em]
+%\hdashline
+Rayleigh & $\frac{4-\pi}{2}\sigma_u^2$\\[1em]
+%\hdashline
+Gamma & $P\sigma_u^2$\\[1em]
+%\hdashline
+Log-Normal & $\left[\exp{\left(\sigma_u^2\right)}-1\right]\exp{\left(2\mu +\sigma_u^2\right)}$\\[1em]
+%\hdashline
+Weibull & $\sigma_u^2\left[\Gamma\left(1+2/k\right)-\left(\Gamma\left(1+1/k\right)\right)^2\right]$\\[1em]
+%\hdashline
+Generalized Exponential & $\frac{5}{4}\sigma_u^2$\\[1em]
+%\hdashline
+Truncated Skewed-Laplace & $\sigma_u^2\frac{1+8\lambda+16\lambda^2+12\lambda^3+4\lambda^4}{\left(1+\lambda\right)^2\left(1+2\lambda\right)^2}$\\[1em]
+%\hdashline
+Uniform & $\exp{\left(W_u\right)}=\frac{\theta^2}{12}$\\[1em]
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\caption{Second moment of inefficiency distributions}
+\label{table:momentdesn2}
+\end{table}
+
+%\newpage
 
 \section{Cross-sectional model tables} \label{app:sfcross}
 
@@ -1958,74 +2023,81 @@ Uniform & $\frac{\theta}{2}$ & $\frac{1-\exp{\left(-\theta\right)}}{\theta}$ & $
 %\begin{landscape}
 %\pagestyle{lscape}
 \begin{table}[h]
- \renewcommand{\arraystretch}{1.3}
-% \setlength{\arrayrulewidth}{.01em}
  \centering
-\begin{adjustbox}{max width=1\textwidth}
- \begin{tabular}{@{}ccc@{}}
+\begin{threeparttable}
+ \renewcommand{\arraystretch}{3}
+% \setlength{\arrayrulewidth}{.01em}
+\begin{adjustbox}{max width=0.7\textwidth}
+ \begin{tabular}{@{}cc@{}}
 \toprule
-Distributions & $f(\epsilon)$ & Notes \\
+Distributions & $f(\epsilon)$ \\
 \midrule
 Half-Normal & $\frac{2\phi{\left(\frac{\epsilon}{\sqrt{\sigma_v^2 + \sigma_u^2}}
 \right)}}{\sqrt{\sigma_u^2 + \sigma_v^2}}\Phi\left(\frac{\mu_*}{\sigma_*}
-\right)$ & $\mu_{*}= \frac{-\epsilon S\sigma_u^2}{\sigma_u^2 + \sigma_v^2}$ and 
-$\sigma_*^2=\frac{\sigma_u^2\sigma_v^2}{\sigma_u^2 + \sigma_v^2}$\\
+\right)$ \\
 %\hdashline 
 Truncated-Normal & $\frac{\phi{\left(\frac{S\epsilon + \mu}{\sqrt{
 \sigma_v^2 + \sigma_u^2}}\right)}}{\sqrt{\sigma_u^2 + \sigma_v^2}\Phi
-\left(\frac{\mu}{\sigma_u}\right)}\Phi\left(\frac{\mu_*}{\sigma_*}\right)$ & 
-$\mu_*= \frac{\mu\sigma_v^2 - \epsilon S\sigma_u^2}{\sigma_u^2 + \sigma_v^2}$ 
-and $\sigma_*^2=\frac{\sigma_u^2\sigma_v^2}{\sigma_u^2 + \sigma_v^2}$ \\
+\left(\frac{\mu}{\sigma_u}\right)}\Phi\left(\frac{\mu_*}{\sigma_*}\right)$  \\
 %\hdashline 
 Exponential & $\frac{1}{\sigma_u}\exp{\left(\frac{\sigma_v^2}{2\sigma_u^2}+
 \frac{S\epsilon}{\sigma_u}\right)}\Phi\left(-\frac{\sigma_v}{\sigma_u} - 
-\frac{S\epsilon}{\sigma_v}\right)$ & -\\
+\frac{S\epsilon}{\sigma_v}\right)$\\
 %\hdashline 
 Rayleigh & $\frac{\exp{\left(\frac{\mu_*^2}{2\sigma_*^2} - \frac{\epsilon^2}{
 2\sigma_v^2} \right)}}{\sigma_u^2\sigma_v}\sigma_* \left[\mu_*\Phi\left(
 \frac{\mu_*}{\sigma_*}\right) + \sigma_*\phi\left(\frac{\mu_*}{\sigma_*}
-\right)\right]$ & $\mu_{*}= \frac{-\epsilon S\sigma_u^2}{\sigma_u^2 + \sigma_v^2}$ 
-and $\sigma_*^2=\frac{\sigma_u^2\sigma_v^2}{\sigma_u^2 + \sigma_v^2}$\\
+\right)\right]$ \\
 %\hdashline
-\multirow{2}{*}{Gamma} & \multirow{2}{*}{$\frac{\exp{\left(\frac{\sigma_v^2}{2\sigma_u^2} + \frac{S\epsilon}{
+Gamma & $\frac{\exp{\left(\frac{\sigma_v^2}{2\sigma_u^2} + \frac{S\epsilon}{
 \sigma_u}\right)}}{\sigma_u^P\Gamma\left(P\right)}\Phi\left(-\frac{\sigma_v}{
-\sigma_u} - \frac{S\epsilon}{\sigma_v}\right)\hat{h}(P-1, \epsilon)$} & 
-$\hat{h}(P-1, \epsilon)= \frac{1}{R}\sum_{r = 1}^R \left[\mu + 
-\sigma_v\Phi^{-1}\left(F_{r}+ \left(1-F_{r}\right)\Phi\left(-\frac{\mu}{
-\sigma_v}\right)\right)\right]^{P-1}$\\
-& &  $\mu = -\frac{\sigma_v^2}{\sigma_u} - S\epsilon_i$ and $F_{r}$ is pseudo/quasi random draw \\
+\sigma_u} - \frac{S\epsilon}{\sigma_v}\right)\hat{h}(P-1, \epsilon)$ \\
 %\hdashline 
 Log-Normal & $\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(
-\frac{\epsilon+Su_r}{\sigma_v}\right)$ & 
-$u_r=\exp{\left(\mu +\sigma_u\Phi^{-1}\left(h_r\right)\right)}$ and $h_r$ is pseudo/quasi random draw\\
+\frac{\epsilon+Su_r}{\sigma_v}\right)$ \\
 %\hdashline 
 Weibull & $\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{
-\epsilon+Su_r}{\sigma_v}\right)$ & $u_r = \sigma_u\left(-\ln{\left(1-h_r\right)}\right)^{1/k}$ and $h_r$ is pseudo/quasi random draw\\
+\epsilon+Su_r}{\sigma_v}\right)$\\
 %\hdashline 
-\multirow{2}{*}{Generalized Exponential} & \multirow{2}{*}{$\frac{2}{\sigma_u}\exp{\left(A\right)}\Phi 
-\left(a\right)-\frac{2}{\sigma_u}\exp{\left(B\right)}\Phi\left(b\right)$} & $A=\frac{S\epsilon}{\sigma_u}+\frac{\sigma_v^2}{2\sigma_u^2}$ and 
-$B = \frac{2S\epsilon}{\sigma_u}+\frac{2\sigma_v^2}{\sigma_u^2}$\\
-& & $a = -\frac{S\epsilon}{\sigma_v}-\frac{\sigma_v}{\sigma_u}$ and $b = -\frac{S\epsilon}{\sigma_v}- \frac{2\sigma_v}{\sigma_u}$ \\
+Generalized Exponential & $\frac{2}{\sigma_u}\exp{\left(A\right)}\Phi 
+\left(a\right)-\frac{2}{\sigma_u}\exp{\left(B\right)}\Phi\left(b\right)$\\
 %\hdashline 
-\multirow{2}{*}{Truncated Skewed-Laplace} & \multirow{2}{*}{$\frac{1+\lambda}{\sigma_u\left(2\lambda+1\right)}
-\left[2\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)\right]$} & 
-$A = \left(\frac{\sigma_v^2}{2\sigma_u^2}+\frac{S\epsilon}{\sigma_u}\right)$ and 
-$B = \left(\frac{\left(1+\lambda\right)^2\sigma_v^2}{2\sigma_u^2}+\frac{S\epsilon\left(1+\lambda\right)}{\sigma_u}\right)$\\
-& & $a = -\frac{\sigma_v}{\sigma_u}-\frac{S\epsilon}{\sigma_v}$ and $b = -\frac{\left(1+\lambda\right)\sigma_v}{\sigma_u}-\frac{S\epsilon}{\sigma_v}$ \\
+Truncated Skewed-Laplace & $\frac{1+\lambda}{\sigma_u\left(2\lambda+1\right)}
+\left[2\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)\right]$\\
 %\hdashline 
 Uniform &  $\frac{1}{\theta}\left[\Phi\left(\frac{\theta + S\epsilon}{\sigma_v}
-\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}\right)\right]$ & -\\
+\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}\right)\right]$\\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
+\begin{tablenotes}
+\tiny
+\item \textbf{Half-Normal}: $\mu_{*}= \frac{-\epsilon S\sigma_u^2}{\sigma_u^2 + \sigma_v^2}$ and 
+$\sigma_*^2=\frac{\sigma_u^2\sigma_v^2}{\sigma_u^2 + \sigma_v^2}$
+\item \textbf{Truncated normal}: $\mu_*= \frac{\mu\sigma_v^2 - \epsilon S\sigma_u^2}{\sigma_u^2 + \sigma_v^2}$ 
+and $\sigma_*^2=\frac{\sigma_u^2\sigma_v^2}{\sigma_u^2 + \sigma_v^2}$
+\item \textbf{Rayleigh}: $\mu_{*}= \frac{-\epsilon S\sigma_u^2}{\sigma_u^2 + \sigma_v^2}$ 
+and $\sigma_*^2=\frac{\sigma_u^2\sigma_v^2}{\sigma_u^2 + \sigma_v^2}$
+\item \textbf{Gamma}: $\hat{h}(P-1, \epsilon)= \frac{1}{R}\sum_{r = 1}^R \left[\mu + 
+\sigma_v\Phi^{-1}\left(F_{r}+ \left(1-F_{r}\right)\Phi\left(-\frac{\mu}{
+\sigma_v}\right)\right)\right]^{P-1}$, $\mu = -\frac{\sigma_v^2}{\sigma_u} - S\epsilon_i$, and $F_{r}$ is a pseudo/quasi random draw
+\item \textbf{Log-normal}: $u_r=\exp{\left(\mu +\sigma_u\Phi^{-1}\left(h_r\right)\right)}$ and $h_r$ is a pseudo/quasi random draw
+\item \textbf{Weibull}: $u_r = \sigma_u\left(-\ln{\left(1-h_r\right)}\right)^{1/k}$ and $h_r$ is a pseudo/quasi random draw
+\item \textbf{Generalized exponential}: $A=\frac{S\epsilon}{\sigma_u}+\frac{\sigma_v^2}{2\sigma_u^2}$ and 
+$B = \frac{2S\epsilon}{\sigma_u}+\frac{2\sigma_v^2}{\sigma_u^2}$, $a = -\frac{S\epsilon}{\sigma_v}-\frac{\sigma_v}{\sigma_u}$ and $b = -\frac{S\epsilon}{\sigma_v}- \frac{2\sigma_v}{\sigma_u}$
+\item \textbf{Truncated skewed-Laplace}: $A = \left(\frac{\sigma_v^2}{2\sigma_u^2}+\frac{S\epsilon}{\sigma_u}\right)$ and 
+$B = \left(\frac{\left(1+\lambda\right)^2\sigma_v^2}{2\sigma_u^2}+\frac{S\epsilon\left(1+\lambda\right)}{\sigma_u}\right)$,
+ $a = -\frac{\sigma_v}{\sigma_u}-\frac{S\epsilon}{\sigma_v}$ and $b = -\frac{\left(1+\lambda\right)\sigma_v}{\sigma_u}-\frac{S\epsilon}{\sigma_v}$
+\end{tablenotes}
 \caption{Densities of $f(\epsilon)$ for cross-section SF models}
 \label{table:mlsfcross}
+\end{threeparttable}
 \end{table}
 %\end{landscape}
 
 %\restoregeometry
 
-\newpage
+%\newpage
 
 \subsection{(In)efficiency estimates for cross-sectional models}
 
@@ -2033,261 +2105,361 @@ Uniform &  $\frac{1}{\theta}\left[\Phi\left(\frac{\theta + S\epsilon}{\sigma_v}
 %\begin{landscape}
 %\pagestyle{lscape}
 \begin{table}[h]
-\begin{threeparttable}
-\renewcommand{\arraystretch}{1.3}
-%\setlength{\arrayrulewidth}{.01em}
 \centering
-\begin{adjustbox}{max width=1\textwidth}
+\begin{threeparttable}
+\renewcommand{\arraystretch}{3}
+%\setlength{\arrayrulewidth}{.01em}
+\begin{adjustbox}{max width=0.7\textwidth}
 %\small
-\begin{tabular}{@{}cccc@{}}
+\begin{tabular}{@{}cc@{}}
 \toprule
-Densities & $E\left[u_i|\epsilon_i\right]$ & $E\left[\exp{\left(-u_i\right)|\epsilon_i}\right]$ & $E\left[\exp{\left(u_i\right)|\epsilon_i}\right]$\\
+Densities & $E\left[u_i|\epsilon_i\right]$\\
 \midrule
-Half-Normal & $\mu_{i*} + \sigma_*\frac{\phi\left(\frac{\mu_{i*}}{\sigma_*}\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)}$ & 
-$\exp{\left(-\mu_{i*} + \frac{1}{2}\sigma_*^2\right)} \frac{\Phi\left(\frac{\mu_{i*}}{\sigma_*}-\sigma_*\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)}$ & 
-$\exp{\left(\mu_{i*} + \frac{1}{2}\sigma_*^2\right)} \frac{\Phi\left(\frac{\mu_{i*}}{\sigma_*}+\sigma_*\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)}$\\
+Half-Normal & $\mu_{i*} + \sigma_*\frac{\phi\left(\frac{\mu_{i*}}{\sigma_*}\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)}$\\
 %\hdashline
-Truncated-Normal & $\mu_{i*} + \sigma_*\frac{\phi\left(\frac{\mu_{i*}}{\sigma_*}\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)}$ & 
-$\exp{\left(-\mu_{i*} + \frac{1}{2}\sigma_*^2\right)} \frac{\Phi\left(\frac{\mu_{i*}}{\sigma_*}-\sigma_*\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)}$ & 
-$\exp{\left(\mu_{i*} + \frac{1}{2}\sigma_*^2\right)} \frac{\Phi\left(\frac{\mu_{i*}}{\sigma_*}+\sigma_*\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)}$ \\
+Truncated-Normal & $\mu_{i*} + \sigma_*\frac{\phi\left(\frac{\mu_{i*}}{\sigma_*}\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)}$ \\
 %\hdashline
-Exponential & $\mu_{i*} + \sigma_v\frac{\phi\left(\frac{\mu_{i*}}{\sigma_v}\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_v}\right)}$ & 
-$\exp{\left(-\mu_{i*} + \frac{1}{2}\sigma_v^2\right)} \frac{\Phi\left(\frac{\mu_{i*}}{\sigma_v}-\sigma_v\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_v}\right)}$ & 
-$\exp{\left(\mu_* + \frac{1}{2}\sigma_v^2\right)} \frac{\Phi\left(\frac{\mu_*}{\sigma_v}+\sigma_v\right)}{\Phi\left(\frac{\mu_*}{\sigma_v}\right)}$\\
+Exponential & $\mu_{i*} + \sigma_v\frac{\phi\left(\frac{\mu_{i*}}{\sigma_v}\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_v}\right)}$ \\
 %\hdashline
-Rayleigh & $\frac{\left[\sigma_*\mu_{i*}\phi\left(\frac{\mu_{i*}}{\sigma_*}\right) + \left(\mu_{i*}^2+\sigma_*^2\right)\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)\right]}{\left[\mu_{i*}\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right) + \sigma_*\phi\left(\frac{\mu_{i*}}{\sigma_*}\right)\right]}$ &
-$\exp{\left(-\mu_{i*} +\frac{\sigma_*^2}{2}\right)}\frac{\left[\left(\mu_{i*}-\sigma_*^2\right)\Phi\left(\frac{\mu_{i*}}{\sigma_*} - \sigma_*\right) + \sigma_*\phi\left(\frac{\mu_{i*}}{\sigma_*} - \sigma_*\right)\right]}{\left[\mu_{i*}\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right) + \sigma_*\phi\left(\frac{\mu_{i*}}{\sigma_*}\right)\right]}$ &
-$\exp{\left(\mu_* +\frac{\sigma_*^2}{2}\right)}\frac{\left[\left(\mu_*+\sigma_*^2\right)\Phi\left(\frac{\mu_*}{\sigma_*} + \sigma_*\right) + \sigma_*\phi\left(\frac{\mu_*}{\sigma_*} + \sigma_*\right)\right]}{\left[\mu_*\Phi\left(\frac{\mu_*}{\sigma_*}\right) + \sigma_*\phi\left(\frac{\mu_*}{\sigma_*}\right)\right]}$\\
+Rayleigh & $\frac{\left[\sigma_*\mu_{i*}\phi\left(\frac{\mu_{i*}}{\sigma_*}\right) + \left(\mu_{i*}^2+\sigma_*^2\right)\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)\right]}{\left[\mu_{i*}\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right) + \sigma_*\phi\left(\frac{\mu_{i*}}{\sigma_*}\right)\right]}$ \\
 %\hdashline
-Gamma & $\frac{h\left(P, \epsilon\right)}{h\left(P-1, \epsilon\right)}$ & $\frac{\exp{\left(\frac{\sigma_v^2}{\sigma_u} + S\epsilon + \frac{\sigma_v^2}{2}\right)}\Phi\left(-\frac{\sigma_v}{\sigma_u} - \frac{S\epsilon}{\sigma_v} - \sigma_v\right)  \hat{g}(P-1, \epsilon)}{\Phi\left(-\frac{\sigma_v}{\sigma_u} - \frac{S\epsilon}{\sigma_v}\right)\hat{h}(P-1, \epsilon)}$ & $\frac{\exp{\left(-\frac{\sigma_v^2}{\sigma_u} - S\epsilon + \frac{\sigma_v^2}{2}\right)}\Phi\left(-\frac{\sigma_v}{\sigma_u} - \frac{S\epsilon}{\sigma_v} + \sigma_v\right)  \hat{k}(P-1, \epsilon)}{\Phi\left(-\frac{\sigma_v}{\sigma_u} - \frac{S\epsilon}{\sigma_v}\right)\hat{h}(P-1, \epsilon)}$\\
+Gamma & $\frac{h\left(P, \epsilon\right)}{h\left(P-1, \epsilon\right)}$ \\
 %\hdashline
-Log-Normal & $\frac{\frac{1}{\sigma_u\sigma_v}\int_0^\infty\phi\left(\frac{\ln{u}-\mu}{\sigma_u}\right)\phi\left(\frac{\epsilon_i+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$ & 
-$\frac{\frac{1}{\sigma_u\sigma_v}\int_0^\infty \frac{\exp{\left(-u\right)}}{u} \phi\left(\frac{\ln{u}-\mu}{\sigma_u}\right)\phi\left(\frac{\epsilon_i+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$ & 
-$\frac{\frac{1}{\sigma_u\sigma_v}\int_0^\infty \frac{\exp{\left(u\right)}}{u} \phi\left(\frac{\ln{u}-\mu}{\sigma_u}\right)\phi\left(\frac{\epsilon_i+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$\\
+Log-Normal & $\frac{\frac{1}{\sigma_u\sigma_v}\int_0^\infty\phi\left(\frac{\ln{u}-\mu}{\sigma_u}\right)\phi\left(\frac{\epsilon_i+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$ \\
 %\hdashline
-Weibull & $\frac{\frac{k}{\sigma_u^k\sigma_v}\int_0^\infty u^k\exp{\left(-\left(u/\sigma_u\right)^{k}\right)}\phi\left(\frac{\epsilon+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$ & 
- $\frac{\frac{k}{\sigma_u\sigma_v}\int_0^\infty \exp{\left(-u_i\right)}\left(\frac{u}{\sigma_u}\right)^{k-1}\exp{\left(-\left(u/\sigma_u\right)^{k}\right)}\phi\left(\frac{\epsilon+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$ & 
-  $\frac{\frac{k}{\sigma_u\sigma_v}\int_0^\infty \exp{\left(u_i\right)}\left(\frac{u}{\sigma_u}\right)^{k-1}\exp{\left(-\left(u/\sigma_u\right)^{k}\right)}\phi\left(\frac{\epsilon+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$\\
+Weibull & $\frac{\frac{k}{\sigma_u^k\sigma_v}\int_0^\infty u^k\exp{\left(-\left(u/\sigma_u\right)^{k}\right)}\phi\left(\frac{\epsilon+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$ \\
 % \hdashline
-Generalized Exponential & $\sigma_v \frac{\exp{\left(A\right)}\left[\phi\left(a\right) + a\Phi\left(a\right)\right]- \exp{\left(B\right)}\left[\phi\left(b\right)+b\Phi\left(b\right)\right]}{\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$ & 
-$\frac{\exp{\left(A\right)}\exp{\left(-a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a-\sigma_v\right)-\exp{\left(B\right)}\exp{\left(-b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(b-\sigma_v\right)}{\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$ & 
-$\frac{\exp{\left(A\right)}\exp{\left(a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a+\sigma_v\right)-\exp{\left(B\right)}\exp{\left(b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(b+\sigma_v\right)}{\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$\\
+Generalized Exponential & $\sigma_v \frac{\exp{\left(A\right)}\left[\phi\left(a\right) + a\Phi\left(a\right)\right]- \exp{\left(B\right)}\left[\phi\left(b\right)+b\Phi\left(b\right)\right]}{\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$ \\
 %\hdashline
-Truncated Skewed-Laplace & $\sigma_v \frac{2\exp{\left(A\right)}\left[\phi\left(a\right) + a\Phi\left(a\right)\right]- \exp{\left(B\right)}\left[\phi\left(b\right)+b\Phi\left(b\right)\right]}{2\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$ & 
-$\frac{2\exp{\left(A\right)}\exp{\left(-a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a-\sigma_v\right)-\exp{\left(B\right)}\exp{\left(-b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(b-\sigma_v\right)}{2\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$ & 
-$\frac{2\exp{\left(A\right)}\exp{\left(a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a+\sigma_v\right)-\exp{\left(B\right)}\exp{\left(b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(b+\sigma_v\right)}{2\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$\\
+Truncated Skewed-Laplace & $\sigma_v \frac{2\exp{\left(A\right)}\left[\phi\left(a\right) + a\Phi\left(a\right)\right]- \exp{\left(B\right)}\left[\phi\left(b\right)+b\Phi\left(b\right)\right]}{2\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$ \\
 %\hdashline
-Uniform & $-\sigma_v\frac{\phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon_i}{\sigma_v}\right)-\phi\left(\frac{S\epsilon_i}{\sigma_v}\right) }{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon_i}{\sigma_v}\right)-\Phi\left(\frac{S\epsilon_i}{\sigma_v}\right)} - S\epsilon_i$ & 
-$\exp{\left(S\epsilon_i+\frac{\sigma_v^2}{2}\right)}\frac{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon_i}{\sigma_v}+\sigma_v\right)-\Phi\left(\frac{S\epsilon_i}{\sigma_v}+\sigma_v\right)}{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon_i}{\sigma_v}\right)-\Phi\left(\frac{S\epsilon_i}{\sigma_v}\right)}$ & 
-$\exp{\left[-S\epsilon+\frac{\sigma_v^2}{2}\right]}\frac{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon}{\sigma_v}-\sigma_v\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}-\sigma_v\right)}{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon}{\sigma_v}\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}\right)}$\\
+Uniform & $-\sigma_v\frac{\phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon_i}{\sigma_v}\right)-\phi\left(\frac{S\epsilon_i}{\sigma_v}\right) }{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon_i}{\sigma_v}\right)-\Phi\left(\frac{S\epsilon_i}{\sigma_v}\right)} - S\epsilon_i$ \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
 \begin{tablenotes}
       \tiny
-      \item Notes: For the exponential distribution we have $\mu_{i*} = -\left(\frac{\sigma_v^2}{\sigma_u} + S\epsilon\right)$. For the gamma distribution $\hat{g}(P-1, \epsilon)= \frac{1}{R}\sum_{r = 1}^R \left[\tilde{\mu} + 
-\sigma_v\Phi^{-1}\left(F_{r}+ \left(1-F_{r}\right)\Phi\left(-\frac{\tilde{\mu}}{
-\sigma_v}\right)\right)\right]^{P-1}$ with $\tilde{\mu} = \left(-\frac{\sigma_v^2}{\sigma_u} - S\epsilon - \sigma_v^2\right)$. 
-      \item On the other hand $\hat{k}(P-1, \epsilon)= \frac{1}{R}\sum_{r = 1}^R \left[\tilde{\tilde{\mu}} + 
-\sigma_v\Phi^{-1}\left(F_{r}+ \left(1-F_{r}\right)\Phi\left(-\frac{\tilde{\tilde{\mu}}}{
-\sigma_v}\right)\right)\right]^{P-1}$ with $\tilde{\tilde{\mu}} = \left(-\frac{\sigma_v^2}{\sigma_u} - S\epsilon + \sigma_v^2\right)$. 
-For all the other variables see notes in Table~\ref{table:mlsfcross}.
+      \item Notes: For the \textbf{exponential} distribution we have $\mu_{i*} = -\left(\frac{\sigma_v^2}{\sigma_u} + S\epsilon\right)$. 
+\item For all the other variables see notes in Table~\ref{table:mlsfcross}.
     \end{tablenotes}
-\caption{Conditional (in)efficiencies for cross-section SF models}
-\label{table:effcross}
+\caption{Conditional inefficiencies for cross-section SF models}
+\label{table:effcross1}
 \end{threeparttable}
 \end{table}
 %\end{landscape}
 %\restoregeometry
 
-\newpage
+%\newpage
+
+\begin{table}[h]
+\centering
+\begin{threeparttable}
+\renewcommand{\arraystretch}{3}
+%\setlength{\arrayrulewidth}{.01em}
+\begin{adjustbox}{max width=1\textwidth}
+%\small
+\begin{tabular}{@{}cc@{}}
+\toprule
+Densities & $E\left[\exp{\left(-u_i\right)|\epsilon_i}\right]$\\
+\midrule
+Half-Normal & $\exp{\left(-\mu_{i*} + \frac{1}{2}\sigma_*^2\right)} \frac{\Phi\left(\frac{\mu_{i*}}{\sigma_*}-\sigma_*\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)}$\\
+%\hdashline
+Truncated-Normal & $\exp{\left(-\mu_{i*} + \frac{1}{2}\sigma_*^2\right)} \frac{\Phi\left(\frac{\mu_{i*}}{\sigma_*}-\sigma_*\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)}$ \\
+%\hdashline
+Exponential & $\exp{\left(-\mu_{i*} + \frac{1}{2}\sigma_v^2\right)} \frac{\Phi\left(\frac{\mu_{i*}}{\sigma_v}-\sigma_v\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_v}\right)}$\\
+%\hdashline
+Rayleigh & $\exp{\left(-\mu_{i*} +\frac{\sigma_*^2}{2}\right)}\frac{\left[\left(\mu_{i*}-\sigma_*^2\right)\Phi\left(\frac{\mu_{i*}}{\sigma_*} - \sigma_*\right) + \sigma_*\phi\left(\frac{\mu_{i*}}{\sigma_*} - \sigma_*\right)\right]}{\left[\mu_{i*}\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right) + \sigma_*\phi\left(\frac{\mu_{i*}}{\sigma_*}\right)\right]}$ \\
+%\hdashline
+Gamma & $\frac{\exp{\left(\frac{\sigma_v^2}{\sigma_u} + S\epsilon + \frac{\sigma_v^2}{2}\right)}\Phi\left(-\frac{\sigma_v}{\sigma_u} - \frac{S\epsilon}{\sigma_v} - \sigma_v\right)  \hat{g}(P-1, \epsilon)}{\Phi\left(-\frac{\sigma_v}{\sigma_u} - \frac{S\epsilon}{\sigma_v}\right)\hat{h}(P-1, \epsilon)}$\\
+%\hdashline
+Log-Normal & $\frac{\frac{1}{\sigma_u\sigma_v}\int_0^\infty \frac{\exp{\left(-u\right)}}{u} \phi\left(\frac{\ln{u}-\mu}{\sigma_u}\right)\phi\left(\frac{\epsilon_i+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$\\
+%\hdashline
+Weibull & $\frac{\frac{k}{\sigma_u\sigma_v}\int_0^\infty \exp{\left(-u_i\right)}\left(\frac{u}{\sigma_u}\right)^{k-1}\exp{\left(-\left(u/\sigma_u\right)^{k}\right)}\phi\left(\frac{\epsilon+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$ \\
+% \hdashline
+Generalized Exponential & $\frac{\exp{\left(A\right)}\exp{\left(-a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a-\sigma_v\right)-\exp{\left(B\right)}\exp{\left(-b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(b-\sigma_v\right)}{\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$\\
+%\hdashline
+Truncated Skewed-Laplace & $\frac{2\exp{\left(A\right)}\exp{\left(-a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a-\sigma_v\right)-\exp{\left(B\right)}\exp{\left(-b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(b-\sigma_v\right)}{2\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$\\
+%\hdashline
+Uniform & $\exp{\left(S\epsilon_i+\frac{\sigma_v^2}{2}\right)}\frac{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon_i}{\sigma_v}+\sigma_v\right)-\Phi\left(\frac{S\epsilon_i}{\sigma_v}+\sigma_v\right)}{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon_i}{\sigma_v}\right)-\Phi\left(\frac{S\epsilon_i}{\sigma_v}\right)}$\\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\begin{tablenotes}
+      \tiny
+      \item For the \textbf{gamma} distribution $\hat{g}(P-1, \epsilon)= \frac{1}{R}\sum_{r = 1}^R \left[\tilde{\mu} + 
+\sigma_v\Phi^{-1}\left(F_{r}+ \left(1-F_{r}\right)\Phi\left(-\frac{\tilde{\mu}}{
+\sigma_v}\right)\right)\right]^{P-1}$ with $\tilde{\mu} = \left(-\frac{\sigma_v^2}{\sigma_u} - S\epsilon - \sigma_v^2\right)$.
+\item For all the other variables see notes in Table~\ref{table:mlsfcross}.
+    \end{tablenotes}
+\caption{Conditional efficiencies for cross-section SF models}
+\label{table:effcross2}
+\end{threeparttable}
+\end{table}
+
+%\newpage
+
+\begin{table}[h]
+\centering
+\begin{threeparttable}
+\renewcommand{\arraystretch}{3}
+%\setlength{\arrayrulewidth}{.01em}
+\begin{adjustbox}{max width=1\textwidth}
+%\small
+\begin{tabular}{@{}cc@{}}
+\toprule
+Densities & $E\left[\exp{\left(u_i\right)|\epsilon_i}\right]$\\
+\midrule
+Half-Normal & $\exp{\left(\mu_{i*} + \frac{1}{2}\sigma_*^2\right)} \frac{\Phi\left(\frac{\mu_{i*}}{\sigma_*}+\sigma_*\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)}$\\
+%\hdashline
+Truncated-Normal & $\exp{\left(\mu_{i*} + \frac{1}{2}\sigma_*^2\right)} \frac{\Phi\left(\frac{\mu_{i*}}{\sigma_*}+\sigma_*\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)}$ \\
+%\hdashline
+Exponential & $\exp{\left(\mu_* + \frac{1}{2}\sigma_v^2\right)} \frac{\Phi\left(\frac{\mu_*}{\sigma_v}+\sigma_v\right)}{\Phi\left(\frac{\mu_*}{\sigma_v}\right)}$\\
+%\hdashline
+Rayleigh & $\exp{\left(\mu_* +\frac{\sigma_*^2}{2}\right)}\frac{\left[\left(\mu_*+\sigma_*^2\right)\Phi\left(\frac{\mu_*}{\sigma_*} + \sigma_*\right) + \sigma_*\phi\left(\frac{\mu_*}{\sigma_*} + \sigma_*\right)\right]}{\left[\mu_*\Phi\left(\frac{\mu_*}{\sigma_*}\right) + \sigma_*\phi\left(\frac{\mu_*}{\sigma_*}\right)\right]}$\\
+%\hdashline
+Gamma & $\frac{\exp{\left(-\frac{\sigma_v^2}{\sigma_u} - S\epsilon + \frac{\sigma_v^2}{2}\right)}\Phi\left(-\frac{\sigma_v}{\sigma_u} - \frac{S\epsilon}{\sigma_v} + \sigma_v\right)  \hat{k}(P-1, \epsilon)}{\Phi\left(-\frac{\sigma_v}{\sigma_u} - \frac{S\epsilon}{\sigma_v}\right)\hat{h}(P-1, \epsilon)}$\\
+%\hdashline
+Log-Normal & $\frac{\frac{1}{\sigma_u\sigma_v}\int_0^\infty \frac{\exp{\left(u\right)}}{u} \phi\left(\frac{\ln{u}-\mu}{\sigma_u}\right)\phi\left(\frac{\epsilon_i+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$\\
+%\hdashline
+Weibull & $\frac{\frac{k}{\sigma_u\sigma_v}\int_0^\infty \exp{\left(u_i\right)}\left(\frac{u}{\sigma_u}\right)^{k-1}\exp{\left(-\left(u/\sigma_u\right)^{k}\right)}\phi\left(\frac{\epsilon+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$\\
+% \hdashline
+Generalized Exponential & $\frac{\exp{\left(A\right)}\exp{\left(a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a+\sigma_v\right)-\exp{\left(B\right)}\exp{\left(b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(b+\sigma_v\right)}{\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$\\
+%\hdashline
+Truncated Skewed-Laplace & $\frac{2\exp{\left(A\right)}\exp{\left(a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a+\sigma_v\right)-\exp{\left(B\right)}\exp{\left(b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(b+\sigma_v\right)}{2\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$\\
+%\hdashline
+Uniform & $\exp{\left[-S\epsilon+\frac{\sigma_v^2}{2}\right]}\frac{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon}{\sigma_v}-\sigma_v\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}-\sigma_v\right)}{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon}{\sigma_v}\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}\right)}$\\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\begin{tablenotes}
+      \tiny
+      \item For the \textbf{gamma} distribution $\hat{k}(P-1, \epsilon)= \frac{1}{R}\sum_{r = 1}^R \left[\tilde{\tilde{\mu}} + 
+\sigma_v\Phi^{-1}\left(F_{r}+ \left(1-F_{r}\right)\Phi\left(-\frac{\tilde{\tilde{\mu}}}{
+\sigma_v}\right)\right)\right]^{P-1}$ with $\tilde{\tilde{\mu}} = \left(-\frac{\sigma_v^2}{\sigma_u} - S\epsilon + \sigma_v^2\right)$. 
+\item For all the other variables see notes in Table~\ref{table:mlsfcross}.
+    \end{tablenotes}
+\caption{Conditional reciprocal efficiencies for cross-section SF models}
+\label{table:effcross3}
+\end{threeparttable}
+\end{table}
+
+%\newpage
 
 \section{Panel SF model tables} \label{app:sfpanel}
 
 \setcounter{table}{0}
 \subsection{Densities of $f(\epsilon)$ for time-invariant inefficiency models}
 
-
-
 %\newgeometry{left=2cm, right=2cm}
 %\begin{landscape}
 %\pagestyle{lscape}
 \begin{table}[h]
-\renewcommand{\arraystretch}{1.3}
-%\setlength{\arrayrulewidth}{.01em}
 \centering
-\begin{adjustbox}{max width=0.9\textwidth}
+\begin{threeparttable}
+\renewcommand{\arraystretch}{3}
+%\setlength{\arrayrulewidth}{.01em}
+\begin{adjustbox}{max width=1\textwidth}
 %\small
-\begin{tabular}{@{}ccc@{}}
+\begin{tabular}{@{}cc@{}}
 \toprule
-Distributions & $f(\epsilon)$ & Notes \\
+Distributions & $f(\epsilon)$ \\
 \midrule
-Half-Normal & $\frac{2\sigma_*}{\sigma_u\sigma_v^T\left(2\pi\right)^{\frac{T}{2}}}\exp{\left[-\frac{1}{2}\left(-\frac{\mu_*^2}{\sigma_*^2} + \frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}\right)\right]}\Phi\left(\frac{\mu_*}{\sigma_*}\right)$ & $\mu_{*}= \frac{-S\sigma_u^2\sum_{t=1}^T\epsilon_{t}}{T\sigma_u^2 + \sigma_v^2}$ and 
-$\sigma_*^2=\frac{\sigma_u^2\sigma_v^2}{T\sigma_u^2 + \sigma_v^2}$\\
+Half-Normal & $\frac{2\sigma_*}{\sigma_u\sigma_v^T\left(2\pi\right)^{\frac{T}{2}}}\exp{\left[-\frac{1}{2}\left(-\frac{\mu_*^2}{\sigma_*^2} + \frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}\right)\right]}\Phi\left(\frac{\mu_*}{\sigma_*}\right)$\\
 %\hdashline 
-Truncated-Normal &  $\frac{\sigma_*}{\sigma_u\sigma_v^T\left(2\pi\right)^{\frac{T}{2}}\Phi\left(\frac{\mu}{\sigma_u}\right)}\exp{\left[-\frac{1}{2}\left(-\frac{\mu_*^2}{\sigma_*^2} + \frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2} + \frac{\mu^2}{\sigma_u^2}\right)\right]}\Phi\left(\frac{\mu_*}{\sigma_*}\right)$ & 
-$\mu_{*}= \frac{\mu\sigma_v^2-S\sigma_u^2\sum_{t=1}^T\epsilon_{t}}{T\sigma_u^2+\sigma_v^2}$ and 
-$\sigma_*^2=\frac{\sigma_u^2\sigma_v^2}{T\sigma_u^2 + \sigma_v^2}$\\
+Truncated-Normal &  $\frac{\sigma_*}{\sigma_u\sigma_v^T\left(2\pi\right)^{\frac{T}{2}}\Phi\left(\frac{\mu}{\sigma_u}\right)}\exp{\left[-\frac{1}{2}\left(-\frac{\mu_*^2}{\sigma_*^2} + \frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2} + \frac{\mu^2}{\sigma_u^2}\right)\right]}\Phi\left(\frac{\mu_*}{\sigma_*}\right)$\\
 %\hdashline 
-Exponential & $\frac{\sigma_*}{\sigma_u\sigma_v^T\left(2\pi\right)^{\frac{T-1}{2}}}\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}\Phi\left(\frac{\mu_*}{\sigma_*}\right)$ & 
-$\mu_* = -\left(\frac{\sigma_v^2}{T\sigma_u}+\frac{S\sum_{t=1}^T\epsilon_t}{T}\right)$ and 
-$\sigma_*^2 = \frac{\sigma_v^2}{T}$\\
+Exponential & $\frac{\sigma_*}{\sigma_u\sigma_v^T\left(2\pi\right)^{\frac{T-1}{2}}}\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}\Phi\left(\frac{\mu_*}{\sigma_*}\right)$\\
 %\hdashline 
-Rayleigh & $\frac{\sigma_*}{\sigma_u^2\sigma_v^T\left(2\pi\right)^{\frac{T-1}{2}}}\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}\left[\mu_*\Phi\left(\frac{\mu_*}{\sigma_*}\right)+\sigma_*\phi\left(\frac{\mu_*}{\sigma_*}\right)\right]$ & 
-$\mu_* = -\frac{S\sigma_u^2\sum_{t=1}^T\epsilon_t}{T\sigma_u^2+\sigma_v^2}$ and $\sigma_*^2 = \frac{\sigma_u^2\sigma_v^2}{T\sigma_u^2+\sigma_v^2}$\\
+Rayleigh & $\frac{\sigma_*}{\sigma_u^2\sigma_v^T\left(2\pi\right)^{\frac{T-1}{2}}}\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}\left[\mu_*\Phi\left(\frac{\mu_*}{\sigma_*}\right)+\sigma_*\phi\left(\frac{\mu_*}{\sigma_*}\right)\right]$\\
 %\hdashline
-\multirow{2}{*}{Gamma} & \multirow{2}{*}{$\frac{\sigma_*}{\sigma_u^P\sigma_v^{T}\left(2\pi\right)^{\frac{T-1}{2}}\Gamma(P)}\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}
-\Phi\left(\frac{\mu_*}{\sigma_*}\right) \hat{h}(P-1, \epsilon)$} & 
-$h(P-1, \epsilon)=\frac{1}{R}\sum_{r = 1}^R \left(\mu_* + \sigma_*\Phi^{-1}\left[PL + F_r \times \left(1 - PL\right)\right]\right)^{P-1}$ and 
-$\mu_* = -\left(\frac{\sigma_v^2}{T\sigma_u}+\frac{S\sum_{t=1}^T\epsilon_t}{T}\right)$\\
-& & $\sigma_*^2 = \frac{\sigma_v^2}{T}$ and $F_r$ is pseudo/quasi random draw\\
+Gamma & $\frac{\sigma_*}{\sigma_u^P\sigma_v^{T}\left(2\pi\right)^{\frac{T-1}{2}}\Gamma(P)}\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}\Phi\left(\frac{\mu_*}{\sigma_*}\right) \hat{h}(P-1, \epsilon)$\\
 %\hdashline 
-Log-Normal & $\frac{1}{R}\sum_{r = 1}^R\frac{1}{\left(2\pi\right)^{T/2}\sigma_v^T}\exp{\left(-\frac{\sum_{t=1}^T\left(\epsilon_t+Su_r\right)^2}{2\sigma_v^2}\right)}$ & 
-$u_r=\exp{\left(\mu +\sigma_u\Phi^{-1}\left(h_r\right)\right)}$ and $h_r$ is pseudo/quasi random draw\\
+Log-Normal & $\frac{1}{R}\sum_{r = 1}^R\frac{1}{\left(2\pi\right)^{T/2}\sigma_v^T}\exp{\left(-\frac{\sum_{t=1}^T\left(\epsilon_t+Su_r\right)^2}{2\sigma_v^2}\right)}$\\
 %\hdashline 
-Weibull & $\frac{1}{R}\sum_{r = 1}^R\frac{1}{\left(2\pi\right)^{T/2}\sigma_v^T}\exp{\left(-\frac{\sum_{t=1}^T\left(\epsilon_t+Su_r\right)^2}{2\sigma_v^2}\right)}$ & 
-$u_r = \sigma_u\left(-\ln{\left(1-h_r\right)}\right)^{1/k}$ and $h_r$ is pseudo/quasi random draw\\
+Weibull & $\frac{1}{R}\sum_{r = 1}^R\frac{1}{\left(2\pi\right)^{T/2}\sigma_v^T}\exp{\left(-\frac{\sum_{t=1}^T\left(\epsilon_t+Su_r\right)^2}{2\sigma_v^2}\right)}$\\
 %\hdashline 
-\multirow{2}{*}{Generalized Exponential} & \multirow{2}{*}{$\frac{2\sigma_*}{\sigma_u\sigma_v^T\left(2\pi\right)^{\frac{T-1}{2}}}\left\{\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}\Phi\left(\frac{\mu_*}{\sigma_*}\right)-\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*'^2}{\sigma_*^2}\right)\right]}\Phi\left(\frac{\mu_*'}{\sigma_*}\right)\right\}$} & $\mu_* = -\left(\frac{\sigma_v^2}{T\sigma_u}+\frac{S\sum_{t=1}^T\epsilon_t}{T}\right)$ and 
-$\mu_*' = -\left(\frac{2\sigma_v^2}{T\sigma_u}+\frac{S\sum_{t=1}^T\epsilon_t}{T}\right)$\\
-& & $\sigma_*^2 = \frac{\sigma_v^2}{T}$\\
+Generalized Exponential & $\frac{2\sigma_*}{\sigma_u\sigma_v^T\left(2\pi\right)^{\frac{T-1}{2}}}\left\{\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}\Phi\left(\frac{\mu_*}{\sigma_*}\right)-\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*'^2}{\sigma_*^2}\right)\right]}\Phi\left(\frac{\mu_*'}{\sigma_*}\right)\right\}$ \\
 %\hdashline 
-\multirow{2}{*}{Truncated Skewed-Laplace} & \multirow{2}{*}{$\frac{\left(1+\lambda\right)\sigma_*}{\sigma_u\sigma_v^T\left(2\pi\right)^{\frac{T-1}{2}}\left(2\lambda+1\right)}\left\{2\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}\Phi\left(\frac{\mu_*}{\sigma_*}\right)-\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*'^2}{\sigma_*^2}\right)\right]}\Phi\left(\frac{\mu_*'}{\sigma_*}\right)\right\}$} & 
-$\mu_* = -\left(\frac{\sigma_v^2}{T\sigma_u}+\frac{S\sum_{t=1}^T\epsilon_t}{T}\right)$ and $\mu_*' = -\left(\frac{\left(1+\lambda\right)\sigma_v^2}{T\sigma_u}+\frac{S\sum_{t=1}^T\epsilon_t}{T}\right)$\\
-& & $\sigma_*^2 = \frac{\sigma_v^2}{T}$ \\
+Truncated Skewed-Laplace & $\frac{\left(1+\lambda\right)\sigma_*}{\sigma_u\sigma_v^T\left(2\pi\right)^{\frac{T-1}{2}}\left(2\lambda+1\right)}\left\{2\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}\Phi\left(\frac{\mu_*}{\sigma_*}\right)-\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*'^2}{\sigma_*^2}\right)\right]}\Phi\left(\frac{\mu_*'}{\sigma_*}\right)\right\}$ \\
 %\hdashline 
-Uniform & $\frac{\sigma_*}{\theta\sigma_v^T\left(2\pi\right)^{\frac{T-1}{2}}}\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}\left[\Phi\left(\frac{\theta-\mu_*}{\sigma_*}\right)-\Phi\left(-\frac{\mu_*}{\sigma_*}\right)\right]$ & 
-$\mu_* = -\frac{S\sum_{t=1}^T\epsilon_t}{T}$ and $\sigma_*^2 = \frac{\sigma_v^2}{T}$\\
+Uniform & $\frac{\sigma_*}{\theta\sigma_v^T\left(2\pi\right)^{\frac{T-1}{2}}}\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}\left[\Phi\left(\frac{\theta-\mu_*}{\sigma_*}\right)-\Phi\left(-\frac{\mu_*}{\sigma_*}\right)\right]$\\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
+\begin{tablenotes}
+\tiny
+\item \textbf{Half-Normal}: $\mu_{*}= \frac{-S\sigma_u^2\sum_{t=1}^T\epsilon_{t}}{T\sigma_u^2 + \sigma_v^2}$ and 
+$\sigma_*^2=\frac{\sigma_u^2\sigma_v^2}{T\sigma_u^2 + \sigma_v^2}$
+\item \textbf{Truncated normal}: $\mu_{*}= \frac{\mu\sigma_v^2-S\sigma_u^2\sum_{t=1}^T\epsilon_{t}}{T\sigma_u^2+\sigma_v^2}$ and 
+$\sigma_*^2=\frac{\sigma_u^2\sigma_v^2}{T\sigma_u^2 + \sigma_v^2}$
+\item \textbf{Exponential}: $\mu_* = -\left(\frac{\sigma_v^2}{T\sigma_u}+\frac{S\sum_{t=1}^T\epsilon_t}{T}\right)$ and 
+$\sigma_*^2 = \frac{\sigma_v^2}{T}$
+\item \textbf{Rayleigh}: $\mu_* = -\frac{S\sigma_u^2\sum_{t=1}^T\epsilon_t}{T\sigma_u^2+\sigma_v^2}$ and $\sigma_*^2 = \frac{\sigma_u^2\sigma_v^2}{T\sigma_u^2+\sigma_v^2}$
+\item \textbf{Gamma}: $h(P-1, \epsilon)=\frac{1}{R}\sum_{r = 1}^R \left(\mu_* + \sigma_*\Phi^{-1}\left[PL + F_r \times \left(1 - PL\right)\right]\right)^{P-1}$, 
+$\mu_* = -\left(\frac{\sigma_v^2}{T\sigma_u}+\frac{S\sum_{t=1}^T\epsilon_t}{T}\right)$, \\ $\sigma_*^2 = \frac{\sigma_v^2}{T}$, and $F_{r}$ is a pseudo/quasi random draw
+\item \textbf{Log-normal}: $u_r=\exp{\left(\mu +\sigma_u\Phi^{-1}\left(h_r\right)\right)}$ and $h_r$ is a pseudo/quasi random draw
+\item \textbf{Weibull}: $u_r = \sigma_u\left(-\ln{\left(1-h_r\right)}\right)^{1/k}$ and $h_r$ is a pseudo/quasi random draw
+\item \textbf{Generalized exponential}: $\mu_* = -\left(\frac{\sigma_v^2}{T\sigma_u}+\frac{S\sum_{t=1}^T\epsilon_t}{T}\right)$ and 
+$\mu_*' = -\left(\frac{2\sigma_v^2}{T\sigma_u}+\frac{S\sum_{t=1}^T\epsilon_t}{T}\right)$, $\sigma_*^2 = \frac{\sigma_v^2}{T}$
+\item \textbf{Truncated skewed-Laplace}: $\mu_* = -\left(\frac{\sigma_v^2}{T\sigma_u}+\frac{S\sum_{t=1}^T\epsilon_t}{T}\right)$ and $\mu_*' = -\left(\frac{\left(1+\lambda\right)\sigma_v^2}{T\sigma_u}+\frac{S\sum_{t=1}^T\epsilon_t}{T}\right)$, $\sigma_*^2 = \frac{\sigma_v^2}{T}$
+\item \textbf{Uniform}: $\mu_* = -\frac{S\sum_{t=1}^T\epsilon_t}{T}$ and $\sigma_*^2 = \frac{\sigma_v^2}{T}$
+\end{tablenotes}
 \caption{Densities of $f(\epsilon)$ for time-invariant inefficiency models}
 \label{table:mlpl81}
+\end{threeparttable}
 \end{table}
 %\end{landscape}
 %\restoregeometry
 
-\newpage
+%\newpage
 
 \subsection{Densities of $f(\epsilon)$ for time-varying inefficiency models}
 
 %\newgeometry{left=2cm, right=2cm}
 %\begin{landscape}
-\pagestyle{lscape}
+%\pagestyle{lscape}
 \begin{table}[h]
-\renewcommand{\arraystretch}{1.3}
-%\setlength{\arrayrulewidth}{.01em}
 \centering
-\begin{adjustbox}{max width=0.9\textwidth}
+\begin{threeparttable}
+\renewcommand{\arraystretch}{3}
+%\setlength{\arrayrulewidth}{.01em}
+\begin{adjustbox}{max width=1\textwidth}
 %\small
-\begin{tabular}{@{}ccc@{}}
+\begin{tabular}{@{}cc@{}}
 \toprule
-Distributions & $f(\epsilon)$ & Notes \\
+Distributions & $f(\epsilon)$ \\
 \midrule
-Half-Normal & $\frac{2\sigma_*}{\sigma_u\sigma_v^T\left(2\pi\right)^{\frac{T}{2}}}\exp{\left[-\frac{1}{2}\left(-\frac{\mu_*^2}{\sigma_*^2} + \frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}\right)\right]}\Phi\left(\frac{\mu_*}{\sigma_*}\right)$ & $\mu_{*}= \frac{-S\sigma_u^2\sum_{t=1}^TG(t)\epsilon_{t}}{\sigma_u^2\sum_{t=1}^TG(t)^2 + \sigma_v^2}$ and 
-$\sigma_*^2=\frac{\sigma_u^2\sigma_v^2}{\sigma_u^2\sum_{t=1}^TG(t)^2 + \sigma_v^2}$\\
+Half-Normal & $\frac{2\sigma_*}{\sigma_u\sigma_v^T\left(2\pi\right)^{\frac{T}{2}}}\exp{\left[-\frac{1}{2}\left(-\frac{\mu_*^2}{\sigma_*^2} + \frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}\right)\right]}\Phi\left(\frac{\mu_*}{\sigma_*}\right)$\\
 %\hdashline 
-Truncated-Normal &  $\frac{\sigma_*}{\sigma_u\sigma_v^T\left(2\pi\right)^{\frac{T}{2}}\Phi\left(\frac{\mu}{\sigma_u}\right)}\exp{\left[-\frac{1}{2}\left(-\frac{\mu_*^2}{\sigma_*^2} + \frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2} + \frac{\mu^2}{\sigma_u^2}\right)\right]}\Phi\left(\frac{\mu_*}{\sigma_*}\right)$ & 
-$\mu_{*}= \frac{\mu\sigma_v^2-S\sigma_u^2\sum_{t=1}^TG(t)\epsilon_t}{\sigma_u^2\sum_{t=1}G(t)^2+\sigma_v^2}$ and 
-$\sigma_*^2=\frac{\sigma_u^2\sigma_v^2}{\sigma_u^2\sum_{t=1}^TG(t)^2 + \sigma_v^2}$\\
+Truncated-Normal &  $\frac{\sigma_*}{\sigma_u\sigma_v^T\left(2\pi\right)^{\frac{T}{2}}\Phi\left(\frac{\mu}{\sigma_u}\right)}\exp{\left[-\frac{1}{2}\left(-\frac{\mu_*^2}{\sigma_*^2} + \frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2} + \frac{\mu^2}{\sigma_u^2}\right)\right]}\Phi\left(\frac{\mu_*}{\sigma_*}\right)$\\
 %\hdashline 
-Exponential & $\frac{\sigma_*}{\sigma_u\sigma_v^T\left(2\pi\right)^{\frac{T-1}{2}}}\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}\Phi\left(\frac{\mu_*}{\sigma_*}\right)$ & 
-$\mu_* = -\left(\frac{\sigma_v^2}{\sigma_u\sum_{t=1}G(t)^2}+\frac{S\sum_{t=1}^TG(t)\epsilon_t}{\sum_{t=1}G(t)^2}\right)$ and 
-$\sigma_*^2 = \frac{\sigma_v^2}{\sum_{t=1}G(t)^2}$\\
+Exponential & $\frac{\sigma_*}{\sigma_u\sigma_v^T\left(2\pi\right)^{\frac{T-1}{2}}}\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}\Phi\left(\frac{\mu_*}{\sigma_*}\right)$\\
 %\hdashline 
-Rayleigh & $\frac{\sigma_*}{\sigma_u^2\sigma_v^T\left(2\pi\right)^{\frac{T-1}{2}}}\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}\left[\mu_*\Phi\left(\frac{\mu_*}{\sigma_*}\right)+\sigma_*\phi\left(\frac{\mu_*}{\sigma_*}\right)\right]$ & 
-$\mu_* = -\frac{S\sigma_u^2\sum_{t=1}^TG(t)\epsilon_t}{\sigma_u^2\sum_{t=1}G(t)^2+\sigma_v^2}$ and $\sigma_*^2 = \frac{\sigma_u^2\sigma_v^2}{\sigma_u^2\sum_{t=1}G(t)^2+\sigma_v^2}$\\
+Rayleigh & $\frac{\sigma_*}{\sigma_u^2\sigma_v^T\left(2\pi\right)^{\frac{T-1}{2}}}\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}\left[\mu_*\Phi\left(\frac{\mu_*}{\sigma_*}\right)+\sigma_*\phi\left(\frac{\mu_*}{\sigma_*}\right)\right]$\\
 %\hdashline
-\multirow{2}{*}{Gamma} & \multirow{2}{*}{$\frac{\sigma_*}{\sigma_u^P\sigma_v^{T}\left(2\pi\right)^{\frac{T-1}{2}}\Gamma(P)}\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}
-\Phi\left(\frac{\mu_*}{\sigma_*}\right) \hat{h}(P-1, \epsilon)$} & 
-$h(P-1, \epsilon)=\frac{1}{R}\sum_{r = 1}^R \left(\mu_* + \sigma_*\Phi^{-1}\left[PL + F_r \times \left(1 - PL\right)\right]\right)^{P-1}$ and 
-$\mu_* = -\left(\frac{\sigma_v^2}{\sigma_u\sum_{t=1}G(t)^2}+\frac{S\sum_{t=1}^TG(t)\epsilon_t}{\sum_{t=1}G(t)^2}\right)$\\
-& & $\sigma_*^2 = \frac{\sigma_v^2}{\sum_{t=1}G(t)^2}$ and $F_r$ is pseudo/quasi random draw\\
+Gamma & $\frac{\sigma_*}{\sigma_u^P\sigma_v^{T}\left(2\pi\right)^{\frac{T-1}{2}}\Gamma(P)}\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}
+\Phi\left(\frac{\mu_*}{\sigma_*}\right) \hat{h}(P-1, \epsilon)$\\
 %\hdashline 
-Log-Normal & $\frac{1}{R}\sum_{r = 1}^R\frac{1}{\left(2\pi\right)^{T/2}\sigma_v^T}\exp{\left(-\frac{\sum_{t=1}^T\left(\epsilon_t+SG(t)u_r\right)^2}{2\sigma_v^2}\right)}$ & 
-$u_r=\exp{\left(\mu +\sigma_u\Phi^{-1}\left(h_r\right)\right)}$ and $h_r$ is pseudo/quasi random draw\\
+Log-Normal & $\frac{1}{R}\sum_{r = 1}^R\frac{1}{\left(2\pi\right)^{T/2}\sigma_v^T}\exp{\left(-\frac{\sum_{t=1}^T\left(\epsilon_t+SG(t)u_r\right)^2}{2\sigma_v^2}\right)}$\\
 %\hdashline 
-Weibull & $\frac{1}{R}\sum_{r = 1}^R\frac{1}{\left(2\pi\right)^{T/2}\sigma_v^T}\exp{\left(-\frac{\sum_{t=1}^T\left(\epsilon_t+SG(t)u_r\right)^2}{2\sigma_v^2}\right)}$ & 
-$u_r = \sigma_u\left(-\ln{\left(1-h_r\right)}\right)^{1/k}$ and $h_r$ is pseudo/quasi random draw\\
+Weibull & $\frac{1}{R}\sum_{r = 1}^R\frac{1}{\left(2\pi\right)^{T/2}\sigma_v^T}\exp{\left(-\frac{\sum_{t=1}^T\left(\epsilon_t+SG(t)u_r\right)^2}{2\sigma_v^2}\right)}$\\
 %\hdashline 
-\multirow{2}{*}{Generalized Exponential} & \multirow{2}{*}{$\frac{2\sigma_*}{\sigma_u\sigma_v^T\left(2\pi\right)^{\frac{T-1}{2}}}\left\{\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}\Phi\left(\frac{\mu_*}{\sigma_*}\right)-\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*'^2}{\sigma_*^2}\right)\right]}\Phi\left(\frac{\mu_*'}{\sigma_*}\right)\right\}$} & $\mu_* = -\left(\frac{\sigma_v^2}{\sigma_u\sum_{t=1}G(t)^2}+\frac{S\sum_{t=1}^TG(t)\epsilon_t}{\sum_{t=1}G(t)^2}\right)$ and 
-$\mu_*' = -\left(\frac{2\sigma_v^2}{\sigma_u\sum_{t=1}G(t)^2}+\frac{S\sum_{t=1}^TG(t)\epsilon_t}{\sum_{t=1}G(t)^2}\right)$\\
-& & $\sigma_*^2 = \frac{\sigma_v^2}{\sum_{t=1}G(t)^2}$\\
+Generalized Exponential & $\frac{2\sigma_*}{\sigma_u\sigma_v^T\left(2\pi\right)^{\frac{T-1}{2}}}\left\{\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}\Phi\left(\frac{\mu_*}{\sigma_*}\right)-\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*'^2}{\sigma_*^2}\right)\right]}\Phi\left(\frac{\mu_*'}{\sigma_*}\right)\right\}$ \\
 %\hdashline 
-\multirow{2}{*}{Truncated Skewed-Laplace} & \multirow{2}{*}{$\frac{\left(1+\lambda\right)\sigma_*}{\sigma_u\sigma_v^T\left(2\pi\right)^{\frac{T-1}{2}}\left(2\lambda+1\right)}\left\{2\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}\Phi\left(\frac{\mu_*}{\sigma_*}\right)-\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*'^2}{\sigma_*^2}\right)\right]}\Phi\left(\frac{\mu_*'}{\sigma_*}\right)\right\}$} & 
-$\mu_* = -\left(\frac{\sigma_v^2}{\sigma_u\sum_{t=1}G(t)^2}+\frac{S\sum_{t=1}^TG(t)\epsilon_t}{\sum_{t=1}G(t)^2}\right)$ and $\mu_*' = -\left(\frac{\left(1+\lambda\right)\sigma_v^2}{\sigma_u\sum_{t=1}G(t)^2}+\frac{S\sum_{t=1}^TG(t)\epsilon_t}{\sum_{t=1}G(t)^2}\right)$\\
-& & $\sigma_*^2 = \frac{\sigma_v^2}{\sum_{t=1}G(t)^2}$ \\
+Truncated Skewed-Laplace & $\frac{\left(1+\lambda\right)\sigma_*}{\sigma_u\sigma_v^T\left(2\pi\right)^{\frac{T-1}{2}}\left(2\lambda+1\right)}\left\{2\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}\Phi\left(\frac{\mu_*}{\sigma_*}\right)-\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*'^2}{\sigma_*^2}\right)\right]}\Phi\left(\frac{\mu_*'}{\sigma_*}\right)\right\}$ \\
 %\hdashline 
-Uniform & $\frac{\sigma_*}{\theta\sigma_v^T\left(2\pi\right)^{\frac{T-1}{2}}}\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}\left[\Phi\left(\frac{\theta-\mu_*}{\sigma_*}\right)-\Phi\left(-\frac{\mu_*}{\sigma_*}\right)\right]$ & 
-$\mu_* = -\frac{S\sum_{t=1}^TG(t)\epsilon_t}{\sum_{t=1}G(t)^2}$ and $\sigma_*^2 = \frac{\sigma_v^2}{\sum_{t=1}G(t)^2}$\\
+Uniform & $\frac{\sigma_*}{\theta\sigma_v^T\left(2\pi\right)^{\frac{T-1}{2}}}\exp{\left[-\frac{1}{2}\left(\frac{\sum_{t=1}^T\epsilon_t^2}{\sigma_v^2}-\frac{\mu_*^2}{\sigma_*^2}\right)\right]}\left[\Phi\left(\frac{\theta-\mu_*}{\sigma_*}\right)-\Phi\left(-\frac{\mu_*}{\sigma_*}\right)\right]$\\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
+\begin{tablenotes}
+\tiny
+\item \textbf{Half-Normal}: $\mu_{*}= \frac{-S\sigma_u^2\sum_{t=1}^TG(t)\epsilon_{t}}{\sigma_u^2\sum_{t=1}^TG(t)^2 + \sigma_v^2}$ and 
+$\sigma_*^2=\frac{\sigma_u^2\sigma_v^2}{\sigma_u^2\sum_{t=1}^TG(t)^2 + \sigma_v^2}$
+\item \textbf{Truncated normal}: $\mu_{*}= \frac{\mu\sigma_v^2-S\sigma_u^2\sum_{t=1}^TG(t)\epsilon_t}{\sigma_u^2\sum_{t=1}G(t)^2+\sigma_v^2}$ and 
+$\sigma_*^2=\frac{\sigma_u^2\sigma_v^2}{\sigma_u^2\sum_{t=1}^TG(t)^2 + \sigma_v^2}$
+\item \textbf{Exponential}: $\mu_* = -\left(\frac{\sigma_v^2}{\sigma_u\sum_{t=1}G(t)^2}+\frac{S\sum_{t=1}^TG(t)\epsilon_t}{\sum_{t=1}G(t)^2}\right)$ and 
+$\sigma_*^2 = \frac{\sigma_v^2}{\sum_{t=1}G(t)^2}$
+\item \textbf{Rayleigh}: $\mu_* = -\frac{S\sigma_u^2\sum_{t=1}^TG(t)\epsilon_t}{\sigma_u^2\sum_{t=1}G(t)^2+\sigma_v^2}$ and $\sigma_*^2 = \frac{\sigma_u^2\sigma_v^2}{\sigma_u^2\sum_{t=1}G(t)^2+\sigma_v^2}$
+\item \textbf{Gamma}: $h(P-1, \epsilon)=\frac{1}{R}\sum_{r = 1}^R \left(\mu_* + \sigma_*\Phi^{-1}\left[PL + F_r \times \left(1 - PL\right)\right]\right)^{P-1}$ and 
+$\mu_* = -\left(\frac{\sigma_v^2}{\sigma_u\sum_{t=1}G(t)^2}+\frac{S\sum_{t=1}^TG(t)\epsilon_t}{\sum_{t=1}G(t)^2}\right)$, \\
+$\sigma_*^2 = \frac{\sigma_v^2}{\sum_{t=1}G(t)^2}$, and $F_{r}$ is a pseudo/quasi random draw
+\item \textbf{Log-normal}: $u_r=\exp{\left(\mu +\sigma_u\Phi^{-1}\left(h_r\right)\right)}$ and $h_r$ is a pseudo/quasi random draw
+\item \textbf{Weibull}: $u_r = \sigma_u\left(-\ln{\left(1-h_r\right)}\right)^{1/k}$ and $h_r$ is a pseudo/quasi random draw
+\item \textbf{Generalized exponential}: $\mu_* = -\left(\frac{\sigma_v^2}{\sigma_u\sum_{t=1}G(t)^2}+\frac{S\sum_{t=1}^TG(t)\epsilon_t}{\sum_{t=1}G(t)^2}\right)$ and 
+$\mu_*' = -\left(\frac{2\sigma_v^2}{\sigma_u\sum_{t=1}G(t)^2}+\frac{S\sum_{t=1}^TG(t)\epsilon_t}{\sum_{t=1}G(t)^2}\right)$, \\ $\sigma_*^2 = \frac{\sigma_v^2}{\sum_{t=1}G(t)^2}$
+\item \textbf{Truncated skewed-Laplace}: $\mu_* = -\left(\frac{\sigma_v^2}{\sigma_u\sum_{t=1}G(t)^2}+\frac{S\sum_{t=1}^TG(t)\epsilon_t}{\sum_{t=1}G(t)^2}\right)$ and $\mu_*' = -\left(\frac{\left(1+\lambda\right)\sigma_v^2}{\sigma_u\sum_{t=1}G(t)^2}+\frac{S\sum_{t=1}^TG(t)\epsilon_t}{\sum_{t=1}G(t)^2}\right)$, \\ $\sigma_*^2 = \frac{\sigma_v^2}{\sum_{t=1}G(t)^2}$
+\item \textbf{Uniform}: $\mu_* = -\frac{S\sum_{t=1}^TG(t)\epsilon_t}{\sum_{t=1}G(t)^2}$ and $\sigma_*^2 = \frac{\sigma_v^2}{\sum_{t=1}G(t)^2}$
+\end{tablenotes}
 \caption{Densities of $f(\epsilon)$ for time-varying inefficiency models}
 \label{table:mlgzit}
+\end{threeparttable}
 \end{table}
 %\end{landscape}
 %\restoregeometry
 
-\newpage
+%\newpage
 
 \subsection{(In)efficiencies for time-varying inefficiency models}
 
-%\newgeometry{left=2cm, right=2cm}
-%\begin{landscape}
-%\pagestyle{lscape}
+
+
 \begin{table}
-\renewcommand{\arraystretch}{1.3}
+\renewcommand{\arraystretch}{3}
 %\setlength{\arrayrulewidth}{.01em}
 \centering
-\begin{adjustbox}{max width=0.9\textwidth}
+\begin{adjustbox}{max width=1\textwidth}
 %\small
-\begin{tabular}{@{}cccc@{}}
+\begin{tabular}{@{}cc@{}}
 \toprule
-Densities & $E\left[G(t)u_i|\bm{\epsilon}_i\right]$ & $E\left[\exp{\left(-G(t)u_i\right)|\epsilon_i}\right]$ & $E\left[\exp{\left(G(t)u_i\right)|\epsilon_i}\right]$\\
-Half-Normal & & $\exp{\left[\frac{1}{2}\sigma_*^2G(t)^2-\mu_*G(t)\right]\frac{\Phi\left(\frac{\mu_*}{\sigma_*}-G(t)\sigma_*\right)}{\Phi\left(\frac{\mu_*}{\sigma_*}\right)}}$
-&  $\exp{\left[\frac{1}{2}\sigma_*^2G(t)^2+\mu_*G(t)\right]\frac{\Phi\left(\frac{\mu_*}{\sigma_*}+G(t)\sigma_*\right)}{\Phi\left(\frac{\mu_*}{\sigma_*}\right)}}$ \\
+Densities & $E\left[\exp{\left(-G(t)u_i\right)|\epsilon_i}\right]$ \\
+\midrule
+Half-Normal & $\exp{\left[\frac{1}{2}\sigma_*^2G(t)^2-\mu_*G(t)\right]\frac{\Phi\left(\frac{\mu_*}{\sigma_*}-G(t)\sigma_*\right)}{\Phi\left(\frac{\mu_*}{\sigma_*}\right)}}$ \\
 %\hdashline 
-Truncated-Normal & & $\exp{\left[\frac{1}{2}\sigma_*^2G(t)^2-\mu_*G(t)\right]\frac{\Phi\left(\frac{\mu_*}{\sigma_*}-G(t)\sigma_*\right)}{\Phi\left(\frac{\mu_*}{\sigma_*}\right)}}$
-&  $\exp{\left[\frac{1}{2}\sigma_*^2G(t)^2+\mu_*G(t)\right]\frac{\Phi\left(\frac{\mu_*}{\sigma_*}+G(t)\sigma_*\right)}{\Phi\left(\frac{\mu_*}{\sigma_*}\right)}}$  \\
+Truncated-Normal & $\exp{\left[\frac{1}{2}\sigma_*^2G(t)^2-\mu_*G(t)\right]\frac{\Phi\left(\frac{\mu_*}{\sigma_*}-G(t)\sigma_*\right)}{\Phi\left(\frac{\mu_*}{\sigma_*}\right)}}$ \\
 %\hdashline 
-Exponential & $\mu_{i*} + \sigma_v\frac{\phi\left(\frac{\mu_{i*}}{\sigma_v}\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)}$ & 
-$\exp{\left(-G(t)\mu_{i*} + \frac{1}{2}G(t)^2\sigma_v^2\right)} \frac{\Phi\left(\frac{\mu_{i*}}{\sigma_v}-G(t)\sigma_v\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_v}\right)}$ & 
-$\exp{\left(G(t)\mu_* + \frac{1}{2}G(t)^2\sigma_v^2\right)} \frac{\Phi\left(\frac{\mu_*}{\sigma_v}+G(t)\sigma_v\right)}{\Phi\left(\frac{\mu_*}{\sigma_v}\right)}$\\
+Exponential & $\exp{\left(-G(t)\mu_{i*} + \frac{1}{2}G(t)^2\sigma_v^2\right)} \frac{\Phi\left(\frac{\mu_{i*}}{\sigma_v}-G(t)\sigma_v\right)}{\Phi\left(\frac{\mu_{i*}}{\sigma_v}\right)}$\\
 %\hdashline
-Rayleigh & $\frac{\left[\sigma_*\mu_{i*}\phi\left(\frac{\mu_{i*}}{\sigma_*}\right) + \left(\mu_{i*}^2+\sigma_*^2\right)\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right)\right]}{\left[\mu_{i*}\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right) + \sigma_*\phi\left(\frac{\mu_{i*}}{\sigma_*}\right)\right]}$ &
-$\exp{\left(-G(t)\mu_{i*} +\frac{G(t)^2\sigma_*^2}{2}\right)}\frac{\left[\left(G(t)\mu_{i*}-G(t)^2\sigma_*^2\right)\Phi\left(\frac{\mu_{i*}}{\sigma_*} - G(t)\sigma_*\right) + G(t)\sigma_*\phi\left(\frac{\mu_{i*}}{\sigma_*} - G(t)\sigma_*\right)\right]}{\left[\mu_{i*}\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right) + \sigma_*\phi\left(\frac{\mu_{i*}}{\sigma_*}\right)\right]}$ &
-$\exp{\left(G(t)\mu_* +\frac{G(t)^2\sigma_*^2}{2}\right)}\frac{\left[\left(G(t)\mu_*+G(t)^2\sigma_*^2\right)\Phi\left(\frac{\mu_*}{\sigma_*} + \sigma_*\right) + \sigma_*\phi\left(\frac{\mu_*}{\sigma_*} + \sigma_*\right)\right]}{\left[\mu_*\Phi\left(\frac{\mu_*}{\sigma_*}\right) + \sigma_*\phi\left(\frac{\mu_*}{\sigma_*}\right)\right]}$\\
+Rayleigh & $\exp{\left(-G(t)\mu_{i*} +\frac{G(t)^2\sigma_*^2}{2}\right)}\frac{\left[\left(G(t)\mu_{i*}-G(t)^2\sigma_*^2\right)\Phi\left(\frac{\mu_{i*}}{\sigma_*} - G(t)\sigma_*\right) + G(t)\sigma_*\phi\left(\frac{\mu_{i*}}{\sigma_*} - G(t)\sigma_*\right)\right]}{\left[\mu_{i*}\Phi\left(\frac{\mu_{i*}}{\sigma_*}\right) + \sigma_*\phi\left(\frac{\mu_{i*}}{\sigma_*}\right)\right]}$ \\
 %\hdashline
-Gamma & $\frac{h\left(P, \epsilon\right)}{h\left(P-1, \epsilon\right)}$ & $\frac{\exp{\left(\frac{\sigma_v^2}{\sigma_u} + S\epsilon + \frac{\sigma_v^2}{2}\right)}\Phi\left(-\frac{\sigma_v}{\sigma_u} - \frac{S\epsilon}{\sigma_v} - \sigma_v\right)  \hat{g}(P-1, \epsilon)}{\Phi\left(-\frac{\sigma_v}{\sigma_u} - \frac{S\epsilon}{\sigma_v}\right)\hat{h}(P-1, \epsilon)}$ & $\frac{\exp{\left(-\frac{\sigma_v^2}{\sigma_u} - S\epsilon + \frac{\sigma_v^2}{2}\right)}\Phi\left(-\frac{\sigma_v}{\sigma_u} - \frac{S\epsilon}{\sigma_v} + \sigma_v\right)  \hat{k}(P-1, \epsilon)}{\Phi\left(-\frac{\sigma_v}{\sigma_u} - \frac{S\epsilon}{\sigma_v}\right)\hat{h}(P-1, \epsilon)}$\\
+Gamma & $\frac{\exp{\left(\frac{\sigma_v^2}{\sigma_u} + S\epsilon + \frac{\sigma_v^2}{2}\right)}\Phi\left(-\frac{\sigma_v}{\sigma_u} - \frac{S\epsilon}{\sigma_v} - \sigma_v\right)  \hat{g}(P-1, \epsilon)}{\Phi\left(-\frac{\sigma_v}{\sigma_u} - \frac{S\epsilon}{\sigma_v}\right)\hat{h}(P-1, \epsilon)}$ \\
 %\hdashline
-Log-Normal & $\frac{\frac{1}{\sigma_u\sigma_v}\int_0^\infty\phi\left(\frac{\ln{u}-\mu}{\sigma_u}\right)\phi\left(\frac{\epsilon_i+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$ & 
-$\frac{\frac{1}{\sigma_u\sigma_v}\int_0^\infty \frac{\exp{\left(-u\right)}}{u} \phi\left(\frac{\ln{u}-\mu}{\sigma_u}\right)\phi\left(\frac{\epsilon_i+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$ & 
-$\frac{\frac{1}{\sigma_u\sigma_v}\int_0^\infty \frac{\exp{\left(u\right)}}{u} \phi\left(\frac{\ln{u}-\mu}{\sigma_u}\right)\phi\left(\frac{\epsilon_i+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$\\
+Log-Normal & $\frac{\frac{1}{\sigma_u\sigma_v}\int_0^\infty \frac{\exp{\left(-u\right)}}{u} \phi\left(\frac{\ln{u}-\mu}{\sigma_u}\right)\phi\left(\frac{\epsilon_i+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$ \\
 %\hdashline
-Weibull & $\frac{\frac{k}{\sigma_u^k\sigma_v}\int_0^\infty u^k\exp{\left(-\left(u/\sigma_u\right)^{k}\right)}\phi\left(\frac{\epsilon+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$ & 
- $\frac{\frac{k}{\sigma_u\sigma_v}\int_0^\infty \exp{\left(-u_i\right)}\left(\frac{u}{\sigma_u}\right)^{k-1}\exp{\left(-\left(u/\sigma_u\right)^{k}\right)}\phi\left(\frac{\epsilon+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$ & 
-  $\frac{\frac{k}{\sigma_u\sigma_v}\int_0^\infty \exp{\left(u_i\right)}\left(\frac{u}{\sigma_u}\right)^{k-1}\exp{\left(-\left(u/\sigma_u\right)^{k}\right)}\phi\left(\frac{\epsilon+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$\\
+Weibull & $\frac{\frac{k}{\sigma_u\sigma_v}\int_0^\infty \exp{\left(-u_i\right)}\left(\frac{u}{\sigma_u}\right)^{k-1}\exp{\left(-\left(u/\sigma_u\right)^{k}\right)}\phi\left(\frac{\epsilon+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$ \\
  % \hdashline
-Generalized Exponential & $\sigma_v \frac{\exp{\left(A\right)}\left[\phi\left(a\right) + a\Phi\left(a\right)\right]- \exp{\left(B\right)}\left[\phi\left(b\right)+b\Phi\left(b\right)\right]}{\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$ & 
-$\frac{\exp{\left(A\right)}\exp{\left(-a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a-\sigma_v\right)-\exp{\left(B\right)}\exp{\left(-b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(b-\sigma_v\right)}{\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$ & 
-$\frac{\exp{\left(A\right)}\exp{\left(a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a+\sigma_v\right)-\exp{\left(B\right)}\exp{\left(b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(b+\sigma_v\right)}{\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$\\
+Generalized Exponential & $\frac{\exp{\left(A\right)}\exp{\left(-a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a-\sigma_v\right)-\exp{\left(B\right)}\exp{\left(-b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(b-\sigma_v\right)}{\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$ \\
 %\hdashline
-Truncated Skewed-Laplace & $\sigma_v \frac{2\exp{\left(A\right)}\left[\phi\left(a\right) + a\Phi\left(a\right)\right]- \exp{\left(B\right)}\left[\phi\left(b\right)+b\Phi\left(b\right)\right]}{2\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$ & 
-$\frac{2\exp{\left(A\right)}\exp{\left(-a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a-\sigma_v\right)-\exp{\left(B\right)}\exp{\left(-b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(b-\sigma_v\right)}{2\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$ & 
-$\frac{2\exp{\left(A\right)}\exp{\left(a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a+\sigma_v\right)-\exp{\left(B\right)}\exp{\left(b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(b+\sigma_v\right)}{2\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$\\
+Truncated Skewed-Laplace & $\frac{2\exp{\left(A\right)}\exp{\left(-a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a-\sigma_v\right)-\exp{\left(B\right)}\exp{\left(-b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(b-\sigma_v\right)}{2\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$ \\
 %\hdashline
-Uniform & $-\sigma_v\frac{\phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon_i}{\sigma_v}\right)-\phi\left(\frac{S\epsilon_i}{\sigma_v}\right) }{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon_i}{\sigma_v}\right)-\Phi\left(\frac{S\epsilon_i}{\sigma_v}\right)} - S\epsilon_i$ & 
-$\exp{\left(S\epsilon_i+\frac{\sigma_v^2}{2}\right)}\frac{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon_i}{\sigma_v}+\sigma_v\right)-\Phi\left(\frac{S\epsilon_i}{\sigma_v}+\sigma_v\right)}{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon_i}{\sigma_v}\right)-\Phi\left(\frac{S\epsilon_i}{\sigma_v}\right)}$ & 
-$\exp{\left[-S\epsilon+\frac{\sigma_v^2}{2}\right]}\frac{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon}{\sigma_v}-\sigma_v\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}-\sigma_v\right)}{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon}{\sigma_v}\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}\right)}$\\
+Uniform & $\exp{\left(S\epsilon_i+\frac{\sigma_v^2}{2}\right)}\frac{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon_i}{\sigma_v}+\sigma_v\right)-\Phi\left(\frac{S\epsilon_i}{\sigma_v}+\sigma_v\right)}{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon_i}{\sigma_v}\right)-\Phi\left(\frac{S\epsilon_i}{\sigma_v}\right)}$\\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
-\caption{Conditional (in)efficiencies for time-varying inefficiency models}
-\label{table:effpanel}
+\caption{Conditional efficiencies for time-varying inefficiency models}
+\label{table:effpanel2}
 \end{table}
-%\end{landscape}
-%\restoregeometry
+
+%\newpage
+
+\begin{table}
+\renewcommand{\arraystretch}{3}
+%\setlength{\arrayrulewidth}{.01em}
+\centering
+\begin{adjustbox}{max width=1\textwidth}
+%\small
+\begin{tabular}{@{}cc@{}}
+\toprule
+Densities & $E\left[\exp{\left(G(t)u_i\right)|\epsilon_i}\right]$\\
+\midrule
+Half-Normal & $\exp{\left[\frac{1}{2}\sigma_*^2G(t)^2+\mu_*G(t)\right]\frac{\Phi\left(\frac{\mu_*}{\sigma_*}+G(t)\sigma_*\right)}{\Phi\left(\frac{\mu_*}{\sigma_*}\right)}}$ \\
+%\hdashline 
+Truncated-Normal & $\exp{\left[\frac{1}{2}\sigma_*^2G(t)^2+\mu_*G(t)\right]\frac{\Phi\left(\frac{\mu_*}{\sigma_*}+G(t)\sigma_*\right)}{\Phi\left(\frac{\mu_*}{\sigma_*}\right)}}$  \\
+%\hdashline 
+Exponential & $\exp{\left(G(t)\mu_* + \frac{1}{2}G(t)^2\sigma_v^2\right)} \frac{\Phi\left(\frac{\mu_*}{\sigma_v}+G(t)\sigma_v\right)}{\Phi\left(\frac{\mu_*}{\sigma_v}\right)}$\\
+%\hdashline
+Rayleigh & $\exp{\left(G(t)\mu_* +\frac{G(t)^2\sigma_*^2}{2}\right)}\frac{\left[\left(G(t)\mu_*+G(t)^2\sigma_*^2\right)\Phi\left(\frac{\mu_*}{\sigma_*} + \sigma_*\right) + \sigma_*\phi\left(\frac{\mu_*}{\sigma_*} + \sigma_*\right)\right]}{\left[\mu_*\Phi\left(\frac{\mu_*}{\sigma_*}\right) + \sigma_*\phi\left(\frac{\mu_*}{\sigma_*}\right)\right]}$\\
+%\hdashline
+Gamma & $\frac{\exp{\left(-\frac{\sigma_v^2}{\sigma_u} - S\epsilon + \frac{\sigma_v^2}{2}\right)}\Phi\left(-\frac{\sigma_v}{\sigma_u} - \frac{S\epsilon}{\sigma_v} + \sigma_v\right)  \hat{k}(P-1, \epsilon)}{\Phi\left(-\frac{\sigma_v}{\sigma_u} - \frac{S\epsilon}{\sigma_v}\right)\hat{h}(P-1, \epsilon)}$\\
+%\hdashline
+Log-Normal & $\frac{\frac{1}{\sigma_u\sigma_v}\int_0^\infty \frac{\exp{\left(u\right)}}{u} \phi\left(\frac{\ln{u}-\mu}{\sigma_u}\right)\phi\left(\frac{\epsilon_i+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$\\
+%\hdashline
+Weibull & $\frac{\frac{k}{\sigma_u\sigma_v}\int_0^\infty \exp{\left(u_i\right)}\left(\frac{u}{\sigma_u}\right)^{k-1}\exp{\left(-\left(u/\sigma_u\right)^{k}\right)}\phi\left(\frac{\epsilon+Su}{\sigma_v}\right)du}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon_i+Su_{ir}}{\sigma_v}\right)}$\\
+ % \hdashline
+Generalized Exponential & $\frac{\exp{\left(A\right)}\exp{\left(a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a+\sigma_v\right)-\exp{\left(B\right)}\exp{\left(b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(b+\sigma_v\right)}{\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$\\
+%\hdashline
+Truncated Skewed-Laplace & $\frac{2\exp{\left(A\right)}\exp{\left(a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a+\sigma_v\right)-\exp{\left(B\right)}\exp{\left(b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(b+\sigma_v\right)}{2\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$\\
+%\hdashline
+Uniform & $\exp{\left[-S\epsilon+\frac{\sigma_v^2}{2}\right]}\frac{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon}{\sigma_v}-\sigma_v\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}-\sigma_v\right)}{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon}{\sigma_v}\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}\right)}$\\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\caption{Conditional reciprocal efficiencies for time-varying inefficiency models}
+\label{table:effpanel3}
+\end{table}
+
+%\newpage
+
 
 
 \end{appendix}
