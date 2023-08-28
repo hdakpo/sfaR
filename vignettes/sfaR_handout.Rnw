@@ -214,19 +214,31 @@ last section offers some discussions and conclusions.
 
 \subsection{Standard cross-sectional SFA models}
 
-\subsubsection{Densities}
-
-Let's consider the standard production function \footnote{Other specifications 
-for the production technology can also be used, e.g. distance functions, profit,
-cost or revenue functions, input/output requirement functions.} 
+We consider a general stochastic frontier model:%
+\footnote{For example, in case of a production frontier,
+the dependent variable represents the output quantity,
+while the explanatory variables represent the input quantities.
+In case of a cost function, the dependent variable indicates the costs,
+while the explanatory variables represent the input prices 
+and the output quantities. 
+Further types of functions that can be modeled as stochastic frontiers
+are, e.g., distance functions, profit functions, revenue functions, 
+and input requirement functions.} 
 %
 \begin{equation}\label{eq:1.1.1}
-y_i = \mathbf{x_i'}\bm{\beta} + v_i - Su_i \quad \text{with} \quad i = 1, \cdots, N
+y_i = \mathbf{x_i}'\bm{\beta} + v_i - Su_i \quad \text{with} \quad i = 1, \cdots, N,
 \end{equation}
 %
-where $S = 1$ for production function and $S = -1$ for cost function. $v$ is the 
-two-sided (idiosyncratic) error, which is generally assumed to follow a normal distribution 
-$\mathcal{N}(0, \sigma_v^2)$. 
+where subscript~$i$ indicates the observation,
+$N$~indicates the total number of observations,
+$y_i$~is the dependent variable,
+$\mathbf{x_i}$~is a vector of explanatory variables,
+$\bm{\beta}$~is a vector of unknown coefficients,
+$v_i$~is a two-sided (``noise'') error term that is usually assumed 
+to follow a normal distribution $\mathcal{N}(0, \sigma_v^2)$,
+$u_i$~is a one-sided (``inefficiency'') error term,
+and $S = 1$ specifies a production frontier,
+while $S = -1$ specifies a cost frontier. 
 
 The spearhead for the SFA is the assumption regarding the distibution of $u$. 
 In the \pkg{sfaR} package, ten different distributions with $u \geq 0$ are 
