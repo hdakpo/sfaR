@@ -152,46 +152,47 @@ performance \citep[e.g.,][]{myd20, kang02}, to evaluate eco-efficiency of firms
 SFA has been used in many different sectors including, e.g., agriculture 
 \citep[e.g.,][]{latruffe23}, banking \citep[e.g.,][]{badu21}, education \citep[e.g., ][]{aga19}, 
 energy demand or distribution \citep[e.g., ][]{filipp15, kop11}, health care \citep[e.g.,][]{ji20}, manufacturing \citep[e.g.,][]{boy19}, 
-museums \citep[e.g.,][]{price23}, and transportation \citep[e.g., ][]{coelli99, 
-}. 
+museums \citep[e.g.,][]{price23}, and transportation \citep[e.g., ][]{coelli99}. 
 
-The scope of SFA is so huge that it spreads from pure research objectives to 
-practitionners and policy makers. As such, the \pkg{sfaR} package intends to 
+The scope of SFA spreads from pure research objectives to 
+business applications and policy making. As such, the \pkg{sfaR} package intends to 
 provide a platform for the basics but also for some of the recent advances in 
 this field of performance benchmarking using the software 
 \proglang{R}.\footnote{SFA has been implemented in other sofware like 
-\proglang{Limdep}, \proglang{Stata}, \proglang{Ox}, $\cdots$}. In \proglang{R}, 
-the package \pkg{frontier} is without any doubt the biggest attempt in 
-an open software \citep{frontier}.\footnote{The package \pkg{frontier} uses the 
+\proglang{Limdep}, \proglang{Stata}, \proglang{Ox}, \ldots}.
+The package \pkg{frontier} \citep{frontier} has been the most well-known
+open-source software for estimating SF models in \proglang{R}.%
+\footnote{The package \pkg{frontier} is based on the 
 Fortran source codes of \proglang{Frontier 4.1} originally developed by Tim 
 Coelli.} However, this package is only limited to a few distributions for the 
-inefficiency term and a few panel models. For instance, only the half-normal and
-truncated normal distributions are possible in \pkg{frontier}. Regading the panel
+inefficiency term and a few panel-data models. For instance, the \pkg{frontier} package
+implements only the half-normal and truncated normal distributions. Regarding the panel
 models, \pkg{frontier} implements the time-invariant inefficiency model by 
-\citet{pl81} and the time-varying efficiency model by \citet{batco92}. \pkg{sfaR} 
-goes a step further and provide more alternative in the time-varying inefficiency
+\citet{pl81} and the time-varying efficiency model by \citet{batco92}. The package \pkg{sfaR} 
+goes a step further and provides additional alternative specifications of time-varying inefficiency
 models \citep{kum90, batco92, lees93, cue00, cue02, feng09, kw05, al06}.
 
-Recently, the package \pkg{npsf} by \citet{npsf} has extended the \pkg{frontier}
-package to new panel models (e.g., the generalized true random effects as 
+Recently, the package \pkg{npsf} \citep{npsf} has extended the \pkg{frontier}
+package to new panel-data models (e.g., the generalized true random effects as 
 discussed in \citet{colomb14, klh14, tk14}).\footnote{Many other packages can be
-found in the literature. For instance, the \pkg{Benchmarking} package contains 
-a very basic SFA model \citep{bench}, \pkg{sfadv} provides one methodology to 
-deal with endogeneity in SFA \citep{sfadv}, \pkg{semsfa}, and \pkg{dsfa} offer semi- and 
-non-parametric SFA models \citep{semsfa, dsfa}, and \pkg{ssfa} allows for spatial 
-stochastic frontiers \citep{ssfa}. In addition to these packages, several R codes can be found
+found in the literature. For instance, the \pkg{Benchmarking} package \citep{bench} contains 
+a very basic SFA model, the \pkg{sfadv} package \citep{sfadv} provides one methodology to 
+deal with endogeneity in SFA, the packages \pkg{semsfa} \citep{semsfa} and \pkg{dsfa}  \citep{dsfa} offer semi- and 
+non-parametric SFA models, and the \pkg{ssfa} package \citep{ssfa} allows for spatial 
+stochastic frontiers. In addition to these packages, several R codes can be found
 online to conduct some SFA \citep{si20, si22, nguyen22}.} Still, many 
 of the recent developments are still lacking, especially regarding technological
 heterogeneity. For instance, the latent class stochastic frontier models, and 
 many of its variants are not covered by any of the aforementioned packages. For instance,
-\pkg{sfaR} includes the latent class SF, the zero inefficiency SF, the 
-contaminated noise SF, and the multi-modal inefficiency SF \citep{orea04, 
-greene05, kum13, rho15, wheat19}. The same is true for the metafrontier 
-\citep{batt04, huang14, am17}, and the sample selection bias 
+the \pkg{sfaR} package includes the standard latent-class SF, the zero-inefficiency SF, the 
+contaminated-noise SF, the multi-modal inefficiency SF \citep{orea04, 
+greene05, kum13, rho15, wheat19}, metafrontier estimations
+\citep{batt04, huang14, am17}, and the sample-selection SF 
 \citep{greene10}. 
 
-With \pkg{sfaR} we do propose not an exhaustive universe of the 
-stochastic frontier (SF) models, but maybe a first step towards this direction. 
+While the \pkg{sfaR} package does not provide an exhaustive universe of the 
+diverse stochastic frontier (SF) models that have been suggested in the previous four decades, 
+it might be a first step into this direction. 
 As we expect the package to grow and even include other developers extension. As of
 now, the package, in summary, can handle cross-section but also panel data depending on the 
 models. It offers more flexibility in terms of the distributions for the 
