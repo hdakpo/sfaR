@@ -226,7 +226,7 @@ are, e.g., distance functions, profit functions, revenue functions,
 and input requirement functions.} 
 %
 \begin{equation}\label{eq:1.1.1}
-y_i = \mathbf{x_i}'\bm{\beta} + v_i - Su_i \quad \text{with} \quad i = 1, \cdots, N,
+y_i = \mathbf{x_i}'\bm{\beta} + v_i - S \, u_i \quad \text{with} \quad i = 1, \cdots, N,
 \end{equation}
 %
 where subscript~$i$ indicates the observation,
@@ -240,16 +240,17 @@ $u_i$~is a one-sided (``inefficiency'') error term,
 and $S = 1$ specifies a production frontier,
 while $S = -1$ specifies a cost frontier. 
 
-The spearhead for the SFA is the assumption regarding the distibution of $u$. 
-In the \pkg{sfaR} package, ten different distributions with $u \geq 0$ are 
-possible for the standard model. Table~\ref{table:dens} presents the density 
-function of all the distributions allowed by \pkg{sfaR}.\footnote{Moments associated
-with each distribution can be found in Table \ref{table:momentdesn} in the 
-Appendix.} For each of the distribution, the parameters can be obtained by 
-maximizing the log-likelihood giving the convolution of $\epsilon_i=v_i - Su_i$. 
+The spearhead for the SFA is the assumption regarding the distibution of
+the inefficiency term~$u \geq 0$. 
+Users of the \pkg{sfaR} package can choose among ten different distributions of~$u$ 
+for standard SF models. Table~\ref{table:dens} presents the density 
+functions of all the ten distributions implemented in the \pkg{sfaR} package.\footnote{Moments associated
+with each distribution can be found in Table~\ref{table:momentdesn} in the 
+Appendix.} For each of the distributions, the parameters can be obtained by 
+maximizing the log-likelihood giving the convolution of $\epsilon_i=v_i - S \, u_i$. 
 
-The most commonly used distributions are the one-parameter half-normal 
-\citep{aig77}, and exponential distributions \citep{mee77}. Their large success 
+The most commonly used distributions are the one-parameter half-normal distribution
+\citep{aig77} and the exponential distribution \citep{mee77}. Their large success 
 is attributed to the simplicity of their density function and their availability 
 in most statistical software (especially for the half-normal distribution). 
 However, these distributions assumed a zero mode for the inefficiency implying 
@@ -307,7 +308,7 @@ results should be sufficient.
 %\begin{adjustbox}{max width=1\textwidth}
 \begin{tabular}{@{}cc@{}}
 \toprule
-Distributions & Densities \\
+Distribution & Density function \\
 \midrule
 Half-Normal & $f(u) = \frac{2}{\sigma_u}\phi\left(\frac{u_i}{
 \sigma_u}\right)$ \\[1em]
