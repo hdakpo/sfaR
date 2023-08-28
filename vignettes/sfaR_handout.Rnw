@@ -133,75 +133,40 @@ frontier, cross-sectional data, panel data, R}
 
 \section[Introduction]{Introduction} \label{sec:intro}
 
-Since its inception by \citet{aig77}, \citet{mee77}, and \citet{batt77} more than 40~years ago,
-stochastic frontier analysis (SFA) has been used as a prominent tool for 
-benchmarking many different performance aspects of various types of decision making units (DMUs). Since then 
-several extensions have been developed to tackle different situations (e.g., data type, 
-technological heterogeneity, endogeneity, \ldots). Overall, SFA can be used 
-to evaluate different performance indicators for DMUs (e.g., technical and economic 
-efficiencies, productivity, \ldots). By estimating the efficiency scores of 
-DMUs, we can compare them, find out who is under-performing, and learn from the 
-best practices. This can help make better policies to improve the 
-efficiency of both private and public sectors \citep{par14}. 
+Since its inception by \citet{aig77}, \citet{mee77}, and \citet{batt77} more than 40~years ago, stochastic frontier analysis (SFA) has been used as a prominent tool for benchmarking many different performance aspects of various types of decision making units (DMUs). Since then several extensions have been developed to tackle different situations (e.g., data type, technological heterogeneity, endogeneity, \ldots). Overall, SFA can be used to evaluate different performance indicators for DMUs (e.g., technical and economic efficiencies, productivity, \ldots). By estimating the efficiency scores of DMUs, we can compare them, find out who is under-performing, and learn from the best practices. This can help make better policies to improve the efficiency of both private and public sectors \citep{par14}. 
 
 SFA has been used in a variety of areas and for different purposes. For 
 instance, SFA has been used to measure productivity growth and its sources 
 \citep[e.g.,][]{orea02}, to examine the effects of regulation and competition on 
 performance \citep[e.g.,][]{myd20, kang02}, to evaluate eco-efficiency of firms 
-\citep[e.g.,][]{mada23}, or to analyze the impact of environmental factors \citep[e.g.,][]{li19}. 
-SFA has been used in many different sectors including, e.g., agriculture 
-\citep[e.g.,][]{latruffe23}, banking \citep[e.g.,][]{badu21}, education \citep[e.g., ][]{aga19}, 
-energy demand or distribution \citep[e.g., ][]{filipp15, kop11}, health care \citep[e.g.,][]{ji20}, manufacturing \citep[e.g.,][]{boy19}, 
+\citep[e.g.,][]{mada23}, or to analyze the impact of environmental factors \citep[e.g.,][]{li19}. SFA has been used in many different sectors including, e.g., agriculture \citep[e.g.,][]{latruffe23}, banking \citep[e.g.,][]{badu21}, education \citep[e.g., ][]{aga19}, energy demand or distribution \citep[e.g., ][]{filipp15, kop11}, health care \citep[e.g.,][]{ji20}, manufacturing \citep[e.g.,][]{boy19}, 
 museums \citep[e.g.,][]{price23}, and transportation \citep[e.g., ][]{coelli99, 
 filipp16}. 
 
-The scope of SFA is so huge that it spreads from pure research objectives to 
-practitionners and policy makers. As such, the \pkg{sfaR} package intends to 
-provide a platform for the basics but also for some of the recent advances in 
+The scope of SFA spreads from pure research objectives to 
+business applications and policy making. As such, the \pkg{sfaR} package intends to provide a platform for the basics but also for some of the recent advances in 
 this field of performance benchmarking using the software 
 \proglang{R}.\footnote{SFA has been implemented in other sofware like 
-\proglang{Limdep}, \proglang{Stata}, \proglang{Ox}, $\cdots$}. In \proglang{R}, 
-the package \pkg{frontier} is without any doubt the biggest attempt in 
-an open software \citep{frontier}.\footnote{The package \pkg{frontier} uses the 
+\proglang{Limdep}, \proglang{Stata}, \proglang{Ox}, \ldots}.
+The package \pkg{frontier} \citep{frontier} has been the most well-known
+open-source software for estimating SF models in \proglang{R}.%
+\footnote{The package \pkg{frontier} is based on the 
 Fortran source codes of \proglang{Frontier 4.1} originally developed by Tim 
 Coelli.} However, this package is only limited to a few distributions for the 
-inefficiency term and a few panel models. For instance, only the half-normal and
-truncated normal distributions are possible in \pkg{frontier}. Regading the panel
-models, \pkg{frontier} implements the time-invariant inefficiency model by 
-\citet{pl81} and the time-varying efficiency model by \citet{batco92}. \pkg{sfaR} 
-goes a step further and provide more alternative in the time-varying inefficiency
-models \citep{kum90, batco92, lees93, cue00, cue02, feng09, kw05, al06}.
+inefficiency term and a few panel-data models. For instance, the \pkg{frontier} package implements only the half-normal and truncated normal distributions. Regarding the panel models, \pkg{frontier} implements the time-invariant inefficiency model by \citet{pl81} and the time-varying efficiency model by \citet{batco92}. The package \pkg{sfaR} goes a step further and provides additional alternative specifications of time-varying inefficiency models \citep{kum90, batco92, lees93, cue00, cue02, feng09, kw05, al06}.
 
-Recently, the package \pkg{npsf} by \citet{npsf} has extended the \pkg{frontier}
-package to new panel models (e.g., the generalized true random effects as 
+Recently, the package \pkg{npsf} \citep{npsf} has extended the \pkg{frontier}
+package to new panel-data models (e.g., the generalized true random effects as 
 discussed in \citet{colomb14, klh14, tk14}).\footnote{Many other packages can be
-found in the literature. For instance, the \pkg{Benchmarking} package contains 
-a very basic SFA model \citep{bench}, \pkg{sfadv} provides one methodology to 
-deal with endogeneity in SFA \citep{sfadv}, \pkg{semsfa}, and \pkg{dsfa} offer semi- and 
-non-parametric SFA models \citep{semsfa, dsfa}, and \pkg{ssfa} allows for spatial 
-stochastic frontiers \citep{ssfa}. In addition to these packages, several R codes can be found
-online to conduct some SFA \citep{si20, si22, nguyen22}.} Still, many 
-of the recent developments are still lacking, especially regarding technological
-heterogeneity. For instance, the latent class stochastic frontier models, and 
-many of its variants are not covered by any of the aforementioned packages. For instance,
-\pkg{sfaR} includes the latent class SF, the zero inefficiency SF, the 
-contaminated noise SF, and the multi-modal inefficiency SF \citep{orea04, 
-greene05, kum13, rho15, wheat19}. The same is true for the metafrontier 
-\citep{batt04, huang14, am17}, and the sample selection bias 
-\citep{greene10}. 
+found in the literature. For instance, the \pkg{Benchmarking} package \citep{bench} contains a very basic SFA model, the \pkg{sfadv} package \citep{sfadv} provides one methodology to deal with endogeneity in SFA, the packages \pkg{semsfa} \citep{semsfa} and \pkg{dsfa}  \citep{dsfa} offer semi- and non-parametric SFA models, and the \pkg{ssfa} package \citep{ssfa} allows for spatial stochastic frontiers. In addition to these packages, several R codes can be found online to conduct some SFA \citep{si20, si22, nguyen22}.} Still, many of the recent developments are still lacking, especially regarding technological heterogeneity. For instance, the latent class stochastic frontier models, and many of its variants are not covered by any of the aforementioned packages. For instance, the \pkg{sfaR} package includes the standard latent-class SF, the zero-inefficiency SF, the 
+contaminated-noise SF, the multi-modal inefficiency SF \citep{orea04, greene05, kum13, rho15, wheat19}, metafrontier estimations \citep{batt04, huang14, am17}, and the sample-selection SF \citep{greene10}. 
 
-With \pkg{sfaR} we do propose not an exhaustive universe of the 
-stochastic frontier (SF) models, but maybe a first step towards this direction. 
-As we expect the package to grow and even include other developers extension. As of
-now, the package, in summary, can handle cross-section but also panel data depending on the 
+While the \pkg{sfaR} package does not provide an exhaustive universe of the 
+diverse stochastic frontier (SF) models that have been suggested in the previous four decades, it might be a first step into this direction. As we expect the package to grow and even include other developers extension. As of now, the package, in summary, can handle cross-section but also panel data depending on the 
 models. It offers more flexibility in terms of the distributions for the 
 inefficiency term, but also the possibility to use several optimization 
 algorithms. Regarding the models, 296 likelihood functions are currently 
-implemented and grouped into ten main functions. This article summarizes the main information 
-about each group of models implemented and illustrate them using real life data.
-The structure of the paper is as follows. Section \ref{sec:modelstandar} gives 
-a brief overview of the standard SF models in the literature for cross-section
-and panel data. Section \ref{sec:modelcm} describes the latent class SF in
+implemented and grouped into ten main functions. This article summarizes the main information about each group of models implemented and illustrate them using real life data. The structure of the paper is as follows. Section \ref{sec:modelstandar} gives a brief overview of the standard SF models in the literature for cross-section and panel data. Section \ref{sec:modelcm} describes the latent class SF in
 addition to its variants. Section \ref{sec:other} presents the other 
 SF models present in \pkg{sfaR}, namely the metafrontiers and the sample 
 selection SF. Practically, section \ref{sec:prespackage} draws a skeleton
@@ -213,78 +178,44 @@ last section offers some discussions and conclusions.
 
 \subsection{Standard cross-sectional SFA models}
 
-\subsubsection{Densities}
-
-Let's consider the standard production function \footnote{Other specifications 
-for the production technology can also be used, e.g. distance functions, profit,
-cost or revenue functions, input/output requirement functions.} 
+We consider a general stochastic frontier model: \footnote{For example, in case of a production frontier, the dependent variable represents the output quantity,
+while the explanatory variables represent the input quantities. In case of a cost function, the dependent variable indicates the costs, while the explanatory variables represent the input prices and the output quantities. 
+Further types of functions that can be modeled as stochastic frontiers
+are, e.g., distance functions, profit functions, revenue functions, 
+and input requirement functions.} 
 %
 \begin{equation}\label{eq:1.1.1}
-y_i = \mathbf{x_i'}\bm{\beta} + v_i - Su_i \quad \text{with} \quad i = 1, \cdots, N
+y_i = \mathbf{x_i}'\bm{\beta} + v_i - S \, u_i \quad \text{with} \quad i = 1, \cdots, N,
 \end{equation}
 %
-where $S = 1$ for production function and $S = -1$ for cost function. $v$ is the 
-two-sided (idiosyncratic) error, which is generally assumed to follow a normal distribution 
-$\mathcal{N}(0, \sigma_v^2)$. 
+where subscript~$i$ indicates the observation, $N$~indicates the total number of observations, $y_i$~is the dependent variable, $\mathbf{x_i}$~is a vector of explanatory variables, $\bm{\beta}$~is a vector of unknown coefficients,
+$v_i$~is a two-sided (``noise'') error term that is usually assumed 
+to follow a normal distribution $\mathcal{N}(0, \sigma_v^2)$, $u_i$~is a one-sided (``inefficiency'') error term, and $S = 1$ specifies a production frontier,
+while $S = -1$ specifies a cost frontier. 
 
-The spearhead for the SFA is the assumption regarding the distibution of $u$. 
-In the \pkg{sfaR} package, ten different distributions with $u \geq 0$ are 
-possible for the standard model. Table~\ref{table:dens} presents the density 
-function of all the distributions allowed by \pkg{sfaR}.\footnote{Moments associated
-with each distribution can be found in Tables \ref{table:momentdesn1} and \ref{table:momentdesn2} in the 
-Appendix.} For each of the distribution, the parameters can be obtained by 
-maximizing the log-likelihood giving the convolution of $\epsilon_i=v_i - Su_i$. 
+The spearhead for the SFA is the assumption regarding the distibution of
+the inefficiency term~$u \geq 0$. Users of the \pkg{sfaR} package can choose among ten different distributions of~$u$ for standard SF models. Table~\ref{table:dens} presents the density functions of all the ten distributions implemented in the \pkg{sfaR} package.\footnote{Moments associated with each distribution can be found in Table~\ref{table:momentdesn1} and \ref{table:momentdesn2} in the Appendix.} For each of the distributions, the parameters can be obtained by maximizing the log-likelihood giving the convolution of $\epsilon_i=v_i - S \, u_i$. 
 
-The most commonly used distributions are the one-parameter half-normal 
-\citep{aig77}, and exponential distributions \citep{mee77}. Their large success 
+The most commonly used distributions are the one-parameter half-normal distribution
+\citep{aig77} and the exponential distribution \citep{mee77}. Their large success 
 is attributed to the simplicity of their density function and their availability 
 in most statistical software (especially for the half-normal distribution). 
 However, these distributions assumed a zero mode for the inefficiency implying 
 that most DMUs will be deemed efficient. Two-parameter distributions like the 
-truncated normal \citep{ste80, kum87}, and the gamma \citep{ste80, beckers87, greene90, greene03}
-were later introduced to shift away from the zero mode distributions. 
-A particular feature of these two distributions is that, under specific 
-conditions they nest the half-normal and the exponential distributions, 
+truncated normal \citep{ste80, kum87}, and the gamma \citep{ste80, beckers87, greene90, greene03} were later introduced to shift away from the zero mode distributions. A particular feature of these two distributions is that, under specific conditions they nest the half-normal and the exponential distributions, 
 respectively. In the case of the gamma distribution, the density corresponding 
 to $\epsilon_i$ does not have a close form, and \citet{greene03} suggested the 
 use of maximum simulated likelihood (MSL). If the previous four distributions 
-are the standards in the stochastic frontier framework, other 
-distributions are also introduced. For instance, the rayleigh \citep{oliv14, 
-hajar15, wang20}, and the generalized exponential \citep{papa21} are 
-one-parameter distributions, which have non-zero mode. Another alternative 
-two-parameter distribution is the log-normal \citep{wang20}, 
-which can be a good choice for certain type of datasets \citep{migon01, rama12}.
+are the standards in the stochastic frontier framework, other distributions are also introduced. For instance, the rayleigh \citep{oliv14, hajar15, wang20}, and the generalized exponential \citep{papa21} are one-parameter distributions, which have non-zero mode. Another alternative two-parameter distribution is the log-normal \citep{wang20}, which can be a good choice for certain type of datasets \citep{migon01, rama12}.
 
 A common feature of all the previous distributions is their positive skewness, 
-which supposed a negative third moment for the distribution of 
-$\epsilon_i$ when $S=1$. However, in practice, the third moment of 
-$\epsilon_i$ can be positive \citep{sw09}. This generate a type I error, which 
-might prevent the identification of the inefficiency distribution parameters 
-\citep{olson80}. According to \citet{wald82}, the "wrong" skewness implies that 
-the maximum likelihood and the OLS estimates of equation~\ref{eq:1.1.1} will have 
-the same slopes and there are no inefficiencies. A long debate has then emerged 
-around the "wrong" skewness. An advantage of the weibull and 
-the truncated skewed-laplace distributions is to allow positive 
-or negative skeweness \citep{tsionas07, wang12}, and therefore identifying inefficiencies even when the OLS
-residuals has the "wrong" skewness. On another hand, the uniform distribution 
-\citet{li96, nguyen10, lee14}, which has a zero skewness, has been introduced to  
-handle situations where the inefficiency distribution is symmetric around the 
-mean. In this latter case, the OLS residuals will also be symmetric, and based on 
-the previous distributions, no inefficiencies can be measured. Another advantage
-of the uniform distribution is to set a threshold on the inefficiency, which can
-provide useful economic information \citep{lee14}.
+which supposed a negative third moment for the distribution of $\epsilon_i$ when $S=1$. However, in practice, the third moment of $\epsilon_i$ can be positive \citep{sw09}. This generate a type I error, which might prevent the identification of the inefficiency distribution parameters \citep{olson80}. According to \citet{wald82}, the "wrong" skewness implies that the maximum likelihood and the OLS estimates of equation~\ref{eq:1.1.1} will have the same slopes and there are no inefficiencies. A long debate has then emerged around the "wrong" skewness. An advantage of the weibull and the truncated skewed-laplace distributions is to allow positive or negative skeweness \citep{tsionas07, wang12}, and therefore identifying inefficiencies even when the OLS residuals has the "wrong" skewness. On another hand, the uniform distribution \citet{li96, nguyen10, lee14}, which has a zero skewness, has been introduced to handle situations where the inefficiency distribution is symmetric around the mean. In this latter case, the OLS residuals will also be symmetric, and based on the previous distributions, no inefficiencies can be measured. Another advantage of the uniform distribution is to set a threshold on the inefficiency, which can provide useful economic information \citep{lee14}.
 
 \textbf{Do distributional assumptions even matter?} If as underlined by 
-\citet[p.~16]{kum20} the "choice of $u$ is often driven through available statistical 
-software to implement the method rather than an underlying theoretical link 
-between a model of productive inefficiency and the exact shape of the 
+\citet[p.~16]{kum20} the "choice of $u$ is often driven through available statistical software to implement the method rather than an underlying theoretical link between a model of productive inefficiency and the exact shape of the 
 corresponding distribution", the \pkg{sfaR} package will fill in some gaps and 
 allow practionners to rigorously check differences in their results.\footnote{See 
-also \citet[p.~214-216]{par14} for more discussion on the matter of the choice of $u$ distribution.}
-It is worth mentioning that if one is only interested on the features of the 
-frontier, as long as inefficiency is not conditional on some variables, the OLS
-results should be sufficient.
-
+also \citet[p.~214-216]{par14} for more discussion on the matter of the choice of $u$ distribution.} It is worth mentioning that if one is only interested on the features of the frontier, as long as inefficiency is not conditional on some variables, the OLS results should be sufficient.
 
 %\begin{landscape}
 \begin{table}[t]
@@ -294,7 +225,7 @@ results should be sufficient.
 %\begin{adjustbox}{max width=1\textwidth}
 \begin{tabular}{@{}cc@{}}
 \toprule
-Distributions & Densities \\
+Distribution & Density function \\
 \midrule
 Half-Normal & $f(u) = \frac{2}{\sigma_u}\phi\left(\frac{u_i}{
 \sigma_u}\right)$ \\[1em]
@@ -334,7 +265,6 @@ Uniform & $f(u) = \frac{1}{\theta}$ with $u \in [0, \theta]$\\[1em]
 \end{table}
 %\end{landscape}
 
-
 The convolution of $\epsilon$ associated with each of the distribution in 
 Table~\ref{table:dens} are presented in Table~\ref{table:mlsfcross} in the 
 Appendix.\footnote{Proof of the derivation of these densities can be found in 
@@ -354,16 +284,7 @@ Allowing heteroscedasticity in the variance of the one-sided error term $u$
 allows to examine the determinants of inefficiency. This parametrization has 
 been discussed in \citet{reif91, cau93, cau95, had99}. Moreover, according to 
 \citet{wang02}, not accounting for the heteroscedasticity in the efficiency  
-component can lead to inconsistent results. As underlined in 
-\citet[p.~115]{kum14}, "the early literature adopts a two-step procedure to investigate 
-the relationship", which was later proved by \citet{wang02} to generate biased results.
-In the case of the truncated normal distribution, \citet{kum91, hua94, batt95}
-suggested to only parameterize the mean of the distribution as 
-$\mu_i = \mathbf{z}'_{\bm\mu, \mathbf{i}}\bm\zeta$ when examining the 
-inefficiency determinants. However, to account for non-monotonicity in the 
-determinants of inefficiency, \citet{wang02b} suggested to parameterized both the 
-mean and and the variance of the pre-truncated distribution. The same process
-can also be applied to the log-normal distribution.
+component can lead to inconsistent results. As underlined in \citet[p.~115]{kum14}, "the early literature adopts a two-step procedure to investigate the relationship", which was later proved by \citet{wang02} to generate biased results. In the case of the truncated normal distribution, \citet{kum91, hua94, batt95} suggested to only parameterize the mean of the distribution as $\mu_i = \mathbf{z}'_{\bm\mu, \mathbf{i}}\bm\zeta$ when examining the inefficiency determinants. However, to account for non-monotonicity in the determinants of inefficiency, \citet{wang02b} suggested to parameterized both the mean and and the variance of the pre-truncated distribution. The same process can also be applied to the log-normal distribution.
 
 Regarding the truncated normal distribution, \citet{wang02} have formulated a 
 different strategy for modelling the inefficiency variable:
@@ -392,40 +313,22 @@ variable $u_*$ can be seen as the firms's base efficiency level which captures
 things like the manager's natural skills, which we view as random. How well 
 these natural skills are exploited to manage the firm efficiently depends on the 
 other variables $\mathbf{z}$, which might include the manager's education or 
-experience, or measures of the environment in which the firm operates, for example."} 
-When determinants of inefficiency are evaluated, so does the marginal impact of 
-each $z$ variable on inefficiency. This marginal impact is estimated using the
+experience, or measures of the environment in which the firm operates, for example."} When determinants of inefficiency are evaluated, so does the marginal impact of each $z$ variable on inefficiency. This marginal impact is estimated using the
 derivatives $\partial E\left[u_i\right]/\partial z\left[k\right]$ and
 $\partial V\left[u_i\right]/\partial z\left[k\right]$, which vary 
 depending on the distribution of $u$.
-
 
 \subsubsection{Efficiency estimation} 
 
 After estimating the model parameters, the other interest is to derive observation 
 specific (in)efficiency. If we take the example of the half-normal distribution, 
 after the estimation, we can obtain a value for $\sigma_u^2$, which is enough if
-one is interested in the average inefficiency 
-($E\left[u\right]=\sigma_u\sqrt{\frac{2}{\pi}}$). However, to obtain individual
-observation inefficiency, $\sigma_u^2$ is not anymore enough.\footnote{Unless 
-inefficiency determinants are considered.} An early solution was proposed by \citet{jon82}
+one is interested in the average inefficiency ($E\left[u\right]=\sigma_u\sqrt{\frac{2}{\pi}}$). However, to obtain individual observation inefficiency, $\sigma_u^2$ is not anymore enough.\footnote{Unless inefficiency determinants are considered.} An early solution was proposed by \citet{jon82}
 who suggested to compute $E\left[u_i|\hat{\epsilon}_i\right]$. \citet{jon82} also 
 formulated an alternative to the conditional mean estimator, viz., the 
 conditional mode $M\left[u_i|\hat{\epsilon}_i\right]$. Once point estimates of 
-$u_i$ are obtained, technical efficiency can be computed as 
-$\exp{\left(-\hat{u}_i|\hat{\epsilon}_i\right)}$. Later, \citet{batt88} proposed to 
-derive the conditional mean efficiency using $E\left[\exp{\left(-u_i\right)|\hat{\epsilon}_i}\right]$.
-We went a step further in the \pkg{sfaR} package to also provide the reciprocal
-mean efficiency: $E\left[\exp{\left(u_i\right)|\hat{\epsilon}_i}\right]$.
-Also whenever possible we also provide the confidence intervall of the (in)efficiency
-scores \citep{horrace96}. Tables~\ref{table:effcross1}, \ref{table:effcross2}, 
-and \ref{table:effcross3}, in the Appendix, summarizes the main (in)efficiency measures. For the 
-weibull and log-normal distributions, all (in)efficiency measures are evaluated
-by solving a numerical integration (in \pkg{sfaR}, this 
-is solved using adaptive multidimensional integration over hypercubes\footnote{This 
-is done using the \pkg{cubature} package \citep{cubature}}). For the
-uniform distribution, different (in)efficiency scores can be derived when $\theta$
-is finite or, $\theta \rightarrow \infty$.
+$u_i$ are obtained, technical efficiency can be computed as $\exp{\left(-\hat{u}_i|\hat{\epsilon}_i\right)}$. Later, \citet{batt88} proposed to 
+derive the conditional mean efficiency using $E\left[\exp{\left(-u_i\right)|\hat{\epsilon}_i}\right]$. We went a step further in the \pkg{sfaR} package to also provide the reciprocal mean efficiency: $E\left[\exp{\left(u_i\right)|\hat{\epsilon}_i}\right]$. Also whenever possible we also provide the confidence intervall of the (in)efficiency scores \citep{horrace96}. Tables~\ref{table:effcross1}, \ref{table:effcross2}, and \ref{table:effcross3}, in the Appendix, summarizes the main (in)efficiency measures. For the weibull and log-normal distributions, all (in)efficiency measures are evaluated by solving a numerical integration (in \pkg{sfaR}, this is solved using adaptive multidimensional integration over hypercubes\footnote{This is done using the \pkg{cubature} package \citep{cubature}}). For the uniform distribution, different (in)efficiency scores can be derived when $\theta$ is finite or, $\theta \rightarrow \infty$.
 
 \subsection{Panel stochastic frontier models}
 
@@ -434,11 +337,7 @@ do not take advantage of the panel structure of the data when this is available.
 In the case of the panel data, some of the latent unobserved heterogeneity can 
 be accounted for as inefficiency or individual specific heterogeneity. In the 
 \pkg{sfaR}, we group the panel models into three categories. The first generation
-of panel models consider the time invariant heterogeneity as if it were inefficiency, 
-the second generation of models simultaneously consider firm heterogeneity in addition 
-to inefficiency. Finally, the third generation model considers firm heterogeneity, 
-and persistent and transient inefficiency components. All the panel models 
-considered in \pkg{sfaR} are distribution-based models.
+of panel models consider the time invariant heterogeneity as if it were inefficiency, the second generation of models simultaneously consider firm heterogeneity in addition to inefficiency. Finally, the third generation model considers firm heterogeneity, and persistent and transient inefficiency components. All the panel models considered in \pkg{sfaR} are distribution-based models.
 
 \subsubsection{Time-invariant inefficiency models}
 
@@ -450,19 +349,12 @@ y_{it} = \mathbf{x_{it}'}\bm{\beta} + v_{it} - Su_i \quad \text{with} \quad i = 
 \end{equation}
 %
 where the random effect $u_i$ is considered to be the inefficiency. If this model
-has only been developed for a few distributions for $u_i$, e.g., half-normal \citep{pl81}, 
-truncated normal \citep{batt88}, rayleigh \citep{hajar15}, uniform \citep{nguyen10}, we extend it in the \pkg{sfaR} package to all the
-other distributions.\footnote{Proofs for the derivation of the density function
+has only been developed for a few distributions for $u_i$, e.g., half-normal \citep{pl81}, truncated normal \citep{batt88}, rayleigh \citep{hajar15}, uniform \citep{nguyen10}, we extend it in the \pkg{sfaR} package to all the other distributions.\footnote{Proofs for the derivation of the density function
 of $f(\epsilon)$ is available from the authors upon request.} 
-An overview of the density of $\epsilon_i$ can be found in 
-Table~\ref{table:mlpl81}, in the Appendix.\footnote{A distribution-free 
-estimation of this model has been discussed in \citet{sl84}.}
+An overview of the density of $\epsilon_i$ can be found in Table~\ref{table:mlpl81}, in the Appendix.\footnote{A distribution-free estimation of this model has been discussed in \citet{sl84}.}
 
 Heterogeneity and heteroscedasticity can be handled in the \citet{pl81} model.
-However, the determinant variables $\mathbf{z}$ have to be time invariant \citep{kum2000}. In the
-\pkg{sfaR}, we suggest several ways to obtain time invariant determinants (see section \ref{sec:prespackage}).
-Regarding the (in)efficiency scores, they are computed the same way as in the 
-cross-sectional models using the formulas in Tables~\ref{table:effcross1}, \ref{table:effcross2}, 
+However, the determinant variables $\mathbf{z}$ have to be time invariant \citep{kum2000}. In the \pkg{sfaR}, we suggest several ways to obtain time invariant determinants (see section \ref{sec:prespackage}). Regarding the (in)efficiency scores, they are computed the same way as in the cross-sectional models using the formulas in Tables~\ref{table:effcross1}, \ref{table:effcross2}, 
 and \ref{table:effcross3} in the Appendix.
 
 \subsubsection{Time-varying inefficiency models}
@@ -480,9 +372,7 @@ All the developments for time-varying inefficiency models are based on the
 functional form assumed for $G(t)$.\footnote{A distribution-free approach has 
 been discussed in \citet{css90, lees93}.} The different possibilities of $G(t)$ in 
 the \pkg{sfaR} are summarized in Table~\ref{table:gt}. \citet{kum90} was the 
-first to suggest an ML estimation of time-varying inefficiency. Later \citet{batco92}
-developed the "time-decay" model along with two other alternatives. Many other
-models were suggested as documented in Table~\ref{table:gt}. 
+first to suggest an ML estimation of time-varying inefficiency. Later \citet{batco92} developed the "time-decay" model along with two other alternatives. Many other models were suggested as documented in Table~\ref{table:gt}. 
 
 \begin{table}
 %\setlength{\arrayrulewidth}{.01em}
@@ -540,13 +430,11 @@ constitute the first generation of panel SF models in the \pkg{sfaR} package.
 
 The latent class SF model (LCM) handles production heterogeneity
 through a mixture of production functions. The standard finite mixture models have
-been extended to the SF framework by \citet{cau03, orea04}. In the next subsections, 
-we describe the LCM for both pooled cross-section and panel data.
+been extended to the SF framework by \citet{cau03, orea04}. In the next subsections, we describe the LCM for both pooled cross-section and panel data.
 
 \subsubsection{For cross-sectional data}
 
-In the case of a pooled cross-section data, the equation associated with the LCM can
-be written as
+In the case of a pooled cross-section data, the equation associated with the LCM can be written as
 %
 \begin{equation} \label{eq:2.1.1}
 y_{it} = \mathbf{x_{it}'}\bm{\beta}_j + v_{it,j} - Su_{it,j} \quad \text{with} \quad i = 1, \cdots, N \quad \text{and} \quad j = 1, \cdots, J
@@ -572,9 +460,7 @@ $$\mu_{it*|j}=\frac{- S\epsilon_{it|j}\sigma_{u|j}^2}{\sigma_{u|j}^2 +
  $$\sigma_*^2 = \frac{\sigma_{u|j}^2 \sigma_{v|j}^2}{\sigma_{u|j}^2 + 
  \sigma_{v|j}^2}$$
 %
-The distribution of observations into classes is based
-on a prior probability that can depend on some covariates. This probability can 
-be modelled using a logit distribution as
+The distribution of observations into classes is based on a prior probability that can depend on some covariates. This probability can be modelled using a logit distribution as
 %
 \begin{equation} \label{eq:2.1.3}
 \pi_{it,j} = \frac{\exp{\left(\mathbf{q}'_{it}\bm{\lambda}_j\right)}}{
@@ -598,8 +484,7 @@ The unconditional likelihood of observation $i$ in period $t$ is simply the aver
  \pi\left(it, m\right)}$$
  %
  As in the standard cases, heteroscedasticity can be accommodated during the 
- estimation. It is worth noting that the \pkg{sfaR} package, currently, only considers
- the latent class SF model with the half-normal distribution.
+ estimation. It is worth noting that the \pkg{sfaR} package, currently, only considers the latent class SF model with the half-normal distribution.
 
 \subsubsection{For panel data}
 
@@ -631,8 +516,7 @@ and
 %
 $$\sigma_*^2=\frac{\sigma_u^2\sigma_v^2}{\sigma_u^2\sum_{t=1}^TG(t)^2 + \sigma_v^2}$$
 %
-As previously, the unconditional likelihood of cross-section $i$ is simply the average
- over the $J$ classes:
+As previously, the unconditional likelihood of cross-section $i$ is simply the average over the $J$ classes:
 %
 $$P(i) = \sum_{m=1}^{J}\pi(i,m)P(i|m)$$
 %
@@ -704,7 +588,6 @@ $v_i$ is:
  with different noise term depending on the class.\footnote{For now the
  \pkg{sfaR} package estimates the ZISF for cross-section or pooled data.} In 
  this case we have:
- 
  %
 \begin{equation}\label{eq:2.2.2}
 y_i = \begin{cases}
@@ -884,10 +767,7 @@ Conditionaly on $|U_i|$, the probability associated with each observation is:
  \end{equation}
  %
  where $a_i = \mathbf{z}_{si}^{\prime} \hat{\bm{\gamma}}$. In \pkg{sfaR}, this 
- likelihood can be estimated using five different approaches: Gauss-Kronrod quadrature, 
- adaptive integration over hypercubes (hcubature and pcubature), Gauss-Hermite 
- quadrature, and maximum simulated likelihood. We also use the BHHH estimator 
- to obtain the asymptotic standard errors for the parameter estimates.
+ likelihood can be estimated using five different approaches: Gauss-Kronrod quadrature, adaptive integration over hypercubes (hcubature and pcubature), Gauss-Hermite quadrature, and maximum simulated likelihood. We also use the BHHH estimator to obtain the asymptotic standard errors for the parameter estimates.
  
  The (in)efficiency scores are obtained following \citet{lai15} and the 
  developments around the closed skew-normal distribution (CSN).\footnote{See 
@@ -998,13 +878,10 @@ The thechnology gap ratio is obtained as (assuming that $y_i$ is expressed in lo
  
  The new quasi-maximum likelihood estimator requires a correction of the 
  standard error in order to account for heteroscedasticity, as the error term
- in \ref{eq:3.2.6} contains the residuals from estimating the group frontiers. The robust
- sandwich-form of the variance-covariance matrix estimator is used to 
+ in \ref{eq:3.2.6} contains the residuals from estimating the group frontiers. The  robust sandwich-form of the variance-covariance matrix estimator is used to 
  correct for the standard errors.
 
- A new stochastic metafrontier has also been suggested in 
- \citet{am17}. Based on the previous developments, The stochastic 
- frontiers corresponding to each group are defined as
+ A new stochastic metafrontier has also been suggested in  \citet{am17}. Based on the previous developments, The stochastic  frontiers corresponding to each group are defined as
  %
  \begin{equation}\label{eq:3.2.7}
  f_{ig} = \mathbf{x}'_i\bm{\beta}_g + v_{ig} \;\; \text{with} 
@@ -1244,10 +1121,7 @@ equation, and \code{frontierF} for the frontier equation. In the case of
 \code{sfametacross}, the different groups used for the metafrontier is 
 specified as a formula using the option \code{ghet}. For the latent class models
 and variants, the variables used to estimate the probability of being in a 
-specific class are included in the fomula based option \code{thet}. Heteroscedasticity in 
-the variances of the one-sided and the two-sided error terms $u$ and $v$ are 
-also defined using one-sided formulas (only right arguments e.g. \code{~x}) 
-with \code{uhet} and \code{vhet}, respectively. Similarly, when some 
+specific class are included in the fomula based option \code{thet}. Heteroscedasticity in the variances of the one-sided and the two-sided error terms $u$ and $v$ are also defined using one-sided formulas (only right arguments e.g. \code{~x}) with \code{uhet} and \code{vhet}, respectively. Similarly, when some 
 distributions are chosen (truncated normal, lognormal), heterogeneity in the 
 inefficiency term can be introduced using the one-sided formula based option 
 \code{muhet}. In \pkg{sfaR}, we made it compulsory to have an intercept in the 
@@ -1310,9 +1184,7 @@ distribution is currently possible. For the case of \code{sfalcmcross}, and
 and \code{gzisfClasses} arguments). For all the other variants of the latent
 classes SF (CNSF, MISF, and ZISF), as presented in the previous section, two 
 classes of observations are estimated. While for the \code{sfalcmcross}, 
-\code{sfalcmpanel} and \code{sfagzisfcross} functions, the probability of belonging to a class is 
-parameterized as a logit model, for \code{sfacnsfcross}, \code{sfamisfcross}, and
-\code{sfazisfcross}, four models are possible through the \code{linkF} argument:
+\code{sfalcmpanel} and \code{sfagzisfcross} functions, the probability of belonging to a class is parameterized as a logit model, for \code{sfacnsfcross}, \code{sfamisfcross}, and \code{sfazisfcross}, four models are possible through the \code{linkF} argument:
 %
 \begin{itemize} \itemsep 10pt
 \item "logit" for the logit model (default)
@@ -1338,16 +1210,11 @@ five possibilities
 \item \code{msl} for maximum simulated likelihood
 \end{itemize}
 %
-For the standard SF models using panel data, the different models in \code{sfapanel1}
-are presented in Table~\ref{table:gt} and can be chosen using the option
-\code{modelType}. The same option is also available in the function \code{sfametacross}
-to choose between the different metafrontiers as in Table~\ref{table:meta}.
+For the standard SF models using panel data, the different models in \code{sfapanel1} are presented in Table~\ref{table:gt} and can be chosen using the option \code{modelType}. The same option is also available in the function \code{sfametacross} to choose between the different metafrontiers as in Table~\ref{table:meta}.
 
 In the case of \code{sfapanel1}, or \code{sfalcmpanel}, except in the case of 
 \code{modelType = 'bc92c'}, in the presence of heteroscedasticity, variables are 
-supposed to be constant over time for each cross section. When this is not the case, three options 
-are suggested to create constant variables: when \code{invariance = 1L}, 
-the first period observation is used; when \code{invariance = 2L}, the last
+supposed to be constant over time for each cross section. When this is not the case, three options are suggested to create constant variables: when \code{invariance = 1L}, the first period observation is used; when \code{invariance = 2L}, the last
 period observation is used (this is the default option); and when 
 \code{invariance = 3L}, the period mean is used.
 
@@ -1379,11 +1246,7 @@ is implemented in the \pkg{stats} package \citep{stats}.}
 %
 As non-linear optimization is well known to converge at local optimum, the
 \pkg{sfaR} allows the user to set the starting values\footnote{In most cases the 
-starting values are obtained from the method of moments or from a simpler homoscedastic M(S)L 
-estimation}, and to allow for a random start (\code{randStart} argument). The
-random starting values are obtained by taking the initial starting values and 
-adding random numbers drawn from a normal distribution with zero mean and 
-standard value of $0.01$.
+starting values are obtained from the method of moments or from a simpler homoscedastic M(S)L estimation}, and to allow for a random start (\code{randStart} argument). The random starting values are obtained by taking the initial starting values and adding random numbers drawn from a normal distribution with zero mean and standard value of $0.01$.
 
 \subsection{Inherited methods for postestimation commands}
 
@@ -1668,8 +1531,7 @@ xtable(dkum14, caption = "Mean (in)efficiency scores and marginal impacts",
 \subsection{Latent class SF and variants for cross-sectional data}
 
 To illustrate the LCM SF along with its variants, we consider the world
-production dataset. The estimation results can be found in Tables \ref{table:lcmgzisf}
-and \ref{{table:lcmvariants}}.
+production dataset. The estimation results can be found in Tables \ref{table:lcmgzisf} and \ref{{table:lcmvariants}}.
 
 <<>>=
 ## LCM 2 classes
