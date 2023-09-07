@@ -898,7 +898,7 @@ sfametacross <- function(formula, muhet, uhet, vhet, ghet, logDepVar = TRUE, dat
   } else {
     dataTablem <- data.frame(IdObs = c(1:sum(validObs)))
   }
-  dataTablem <- cbind(dataTablem, data[, all.vars(terms(formula))], weights = wHvar)
+  dataTablem <- cbind(dataTablem, data[, all.vars(terms(formula)), drop = FALSE], weights = wHvar)
   # Looping over each group -------
   startVal <- list()
   olsParam <- list()
