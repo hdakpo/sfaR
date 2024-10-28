@@ -21,10 +21,6 @@ of the household head (years).} \item{EDYRS}{Education of the household head
 the household.} \item{BANRAT}{Percentage of area classified as bantog
 (upland) fields.} }
 }
-\source{
-Supplementary files for Coelli \emph{et al.} (2005),
-\url{http://www.uq.edu.au/economics/cepa/crob2005/software/CROB2005.zip}.
-}
 \description{
 This dataset contains annual data collected from 43 smallholder rice
 producers in the Tarlac region of the Philippines between 1990 and 1997.

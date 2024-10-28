@@ -13,7 +13,7 @@ MM USD.} \item{output}{Output in million KwH.} \item{lprice}{Labor price.}
 \item{fshare}{Fuel's cost share.} }
 }
 \source{
-\url{http://pages.stern.nyu.edu/~wgreene/Text/tables/tablelist5.htm}
+\url{https://pages.stern.nyu.edu/~wgreene/Text/Edition7/tablelist8new.htm}
 }
 \description{
 This dataset is on electric power generation in the United States.

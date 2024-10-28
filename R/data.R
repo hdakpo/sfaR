@@ -49,7 +49,7 @@
 #' unobservables in production models: management and inefficiency.
 #' \emph{Econometric Society}, \bold{341}:1--20.
 #' @source
-#' \url{http://pages.stern.nyu.edu/~wgreene/Econometrics/oldPanelDataSets.htm}
+#' \url{https://pages.stern.nyu.edu/~wgreene/Text/Edition7/tablelist8new.htm}
 #' @keywords datasets
 #' @examples
 #'
@@ -78,7 +78,7 @@ NULL
 #'
 #' Greene, W.H. 1990. A Gamma-distributed stochastic frontier model.
 #' \emph{Journal of Econometrics}, \bold{46}:141--163.
-#' @source \url{http://pages.stern.nyu.edu/~wgreene/Text/tables/tablelist5.htm}
+#' @source \url{https://pages.stern.nyu.edu/~wgreene/Text/Edition7/tablelist8new.htm}
 #' @keywords datasets
 #' @examples
 #'
@@ -121,8 +121,8 @@ NULL
 #' Pandey, S., Masciat, P., Velasco, L, and Villano, R. 1999. Risk analysis of
 #' a rainfed rice production system system in Tarlac, Central Luzon,
 #' Philippines. \emph{Experimental Agriculture}, \bold{35}:225--237.
-#' @source Supplementary files for Coelli \emph{et al.} (2005),
-#' \url{http://www.uq.edu.au/economics/cepa/crob2005/software/CROB2005.zip}.
+# @source Supplementary files for Coelli \emph{et al.} (2005),
+# \url{http://www.uq.edu.au/economics/cepa/crob2005/software/CROB2005.zip}.
 #' @keywords datasets
 #' @examples
 #'
@@ -163,9 +163,9 @@ NULL
 #' measurement in network industries: Application to the Swiss railway
 #' companies. \emph{Journal of Regulatory Economics}, \bold{28}:69--90.
 #' @source
-#' \url{http://pages.stern.nyu.edu/~wgreene/Text/Edition7/tablelist8new.htm}
+#' \url{https://pages.stern.nyu.edu/~wgreene/Text/Edition7/tablelist8new.htm}
 #'
-#' \url{http://people.stern.nyu.edu/wgreene/Microeconometrics.htm}
+#\url{http://people.stern.nyu.edu/wgreene/Microeconometrics.htm}
 #' @keywords datasets
 #' @examples
 #'
@@ -194,7 +194,7 @@ NULL
 #' Practitioner's Guide to Stochastic Frontier Analysis Using Stata}. Cambridge
 #' University Press.
 #' @source
-#' \url{https://sites.google.com/site/sfbook2014/home/for-stata-v12-v13-v14}
+#' \url{https://sites.google.com/view/sfbook-stata/home}
 #' @keywords datasets
 #' @examples
 #'
@@ -226,7 +226,7 @@ NULL
 #' Practitioner's Guide to Stochastic Frontier Analysis Using Stata}. Cambridge
 #' University Press.
 #' @source
-#' \url{https://sites.google.com/site/sfbook2014/home/for-stata-v12-v13-v14}
+#' \url{https://sites.google.com/view/sfbook-stata/home}
 #' @keywords datasets
 #' @examples
 #'
@@ -258,7 +258,7 @@ NULL
 #' Practitioner's Guide to Stochastic Frontier Analysis Using Stata}. Cambridge
 #' University Press.
 #' @source
-#' \url{https://sites.google.com/site/sfbook2014/home/for-stata-v12-v13-v14}
+#' \url{https://sites.google.com/view/sfbook-stata/home}
 #' @keywords datasets
 #' @examples
 #'

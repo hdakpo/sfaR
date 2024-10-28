@@ -20,7 +20,7 @@ identification.} \item{y1}{Milk sold (1000 liters).} \item{y2}{Meat (1000 NOK).}
 \item{tc}{Total cost.}}
 }
 \source{
-\url{https://sites.google.com/site/sfbook2014/home/for-stata-v12-v13-v14}
+\url{https://sites.google.com/view/sfbook-stata/home}
 }
 \description{
 This dataset contains nine years (1998-2006) of information on Norwegian dairy

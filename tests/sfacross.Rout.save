@@ -1,7 +1,7 @@
 
-R version 4.3.0 (2023-04-21) -- "Already Tomorrow"
-Copyright (C) 2023 The R Foundation for Statistical Computing
-Platform: x86_64-pc-linux-gnu (64-bit)
+R Under development (unstable) (2024-10-26 r87273 ucrt) -- "Unsuffered Consequences"
+Copyright (C) 2024 The R Foundation for Statistical Computing
+Platform: x86_64-w64-mingw32/x64
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -16,13 +16,21 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 Type 'q()' to quit R.
 
 > library("sfaR")
+           ****           *******  
+          /**/           /**////** 
+  ****** ******  ******  /**   /** 
+ **//// ///**/  //////** /*******  
+//*****   /**    ******* /**///**  
+ /////**  /**   **////** /**  //** 
+ ******   /**  //********/**   //**
+//////    //    //////// //     //    version 1.0.1
+
 * Please cite the 'sfaR' package as:
-  Dakpo KH., Desjeux Y., Henningsen A., and Latruffe L. (2023). sfaR: Stochastic Frontier Analysis Routines. R package version 1.0.0.
+  Dakpo KH., Desjeux Y., Henningsen A., and Latruffe L. (2024). sfaR: Stochastic Frontier Analysis Using R. R package version 1.0.1.
 
 See also: citation("sfaR")
 
-* For any questions, suggestions, or comments on the 'sfaR' package, please make use of Tracker facilities at:
-  https://github.com/hdakpo/sfaR/issues
+* For any questions, suggestions, or comments on the 'sfaR' package, you can contact directly the authors or visit:  https://github.com/hdakpo/sfaR/issues
 > data("utility")
 > data("ricephil")
 > data("electricity")
@@ -182,5 +190,5 @@ teBC            0.218   0.899  0.944 0.893   0.965 0.987
 teBC_reciprocal 1.014   1.038  1.063 1.194   1.121 4.638
 > 
 > proc.time()
-   user  system elapsed 
-  2.744   0.104   2.867 
+utilisateur     système      écoulé 
+       2.21        0.28        3.89 

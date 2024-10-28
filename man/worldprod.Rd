@@ -17,7 +17,7 @@ labor ratio of each country, \code{lk} - \code{ll}, measured at the
 beginning of the sample period.} }
 }
 \source{
-\url{https://sites.google.com/site/sfbook2014/home/for-stata-v12-v13-v14}
+\url{https://sites.google.com/view/sfbook-stata/home}
 }
 \description{
 This dataset provides information on production related variables for

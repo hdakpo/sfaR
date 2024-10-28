@@ -23,7 +23,7 @@ of \code{LABOR}.} \item{X4}{Log of \code{FEED}.} \item{X11}{1/2 *
 \code{YEAR = 1998}.} }
 }
 \source{
-\url{http://pages.stern.nyu.edu/~wgreene/Econometrics/oldPanelDataSets.htm}
+\url{https://pages.stern.nyu.edu/~wgreene/Text/Edition7/tablelist8new.htm}
 }
 \description{
 This dataset contains six years of observations on 247 dairy farms in

@@ -16,7 +16,7 @@ otherwise.} \item{k}{Capital stock.} \item{labor}{Labor and maintenance.}
 \item{wk}{Capital price.} \item{tc}{Total cost.} }
 }
 \source{
-\url{https://sites.google.com/site/sfbook2014/home/for-stata-v12-v13-v14}
+\url{https://sites.google.com/view/sfbook-stata/home}
 }
 \description{
 This dataset contains data on fossil fuel fired steam electric power

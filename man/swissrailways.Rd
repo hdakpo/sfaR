@@ -25,9 +25,7 @@ of \code{LNQ2}.} \item{MLNQ3}{Mean of \code{LNQ3}.} \item{MLNNET}{Mean of
 \code{LNPK}.} \item{MLNSTOP}{Mean of \code{LNSTOP}.} }
 }
 \source{
-\url{http://pages.stern.nyu.edu/~wgreene/Text/Edition7/tablelist8new.htm}
-
-\url{http://people.stern.nyu.edu/wgreene/Microeconometrics.htm}
+\url{https://pages.stern.nyu.edu/~wgreene/Text/Edition7/tablelist8new.htm}
 }
 \description{
 This dataset is an unbalanced panel of 50 Swiss railway companies over the

@@ -29,7 +29,7 @@
 #'
 #' @aliases sfaR-package sfaR
 #'
-#' @docType package
+#' _SFAR
 #' 
 #' @section sfacross: \code{\link{sfacross}} estimates the basic stochastic 
 #' frontier analysis (SFA) for cross-sectional or pooled data and allows for 
