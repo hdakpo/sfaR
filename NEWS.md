@@ -1,3 +1,5 @@
+# sfaR (development version)
+
 # sfaR 1.0.1
 
 ## BUG FIXES
