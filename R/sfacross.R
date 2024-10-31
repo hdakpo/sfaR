@@ -812,7 +812,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
   } else {
     dataTable <- data.frame(IdObs = 1:sum(validObs))
   }
-  dataTable <- cbind(dataTable, data[, all.vars(terms(formula))],
+  dataTable <- cbind(dataTable, data[, all.vars(terms(formula)), drop = FALSE],
     weights = wHvar)
   dataTable <- cbind(dataTable, olsResiduals = residuals(olsRes),
     olsFitted = fitted(olsRes))
