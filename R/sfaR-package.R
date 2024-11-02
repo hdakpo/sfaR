@@ -85,7 +85,7 @@
 #' @importFrom Formula as.Formula Formula
 #' @importFrom randtoolbox get.primes sobol
 #' @importFrom qrng ghalton
-#' @import maxLik
+#' @importFrom maxLik maxBFGS maxBHHH maxCG maxNR maxCG maxSANN maxNM
 #' @importFrom ucminf ucminf
 #' @importFrom trustOptim trust.optim
 #' @importFrom marqLevAlg mla
