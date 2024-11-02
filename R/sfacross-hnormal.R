@@ -163,6 +163,7 @@ chesshalfnormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
   phi <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
+  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
   sigma_sq <- exp(Wu) + exp(Wv)
   .e2 <- exp(Wu)
   .e3 <- exp(Wv)
