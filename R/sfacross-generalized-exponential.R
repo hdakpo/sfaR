@@ -121,36 +121,34 @@ cgradgenexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
   epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
-  wvwu <- exp(Wv/2)/exp(Wu/2)
-  wvwuepsi <- wvwu + S * (epsilon)/exp(Wv/2)
-  wvwuepsix2 <- 2 * (wvwu) + S * (epsilon)/exp(Wv/2)
-  a <- -(wvwuepsi)
-  pa <- pnorm(a)
-  da <- dnorm(a)
-  b <- -(wvwuepsix2)
-  pb <- pnorm(b)
-  db <- dnorm(b)
-  eA <- exp(exp(Wv)/(2 * exp(Wu)) + S * (epsilon)/exp(Wu/2))
-  eB <- exp(2 * (exp(Wv)/exp(Wu)) + 2 * (S * (epsilon)/exp(Wu/2)))
-  eC <- 2 * (exp(Wv)/exp(Wu)) + S * (epsilon)/exp(Wu/2)
-  epsiv <- 0.5 * (S * (epsilon)/exp(Wv/2))
-  epsiuv <- 0.5 * (wvwu) - epsiv
-  pda <- da/exp(Wv/2) - pa/exp(Wu/2)
-  sigx1 <- (pda) * eA - (db/exp(Wv/2) - 2 * (pb/exp(Wu/2))) *
-    eB
-  pab <- eA * pa - eB * pb
-  sigx2 <- 0.5 * (S * (epsilon)/exp(Wu/2)) + 2 * (exp(Wu) *
-    exp(Wv)/(2 * exp(Wu))^2)
-  sigx3 <- (0.5 * (da * wvwu) - (sigx2) * pa) * eA - (db *
-    wvwu - (eC) * pb) * eB
-  sigx5 <- 2 * (exp(Wv) * pb/exp(Wu)) - db * (wvwu - epsiv)
-  sigx4 <- eA * (exp(Wv) * pa/(2 * exp(Wu)) - (epsiuv) * da) -
-    (sigx5) * eB
-  gradll <- cbind(sweep(Xvar, MARGIN = 1, STATS = S * (sigx1)/(pab),
-    FUN = "*"), sweep(uHvar, MARGIN = 1, STATS = ((sigx3)/(pab) -
-    0.5), FUN = "*"), sweep(vHvar, MARGIN = 1, STATS = (sigx4)/(pab),
-    FUN = "*"))
-  return(sweep(gradll, MARGIN = 1, STATS = wHvar, FUN = "*"))
+  .e1 <- Wv
+  .e2 <- Wu
+  .e3 <- exp(.e1/2)
+  .e5 <- exp(.e2/2)
+  .e7 <- S * epsilon
+  .e8 <- .e3/.e5
+  .e9 <- .e7/.e3
+  .e10 <- exp(.e2)
+  .e11 <- exp(.e1)
+  .e12 <- .e7/.e5
+  .e13 <- -(2 * .e8 + .e9)
+  .e14 <- -(.e8 + .e9)
+  .e15 <- 2 * .e10
+  .e16 <- 2 * (.e11/.e10)
+  .e18 <- exp(.e16 + 2 * .e12)
+  .e19 <- exp(.e11/.e15 + .e12)
+  .e20 <- pnorm(.e13)
+  .e21 <- pnorm(.e14)
+  .e22 <- dnorm(.e13, 0, 1)
+  .e23 <- dnorm(.e14, 0, 1)
+  .e26 <- .e19 * .e21 - .e18 * .e20
+  .e27 <- 0.5 * .e9
+  gradll <- cbind(S * Xvar * (((.e23/.e3 - .e21/.e5) * .e19 - (.e22/.e3 - 2 * (.e20/.e5)) *
+    .e18)/.e26), uHvar * (((0.5 * (.e23 * .e3/.e5) - (0.5 * .e12 + 2 * (.e10 *
+    .e11/.e15^2)) * .e21) * .e19 - (.e22 * .e3/.e5 - (.e16 + .e12) * .e20) *
+    .e18)/.e26 - 0.5), vHvar * ((.e19 * (.e11 * .e21/.e15 - (0.5 * .e8 - .e27) *
+    .e23) - (2 * (.e11 * .e20/.e10) - .e22 * (.e8 - .e27)) * .e18)/.e26))
+  return(gradll * wHvar)
 }
 
 # Hessian of the likelihood function ----------
@@ -174,87 +172,92 @@ chessgenexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
   Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
   Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
   epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
-  wvwu <- exp(Wv/2)/exp(Wu/2)
-  wvwuepsi <- wvwu + S * (epsilon)/exp(Wv/2)
-  wvwuepsix2 <- 2 * (wvwu) + S * (epsilon)/exp(Wv/2)
-  a <- -(wvwuepsi)
-  pa <- pnorm(a)
-  da <- dnorm(a)
-  b <- -(wvwuepsix2)
-  pb <- pnorm(b)
-  db <- dnorm(b)
-  eA <- exp(exp(Wv)/(2 * exp(Wu)) + S * (epsilon)/exp(Wu/2))
-  eB <- exp(2 * (exp(Wv)/exp(Wu)) + 2 * (S * (epsilon)/exp(Wu/2)))
-  eC <- 2 * (exp(Wv)/exp(Wu)) + S * (epsilon)/exp(Wu/2)
-  epsiv <- 0.5 * (S * (epsilon)/exp(Wv/2))
-  epsiuv <- 0.5 * (wvwu) - epsiv
-  pda <- da/exp(Wv/2) - pa/exp(Wu/2)
-  sigx1 <- (pda) * eA - (db/exp(Wv/2) - 2 * (pb/exp(Wu/2))) *
-    eB
-  pab <- eA * pa - eB * pb
-  sigx2 <- 0.5 * (S * (epsilon)/exp(Wu/2)) + 2 * (exp(Wu) *
-    exp(Wv)/(2 * exp(Wu))^2)
-  sigx3 <- (0.5 * (da * wvwu) - (sigx2) * pa) * eA - (db *
-    wvwu - (eC) * pb) * eB
-  sigx5 <- 2 * (exp(Wv) * pb/exp(Wu)) - db * (wvwu - epsiv)
-  sigx4 <- eA * (exp(Wv) * pa/(2 * exp(Wu)) - (epsiuv) * da) -
-    (sigx5) * eB
-  hessll <- matrix(nrow = nXvar + nuZUvar + nvZVvar, ncol = nXvar +
-    nuZUvar + nvZVvar)
-  hessll[1:nXvar, 1:nXvar] <- crossprod(sweep(Xvar, MARGIN = 1,
-    STATS = S^2 * wHvar * ((((wvwuepsi)/exp(Wv/2) - 1/exp(Wu/2)) *
-      da/exp(Wv/2) - (pda)/exp(Wu/2)) * eA - ((((wvwuepsix2)/exp(Wv/2) -
-      2/exp(Wu/2)) * db/exp(Wv/2) - 2 * ((db/exp(Wv/2) -
-      2 * (pb/exp(Wu/2)))/exp(Wu/2))) * eB + (sigx1)^2/(pab)))/(pab),
-    FUN = "*"), Xvar)
-  hessll[1:nXvar, (nXvar + 1):(nXvar + nuZUvar)] <- crossprod(sweep(Xvar,
-    MARGIN = 1, STATS = S * wHvar * ((((0.5 + sigx2) * pa -
-      0.5 * (da * wvwu))/exp(Wu/2) + (0.5 * ((wvwuepsi)/exp(Wu/2)) -
-      (sigx2)/exp(Wv/2)) * da) * eA - ((((wvwuepsix2)/exp(Wu/2) -
-      (eC)/exp(Wv/2)) * db + (pb - 2 * (db * wvwu - (eC) *
-      pb))/exp(Wu/2)) * eB + (sigx3) * (sigx1)/(pab)))/(pab),
-    FUN = "*"), uHvar)
-  hessll[1:nXvar, (nXvar + nuZUvar + 1):(nXvar + nuZUvar +
-    nvZVvar)] <- crossprod(sweep(Xvar, MARGIN = 1, STATS = S *
-    wHvar * ((da * (exp(Wv)/(2 * exp(Wu)) - ((epsiuv) * (wvwuepsi) +
-    0.5))/exp(Wv/2) - (exp(Wv) * pa/(2 * exp(Wu)) - (epsiuv) *
-    da)/exp(Wu/2)) * eA - (((2 * (exp(Wv)/exp(Wu)) - ((wvwuepsix2) *
-    (wvwu - epsiv) + 0.5)) * db/exp(Wv/2) - 2 * ((sigx5)/exp(Wu/2))) *
-    eB + (sigx1) * (sigx4)/(pab)))/(pab), FUN = "*"), vHvar)
-  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + 1):(nXvar +
-    nuZUvar)] <- crossprod(sweep(uHvar, MARGIN = 1, STATS = wHvar *
-    (((0.5 * (0.5 * (exp(Wv/2) * (wvwuepsi)/exp(Wu/2)) -
-      0.5) - 0.5 * (sigx2)) * da * wvwu - ((0.5 * (da *
-      wvwu) - (sigx2) * pa) * (sigx2) + (2 * ((1 - 8 *
-      (exp(Wu)^2/(2 * exp(Wu))^2)) * exp(Wu) * exp(Wv)/(2 *
-      exp(Wu))^2) - 0.25 * (S * (epsilon)/exp(Wu/2))) *
-      pa)) * eA - (((((wvwuepsix2) * exp(Wv/2) - S * (epsilon))/exp(Wu/2) -
-      (0.5 + 2 * (exp(Wv)/exp(Wu)))) * db * wvwu + (0.5 *
-      (S * (epsilon)/exp(Wu/2)) + 2 * (exp(Wv)/exp(Wu))) *
-      pb - (eC) * (db * wvwu - (eC) * pb)) * eB + (sigx3)^2/(pab)))/(pab),
-    FUN = "*"), uHvar)
-  hessll[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar),
-    (nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)] <- crossprod(sweep(vHvar,
-    MARGIN = 1, STATS = wHvar * ((((exp(Wv) * pa/(2 * exp(Wu)) -
-      (epsiuv) * da)/2 + (pa - (epsiuv) * da)/2) * exp(Wv)/exp(Wu) -
-      (0.25 * (wvwu) + 0.25 * (S * (epsilon)/exp(Wv/2)) -
-        (epsiuv)^2 * (wvwuepsi)) * da) * eA - (((2 *
-      (sigx5) + 2 * (pb - db * (wvwu - epsiv))) * exp(Wv)/exp(Wu) -
-      (0.25 * (S * (epsilon)/exp(Wv/2)) + 0.5 * (wvwu) +
-        b * (wvwu - epsiv)^2) * db) * eB + (sigx4)^2/(pab)))/(pab),
-    FUN = "*"), vHvar)
-  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + nuZUvar +
-    1):(nXvar + nuZUvar + nvZVvar)] <- crossprod(sweep(uHvar,
-    MARGIN = 1, STATS = wHvar * (((da * exp(Wv/2)/(4 * (exp(Wu) *
-      exp(Wu/2))) - 2 * (exp(Wu) * pa/(2 * exp(Wu))^2)) *
-      exp(Wv) - ((0.5 * ((epsiuv) * (wvwuepsi)) - 0.25) *
-      da * wvwu + (sigx2) * (exp(Wv) * pa/(2 * exp(Wu)) -
-      (epsiuv) * da))) * eA - ((sigx3) * (sigx4)/(pab) +
-      (2 * ((db * wvwu - pb) * exp(Wv)/exp(Wu)) - (((wvwuepsix2) *
-        (wvwu - epsiv) - 0.5) * db * wvwu + (sigx5) *
-        (eC))) * eB))/(pab), FUN = "*"), vHvar)
+  .e1 <- Wv
+  .e2 <- Wu
+  .e3 <- exp(.e1/2)
+  .e5 <- exp(.e2/2)
+  .e7 <- S * epsilon
+  .e8 <- .e3/.e5
+  .e9 <- .e7/.e3
+  .e10 <- exp(.e2)
+  .e11 <- exp(.e1)
+  .e12 <- .e7/.e5
+  .e14 <- 2 * .e8 + .e9
+  .e15 <- .e8 + .e9
+  .e16 <- -.e14
+  .e17 <- -.e15
+  .e18 <- 2 * .e10
+  .e19 <- 2 * (.e11/.e10)
+  .e20 <- pnorm(.e16)
+  .e21 <- pnorm(.e17)
+  .e22 <- .e11/.e18
+  .e24 <- exp(.e19 + 2 * .e12)
+  .e25 <- exp(.e22 + .e12)
+  .e26 <- dnorm(.e16, 0, 1)
+  .e27 <- dnorm(.e17, 0, 1)
+  .e28 <- 0.5 * .e9
+  .e29 <- .e18^2
+  .e30 <- 0.5 * .e8
+  .e33 <- .e25 * .e21 - .e24 * .e20
+  .e34 <- .e30 - .e28
+  .e35 <- .e8 - .e28
+  .e36 <- 0.5 * .e12
+  .e37 <- 2 * (.e10 * .e11/.e29)
+  .e38 <- .e36 + .e37
+  .e39 <- .e19 + .e12
+  .e41 <- .e26 * .e3/.e5
+  .e42 <- .e34 * .e27
+  .e43 <- .e26 * .e35
+  .e44 <- .e27 * .e3
+  .e46 <- 0.5 * (.e44/.e5)
+  .e48 <- 2 * (.e11 * .e20/.e10) - .e43
+  .e50 <- .e41 - .e39 * .e20
+  .e52 <- .e26/.e3 - 2 * (.e20/.e5)
+  .e54 <- .e27/.e3 - .e21/.e5
+  .e57 <- .e11 * .e21/.e18 - .e42
+  .e59 <- .e46 - .e38 * .e21
+  .e61 <- .e59 * .e25 - .e50 * .e24
+  .e65 <- .e54 * .e25 - .e52 * .e24
+  .e67 <- .e25 * .e57 - .e48 * .e24
+  .e68 <- .e34 * .e15
+  .e69 <- .e14 * .e35
+  .e72 <- .e61 * .e65/.e33
+  .e74 <- .e61 * .e67/.e33
+  .e76 <- .e65 * .e67/.e33
+  .e77 <- .e68 + 0.5
+  .e78 <- .e69 + 0.5
+  .e79 <- 0.25 * .e9
+  .e80 <- 2 * .e50
+  .e81 <- 2 * (.e10 * .e21/.e29)
+  hessll <- matrix(0, nrow = nXvar + nuZUvar + nvZVvar, ncol = nXvar + nuZUvar +
+    nvZVvar)
+  hessll[1:nXvar, 1:nXvar] <- crossprod(Xvar * ((((.e15/.e3 - 1/.e5) * .e27/.e3 -
+    .e54/.e5) * .e25 - (((.e14/.e3 - 2/.e5) * .e26/.e3 - 2 * (.e52/.e5)) * .e24 +
+    .e65^2/.e33))/.e33) * wHvar, Xvar)
+  hessll[1:nXvar, (nXvar + 1):(nXvar + nuZUvar)] <- crossprod(S * Xvar * (((((0.5 +
+    .e36 + .e37) * .e21 - .e46)/.e5 + (0.5 * (.e15/.e5) - .e38/.e3) * .e27) *
+    .e25 - (((.e14/.e5 - .e39/.e3) * .e26 + (.e20 - .e80)/.e5) * .e24 + .e72))/.e33) *
+    wHvar, uHvar)
+  hessll[1:nXvar, (nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)] <- crossprod(S *
+    Xvar * (((.e27 * (.e22 - .e77)/.e3 - .e57/.e5) * .e25 - (((.e19 - .e78) *
+    .e26/.e3 - 2 * (.e48/.e5)) * .e24 + .e76))/.e33) * wHvar, vHvar)
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + 1):(nXvar + nuZUvar)] <- crossprod(uHvar *
+    ((((0.5 * (0.5 * (.e3 * .e15/.e5) - 0.5) - 0.5 * .e38) * .e27 * .e3/.e5 -
+      (.e59 * .e38 + (2 * ((1 - 8 * (.e10^2/.e29)) * .e10 * .e11/.e29) - 0.25 *
+        .e12) * .e21)) * .e25 - ((((.e14 * .e3 - .e7)/.e5 - (0.5 + .e19)) *
+      .e26 * .e3/.e5 + (.e36 + .e19) * .e20 - .e39 * .e50) * .e24 + .e61^2/.e33))/.e33) *
+    wHvar, uHvar)
+  hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + nuZUvar + 1):(nXvar + nuZUvar +
+    nvZVvar)] <- crossprod(uHvar * ((((.e44/(4 * (.e10 * .e5)) - .e81) * .e11 -
+    ((0.5 * .e68 - 0.25) * .e27 * .e3/.e5 + .e38 * .e57)) * .e25 - (.e74 + (2 *
+    ((.e41 - .e20) * .e11/.e10) - ((.e69 - 0.5) * .e26 * .e3/.e5 + .e48 * .e39)) *
+    .e24))/.e33) * wHvar, vHvar)
+  hessll[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar), (nXvar + nuZUvar +
+    1):(nXvar + nuZUvar + nvZVvar)] <- crossprod(vHvar * ((((.e57/2 + (.e21 -
+    .e42)/2) * .e11/.e10 - (0.25 * .e8 + .e79 - .e34^2 * .e15) * .e27) * .e25 -
+    (((2 * .e48 + 2 * (.e20 - .e43)) * .e11/.e10 - (.e79 + .e30 - .e14 * .e35^2) *
+      .e26) * .e24 + .e67^2/.e33))/.e33) * wHvar, vHvar)
   hessll[lower.tri(hessll)] <- t(hessll)[lower.tri(hessll)]
-  # hessll <- (hessll + (hessll))/2
   return(hessll)
 }
 
