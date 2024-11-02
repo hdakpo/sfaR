@@ -39,9 +39,9 @@ sfacross(
 
 \method{print}{sfacross}(x, ...)
 
-\method{bread}{sfacross}(x, ...)
+bread.sfacross(x, ...)
 
-\method{estfun}{sfacross}(x, ...)
+estfun.sfacross(x, ...)
 }
 \arguments{
 \item{formula}{A symbolic description of the model to be estimated based on

@@ -43,9 +43,9 @@ sfaselectioncross(
 
 \method{print}{sfaselectioncross}(x, ...)
 
-\method{bread}{sfaselectioncross}(x, ...)
+bread.sfaselectioncross(x, ...)
 
-\method{estfun}{sfaselectioncross}(x, ...)
+estfun.sfaselectioncross(x, ...)
 }
 \arguments{
 \item{selectionF}{A symbolic (formula) description of the selection equation.}

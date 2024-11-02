@@ -36,9 +36,9 @@ sfalcmcross(
 
 \method{print}{sfalcmcross}(x, ...)
 
-\method{bread}{sfalcmcross}(x, ...)
+bread.sfalcmcross(x, ...)
 
-\method{estfun}{sfalcmcross}(x, ...)
+estfun.sfalcmcross(x, ...)
 }
 \arguments{
 \item{formula}{A symbolic description of the model to be estimated based on
