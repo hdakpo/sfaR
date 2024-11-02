@@ -824,7 +824,7 @@ sfalcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
       "BHHH Hessian"
     }
   }
-  returnObj$mlDate <- mleDate
+  returnObj$mlDate <- mlDate
   rm(mleList)
   class(returnObj) <- "sfalcmcross"
   return(returnObj)
