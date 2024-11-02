@@ -9,6 +9,14 @@
 
 ## OTHER USER-VISIBLE CHANGES
 
+* Change analytical gradient and hessian format for better readability
+
+* Models estimation date now includes seconds.
+
+* Remove deprecated function `lcmcross` along with associated methods.
+
+* Packages `texreg` and `sandwich` are moved from Imports to Suggests.
+
 # sfaR 1.0.1
 
 ## BUG FIXES
