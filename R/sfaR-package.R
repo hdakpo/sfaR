@@ -92,9 +92,9 @@
 #' @importFrom nleqslv nleqslv
 #' @importFrom fastGHQuad gaussHermiteData
 #' @importFrom cubature hcubature pcubature
-#' @importFrom sandwich bread estfun
+# @importFrom sandwich bread estfun
 # @importFrom calculus jacobian
 #' @importFrom plm pdata.frame index
-#' @importFrom texreg extract createTexreg
+# @importFrom texreg extract createTexreg
 #' @importFrom mnorm pmnorm
 NULL

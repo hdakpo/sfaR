@@ -36,13 +36,13 @@ Imports:
     plm,
     qrng,
     randtoolbox,
-    sandwich,
     stats,
-    texreg,
     trustOptim,
     ucminf
 Suggests: 
-    lmtest
+    lmtest,
+    sandwich,
+    texreg
 Encoding: UTF-8
 Language: en-US
 LazyData: true
