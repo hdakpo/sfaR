@@ -1,5 +1,14 @@
 # sfaR (development version)
 
+## NEW FEATURES
+
+## BUG FIXES
+
+* `efficiencies` returns error when all formulas only contains intercept for
+`sfacross`.
+
+## OTHER USER-VISIBLE CHANGES
+
 # sfaR 1.0.1
 
 ## BUG FIXES
