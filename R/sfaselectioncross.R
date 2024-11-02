@@ -978,7 +978,7 @@ sfaselectioncross <- function(selectionF, frontierF, uhet, vhet,
   names(mleList$gradient) <- names(mleList$mlParam)
   colnames(mleList$mleObj$gradL_OBS) <- names(mleList$mlParam)
   # Return object -------
-  mlDate <- format(Sys.time(), "Model was estimated on : %b %a %d, %Y at %H:%M")
+  mlDate <- format(Sys.time(), "Model was estimated on : %b %a %d, %Y at %H:%M:%S")
   dataTable$mlResiduals <- NA
   dataTable$mlResiduals[Yvar_S == 1] <- Yvar_F - as.numeric(crossprod(matrix(mleList$mlParam[1:nXvar_F]),
     t(Xvar_F)))

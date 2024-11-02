@@ -719,7 +719,7 @@ sfalcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
   names(mleList$gradient) <- names(mleList$mlParam)
   colnames(mleList$mleObj$gradL_OBS) <- names(mleList$mlParam)
   # Return object -------
-  mleDate <- format(Sys.time(), "Model was estimated on : %b %a %d, %Y at %H:%M")
+  mlDate <- format(Sys.time(), "Model was estimated on : %b %a %d, %Y at %H:%M:%S")
   dataTable$mlResiduals_c1 <- Yvar - as.numeric(crossprod(matrix(mleList$mlParam[1:nXvar]),
     t(Xvar)))
   dataTable$mlFitted_c1 <- as.numeric(crossprod(matrix(mleList$mlParam[1:nXvar]),
