@@ -848,7 +848,7 @@ print.sfalcmcross <- function(x, ...) {
 
 # Bread for Sandwich Estimator ----------
 #' @rdname sfalcmcross
-#' @export
+#' @exportS3Method sandwich::bread sfalcmcross
 bread.sfalcmcross <- function(x, ...) {
   if (x$hessianType == "Analytic Hessian") {
     return(x$invHessian * x$Nobs)
@@ -898,7 +898,7 @@ bread.sfalcmcross <- function(x, ...) {
 
 # Gradients Evaluated at each Observation ----------
 #' @rdname sfalcmcross
-#' @export
+#' @exportS3Method sandwich::estfun sfalcmcross
 estfun.sfalcmcross <- function(x, ...) {
   return(x$gradL_OBS)
 }

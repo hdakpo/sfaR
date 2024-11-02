@@ -1041,7 +1041,7 @@ print.sfacross <- function(x, ...) {
 
 # Bread for Sandwich Estimator ----------
 #' @rdname sfacross
-#' @export
+#' @exportS3Method sandwich::bread sfacross
 bread.sfacross <- function(x, ...) {
   if (x$hessianType == "Analytic Hessian") {
     return(x$invHessian * x$Nobs)
@@ -1156,7 +1156,7 @@ bread.sfacross <- function(x, ...) {
 
 # Gradients Evaluated at each Observation ----------
 #' @rdname sfacross
-#' @export
+#' @exportS3Method sandwich::estfun sfacross
 estfun.sfacross <- function(x, ...) {
   return(x$gradL_OBS)
 }

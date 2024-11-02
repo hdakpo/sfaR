@@ -1072,7 +1072,7 @@ print.sfaselectioncross <- function(x, ...) {
 
 # Bread for Sandwich Estimator ----------
 #' @rdname sfaselectioncross
-#' @export
+#' @exportS3Method sandwich::bread sfaselectioncross
 bread.sfaselectioncross <- function(x, ...) {
   if (x$hessianType == "Analytic Hessian") {
     return(x$invHessian * x$Nobs)
@@ -1141,7 +1141,7 @@ bread.sfaselectioncross <- function(x, ...) {
 
 # Gradients Evaluated at each Observation ----------
 #' @rdname sfaselectioncross
-#' @export
+#' @exportS3Method sandwich::estfun sfaselectioncross
 estfun.sfaselectioncross <- function(x, ...) {
   return(x$gradL_OBS[complete.cases(x$gradL_OBS), , drop = FALSE])
 }
