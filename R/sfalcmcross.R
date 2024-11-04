@@ -628,8 +628,8 @@ sfalcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
   } else {
     dataTable <- data.frame(IdObs = 1:sum(validObs))
   }
-  dataTable <- cbind(dataTable, data[, all.vars(terms(formula))][validObs,
-    ], weights = wHvar)
+  dataTable <- cbind(dataTable, data[, all.vars(terms(formula)), drop = FALSE],
+    weights = wHvar)
   dataTable <- cbind(dataTable, olsResiduals = residuals(olsRes),
     olsFitted = fitted(olsRes))
   # possibility to have duplicated columns if ID or TIME

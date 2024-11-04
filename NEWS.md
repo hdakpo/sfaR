@@ -7,7 +7,9 @@
 * `efficiencies` returns error when all formulas only contains intercept for
 `sfacross`.
 
-* `sfacross` returns error when NA is present in the data.
+* `sfalcmcross` return error when all formulas only contains intercept
+
+* `sfacross`, `sfalcmcross` return error when NA is present in the data.
 
 ## OTHER USER-VISIBLE CHANGES
 
