@@ -77,7 +77,7 @@
 
 % \DeclareNewPageStyleByLayers{lscape}{lscape.foot,lscape.head}
 
-% \VignetteIndexEntry{Technical Appendix for sfaR}
+\VignetteIndexEntry{Technical Appendix for sfaR}
 
 \newcommand{\sfar}{\pkg{sfaR}}
 
