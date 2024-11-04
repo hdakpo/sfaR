@@ -447,8 +447,7 @@ sfalcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
   mc$na.action <- na.pass
   mc[[1L]] <- quote(model.frame)
   mc <- eval(mc, parent.frame())
-  validObs <- rowSums(is.na(mc) | is.infinite.data.frame(mc)) ==
-    0
+  validObs <- rowSums(is.na(mc) | is.infinite.data.frame(mc)) == 0
   Yvar <- model.response(mc, "numeric")
   Yvar <- Yvar[validObs]
   mtX <- terms(formula, data = data, rhs = 1)
@@ -459,12 +458,9 @@ sfalcmcross <- function(formula, uhet, vhet, thet, logDepVar = TRUE,
   if (N == 0L) {
     stop("0 (non-NA) cases", call. = FALSE)
   }
-  # if subset is non-missing and there NA, force data to
-  # change
-  data <- data[row.names(data) %in% attr(mc, "row.names"),
-    ]
-  data <- data[validObs, ]
-  wHvar <- as.vector(model.weights(mc))
+  # if subset is non-missing and there are NAs, force data to change
+  data <- data[row.names(data) %in% attr(mc, "row.names"), ]
+  wHvar <- as.vector(model.weights(mc))[validObs]
   if (length(wscale) != 1 || !is.logical(wscale[1])) {
     stop("argument 'wscale' must be a single logical value",
       call. = FALSE)
