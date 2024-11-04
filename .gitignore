@@ -16,4 +16,8 @@ vignettes/*.pdf
 *.knit.md
 .Renviron
 .DS_Store
-
+vignettes/sfaR_Technical_Appendix-concordance.tex
+vignettes/sfaR_Technical_Appendix.synctex.gz
+vignettes/sfaR_Technical_Appendix.tex
+vignettes/sfaR_Technical_Appendix.log
+inst/doc

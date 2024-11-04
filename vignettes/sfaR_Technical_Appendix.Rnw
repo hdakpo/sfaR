@@ -1,0 +1,138 @@
+%\documentclass[article]{jss}
+\documentclass[nojss]{jss}
+
+%% -- LaTeX packages and custom commands ---------------------------------------
+
+\usepackage{orcidlink,thumbpdf,lmodern}
+\usepackage{mathtools,amssymb,amsthm,amsmath, bm}
+\usepackage[utf8]{inputenc}
+% \usepackage{adjustbox}
+% \usepackage{longtable}
+% \usepackage{booktabs} % for toprule
+% \usepackage{bookmark}
+% \usepackage{textcomp} % for registered symbol (in biblio)
+% \usepackage{multirow}
+% \usepackage{arydshln} % for dashed line in tables
+% \usepackage[flushleft]{threeparttable} % for table note
+% \usepackage{pdflscape}
+\usepackage[margin=1in, headheight=15pt]{geometry}
+% \usepackage{nicefrac}
+% \usepackage[automark]{scrlayer-scrpage}  % Load scrlayer-scrpage with automatic marking
+% \clearpairofpagestyles  
+
+
+% \let\underbar\relax
+% \let\underline\relax
+% \usepackage{sectsty}
+% \sectionfont{\bfseries\Large\raggedright}
+
+% \usepackage{titlesec}
+% 
+% \titleformat{\section}{\normalfont\Large\bfseries}{\thesection}{1em}{\raggedright}
+% \titleformat{\subsection}{\normalfont\large\bfseries}{\thesubsection}{1em}{\raggedright}
+% \titleformat{\subsubsection}{\normalfont\normalsize\bfseries}{\thesubsubsection}{1em}{\raggedright}
+
+
+% \usepackage{chngcntr}
+% \counterwithin{paragraph}{subsubsection}
+% \newcommand{\numberedparagraph}[1]{%
+%   \paragraph{}% Start a new paragraph with no title
+%   \stepcounter{paragraph}% Increment the paragraph counter
+%   \textbf{\theparagraph.}\quad#1% Format the paragraph number and content
+% }
+% 
+
+% \usepackage[most]{tcolorbox}
+% \tcbset{colback=yellow!10!white, colframe=red!50!black, 
+%   highlight math style= {enhanced,
+%     colframe=red,colback=red!10!white,boxsep=0pt}
+% }
+
+\definecolor{babyblue}{rgb}{0.54, 0.81, 0.94}
+\definecolor{darkblue}{rgb}{0.0, 0.0, 0.55}
+
+% \DeclareMathOperator{\erfc}{erfc}
+
+% \titleformat{\subsubsection}
+%   {\normalfont\normalsize\itshape}{\thesubsubsection.}{1em}{}
+
+
+% \DeclareNewLayer[
+%   background,
+%   rightmargin,
+%   contents={%
+%     \parbox[b][\layerheight][c]{\dimexpr\footskip+\footheight\relax}{%
+%       \hfill\rotatebox{90}{\pagemark}}}
+% ]{lscape.foot}
+% 
+% \DeclareNewLayer[
+%   background,
+%   textarea,
+%   addvoffset=-\dimexpr\headsep+\headheight\relax, % Adjust vertical offset to center the header
+%   addhoffset=-\dimexpr\footskip+\footheight\relax, % Adjust horizontal offset to center the header
+%   width=\dimexpr\headsep+\headheight+\textheight+\footskip+\footheight\relax, % Adjust width to center the header
+%   height=\dimexpr\textwidth\relax, % Swap width and height to match the landscape orientation
+%   contents=\rotatebox{90}{\parbox{\layerheight}{\centering\headmark}}
+% ]{lscape.head}
+
+% \DeclareNewPageStyleByLayers{lscape}{lscape.foot,lscape.head}
+
+% \VignetteIndexEntry{Technical Appendix for sfaR}
+
+\newcommand{\sfar}{\pkg{sfaR}}
+
+\usepackage{draftwatermark}
+\SetWatermarkText{Preliminary Unfinished Draft}
+\SetWatermarkScale{0.4}
+
+%% -- Article metainformation (author, title, ...) -----------------------------
+
+\author{K Herv\'e Dakpo~\orcidlink{0000-0002-6114-7896}\\Universit\'e 
+Paris-Saclay INRAE \\ AgroParisTech, PSAE\\ Palaiseau, F-91120, France \AND
+Yann Desjeux ~ \\INRAE, Bordeaux School of Economics, \\ University Bordeaux, 
+Pessac, France \AND Arne Henningsen~\orcidlink{0000-0002-6720-0264}\\ Dept. of Food and Resource Economics,\\ 
+University of Copenhagen, Frederiksberg C, Denmark \AND Laure Latruffe ~ \\
+INRAE, Bordeaux School of Economics, \\ University Bordeaux, 
+Pessac, France}
+\Plainauthor{K Herv\'e Dakpo, Yann Desjeux, Arne Henningsen, Laure Latruffe}
+
+\title{\pkg{sfaR}: Technical Appendix}
+\Plaintitle{sfaR: Technical Appendix}
+\Shorttitle{\pkg{sfaR}: Model Derivations}
+
+\Abstract{
+This technical appendix provides the proofs for the derivation of the likelihoods and
+the (in)efficiency estimates for most models included in the \pkg{sfaR} package.
+}
+
+\Keywords{stochastic frontier analysis, latent class stochastic frontier, 
+metafrontier, sample selection stochastic frontier, zero inefficiency stochastic
+frontier, cross-sectional data, panel data, \proglang{R}}
+\Plainkeywords{stochastic frontier analysis, latent class stochastic frontier, 
+metafrontier, sample selection stochastic frontier, zero inefficiency stochastic
+frontier, cross-sectional data, panel data, R}
+
+\Address{
+  K Herv\'e Dakpo\\
+%  Journal of Statistical Software\\
+  Universit\'e Paris-Saclay INRAE\\
+  AgroParisTech, PSAE\\
+  Palaiseau, F-91120, France\\
+  E-mail: \email{k-herve.dakpo@inrae.fr}\\
+  URL: \url{https://eng-psae.versailles-saclay.hub.inrae.fr/personalpages/dakpo}
+}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+\section{Standard models for cross-section data} \label{sec:modelstandarcross}
+
+The standard stochastic frontier (SF) model writes as:
+
+$$y_i = \mathbf{x_i}'\bm{\beta} + v_i - S \, u_i \quad \text{with} \quad i = 1, 
+\cdots, N,$$
+
+with $\epsilon_i = v_i - Su_i$.
+
+
+\end{document}
