@@ -546,8 +546,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
   mc$na.action <- na.pass
   mc[[1L]] <- quote(model.frame)
   mc <- eval(mc, parent.frame())
-  validObs <- rowSums(is.na(mc) | is.infinite.data.frame(mc)) ==
-    0
+  validObs <- rowSums(is.na(mc) | is.infinite.data.frame(mc)) == 0
   Yvar <- model.response(mc, "numeric")
   Yvar <- Yvar[validObs]
   mtX <- terms(formula, data = data, rhs = 1)
@@ -558,10 +557,8 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
   if (N == 0L) {
     stop("0 (non-NA) cases", call. = FALSE)
   }
-  # if subset is non-missing and there are NA, force data to
-  # change
-  data <- data[row.names(data) %in% attr(mc, "row.names"),
-    ]
+  # if subset is non-missing and there are NAs, force data to change
+  data <- data[row.names(data) %in% attr(mc, "row.names"), ]
   data <- data[validObs, ]
   wHvar <- as.vector(model.weights(mc))
   if (length(wscale) != 1 || !is.logical(wscale[1])) {
@@ -589,8 +586,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
       nrow(Xvar), ")", sep = ""), call. = FALSE)
   }
   if (udist %in% c("tnormal", "lognormal")) {
-    mtmuH <- delete.response(terms(formula, data = data,
-      rhs = 2))
+    mtmuH <- delete.response(terms(formula, data = data, rhs = 2))
     muHvar <- model.matrix(mtmuH, mc)
     muHvar <- muHvar[validObs, , drop = FALSE]
     nmuZUvar <- ncol(muHvar)
@@ -615,8 +611,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
   # Check other supplied options -------
   if (length(S) != 1 || !(S %in% c(-1L, 1L))) {
     stop("argument 'S' must equal either 1 or -1: 1 for production or profit 
-    frontier
-   and -1 for cost frontier",
+    frontier and -1 for cost frontier",
       call. = FALSE)
   }
   typeSfa <- if (S == 1L) {
@@ -651,8 +646,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
     }
   }
   if (length(logDepVar) != 1 || !is.logical(logDepVar[1])) {
-    stop("argument 'logDepVar' must be a single logical value",
-      call. = FALSE)
+    stop("argument 'logDepVar' must be a single logical value", call. = FALSE)
   }
   # Number of parameters -------
   nParm <- if (udist == "tnormal") {
@@ -808,7 +802,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
   olsStder <- sqrt(diag(vcov(olsRes)))
   olsLoglik <- logLik(olsRes)[1]
   if (inherits(data, "pdata.frame")) {
-    dataTable <- data[, names(index(data))] # where is validObs here
+    dataTable <- data[, names(index(data))]
   } else {
     dataTable <- data.frame(IdObs = 1:sum(validObs))
   }
