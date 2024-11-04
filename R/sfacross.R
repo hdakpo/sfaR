@@ -560,7 +560,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
   # if subset is non-missing and there are NAs, force data to change
   data <- data[row.names(data) %in% attr(mc, "row.names"), ]
   data <- data[validObs, ]
-  wHvar <- as.vector(model.weights(mc))
+  wHvar <- as.vector(model.weights(mc))[validObs]
   if (length(wscale) != 1 || !is.logical(wscale[1])) {
     stop("argument 'wscale' must be a single logical value",
       call. = FALSE)
@@ -716,7 +716,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
       stop("argument 'antithetics' must be a single logical value",
         call. = FALSE)
     }
-    if (antithetics && (Nsim%%2) != 0) {
+    if (antithetics && (Nsim %% 2) != 0) {
       Nsim <- Nsim + 1
     }
     simDist <- if (simType == "halton") {

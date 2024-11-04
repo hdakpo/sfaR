@@ -7,6 +7,8 @@
 * `efficiencies` returns error when all formulas only contains intercept for
 `sfacross`.
 
+* `sfacross` returns error when NA is present in the data.
+
 ## OTHER USER-VISIBLE CHANGES
 
 * Change analytical gradient and hessian format for better readability
