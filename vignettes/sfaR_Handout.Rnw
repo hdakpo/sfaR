@@ -1,0 +1,340 @@
+%\documentclass[article]{jss}
+\documentclass[nojss]{jss}
+
+%% -- LaTeX packages and custom commands ---------------------------------------
+
+% \usepackage{hyperref}
+\usepackage{orcidlink,thumbpdf,lmodern}
+\usepackage{mathtools,amssymb,amsthm,amsmath, bm}
+% \usepackage{mathptmx}  % Uses Times fonts with math support
+% \usepackage{newtxtext,newtxmath}  % More flexible font support
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{soul}
+\usepackage{xcolor}
+% \usepackage{adjustbox}
+% \usepackage{longtable}
+% \usepackage{booktabs} % for toprule
+% \usepackage{bookmark}
+% \usepackage{textcomp} % for registered symbol (in biblio)
+% \usepackage{multirow}
+% \usepackage{arydshln} % for dashed line in tables
+% \usepackage[flushleft]{threeparttable} % for table note
+% \usepackage{pdflscape}
+\usepackage[margin=1in, headheight=15pt]{geometry}
+% \usepackage{nicefrac}
+% \usepackage[automark]{scrlayer-scrpage}  % Load scrlayer-scrpage with automatic marking
+% \clearpairofpagestyles  
+
+
+% \let\underbar\relax
+% \let\underline\relax
+% \usepackage{sectsty}
+% \sectionfont{\bfseries\Large\raggedright}
+
+% \usepackage{titlesec}
+% 
+% \titleformat{\section}{\normalfont\Large\bfseries}{\thesection}{1em}{\raggedright}
+% \titleformat{\subsection}{\normalfont\large\bfseries}{\thesubsection}{1em}{\raggedright}
+% \titleformat{\subsubsection}{\normalfont\normalsize\bfseries}{\thesubsubsection}{1em}{\raggedright}
+
+
+% \usepackage{chngcntr}
+% \counterwithin{paragraph}{subsubsection}
+% \newcommand{\numberedparagraph}[1]{%
+%   \paragraph{}% Start a new paragraph with no title
+%   \stepcounter{paragraph}% Increment the paragraph counter
+%   \textbf{\theparagraph.}\quad#1% Format the paragraph number and content
+% }
+% 
+
+% \usepackage[most]{tcolorbox}
+% \tcbset{colback=yellow!10!white, colframe=red!50!black, 
+%   highlight math style= {enhanced,
+%     colframe=red,colback=red!10!white,boxsep=0pt}
+% }
+
+\definecolor{babyblue}{rgb}{0.54, 0.81, 0.94}
+\definecolor{darkblue}{rgb}{0.0, 0.0, 0.55}
+
+% \DeclareMathOperator{\erfc}{erfc}
+
+% \titleformat{\subsubsection}
+%   {\normalfont\normalsize\itshape}{\thesubsubsection.}{1em}{}
+
+
+% \DeclareNewLayer[
+%   background,
+%   rightmargin,
+%   contents={%
+%     \parbox[b][\layerheight][c]{\dimexpr\footskip+\footheight\relax}{%
+%       \hfill\rotatebox{90}{\pagemark}}}
+% ]{lscape.foot}
+% 
+% \DeclareNewLayer[
+%   background,
+%   textarea,
+%   addvoffset=-\dimexpr\headsep+\headheight\relax, % Adjust vertical offset to center the header
+%   addhoffset=-\dimexpr\footskip+\footheight\relax, % Adjust horizontal offset to center the header
+%   width=\dimexpr\headsep+\headheight+\textheight+\footskip+\footheight\relax, % Adjust width to center the header
+%   height=\dimexpr\textwidth\relax, % Swap width and height to match the landscape orientation
+%   contents=\rotatebox{90}{\parbox{\layerheight}{\centering\headmark}}
+% ]{lscape.head}
+
+% \DeclareNewPageStyleByLayers{lscape}{lscape.foot,lscape.head}
+
+%\VignetteIndexEntry{sfaR: A package for Stochastic Frontier Analysis in R}
+
+\newcommand{\sfar}{\pkg{sfaR}}
+
+\usepackage{draftwatermark}
+\SetWatermarkText{Preliminary Unfinished Draft}
+\SetWatermarkScale{0.4}
+
+%% -- Article metainformation (author, title, ...) -----------------------------
+
+\author{K Herv\'e Dakpo~\orcidlink{0000-0002-6114-7896}\\Universit\'e 
+Paris-Saclay INRAE \\ AgroParisTech, PSAE\\ Palaiseau, F-91120, France \AND
+Yann Desjeux ~ \\INRAE, Bordeaux School of Economics, \\ University Bordeaux, 
+Pessac, France \AND Arne Henningsen~\orcidlink{0000-0002-6720-0264}\\ Dept. of Food and Resource Economics,\\ 
+University of Copenhagen, Frederiksberg C, Denmark \AND Laure Latruffe ~ \\
+INRAE, Bordeaux School of Economics, \\ University Bordeaux, 
+Pessac, France}
+\Plainauthor{K Herv\'e Dakpo, Yann Desjeux, Arne Henningsen, Laure Latruffe}
+
+\title{Stochastic Frontier Analysis Using \pkg{sfaR}}
+\Plaintitle{Stochastic Frontier Analysis Using sfaR}
+\Shorttitle{\pkg{sfaR}: SFA using R}
+
+%% - \Abstract{} almost as usual
+
+\Abstract{
+This article presents an overview of the \pkg{sfaR} \proglang{R} package, 
+designed for advanced estimation of stochastic frontier (SF) models. Extending 
+beyond the widely used \pkg{frontier} package, \pkg{sfaR} incorporates recent 
+developments for both cross-sectional and panel data SF models. Key features 
+include support for latent-class SF models and several specialized variants—such 
+as zero-inefficiency, contaminated noise, and multimodal inefficiency SF 
+models—as well as metafrontier and sample-selection SF models. Users can choose 
+from a variety of one-sided error term distributions (e.g., half-normal, 
+truncated normal, exponential, Rayleigh, generalized exponential, skewed-laplace, 
+uniform, gamma, Weibull, log-normal, folded normal, and weighted exponential). 
+Additionally, \pkg{sfaR} provides flexible optimization algorithms to improve 
+model estimation. This article outlines the primary functions of \pkg{sfaR} and 
+demonstrates their application with real-world data.
+}
+
+\Keywords{stochastic frontier analysis, latent class stochastic frontier, 
+metafrontier, sample selection stochastic frontier, zero inefficiency stochastic
+frontier, cross-sectional data, panel data, \proglang{R}}
+\Plainkeywords{stochastic frontier analysis, latent class stochastic frontier, 
+metafrontier, sample selection stochastic frontier, zero inefficiency stochastic
+frontier, cross-sectional data, panel data, R}
+
+\Address{
+  K Herv\'e Dakpo\\
+%  Journal of Statistical Software\\
+  Universit\'e Paris-Saclay INRAE\\
+  AgroParisTech, PSAE\\
+  Palaiseau, F-91120, France\\
+  E-mail: \email{k-herve.dakpo@inrae.fr}\\
+  URL: \url{https://www6.versailles-grignon.inrae.fr/psae_eng/PersonalPages2/Herve-Dakpo}
+}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+%% -- Introduction -------------------------------------------------------------
+
+\section[Introduction]{Introduction} \label{sec:intro}
+
+Since its inception by \citet{aig77}, \citet{mee77}, and \citet{batt77} over 40 
+years ago, stochastic frontier analysis (SFA) has been widely used for 
+benchmarking various performance aspects across diverse decision-making units 
+(DMUs). Over time, numerous extensions have been developed to accommodate 
+different scenarios, such as data types, technological heterogeneity, and 
+endogeneity. SFA is instrumental in evaluating performance indicators 
+(e.g., technical and economic efficiencies, productivity) of DMUs, allowing for 
+performance comparisons, identification of underperformers, and insights from 
+best practices. This process is essential in crafting policies that enhance 
+efficiency in both the private and public sectors \citep{par14}.
+
+SFA has diverse applications, including measuring productivity growth 
+\citep[e.g.,][]{orea02}, analyzing the effects of regulation and competition 
+\citep[e.g.,][]{myd20, kang02}, assessing eco-efficiency \citep[e.g.,][]{mada23}, 
+and examining environmental factors’ impacts \citep[e.g.,][]{li19}. It has been 
+used across various sectors, such as agriculture \citep[e.g.,][]{latruffe23}, 
+banking \citep[e.g.,][]{badu21}, education \citep[e.g., ][]{aga19}, energy 
+\citep[e.g., ][]{filipp15, kop11}, healthcare \citep[e.g.,][]{ji20}, 
+manufacturing \citep[e.g.,][]{boy19}, museums \citep[e.g.,][]{price23}, and 
+transportation \citep[e.g., ][]{coelli99, filipp16}.
+
+The scope of SFA spans pure research, business applications, and policymaking. 
+The \pkg{sfaR} package aims to support fundamental SFA methods and recent 
+advances in this field through the R software environment.\footnote{SFA has also 
+been implemented in other software, such as \proglang{Limdep}, \proglang{Stata}, 
+and \proglang{Ox}.} The \pkg{frontier} package \citep{frontier} has been the 
+primary open-source software for SF model estimation in R,\footnote{The 
+\pkg{frontier} package is based on the Fortran source code of 
+\proglang{Frontier 4.1}, developed by Tim Coelli.} but it is limited to a few 
+distributions for the inefficiency term and a few panel data models, supporting 
+only half-normal and truncated normal distributions. Additionally, it offers 
+only basic panel models: the time-invariant inefficiency model \citep{pl81} and 
+the time-varying efficiency model \citep{batco92}. By contrast, \pkg{sfaR} 
+includes further time-varying inefficiency models \citep{kum90, batco92, lees93, 
+cue00, cue02, feng09, kw05, al06}.
+
+Recently, the \pkg{npsf} package \citep{npsf} has expanded on frontier by 
+introducing new panel-data models, such as the generalized true random effects 
+models \citep[e.g.,][]{colomb14, klh14, tk14}.\footnote{Many other packages are 
+available, such as \pkg{Benchmarking} \citep{bench} with basic SFA models, 
+\pkg{sfadv} \citep{sfadv} addressing endogeneity in SFA, \pkg{semsfa} 
+\citep{semsfa} and \pkg{dsfa} \citep{dsfa} with semi- and non-parametric models, 
+and \pkg{ssfa} \citep{ssfa} for spatial stochastic frontiers. Online R codes 
+also exist for SFA \citep{si20, si22, nguyen22}.} However, recent 
+developments, especially for technological heterogeneity remain underrepresented. 
+For example, latent-class stochastic frontier models and their variants are not 
+covered in these packages. The \pkg{sfaR} package includes not only standard 
+latent-class SF models but also zero-inefficiency, contaminated-noise, 
+multimodal inefficiency SF models \citep{orea04, greene05, kum13, rho15, wheat19}, 
+as well as metafrontier estimation \citep{batt04, huang14, am17} and 
+sample-selection SF \citep{greene10}.
+
+While \pkg{sfaR} does not yet cover every SF model developed over the past four 
+decades, it is a significant step forward, with potential for growth and 
+contributions from other developers. Currently, the package supports both 
+cross-sectional and panel data, offers a broader selection of distributions for 
+the inefficiency term, and provides multiple optimization algorithms. 
+With \hl{296} likelihood functions implemented, organized into \hl{ten} main functions, 
+\pkg{sfaR} provides a powerful tool for model estimation. This article describes 
+each model group and demonstrates their use with real-life data.
+
+The structure of the paper is as follows: Section \ref{sec:modelstandacross} 
+presents a brief overview of standard SF models for cross-sectional and panel data. 
+Section \ref{sec:modelcm} covers latent class SF models and their variants. 
+Section \ref{sec:other} discusses other SF models, such as metafrontiers and 
+sample selection SF. Section \ref{sec:prespackage} details the main functions 
+and post-estimation routines of \pkg{sfaR}, and Section \ref{sec:illus} provides 
+empirical applications. The final section offers discussions and conclusions.
+
+\section{Standard cross-sectional SFA models} \label{sec:modelstandacross}
+
+We consider a general stochastic frontier model: \footnote{For example, in case 
+of a production frontier, the dependent variable represents the output quantity,
+while the explanatory variables represent the input quantities. 
+In case of a cost function, the dependent variable indicates the costs, while 
+the explanatory variables represent the input prices and the output quantities. 
+Further types of functions that can be modeled as stochastic frontiers
+are, e.g., distance functions, profit functions, revenue functions, 
+and input requirement functions.} 
+%
+\begin{equation}\label{eq:1.1.1}
+y_i = \mathbf{x_i}'\bm{\beta} + v_i - S \, u_i \quad \text{with} \quad i = 1, 
+\cdots, N,
+\end{equation}
+%
+where subscript~$i$ indicates the observation, $N$~indicates the total number of 
+observations, $y_i$~is the dependent variable, $\mathbf{x_i}$~is a vector of 
+explanatory variables, $\bm{\beta}$~is a vector of unknown coefficients,
+$v_i$~is a two-sided (``noise'') error term that is usually assumed 
+to follow a normal distribution $\mathcal{N}(0, \sigma_v^2)$, $u_i$~is a 
+one-sided (``inefficiency'') error term, and $S = 1$ specifies a production 
+frontier, while $S = -1$ specifies a cost frontier. 
+
+The spearhead for the SFA is the assumption regarding the distibution of
+the inefficiency term~$u \geq 0$. Users of the \pkg{sfaR} package can choose 
+among ten different distributions of~$u$ for standard SF models. 
+Table~\ref{table:dens} presents the density functions of all the ten 
+distributions implemented in the \pkg{sfaR} package.
+\footnote{Moments associated with each distribution can be found in 
+Tables~\ref{table:momentdesn1}, \ref{table:momentdesn2}, and 
+\ref{table:momentdesn3} in the Appendix.} 
+For each of the distributions, the parameters can be obtained by maximizing the 
+log-likelihood giving the convolution of $\epsilon_i=v_i - S \, u_i$. 
+
+The most commonly used distributions are the one-parameter half-normal 
+distribution \citep{aig77} and the exponential distribution \citep{mee77}. 
+Their large success is attributed to the simplicity of their density function 
+and their availability in most statistical software (especially for the 
+half-normal distribution). 
+However, these distributions assumed a zero mode for the inefficiency implying 
+that most DMUs will be deemed efficient. 
+Two-parameter distributions like the truncated normal \citep{ste80, kum87}, and 
+the gamma \citep{ste80, beckers87, greene90, greene03} were later introduced to 
+shift away from the zero mode distributions. 
+A particular feature of these two distributions is that, under specific 
+conditions they nest the half-normal and the exponential distributions, 
+respectively. 
+In the case of the gamma distribution, the density corresponding to $\epsilon_i$ 
+does not have a close form, and \citet{greene03} suggested the use of maximum 
+simulated likelihood (MSL). 
+If the previous four distributions are the standards in the stochastic frontier 
+framework, other distributions are also introduced. 
+For instance, the rayleigh \citep{oliv14, hajar15, wang20}, and the generalized 
+exponential \citep{papa21a} are one-parameter distributions, which have non-zero 
+mode.\footnote{\citet{papa21a} recommended a special case of the the generalized 
+exponential distribution, introduced by \citet{gupta99}, where the shape 
+parameter is set to two.} 
+Another alternative two-parameter distribution is the log-normal \citep{wang20}, 
+which can be a good choice for certain type of datasets \citep{migon01, rama12}.
+
+A common feature of all the previous distributions is their positive skewness, 
+which supposed a negative third moment for the distribution of $\epsilon_i$ 
+when $S=1$. 
+However, in practice, the third moment of $\epsilon_i$ can be positive 
+\citep{sw09}. 
+This generate a type I error, which might prevent the identification of the 
+inefficiency distribution parameters \citep{olson80}. 
+According to \citet{wald82}, the "wrong" skewness implies that the maximum 
+likelihood and the OLS estimates of equation~\ref{eq:1.1.1} will have the same 
+slopes and there are no inefficiencies. 
+A long debate has then emerged around the "wrong" skewness (see \citet{papa21b}). 
+An advantage of the weibull and the truncated skewed-laplace distributions is to 
+allow positive or negative skeweness \citep{tsionas07, wang12}, and therefore 
+identifying inefficiencies even when the OLS residuals has the "wrong" skewness. 
+On another hand, the uniform distribution \citet{li96, nguyen10, lee14}, which 
+has a zero skewness, has been introduced to handle situations where the
+inefficiency distribution is symmetric around the mean. 
+In this latter case, the OLS residuals will also be symmetric, and based on the 
+previous distributions, no inefficiencies can be measured. 
+Another advantage of the uniform distribution is to set a threshold on the 
+inefficiency, which can provide useful economic information \citep{lee14}.
+
+\textbf{Do distributional assumptions even matter?} If as underlined by 
+\citet[p.~16]{kum20} the "choice of $u$ is often driven through available 
+statistical software to implement the method rather than an underlying 
+theoretical link between a model of productive inefficiency and the exact 
+shape of the corresponding distribution", the \pkg{sfaR} package will fill in 
+some gaps and allow practionners to rigorously check differences in their 
+results. \footnote{See also \citet[p.~214-216]{par14} for more discussion on the 
+matter of the choice of $u$ distribution.} 
+It is worth mentioning that if one is only interested on the features of the 
+frontier, as long as inefficiency is not conditional on some variables, the OLS 
+results should be sufficient.
+Moreover, it seems that DMUs ranking might not be affected by the distribution 
+\citep{kum2000}.
+
+\section{Latent class stochastic frontiers and variants} \label{sec:modelcm}
+
+\section{Other models} \label{sec:other}
+
+\subsection{Sample selection stochastic frontier} \label{subsec:ss}
+
+\subsection{Metafrontiers} \label{subsec:meta}
+
+\subsection{Handling endogeneity in SFA} \label{subsec:endog}
+
+\section[Introduction to the sfaR package]{Introduction to the \pkg{sfaR} package} \label{sec:prespackage}
+
+\section{Applications} \label{sec:illus}
+
+\section{Conclusion} \label{sec:concl}
+
+%% -- Bibliography -------------------------------------------------------------
+
+\bibliography{sfaR-bib}
+
+%% -- Appendix -----------------------------------------------------------------
+
+
+\end{document}
