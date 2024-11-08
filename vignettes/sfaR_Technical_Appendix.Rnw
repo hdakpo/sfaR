@@ -5,7 +5,12 @@
 
 \usepackage{orcidlink,thumbpdf,lmodern}
 \usepackage{mathtools,amssymb,amsthm,amsmath, bm}
+% \usepackage{mathptmx}  % Uses Times fonts with math support
 \usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{soul}
+\usepackage{xcolor}
+% \usepackage{hyperref}
 % \usepackage{adjustbox}
 % \usepackage{longtable}
 % \usepackage{booktabs} % for toprule
@@ -19,6 +24,18 @@
 % \usepackage{nicefrac}
 % \usepackage[automark]{scrlayer-scrpage}  % Load scrlayer-scrpage with automatic marking
 % \clearpairofpagestyles  
+
+% Adjust section numbering depth and table of contents depth
+\setcounter{secnumdepth}{3}  % Enable numbering for \subsubsection
+\setcounter{tocdepth}{3}      % Include \subsubsection in TOC
+
+% Manually define subsubsection if it's not available in the jss class
+\makeatletter
+\def\subsubsection{\@startsection{subsubsection}{3}{\z@}%
+  {-3.25ex\@plus -1ex \@minus -.2ex}%
+  {1.5ex \@plus .2ex}%
+  {\normalfont\normalsize\bfseries}}
+\makeatother
 
 
 % \let\underbar\relax
@@ -50,6 +67,11 @@
 
 \definecolor{babyblue}{rgb}{0.54, 0.81, 0.94}
 \definecolor{darkblue}{rgb}{0.0, 0.0, 0.55}
+\definecolor{darkred}{rgb}{0.55, 0.0, 0.0}
+\definecolor{lightblue}{rgb}{0.2, 0.6, 0.8}
+\definecolor{darkgreen}{rgb}{0.0, 0.5, 0.0}
+\definecolor{darkviolet}{rgb}{0.58, 0.0, 0.83}
+\definecolor{slateblue}{rgb}{0.42, 0.35, 0.8}
 
 % \DeclareMathOperator{\erfc}{erfc}
 
@@ -102,7 +124,7 @@ Pessac, France}
 
 \Abstract{
 This technical appendix provides the proofs for the derivation of the likelihoods and
-the (in)efficiency estimates for most models included in the \pkg{sfaR} package.
+the (in)efficiency estimates for all models included in the \pkg{sfaR} package.
 }
 
 \Keywords{stochastic frontier analysis, latent class stochastic frontier, 
@@ -132,7 +154,515 @@ The standard stochastic frontier (SF) model writes as:
 $$y_i = \mathbf{x_i}'\bm{\beta} + v_i - S \, u_i \quad \text{with} \quad i = 1, 
 \cdots, N,$$
 
-with $\epsilon_i = v_i - Su_i$.
+with $\epsilon_i = v_i - S \, u_i$, and $N$ the number of DMUs. The derivations
+associated to each one-sided error distributions are presented in the next
+sections.
 
+\subsection{Truncated normal distribution} \label{subsec:truncnorm}
+
+Let's consider a random variable $x$ that follows a normal distribution
+$\mathcal{N}(\mu, \sigma_x^2)$. If $x$ is truncated below by $(x\geq \alpha)$,
+the probability density function writes as:
+
+$$g(x|x \geq \alpha)=\frac{\frac{1}{\sigma_x}\phi\left(\frac{x-\mu}{\sigma_x}
+\right)}{1-\Phi\left(\frac{\alpha-\mu}{\sigma_x}\right)} \quad x\geq \alpha$$
+
+For the truncated normal distribution, let's set $\alpha = 0$.
+
+\subsubsection{Derivation of the density of $\epsilon$} \label{subsubsec:denstruncnorm}
+
+We have:
+
+$$f(v)=\frac{1}{\sigma_v\sqrt{2\pi}}\exp{\left(-\frac{v^2}{2\sigma_v^2}\right)}$$
+
+$$f(u)=\frac{1}{\sigma_u\sqrt{2\pi}\left(1-\Phi\left(-\frac{\mu}{\sigma_u}
+\right)\right)}\exp{\left[-\frac{1}{2}\left(\frac{u-\mu}{\sigma_v}\right)^2\right]}=
+\frac{1}{\sigma_u\sqrt{2\pi}\Phi\left(\frac{\mu}{\sigma_u}\right)}\exp{
+\left[-\frac{1}{2}\left(\frac{u-\mu}{\sigma_u}\right)^2\right]}$$
+
+Then
+
+$$f(u,v)=f(u).f(v)=\frac{1}{\sigma_u\sigma_v2\pi\Phi\left(\frac{\mu}{\sigma_u}
+\right)}\exp{\left\{-\frac{1}{2}\left[\frac{v^2}{\sigma_v^2} + 
+\left(\frac{u-\mu}{\sigma_u}\right)^2\right]\right\}}$$
+
+This model is also equivalent to:
+
+$$f(u,\epsilon + Su)=\frac{1}{\sigma_u\sigma_v2\pi\Phi\left(\frac{\mu}{\sigma_u}
+\right)}\exp{\left\{-\frac{1}{2}\left[\left(\frac{\epsilon + Su}{\sigma_v}
+\right)^2 + \left(\frac{u-\mu}{\sigma_u}\right)^2\right]\right\}}$$
+
+The expression in the exponential can be transformed as:
+
+\begin{align*}
+\left(\frac{\epsilon + Su}{\sigma_v}\right)^2 + \left(\frac{u-\mu}{\sigma_u}
+\right)^2 & = \frac{\epsilon^2 + 2\epsilon Su + S^2u^2}{\sigma_v^2} + 
+\frac{u^2 - 2\mu u + \mu^2}{\sigma_u^2} \\
+ & = u^2\left(\frac{1}{\sigma_v^2} + \frac{1}{\sigma_u^2}\right) - 
+ 2u\left(\frac{\mu}{\sigma_u^2} - \frac{\epsilon S}{\sigma_v^2}\right) + 
+ \left(\frac{\epsilon^2}{\sigma_v^2} + \frac{\mu^2}{\sigma_u^2}\right) \\
+ & = \frac{\sigma_u^2 + \sigma_v^2}{\sigma_u^2\sigma_v^2}\left[u^2 - 
+ 2u\left(\frac{\mu\sigma_v^2 - \epsilon S\sigma_u^2}{\sigma_u^2 + 
+ \sigma_v^2}\right)\right] + \left(\frac{\epsilon^2}{\sigma_v^2} + 
+ \frac{\mu^2}{\sigma_u^2}\right)
+\end{align*}
+
+Let 
+
+$$\mu_*= \frac{\mu\sigma_v^2 - \epsilon S\sigma_u^2}{\sigma_u^2 + \sigma_v^2}$$
+
+and 
+
+$$\sigma_*^2=\frac{\sigma_u^2\sigma_v^2}{\sigma_u^2 + \sigma_v^2}$$
+
+Then we have:
+
+$$\frac{1}{\sigma_*^2}\left(u^2 - 2u\mu_* + \mu_*^2\right) - 
+\frac{\mu_*^2}{\sigma_*^2} + \frac{\epsilon^2}{\sigma_v^2} + 
+\frac{\mu^2}{\sigma_u^2}=\left(\frac{u-\mu_*}{\sigma_*}\right)^2 + 
+\frac{\left(S\epsilon + \mu \right)^2}{\sigma_v^2 + \sigma_u^2}$$
+
+Moreover, we have:
+
+$$\frac{\mu_*^2}{\sigma_*^2} = \left[\frac{\mu\sigma_v^2 - 
+\epsilon S\sigma_u^2}{\sigma_u^2 + \sigma_v^2}\right]^2\frac{\sigma_u^2+
+\sigma_v^2}{\sigma_u^2\sigma_v^2}=\frac{\mu^2\sigma_v^4-2\epsilon S\mu\sigma_u^2 
+\sigma_v^2 + \epsilon^2\sigma_u^4}{\sigma_u^2\sigma_v^2\left(\sigma_u^2+
+\sigma_v^2\right)}$$
+
+Then
+
+\begin{align*}
+-\frac{\mu_*^2}{\sigma_*^2} + \frac{\epsilon^2}{\sigma_v^2} + 
+\frac{\mu^2}{\sigma_u^2} & = \frac{-\mu^2\sigma_v^4+2\epsilon S\mu\sigma_u^2 
+\sigma_v^2 - \epsilon^2\sigma_u^4}{\sigma_u^2\sigma_v^2\left(\sigma_u^2+
+\sigma_v^2\right)} + \frac{\epsilon^2}{\sigma_v^2} + \frac{\mu^2}{\sigma_u^2} \\
+& = \epsilon^2\left(\frac{1}{\sigma_v^2}-\frac{\sigma_u^2}{\sigma_v^2\left(
+\sigma_u^2+\sigma_v^2\right)}\right) + \frac{2\epsilon S\mu}{\sigma_u^2+
+\sigma_v^2} - \frac{\mu^2\sigma_v^2}{\sigma_u^2\left(\sigma_u^2+
+\sigma_v^2\right)} + \frac{\mu^2}{\sigma_u^2} \\
+& = \frac{1}{\sigma_u^2+\sigma_v^2}\left(\epsilon^2 + 2\epsilon S\mu\right) + 
+\frac{\mu^2}{\sigma_u^2+\sigma_v^2} \\
+& = \frac{\left(S\epsilon + \mu \right)^2}{\sigma_v^2 + \sigma_u^2}
+\end{align*}
+
+The previous density function then simplifies into:
+
+$$f(u,\epsilon + Su)=\frac{1}{\sigma_u\sigma_v2\pi\Phi\left(\frac{\mu}{\sigma_u}
+\right)}\exp{\left\{-\frac{1}{2}\left[\left(\frac{u-\mu_*}{\sigma_*}\right)^2 + 
+\frac{\left(S\epsilon + \mu \right)^2}{\sigma_v^2 + \sigma_u^2}\right]\right\}}$$
+Thus 
+
+\begin{align*}
+f(\epsilon)=\int_0^\infty f(u,\epsilon + Su)du & =\int_0^\infty \frac{1}{
+\sigma_u\sigma_v2\pi\Phi\left(\frac{\mu}{\sigma_u}\right)}\exp{\left\{
+-\frac{1}{2}\left[\left(\frac{u-\mu_*}{\sigma_*}\right)^2 + \frac{\left(
+S\epsilon + \mu \right)^2}{\sigma_v^2 + \sigma_u^2}\right]\right\}}du \\
+ & = \frac{1}{\sigma_u\sigma_v2\pi\Phi\left(\frac{\mu}{\sigma_u}\right)}\exp{
+ \left[-\frac{1}{2}\frac{\left(S\epsilon + \mu \right)^2}{\sigma_v^2 + 
+ \sigma_u^2}\right]}\int_0^\infty \exp{\left[-\frac{1}{2}\left(\frac{u-\mu_*}{
+ \sigma_*}\right)^2\right]}du \\
+ & = \frac{1}{\sigma_u\sigma_v\sqrt{2\pi}\Phi\left(\frac{\mu}{\sigma_u}\right)}
+ \exp{\left[-\frac{1}{2}\frac{\left(S\epsilon + \mu \right)^2}{\sigma_v^2 + 
+ \sigma_u^2}\right]}\int_0^\infty \frac{1}{\sqrt{2\pi}} \exp{\left[-\frac{1}{2}
+ \left(\frac{u-\mu_*}{\sigma_*}\right)^2\right]}du
+\end{align*}
+
+Using the the solution of integral \ref{eq.a1} in the appendix, the density of 
+$\epsilon$ is 
+
+\begin{align*}
+f(\epsilon) & = \frac{1}{\sigma_u\sigma_v\sqrt{2\pi}\Phi\left(\frac{\mu}{
+\sigma_u}\right)}\exp{\left[-\frac{1}{2}\frac{\left(S\epsilon + \mu \right)^2}{
+\sigma_v^2 + \sigma_u^2}\right]} \sigma_* \Phi\left(\frac{\mu_*}{\sigma_*}\right) \\
+ & = \frac{1}{\sqrt{\sigma_u^2 + \sigma_v^2}\sqrt{2\pi}\frac{\Phi\left(\frac{
+ \mu}{\sigma_u}\right)}{\Phi\left(\frac{\mu_*}{\sigma_*}\right)}}\exp{\left[
+ -\frac{1}{2}\frac{\left(S\epsilon + \mu \right)^2}{\sigma_v^2 + \sigma_u^2}\right]}
+\end{align*}
+
+Simplifying the previous expression, we obtain the density function of $\epsilon$:
+
+\begin{equation}\label{eq:1.1.1}
+f(\epsilon) = \frac{\phi{\left(\frac{S\epsilon + \mu}{\sqrt{\sigma_v^2 + 
+\sigma_u^2}}\right)}}{\sqrt{\sigma_u^2 + \sigma_v^2}\Phi\left(\frac{\mu}{
+\sigma_u}\right)}\Phi\left(\frac{\mu_*}{\sigma_*}\right)
+\end{equation}
+
+\subsubsection{Technical (in)efficiencies derivation} \label{subsubsec:techinefftruncnorm}
+
+The conditional (in)efficiency is derived following \citet{jon82} for
+$E\left[u|\epsilon\right]$ and \citet{batt88} for
+$E\left[\exp{\left(-u\right)|\epsilon}\right]$. We have:
+
+$$f(u|\epsilon)=\frac{f(u, \epsilon)}{f(\epsilon)}=\frac{1}{\sqrt{2\pi}\sigma_*
+\Phi\left(\frac{\mu_*}{\sigma_*}\right)}\exp{\left[-\frac{1}{2}\left(\frac{
+u-\mu_*}{\sigma_*}\right)^2\right]}$$
+
+\begin{itemize}
+\item Conditional inefficiency
+\end{itemize}
+
+$$E\left[u|\epsilon\right]=\int_0^\infty u f(u|\epsilon) du=\int_0^\infty 
+\frac{u}{\sqrt{2\pi}\sigma_*\Phi\left(\frac{\mu_*}{\sigma_*}\right)}\exp{
+\left[-\frac{1}{2}\left(\frac{u-\mu_*}{\sigma_*}\right)^2\right]}du$$ 
+
+Using the solution of the integral \ref{eq.a3} in the appendix, we have:
+
+\begin{equation}\label{eq:1.1.2}
+E\left[u|\epsilon\right] = \mu_* + \sigma_*\frac{\phi\left(\frac{\mu_*}{
+\sigma_*}\right)}{\Phi\left(\frac{\mu_*}{\sigma_*}\right)}
+\end{equation}
+
+\begin{itemize}
+\item Conditional efficiency
+\end{itemize}
+
+$$E\left[\exp{\left(-u\right)|\epsilon}\right] = \int_0^\infty \exp{(-u)} 
+f(u|\epsilon) du=\int_0^\infty \frac{\exp{(-u)}}{\sqrt{2\pi}\sigma_*\Phi\left(
+\frac{\mu_*}{\sigma_*}\right)}\exp{\left[-\frac{1}{2}\left(\frac{u-\mu_*}{
+\sigma_*}\right)^2\right]}du$$
+
+Using the the solution of integral \ref{eq.a4} in the appendix, and setting 
+$t = 1$, the conditional efficiency is given by:
+
+\begin{equation}\label{eq:1.1.3}
+E\left[\exp{\left(-u\right)|\epsilon}\right] = \exp{\left(-\mu_* + \frac{1}{2}
+\sigma_*^2\right)} \frac{\Phi\left(\frac{\mu_*}{\sigma_*}-\sigma_*\right)}{
+\Phi\left(\frac{\mu_*}{\sigma_*}\right)}
+\end{equation}
+
+\begin{itemize}
+\item Reciprocal conditional efficiency
+\end{itemize}
+
+The previous measure of the efficiency is equivalent to the Shephard's output
+efficiency score or the Farrell efficiency in the case of cost or input distance 
+function. The reciprocal of this measure is $E\left[\exp{(u)}|\epsilon\right]$ 
+and is obtained using the the solution of integral \ref{eq.a4} in the appendix, 
+and setting $t = -1$:
+
+\begin{equation}\label{eq:1.1.4}
+E\left[\exp{\left(u\right)|\epsilon}\right] = \exp{\left(\mu_* + \frac{1}{2}
+\sigma_*^2\right)} \frac{\Phi\left(\frac{\mu_*}{\sigma_*}+\sigma_*\right)}{
+\Phi\left(\frac{\mu_*}{\sigma_*}\right)}
+\end{equation}
+
+The mode for the conditional inefficiency $u|\epsilon$ is $\mu_*$.
+
+\subsubsection{Confidence intervals} \label{subsubsec:confinttruncnorm}
+
+From the previous developments, $u|\epsilon$ follows $\mathcal{N}^+(\mu_{*}, 
+\sigma_*)$. Let $\tilde{u} = \frac{u-\mu_*}{\sigma_*}$ then $\tilde{u}\in\left[
+-\frac{\mu_*}{\sigma_*}, \infty\right)$. Then the $(1-\alpha)100\%$ confidence 
+interval is given by
+
+$$\mu_{*} + Z_L\sigma_* \leq E\left[u|\epsilon\right] \leq \mu_{*} + Z_U\sigma_*$$
+
+such that
+
+$$\int_{-\frac{\mu_*}{\sigma_*}}^{Z_L}f(\tilde{u})d\tilde{u} = \int_{Z_U}^\infty 
+f(\tilde{u})d\tilde{u} = \frac{\alpha}{2}$$
+
+clearly 
+
+$$f(\tilde{u}) = \frac{\phi\left(\tilde{u}\right)}{1 - \Phi\left(-\frac{\mu_*}{
+\sigma_*}\right)}$$
+
+then 
+
+$$\int_{Z_U}^\infty f(\tilde{u})d\tilde{u} = \frac{1}{1 - \Phi\left(-
+\frac{\mu_*}{\sigma_*}\right)}\left[1-\Phi\left(Z_U\right)\right]=
+\frac{\alpha}{2}$$
+
+Hence 
+
+\begin{equation}\label{eq:1.1.5}
+Z_U = \Phi^{-1}\left\{1-\frac{\alpha}{2}\left[1-\Phi\left(-\frac{\mu_*}{\sigma_*}
+\right)\right]\right\}
+\end{equation}
+
+On the other hand
+
+$$\int_{-\frac{\mu_*}{\sigma_*}}^{Z_L}f(\tilde{u})d\tilde{u} = \frac{1}{1 - 
+\Phi\left(-\frac{\mu_*}{\sigma_*}\right)}\left[\Phi\left(Z_L\right) - 
+\Phi\left(-\frac{\mu_*}{\sigma_*}\right)\right] = \frac{\alpha}{2}$$
+
+Therefore
+
+$$Z_L = \Phi^{-1}\left\{\frac{\alpha}{2}\left[1-\Phi\left(-\frac{\mu_*}{\sigma_*}
+\right)\right] + \Phi\left(-\frac{\mu_*}{\sigma_*}\right)\right\}$$
+
+or
+
+\begin{equation}\label{eq:1.1.6}
+Z_L=\Phi^{-1}\left\{1 - \left(1 - \frac{\alpha}{2}\right)\left[1 - 
+\Phi\left(-\frac{\mu_*}{\sigma_*}\right) \right]\right\}
+\end{equation}
+
+For the half-normal normal distribution, all the derivations can be easily 
+obtained using previous developments and set $\mu=0$. In the case of the 
+truncated normal distribution with scaling property, $\mu$ and $\sigma_u^2$ are 
+replaced by $\tau\exp{\left(\mathbf{z}_{u,i}'\bm{\delta}\right)}$ and 
+$\exp{\left(c_u + 2\mathbf{z}_{u,i}'\bm{\delta}\right)}$, respectively.
+
+\subsection{Exponential distribution} \label{subsec:exp}
+
+\subsubsection{Derivation of the density of $\epsilon$} \label{subsubsec:densexp}
+
+%% -- Bibliography -------------------------------------------------------------
+
+\bibliography{sfaR-bib}
+
+%% -- Appendix -----------------------------------------------------------------
+
+\newpage
+
+\begin{appendix}
+
+\section{Useful Integrals}\label{app:integrals}
+
+\renewcommand{\theequation}{A.\arabic{equation}}
+\setcounter{equation}{0}
+
+\textcolor{darkred}{
+\begin{equation} \label{eq.a1}
+\int_0^\infty \frac{1}{\sqrt{2\pi}} \exp{\left[-\frac{1}{2}\left(\frac{u-\mu_*}{
+\sigma_*}\right)^2\right]}du = \sigma_*\Phi\left(\frac{\mu_*}{\sigma_*}\right)
+\end{equation}
+}
+
+\textbf{\underline{Proof}}: \\
+\bigskip
+Let $\tilde{u}=\frac{u-\mu_*}{\sigma_*}$, then $\tilde{u} \in \left[
+-\frac{\mu_*}{\sigma_*}, \infty\right)$ and $d\tilde{u} = \frac{du}{\sigma_*}$
+
+Thus we have
+
+\begin{align*}
+\int_0^\infty \frac{1}{\sqrt{2\pi}} \exp{\left[-\frac{1}{2}\left(\frac{
+u-\mu_*}{\sigma_*}\right)^2\right]}du & = \int_{-\frac{\mu_*}{\sigma_*}}^\infty 
+\frac{1}{\sqrt{2\pi}} \exp{\left(-\frac{1}{2}\tilde{u}^2\right)}\sigma_*d\tilde{u}\\
+ & = \sigma_* \Phi\left(\frac{\mu_*}{\sigma_*}\right) \\
+\end{align*}
+
+\textcolor{darkred}{
+\begin{equation} \label{eq.a2}
+\int_{\left(-a\right)}^\infty \frac{\tilde{u}}{\sqrt{2\pi}}
+\exp{\left[-\frac{1}{2}\tilde{u}^2\right]}d\tilde{u} = \phi\left(a\right)
+\end{equation}
+}
+
+\textbf{\underline{Proof}}: \\
+\bigskip
+Let $z = \tilde{u}^2$ then $dz = 2\tilde{u}d\tilde{u}$ and $z\in \left[a^2, 
+\infty\right)$. The previous integral is then 
+equivalent to
+
+$$\int_{\left(-a\right)}^\infty \frac{\tilde{u}}{
+\sqrt{2\pi}} \exp{\left[-\frac{1}{2}\tilde{u}^2\right]}d\tilde{u} = 
+\int_{a^2}^\infty \frac{\sqrt{z}}{\sqrt{2\pi}}
+\exp{\left(-\frac{1}{2}z\right)\frac{dz}{2\sqrt{z}}}=\frac{1}{\sqrt{2\pi}}\exp{
+\left[-\frac{1}{2}a^2\right]}$$
+
+\textcolor{darkred}{
+\begin{equation} \label{eq.a3}
+\int_0^\infty \frac{u}{\sqrt{2\pi}} \exp{\left[-\frac{1}{2}\left(\frac{u-\mu_*}{
+\sigma_*}\right)^2\right]}du = \mu_*\sigma_*\Phi\left(\frac{\mu_*}{\sigma_*}
+\right) + \sigma^2_*\phi\left(\frac{\mu_*}{\sigma_*}\right)
+\end{equation}
+}
+
+\textbf{\underline{Proof}}:\\
+\bigskip
+Let $\tilde{u}=\frac{u-\mu_*}{\sigma_*}$, then $\tilde{u} \in \left[-\frac{
+\mu_*}{\sigma_*}, \infty\right)$ and $d\tilde{u} = \frac{du}{\sigma_*}$
+
+Thus we have
+\begin{align*}
+ \int_0^\infty \frac{u}{\sqrt{2\pi}} \exp{\left[-\frac{1}{2}\left(\frac{
+ u-\mu_*}{\sigma_*}\right)^2\right]}du & = \int_{\left(-\frac{\mu_*}{\sigma_*}
+ \right)}^\infty \frac{\mu_* + \sigma_* \tilde{u}}{\sqrt{2\pi}}\exp{\left[
+ -\frac{1}{2}\tilde{u}^2\right]\sigma_*d\tilde{u}} \\
+ & = \mu_*\sigma_*\int_{\left(-\frac{\mu_*}{\sigma_*}\right)}^\infty \frac{1}{
+ \sqrt{2\pi}}\exp{\left[-\frac{1}{2}\tilde{u}^2\right]d\tilde{u}} + \sigma_*^2
+ \int_{\left(-\frac{\mu_*}{\sigma_*}\right)}^\infty \frac{\tilde{u}}{\sqrt{2\pi}}
+ \exp{\left[-\frac{1}{2}\tilde{u}^2\right]}d\tilde{u} \\
+\end{align*}
+
+Using the results from equation \ref{eq.a2} we obtain the desired result in 
+\ref{eq.a3}.
+
+\textcolor{darkred}{
+\begin{equation} \label{eq.a4}
+\int_0^\infty \frac{\exp{\left(-tu\right)}}{\sqrt{2\pi}} \exp{\left[-\frac{1}{2}
+\left(\frac{u-\mu_*}{\sigma_*}\right)^2\right]}du = \sigma_*\exp{\left(-t\mu_* + 
+\frac{1}{2}t^2\sigma_*^2\right)}\Phi\left(\frac{\mu_*}{\sigma_*}-t\sigma_*\right)
+\end{equation}
+}
+
+\textbf{\underline{Proof}}: \\
+\bigskip
+We have
+
+$$\frac{\exp{\left(-tu\right)}}{\sqrt{2\pi}} \exp{\left[-\frac{1}{2}\left(
+\frac{u-\mu_*}{\sigma_*}\right)^2\right]} = \frac{1}{\sqrt{2\pi}}\exp{\left[
+-\frac{1}{2}\left(\frac{u-\mu_*}{\sigma_*}\right)^2 - tu\right]}$$
+
+Developing the expression in the exponential yields:
+
+\begin{align*}
+-\frac{1}{2}\left(\frac{u-\mu_*}{\sigma_*}\right)^2 - tu &= -\frac{1}{2}\left(
+\frac{u^2 - 2u\mu_* + \mu_*^2}{\sigma_*^2}\right) - tu \\
+ & = -\frac{1}{2}\left(\frac{u^2 - 2u\left(\mu_*-t\sigma_*^2\right) + \mu_*^2}{
+ \sigma_*^2}\right) \\
+&= -\frac{1}{2}\left(\frac{u^2 - 2u\left(\mu_*-t\sigma_*^2\right) + \left(\mu_*-
+t\sigma_*^2\right)^2 - \left(\mu_*-t\sigma_*^2\right)^2 + \mu_*^2}{\sigma_*^2}
+\right) \\
+& = -\frac{1}{2}\left(\frac{\left(u - \left(\mu_*-t\sigma_*^2\right)\right)^2 + 
+t\sigma_*^2\left(2\mu_* - t\sigma_*^2\right)}{\sigma_*^2}\right) \\
+& = -\left[\frac{\left(u - \left(\mu_*-t\sigma_*^2\right)\right)^2}{2\sigma_*^2}
+\right]-\frac{1}{2}\left(2t\mu_* - t^2\sigma_*^2\right)
+\end{align*}
+
+Therefore we have
+
+\begin{align*}
+\int_0^\infty \frac{\exp{\left[-\frac{1}{2}\left(\frac{u-\mu_*}{\sigma_*}
+\right)^2 - tu\right]}}{\sqrt{2\pi}}du & = \int_0^\infty \frac{1}{\sqrt{2\pi}}
+\exp{\left\{-\left[\frac{\left(u - \left(\mu_*-t\sigma_*^2\right)\right)^2}{
+2\sigma_*^2}\right]-\frac{1}{2}\left(2t\mu_* - t^2\sigma_*^2\right)\right\}}du \\
+& = \exp{\left(-t\mu_* +  \frac{1}{2}t^2\sigma_*^2\right)} \int_0^\infty\frac{1}{
+\sqrt{2\pi}}\exp{\left\{-\left[\frac{\left(u - \left(\mu_*-t\sigma_*^2\right)
+\right)^2}{2\sigma_*^2}\right]\right\}}du
+\end{align*}
+
+Let $\tilde{u} = \frac{u - \left(\mu_*-t\sigma_*^2\right)}{\sigma_*}$ then 
+$d\tilde{u} = \frac{du}{\sigma_*}$ and $\tilde{u} \in \left[-\frac{\mu_*}{
+\sigma_*} + t\sigma_*,\infty \right)$
+
+Therefore we have
+
+\begin{align*}
+ \int_0^\infty \frac{1}{\sqrt{2\pi}}\exp{\left[-\frac{1}{2}\left(\frac{u-\mu_*}{
+ \sigma_*}\right)^2 - tu\right]}du & = \exp{\left(-t\mu_* +  \frac{1}{2}t^2
+ \sigma_*^2\right)} \int_{-\frac{\mu_*}{\sigma_*} + t\sigma_*}^\infty\frac{1}{
+ \sqrt{2\pi}}\exp{\left(-\frac{1}{2}\tilde{u}^2\right)}\sigma_*d\tilde{u} \\
+ & = \sigma_*\exp{\left(-t\mu_* +  \frac{1}{2}t^2\sigma_*^2\right)}\Phi\left(
+ \frac{\mu_*}{\sigma_*}-t\sigma_*\right)
+\end{align*}
+
+\textcolor{darkred}{
+\begin{equation} \label{eq.a5}
+\int_{-c}^\infty \frac{\tilde{u}^2}{\sqrt{2\pi}} \exp{\left(
+-\frac{1}{2}\tilde{u}^2\right)}d\tilde{u} = 
+-c\phi\left(c\right) + 
+\Phi\left(c\right)
+\end{equation}
+}
+
+\textbf{\underline{Proof}}: \\
+\bigskip
+The solution to the previous integral is obtained by using integration by parts.
+
+Let $a = u$ then $a' = 1$ and $b'=u\exp{\left(-\frac{1}{2}u^2\right)}$ then 
+$b = -\exp{\left(-\frac{1}{2}u^2\right)}$. 
+Therefore we have
+
+\begin{align*}
+\int_{-c}^\infty \frac{\tilde{u}^2}{\sqrt{2\pi}} \exp{
+\left(-\frac{1}{2}\tilde{u}^2\right)}d\tilde{u} &= \frac{1}{\sqrt{2\pi}}\left[
+-u\exp{\left(-\frac{1}{2}u^2\right)}\right]_{-c}^\infty + 
+\int_{-c}^\infty \frac{1}{\sqrt{2\pi}} \exp{\left(-
+\frac{1}{2}u^2\right)}du \\
+& = -c\phi\left(c\right) + 
+\Phi\left(c\right)
+\end{align*}
+
+\textcolor{darkred}{
+\begin{equation} \label{eq.a6}
+\int_0^\infty \frac{u^2}{\sqrt{2\pi}} \exp{\left[-\frac{1}{2}\left(\frac{u-\mu_*}{
+\sigma_*}\right)^2\right]}du = \sigma_*^2\mu_*\phi\left(\frac{\mu_*}{\sigma_*}
+\right) + \sigma_* \Phi\left(\frac{\mu_*}{\sigma_*}\right) \left[\sigma_*^2 +
+\mu_*^2\right]
+\end{equation}
+}
+
+\textbf{\underline{Proof}}: \\
+\bigskip
+Let $\tilde{u} = \frac{u-\mu_*}{\sigma_*}$, then $\tilde{u} \in \left[-\frac{
+\mu_*}{\sigma_*}, \infty\right)$ and $d\tilde{u} = \frac{du}{\sigma_*}$. 
+Therefore we have
+
+\begin{align*}
+\int_0^\infty \frac{u^2}{\sqrt{2\pi}} \exp{\left[-\frac{1}{2}\left(\frac{u-
+\mu_*}{\sigma_*}\right)^2\right]}du & = \int_{-\frac{\mu_*}{\sigma_*}}^\infty
+\frac{\left(\sigma_*^2\tilde{u}^2+2\sigma_*\mu_*\tilde{u}+\mu_*^2\right)}{
+\sqrt{2\pi}}\exp{\left(-\frac{1}{2}\tilde{u}^2\right)}\sigma_*d\tilde{u} \\
+& = \Bigg\{\sigma_*^3\int_{-\frac{\mu_*}{\sigma_*}}^\infty \frac{\tilde{u}^2}{
+\sqrt{2\pi}} \exp{\left(-\frac{1}{2}\tilde{u}^2\right)}d\tilde{u} + 2\sigma_*^2
+\mu_*\int_{-\frac{\mu_*}{\sigma_*}}^\infty \frac{\tilde{u}}{\sqrt{2\pi}}\exp{
+\left(-\frac{1}{2}\tilde{u}^2\right)}d\tilde{u} +\\ 
+&\quad \sigma_*\mu_*^2\int_{-\frac{\mu_*}{\sigma_*}}^\infty\frac{1}{\sqrt{2\pi}}
+\exp{\left(-\frac{1}{2}\tilde{u}^2\right)}d\tilde{u}\Bigg\} 
+\end{align*}
+
+Using the solution to integrals \ref{eq.a2}, and \ref{eq.a5} we have
+
+\begin{align*}
+\int_0^\infty \frac{u^2}{\sqrt{2\pi}} \exp{\left[-\frac{1}{2}\left(\frac{u-\mu_*}{
+\sigma_*}\right)^2\right]}du & =
+\Bigg\{\sigma_*^3\left[-\left(\frac{\mu_*}{\sigma_*}\right)\phi\left(\frac{\mu_*}{
+\sigma_*}\right) + \Phi\left(\frac{\mu_*}{\sigma_*}\right)\right] + 2\sigma_*^2
+\mu_*\phi\left(\frac{\mu_*}{\sigma_*}\right) + \\
+& \sigma_*\mu_*^2\Phi\left(\frac{\mu_*}{\sigma_*}\right)\Bigg\} \\
+& = \sigma_*^2\mu_*\phi\left(\frac{\mu_*}{\sigma_*}\right) + \sigma_* \Phi\left(
+\frac{\mu_*}{\sigma_*}\right) \left[\sigma_*^2 + \mu_*^2\right]\\
+\end{align*}
+
+\textcolor{darkred}{
+\begin{align} \label{eq.a7}
+\int_0^\infty u\frac{\exp{\left(-tu\right)}}{\sqrt{2\pi}} \exp{\left[-
+\frac{1}{2}\left(\frac{u-\mu_*}{\sigma_*}\right)^2\right]}du &= \exp{\left(
+-t\mu_* + \frac{1}{2}t^2\sigma_*^2\right)}\sigma_* \Bigg\{\nonumber \\
+&\quad\left(\mu_*-t\sigma_*^2\right)\Phi\left(\frac{\mu_*}{\sigma_*} - 
+t\sigma_*\right) + \sigma_*\phi\left(\frac{\mu_*}{\sigma_*} - t\sigma_*\right)
+\Bigg\}
+\end{align}
+}
+
+\textbf{\underline{Proof}}: \\
+\bigskip
+From previous developments, we know that
+
+$$\frac{\exp{\left(-tu\right)}}{\sqrt{2\pi}} \exp{\left[-\frac{1}{2}\left(
+\frac{u-\mu_*}{\sigma_*}\right)^2\right]}=
+\frac{\exp{\left(-t\mu_* + \frac{1}{2}t^2\sigma_*^2\right)}}{\sqrt{2\pi}}
+\exp{\left\{-\left[\frac{\left(u - \left(\mu_*-t\sigma_*^2\right)\right)^2}{
+2\sigma_*^2}\right]\right\}}$$
+
+Then
+
+\begin{align*}
+\int_0^\infty u\frac{\exp{\left(-tu\right)}}{\sqrt{2\pi}} \exp{\left[-
+\frac{1}{2}\left(\frac{u-\mu_*}{\sigma_*}\right)^2\right]}du &= 
+\exp{\left(-t\mu_* + \frac{1}{2}t^2\sigma_*^2\right)} \int_0^\infty u\frac{
+\exp{\left\{-\left[\frac{\left(u - \left(\mu_*-t\sigma_*^2\right)\right)^2}{
+2\sigma_*^2}\right]\right\}}}{\sqrt{2\pi}}du \\
+\end{align*}
+
+Using the results of integral \ref{eq.a3}, we have
+
+\begin{align*}
+\int_0^\infty u\frac{\exp{\left(-tu\right)}}{\sqrt{2\pi}} \exp{\left[-
+\frac{1}{2}\left(\frac{u-\mu_*}{\sigma_*}\right)^2\right]}du &= 
+\exp{\left(-t\mu_* + \frac{1}{2}t^2\sigma_*^2\right)} \Bigg\{\left(\mu_*
+-t\sigma_*^2\right)\sigma_*\Phi\left(\frac{\mu_*-t\sigma_*^2}{\sigma_*}\right) + \\
+&\quad \sigma_*^2\phi\left(\frac{\mu_*-t\sigma_*^2}{\sigma_*}\right)\Bigg\}\\
+& = \exp{\left(-t\mu_* + \frac{1}{2}t^2\sigma_*^2\right)}\sigma_*\Bigg\{
+\left(\mu_*-t\sigma_*^2\right)\Phi\left(\frac{\mu_*}{\sigma_*} - t\sigma_*\right) + \\
+&\quad\sigma_*\phi\left(\frac{\mu_*}{\sigma_*} - t\sigma_*\right)\Bigg\}
+\end{align*}
+
+\end{appendix}
 
 \end{document}
