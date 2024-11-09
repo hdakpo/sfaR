@@ -71,6 +71,11 @@
 #' Default = \code{FALSE}. (see section \sQuote{Details}).
 #' @param start Numeric vector. Optional starting values for the maximum
 #' likelihood (ML) estimation.
+#' @param randStart Logical. Define if random starting values should be used for
+#' M(S)L estimation. New starting values are obtained as old ones + draws from
+#' normal distribution with std. deviation of 0.01. \code{'seed'} is not 
+#' considered here, then each run will provide different starting values 
+#' (unless a seed is set by the user before the run).
 #' @param method Optimization algorithm used for the estimation. Default =
 #' \code{'bfgs'}. 11 algorithms are available: \itemize{ \item \code{'bfgs'},
 #' for Broyden-Fletcher-Goldfarb-Shanno (see
@@ -498,7 +503,7 @@
 #' @export
 sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
   data, subset, weights, wscale = TRUE, S = 1L, udist = "hnormal",
-  scaling = FALSE, start = NULL, method = "bfgs", hessianType = 1L,
+  scaling = FALSE, start = NULL, randStart = FALSE, method = "bfgs", hessianType = 1L,
   simType = "halton", Nsim = 100, prime = 2L, burn = 10, antithetics = FALSE,
   seed = 12345, itermax = 2000, printInfo = FALSE, tol = 1e-12,
   gradtol = 1e-06, stepmax = 0.1, qac = "marquardt") {
@@ -648,6 +653,9 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
   if (length(logDepVar) != 1 || !is.logical(logDepVar[1])) {
     stop("argument 'logDepVar' must be a single logical value", call. = FALSE)
   }
+  if (length(randStart) != 1 || !is.logical(randStart[1])) {
+    stop("argument 'randStart' must be a single logical value", call. = FALSE)
+  }
   # Number of parameters -------
   nParm <- if (udist == "tnormal") {
     if (scaling) {
@@ -681,6 +689,9 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
   if (nParm > N) {
     stop("Model has more parameters than observations", call. = FALSE)
   }
+  # Set std. Error when random start is allowed -------
+  sdStart <- if (randStart)
+    0.01 else NULL
   # Check algorithms -------
   method <- tolower(method)
   if (!(method %in% c("ucminf", "bfgs", "bhhh", "nr", "nm",
@@ -837,7 +848,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
   # Step 2: MLE arguments -------
   FunArgs <- if (udist == "tnormal") {
     if (scaling) {
-      list(start = start, olsParam = olsParam, dataTable = dataTable,
+      list(start = start, randStart = randStart, sdStart = sdStart, olsParam = olsParam, dataTable = dataTable,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
         S = S, wHvar = wHvar, method = method, printInfo = printInfo,
@@ -845,7 +856,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
         gradtol = gradtol, hessianType = hessianType,
         qac = qac)
     } else {
-      list(start = start, olsParam = olsParam, dataTable = dataTable,
+      list(start = start, randStart = randStart, sdStart = sdStart, olsParam = olsParam, dataTable = dataTable,
         nXvar = nXvar, nmuZUvar = nmuZUvar, nuZUvar = nuZUvar,
         nvZVvar = nvZVvar, muHvar = muHvar, uHvar = uHvar,
         vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
@@ -856,7 +867,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
     }
   } else {
     if (udist == "lognormal") {
-      list(start = start, olsParam = olsParam, dataTable = dataTable,
+      list(start = start, randStart = randStart, sdStart = sdStart, olsParam = olsParam, dataTable = dataTable,
         nXvar = nXvar, nmuZUvar = nmuZUvar, nuZUvar = nuZUvar,
         nvZVvar = nvZVvar, muHvar = muHvar, uHvar = uHvar,
         vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
@@ -866,7 +877,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
         qac = qac)
     } else {
       if (udist %in% c("gamma", "weibull")) {
-        list(start = start, olsParam = olsParam, dataTable = dataTable,
+        list(start = start, randStart = randStart, sdStart = sdStart, olsParam = olsParam, dataTable = dataTable,
           nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
           uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
           Xvar = Xvar, S = S, wHvar = wHvar, N = N, FiMat = FiMat,
@@ -874,7 +885,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
           stepmax = stepmax, tol = tol, gradtol = gradtol,
           hessianType = hessianType, qac = qac)
       } else {
-        list(start = start, olsParam = olsParam, dataTable = dataTable,
+        list(start = start, randStart = randStart, sdStart = sdStart, olsParam = olsParam, dataTable = dataTable,
           nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
           uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
           Xvar = Xvar, S = S, wHvar = wHvar, method = method,
