@@ -392,6 +392,8 @@ chessgammanormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
 # Optimization using different algorithms ----------
 #' optimizations solve for gamma-normal distribution
 #' @param start starting value for optimization
+#' @param randStart if random starting values should be used
+#' @param sdStart std. Error for random draws for starting values
 #' @param olsParam OLS coefficients
 #' @param dataTable dataframe contains id of observations
 #' @param nXvar number of main variables (inputs + env. var)
@@ -414,7 +416,7 @@ chessgammanormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param hessianType how hessian is computed
 #' @param qac qac option for maxLik
 #' @noRd
-gammanormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
+gammanormAlgOpt <- function(start, randStart, sdStart, olsParam, dataTable, S, nXvar,
   N, FiMat, uHvar, nuZUvar, vHvar, nvZVvar, Yvar, Xvar, wHvar,
   method, printInfo, itermax, stepmax, tol, gradtol, hessianType,
   qac) {
@@ -422,6 +424,8 @@ gammanormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
     start else cstgammanorm(olsObj = olsParam, epsiRes = dataTable[["olsResiduals"]],
     S = S, uHvar = uHvar, nuZUvar = nuZUvar, vHvar = vHvar,
     nvZVvar = nvZVvar)
+  if (randStart)
+    startVal <- startVal + rnorm(length(startVal), sd = sdStart)
   startLoglik <- sum(cgammanormlike(startVal, nXvar = nXvar,
     nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
     vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, N = N,
