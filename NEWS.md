@@ -2,6 +2,8 @@
 
 ## NEW FEATURES
 
+* Add two vignettes for the package
+
 ## BUG FIXES
 
 * `efficiencies` returns error when all formulas only contains intercept for
