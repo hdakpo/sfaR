@@ -279,6 +279,8 @@ chessraynormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
 # Optimization using different algorithms ----------
 #' optimizations solve for rayleigh-normal distribution
 #' @param start starting value for optimization
+#' @param randStart if random starting values should be used
+#' @param sdStart std. Error for random draws for starting values
 #' @param olsParam OLS coefficients
 #' @param dataTable dataframe contains id of observations
 #' @param nXvar number of main variables (inputs + env. var)
@@ -299,13 +301,15 @@ chessraynormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
 #' @param hessianType how hessian is computed
 #' @param qac qac option for maxLik
 #' @noRd
-raynormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
+raynormAlgOpt <- function(start, randStart, sdStart, olsParam, dataTable, S, nXvar,
   uHvar, nuZUvar, vHvar, nvZVvar, Yvar, Xvar, wHvar, method,
   printInfo, itermax, stepmax, tol, gradtol, hessianType, qac) {
   startVal <- if (!is.null(start))
     start else cstraynorm(olsObj = olsParam, epsiRes = dataTable[["olsResiduals"]],
     S = S, uHvar = uHvar, nuZUvar = nuZUvar, vHvar = vHvar,
     nvZVvar = nvZVvar)
+  if (randStart)
+    startVal <- startVal + rnorm(length(startVal), sd = sdStart)
   startLoglik <- sum(craynormlike(startVal, nXvar = nXvar,
     nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
     vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar,
