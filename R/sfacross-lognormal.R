@@ -375,6 +375,8 @@ chesslognormlike <- function(parm, nXvar, nmuZUvar, nuZUvar,
 # Optimization using different algorithms ----------
 #' optimizations solve for lognormal-normal distribution
 #' @param start starting value for optimization
+#' @param randStart if random starting values should be used
+#' @param sdStart std. Error for random draws for starting values
 #' @param olsParam OLS coefficients
 #' @param dataTable dataframe contains id of observations
 #' @param nXvar number of main variables (inputs + env. var)
@@ -398,7 +400,7 @@ chesslognormlike <- function(parm, nXvar, nmuZUvar, nuZUvar,
 #' @param hessianType how hessian is computed
 #' @param qac qac option for maxLik
 #' @noRd
-lognormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
+lognormAlgOpt <- function(start, randStart, sdStart, olsParam, dataTable, S, nXvar,
   muHvar, nmuZUvar, N, FiMat, uHvar, nuZUvar, vHvar, nvZVvar,
   wHvar, Yvar, Xvar, method, printInfo, itermax, stepmax, tol,
   gradtol, hessianType, qac) {
@@ -406,6 +408,8 @@ lognormAlgOpt <- function(start, olsParam, dataTable, S, nXvar,
     start else cstlognorm(olsObj = olsParam, epsiRes = dataTable[["olsResiduals"]],
     S = S, uHvar = uHvar, nuZUvar = nuZUvar, vHvar = vHvar,
     nvZVvar = nvZVvar, nmuZUvar = nmuZUvar, muHvar = muHvar)
+  if (randStart)
+    startVal <- startVal + rnorm(length(startVal), sd = sdStart)
   startLoglik <- sum(clognormlike(startVal, nXvar = nXvar,
     nuZUvar = nuZUvar, nvZVvar = nvZVvar, nmuZUvar = nmuZUvar,
     muHvar = muHvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
