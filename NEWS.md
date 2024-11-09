@@ -4,6 +4,8 @@
 
 * Add two vignettes for the package
 
+* Add random starting values for ML estimation
+
 ## BUG FIXES
 
 * `efficiencies` returns error when all formulas only contains intercept for
