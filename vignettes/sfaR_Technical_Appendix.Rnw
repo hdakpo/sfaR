@@ -1617,6 +1617,327 @@ convolution.
 No confidence intervals are computed for the truncated skewed laplace-normal 
 convolution.
 
+\subsection{Uniform distribution} \label{subsec:uniform}
+
+\subsubsection{Derivation of the density of $\epsilon$} \label{subsubsec:denuniform}
+
+$$f(u,v)=\frac{1}{\theta\sigma_v\sqrt{2\pi}}\exp{\left(-\frac{1}{2}
+\frac{v^2}{\sigma_v^2}\right)}$$
+and 
+
+$$f(u,\epsilon + Su)=\frac{1}{\theta\sigma_v\sqrt{2\pi}}\exp{\left(-\frac{1}{2}
+\frac{\left(\epsilon + Su\right)^2}{\sigma_v^2}\right)}$$
+
+Therefore:
+
+\begin{align*}
+f(\epsilon) & = \int_0^\theta f(u,\epsilon + Su)du =\frac{1}{\theta\sigma_v} 
+\int_0^\theta \frac{1}{\sqrt{2\pi}}\exp{\left(-\frac{1}{2}\frac{\left(\epsilon + 
+Su\right)^2}{\sigma_v^2}\right)}du \\
+&= \frac{1}{\theta\sigma_v} \int_0^\theta \frac{1}{\sqrt{2\pi}}\exp{\left(-
+\frac{1}{2}\frac{\left(S\epsilon + u\right)^2}{\sigma_v^2}\right)}du
+\end{align*}
+
+Let $Q=\frac{u+S\epsilon}{\sigma_v}$, then $Q\in\left[\frac{S\epsilon}{\sigma_v}, 
+\frac{\theta + S\epsilon}{\sigma_v}\right]$ and $dQ=\frac{du}{\sigma_v}$
+
+Then
+
+$$f(\epsilon) = \frac{1}{\theta\sigma_v} \int_{\frac{S\epsilon}{\sigma_v}}^{
+\frac{\theta + S\epsilon}{\sigma_v}} \frac{1}{\sqrt{2\pi}}\exp{\left(-
+\frac{1}{2}Q^2\right)}\sigma_vdQ$$
+
+\begin{equation}\label{eq:1.9.1}
+f(\epsilon) =  \frac{1}{\theta}\left[\Phi\left(\frac{\theta + S\epsilon}{
+\sigma_v}\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}\right)\right]
+\end{equation}
+
+For estimation purposes, $\theta$ is replaced by $\sigma_u\sqrt{12}$, as the
+variance of the uniform distribution is $\theta^2/12$.
+
+\subsubsection{Technical (in)efficiencies derivation} \label{subsubsec:techineffuniform}
+
+\begin{itemize}
+\item Conditional inefficiency
+\end{itemize}
+
+$$f(u|\epsilon)=\frac{f(u, \epsilon)}{f(\epsilon)}=\frac{\frac{1}{\sigma_v
+\sqrt{2\pi}}\exp{\left(-\frac{1}{2}\frac{\left(S\epsilon + u\right)^2}{
+\sigma_v^2}\right)}}{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon}{
+\sigma_v}\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}\right)} $$
+then
+
+$$E\left[u|\epsilon\right] = \frac{1}{\Phi\left(\frac{\theta}{\sigma_v}+
+\frac{S\epsilon}{\sigma_v}\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}\right)}
+\frac{1}{\sigma_v}\int_0^\theta \frac{u}{\sqrt{2\pi}}\exp{\left(-\frac{1}{2}
+\frac{\left(S\epsilon + u\right)^2}{\sigma_v^2}\right)}du$$
+
+Let $\tilde{u} = \frac{u + S\epsilon}{\sigma_v}$, then $\tilde{u}\in\left[
+\frac{S\epsilon}{\sigma_v}, \frac{\theta+S\epsilon}{\sigma_v}\right]$, and 
+$d\tilde{u}=\frac{du}{\sigma_v}$.
+
+Then we have
+
+$$\frac{1}{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon}{\sigma_v}\right)-
+\Phi\left(\frac{S\epsilon}{\sigma_v}\right)}\frac{1}{\sigma_v}\int_{\frac{
+S\epsilon}{\sigma_v}}^{\frac{\theta+S\epsilon}{\sigma_v}}\frac{\sigma_v
+\tilde{u}-S\epsilon}{\sqrt{2\pi}}\exp{\left(-\frac{1}{2}\tilde{u}^2\right)}
+\sigma_vd\tilde{u}$$
+
+\begin{align*}
+E\left[u|\epsilon\right] & = \frac{1}{\Phi\left(\frac{\theta}{\sigma_v}+
+\frac{S\epsilon}{\sigma_v}\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}\right)}
+\frac{1}{\sigma_v}\int_{\frac{S\epsilon}{\sigma_v}}^{\frac{\theta+S\epsilon}{
+\sigma_v}}\frac{\sigma_v\tilde{u}-S\epsilon}{\sqrt{2\pi}}\exp{\left(-
+\frac{1}{2}\tilde{u}^2\right)}\sigma_vd\tilde{u} \\
+&= \frac{1}{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon}{\sigma_v}\right)-
+\Phi\left(\frac{S\epsilon}{\sigma_v}\right)}\left\{\int_{\frac{S\epsilon}{
+\sigma_v}}^{\frac{\theta+S\epsilon}{\sigma_v}}\frac{\sigma_v\tilde{u}}{
+\sqrt{2\pi}}\exp{\left(-\frac{1}{2}\tilde{u}^2\right)}d\tilde{u}-\int_{
+\frac{S\epsilon}{\sigma_v}}^{\frac{\theta+S\epsilon}{\sigma_v}}
+\frac{S\epsilon}{\sqrt{2\pi}}\exp{\left(-\frac{1}{2}\tilde{u}^2\right)}
+d\tilde{u}\right\}
+\end{align*}
+
+Let $z=\tilde{u}^2$, then $dz=2\tilde{u}d\tilde{u}$, and $z\in\left[
+\frac{\epsilon^2}{\sigma_v^2}, \frac{(\theta + S\epsilon)^2}{\sigma_v^2}\right]$. 
+Then
+
+\begin{align*}
+\int_{\frac{S\epsilon}{\sigma_v}}^{\frac{\theta+S\epsilon}{\sigma_v}}\frac{
+\sigma_v\tilde{u}}{\sqrt{2\pi}}\exp{\left(-\frac{1}{2}\tilde{u}^2\right)}
+d\tilde{u} & = \int_{\frac{\epsilon^2}{\sigma_v^2}}^{\frac{(\theta + 
+S\epsilon)^2}{\sigma_v^2}}\frac{\sigma_v\sqrt{z}}{\sqrt{2\pi}}\exp{\left(-
+\frac{1}{2}z\right)}\frac{dz}{2\sqrt{z}} \\
+& = \int_{\frac{\epsilon^2}{\sigma_v^2}}^{\frac{(\theta + S\epsilon)^2}{
+\sigma_v^2}}\frac{\sigma_v}{\sqrt{2\pi}}\exp{\left(-\frac{1}{2}z\right)}
+\frac{dz}{2} \\
+& = \frac{\sigma_v}{2\sqrt{2\pi}}\left\{-2\exp{\left[-\frac{1}{2}
+\frac{(\theta+S\epsilon)^2}{\sigma_v^2}\right]}+2\exp{\left(-\frac{1}{2}
+\frac{\epsilon^2}{\sigma_v^2}\right)}\right\} \\
+&= \sigma_v\left[\phi\left(\frac{\epsilon}{\sigma_v}\right)-\phi\left(
+\frac{\theta+\epsilon}{\sigma_v}\right)\right]
+\end{align*}
+ 
+In addition:
+
+$$\int_{\frac{S\epsilon}{\sigma_v}}^{\frac{\theta+S\epsilon}{\sigma_v}}
+\frac{S\epsilon}{\sqrt{2\pi}}\exp{\left(-\frac{1}{2}\tilde{u}^2\right)}
+d\tilde{u}=S\epsilon\left[\Phi\left(\frac{\theta+S\epsilon}{\sigma_v}\right)-
+\Phi\left(\frac{S\epsilon}{\sigma_v}\right)\right]$$
+Then
+
+$$E\left[u|\epsilon\right]=\frac{\sigma_v\left[\phi\left(\frac{\epsilon}{
+\sigma_v}\right)-\phi\left(\frac{\theta+\epsilon}{\sigma_v}\right)\right]-
+S\epsilon\left[\Phi\left(\frac{\theta+S\epsilon}{\sigma_v}\right)-\Phi\left(
+\frac{S\epsilon}{\sigma_v}\right)\right]}{\Phi\left(\frac{\theta}{\sigma_v}+
+\frac{S\epsilon}{\sigma_v}\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}\right)}$$
+
+\begin{equation}\label{eq:1.9.2}
+E\left[u|\epsilon\right] = \frac{\sigma_v\left[\phi\left(\frac{\epsilon}{
+\sigma_v}\right)-\phi\left(\frac{\theta+\epsilon}{\sigma_v}\right)\right]}{
+\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon}{\sigma_v}\right)-
+\Phi\left(\frac{S\epsilon}{\sigma_v}\right)}-S\epsilon
+\end{equation}
+
+If $\theta \longrightarrow \infty$, this inefficiency score becomes
+
+\begin{equation}\label{eq:1.9.3}
+E\left[u|\epsilon\right] = \frac{\sigma_v\phi\left(\frac{\epsilon}{\sigma_v}
+\right)}{1-\Phi\left(\frac{S\epsilon}{\sigma_v}\right)}-S\epsilon
+\end{equation}
+
+\begin{itemize}
+\item Conditional efficiency
+\end{itemize}
+
+\begin{align*}
+E\left[\exp{\left(-u\right)|\epsilon}\right] & = \int_0^\theta \exp{(-u)} 
+f(u|\epsilon) du \\
+& = \int_0^\theta \exp{(-u)} \frac{\frac{1}{\sigma_v\sqrt{2\pi}}\exp{\left(-
+\frac{1}{2}\frac{\left(S\epsilon + u\right)^2}{\sigma_v^2}\right)}}{\Phi\left(
+\frac{\theta}{\sigma_v}+\frac{S\epsilon}{\sigma_v}\right)-\Phi\left(\frac{
+S\epsilon}{\sigma_v}\right)}du \\
+&= \frac{1}{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon}{\sigma_v}\right)-
+\Phi\left(\frac{S\epsilon}{\sigma_v}\right)}\frac{1}{\sigma_v}\int_0^\theta 
+\frac{1}{\sqrt{2\pi}}\exp{\left(-\frac{1}{2}\frac{\left(S\epsilon + 
+u\right)^2}{\sigma_v^2}-\frac{2u}{2}\right)}du\\
+& = \frac{1}{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon}{\sigma_v}
+\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}\right)}\frac{1}{\sigma_v}
+\int_0^\theta \frac{1}{\sqrt{2\pi}}\exp{\left[-\frac{1}{2}\left(\frac{
+\epsilon^2+2S\epsilon u +u^2}{\sigma_v^2}+2u\right)\right]}du \\
+& = \frac{1}{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon}{\sigma_v}
+\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}\right)}\frac{1}{\sigma_v}
+\int_0^\theta \frac{1}{\sqrt{2\pi}}\exp{\left\{-\frac{1}{2}\left[\frac{1}{
+\sigma_v^2}\left(u^2+2u(S\epsilon+\sigma_v^2\right)+\frac{\epsilon^2}{
+\sigma_v^2}\right]\right\}}du \\
+&= \frac{\exp{\left[\frac{\left(S\epsilon+\sigma_v^2\right)^2}{2\sigma_v^2}-
+\frac{\epsilon^2}{2\sigma_v^2}\right]}}{\Phi\left(\frac{\theta}{\sigma_v}+
+\frac{S\epsilon}{\sigma_v}\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}\right)}
+\frac{1}{\sigma_v}\int_0^\theta \frac{1}{\sqrt{2\pi}}\exp{\left\{-\frac{1}{2}
+\left[\frac{u+(S\epsilon+\sigma_v^2)}{\sigma_v}\right]^2\right\}}du\\
+& = \frac{\exp{\left[\frac{\left(S\epsilon+\sigma_v^2\right)^2}{2\sigma_v^2}-
+\frac{\epsilon^2}{2\sigma_v^2}\right]}}{\Phi\left(\frac{\theta}{\sigma_v}+
+\frac{S\epsilon}{\sigma_v}\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}\right)}
+\int_{\frac{S\epsilon+\sigma_v^2}{\sigma_v}}^{\frac{\theta + S\epsilon+
+\sigma_v^2}{\sigma_v}} \frac{1}{\sqrt{2\pi}}\exp{\left\{-\frac{1}{2}
+\tilde{u}^2\right\}}d\tilde{u} \\
+&= \exp{\left[\frac{\left(S\epsilon+\sigma_v^2\right)^2}{2\sigma_v^2}-
+\frac{\epsilon^2}{2\sigma_v^2}\right]}\frac{\Phi\left(\frac{\theta}{\sigma_v}+
+\frac{S\epsilon}{\sigma_v}+\sigma_v\right)-\Phi\left(\frac{S\epsilon}{
+\sigma_v}+\sigma_v\right)}{\Phi\left(\frac{\theta}{\sigma_v}+\frac{
+S\epsilon}{\sigma_v}\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}\right)}
+\end{align*}
+
+\begin{equation}\label{eq:1.9.4}
+E\left[\exp{\left(-u\right)|\epsilon}\right] = \exp{\left[S\epsilon+\frac{
+\sigma_v^2}{2}\right]}\frac{\Phi\left(\frac{\theta}{\sigma_v}+\frac{
+S\epsilon}{\sigma_v}+\sigma_v\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}+
+\sigma_v\right)}{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon}{
+\sigma_v}\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}\right)}
+\end{equation}
+
+When $\theta \longrightarrow \infty$, this efficiency score becomes
+
+\begin{equation}\label{eq:1.9.5}
+E\left[\exp{\left(-u\right)|\epsilon}\right] = \exp{\left[S\epsilon+
+\frac{\sigma_v^2}{2}\right]}\frac{1-\Phi\left(\frac{S\epsilon}{\sigma_v}+
+\sigma_v\right)}{1-\Phi\left(\frac{S\epsilon}{\sigma_v}\right)}
+\end{equation}
+
+\begin{itemize}
+\item Reciprocal conditional efficiency
+\end{itemize}
+
+\begin{align*}
+E\left[\exp{\left(-u\right)|\epsilon}\right] & = \int_0^\theta \exp{(u)} 
+f(u|\epsilon) du \\
+& = \int_0^\theta \exp{(u)} \frac{\frac{1}{\sigma_v\sqrt{2\pi}}\exp{
+\left(-\frac{1}{2}\frac{\left(S\epsilon + u\right)^2}{\sigma_v^2}\right)}}{
+\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon}{\sigma_v}\right)-
+\Phi\left(\frac{S\epsilon}{\sigma_v}\right)}du \\
+&= \frac{1}{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon}{\sigma_v}
+\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}\right)}\frac{1}{\sigma_v}
+\int_0^\theta \frac{1}{\sqrt{2\pi}}\exp{\left(-\frac{1}{2}\frac{
+\left(S\epsilon + u\right)^2}{\sigma_v^2}+\frac{2u}{2}\right)}du\\
+& = \frac{1}{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon}{\sigma_v}
+\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}\right)}\frac{1}{\sigma_v}
+\int_0^\theta \frac{1}{\sqrt{2\pi}}\exp{\left[-\frac{1}{2}\left(\frac{
+\epsilon^2+2S\epsilon u +u^2}{\sigma_v^2}-2u\right)\right]}du \\
+& = \frac{1}{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon}{\sigma_v}
+\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}\right)}\frac{1}{\sigma_v}
+\int_0^\theta \frac{1}{\sqrt{2\pi}}\exp{\left\{-\frac{1}{2}\left[
+\frac{1}{\sigma_v^2}\left(u^2+2u(S\epsilon-\sigma_v^2\right)+\frac{
+\epsilon^2}{\sigma_v^2}\right]\right\}}du \\
+&= \frac{\exp{\left[\frac{\left(S\epsilon-\sigma_v^2\right)^2}{2\sigma_v^2}-
+\frac{\epsilon^2}{2\sigma_v^2}\right]}}{\Phi\left(\frac{\theta}{\sigma_v}+
+\frac{S\epsilon}{\sigma_v}\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}\right)}
+\frac{1}{\sigma_v}\int_0^\theta \frac{1}{\sqrt{2\pi}}\exp{\left\{-\frac{1}{2}
+\left[\frac{u+(S\epsilon-\sigma_v^2)}{\sigma_v}\right]^2\right\}}du\\
+& = \frac{\exp{\left[\frac{\left(S\epsilon-\sigma_v^2\right)^2}{2\sigma_v^2}-
+\frac{\epsilon^2}{2\sigma_v^2}\right]}}{\Phi\left(\frac{\theta}{\sigma_v}+
+\frac{S\epsilon}{\sigma_v}\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}\right)}
+\int_{\frac{S\epsilon-\sigma_v^2}{\sigma_v}}^{\frac{\theta + S\epsilon-
+\sigma_v^2}{\sigma_v}} \frac{1}{\sqrt{2\pi}}\exp{\left\{-\frac{1}{2}
+\tilde{u}^2\right\}}d\tilde{u} \\
+&= \exp{\left[\frac{\left(S\epsilon-\sigma_v^2\right)^2}{2\sigma_v^2}-
+\frac{\epsilon^2}{2\sigma_v^2}\right]}\frac{\Phi\left(\frac{\theta}{\sigma_v}+
+\frac{S\epsilon}{\sigma_v}-\sigma_v\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}-
+\sigma_v\right)}{\Phi\left(\frac{\theta}{\sigma_v}+\frac{S\epsilon}{\sigma_v}
+\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}\right)}
+\end{align*}
+
+\begin{equation}\label{eq:1.9.6}
+E\left[\exp{\left(u\right)|\epsilon}\right] = \exp{\left[-S\epsilon+
+\frac{\sigma_v^2}{2}\right]}\frac{\Phi\left(\frac{\theta}{\sigma_v}+
+\frac{S\epsilon}{\sigma_v}-\sigma_v\right)-\Phi\left(\frac{S\epsilon}{
+\sigma_v}-\sigma_v\right)}{\Phi\left(\frac{\theta}{\sigma_v}+\frac{
+S\epsilon}{\sigma_v}\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}\right)}
+\end{equation}
+
+When $\theta \longrightarrow \infty$, this efficiency score becomes
+
+\begin{equation}\label{eq:1.9.7}
+E\left[\exp{\left(u\right)|\epsilon}\right] = \exp{\left[-S\epsilon+
+\frac{\sigma_v^2}{2}\right]}\frac{1-\Phi\left(\frac{S\epsilon}{\sigma_v}-
+\sigma_v\right)}{1-\Phi\left(\frac{S\epsilon}{\sigma_v}\right)}
+\end{equation}
+
+\begin{itemize}
+\item Mode of conditional inefficiency
+\end{itemize}
+
+The mode of the conditional inefficiency is obtained by solving the following
+equation:
+
+The mode of the inefficiency score is obtained by maximizing the distribution 
+of $u_i|\epsilon_i$, and solving the following equation:
+
+$$\frac{\partial f(u_i|\epsilon_i)}{\partial u_i} = 0$$
+
+which yields $-S\epsilon$. When $-\theta < S\epsilon < 0$, the mode is 
+$-S\epsilon$. When $S\epsilon \geq 0$, the mode is $0$, and in all other cases, the
+mode equals $\theta$.
+
+\subsubsection{Confidence intervals}
+
+The distribution of $u|\epsilon$ shows that this variable follows 
+$\mathcal{N}^+\left(\mu_*, \sigma_*\right)$ with $\mu_{i*} = -S\epsilon_i$ and 
+$\sigma_* = \sigma_v$ and $0\leq u\leq \theta$. 
+Let $\tilde{u}_i =\frac{u_i-\mu_{i*}}{\sigma_*}= \frac{u_i+S\epsilon_i}{\sigma_v}$ 
+then $\tilde{u}_i \in \left[\frac{S\epsilon_i}{\sigma_v}, 
+\frac{\theta+S\epsilon_i}{\sigma_v}\right]$. The confidence interval can then 
+be obtained as follows
+
+$$\mu_{i*} + Z_L\sigma_* \leq u_i|\epsilon_i \leq \mu_{i*} + Z_U\sigma_*$$
+
+with $L_i = \mu_{i*} + Z_L\sigma_*$ and $U_i = \mu_{i*} + Z_U\sigma_*$.
+
+We have:
+
+$$\int_{\frac{S\epsilon}{\sigma_v}}^{Z_L}f(\tilde{u})d\tilde{u}=\int_{Z_U}^{
+\frac{\theta + S\epsilon}{\sigma_v}} f(\tilde{u})d\tilde{u} = \frac{\alpha}{2}$$
+
+with 
+
+$$f(\tilde{u})=\frac{\phi\left(\tilde{u}\right)}{\Phi\left(\frac{\theta + 
+S\epsilon}{\sigma_v}\right)-\Phi\left(\frac{S\epsilon}{\sigma_v}\right)}$$
+
+Solving the integrals yields:
+
+\begin{equation}\label{eq:1.9.8}
+Z_L = -S\epsilon_i +\sigma_v\Phi^{-1}\left[\frac{\alpha}{2}\Phi\left(\frac{
+\theta + S\epsilon_i}{\sigma_v}\right) + \left(1-\frac{\alpha}{2}\right)
+\Phi\left(\frac{S\epsilon_i}{\sigma_v}\right)\right]
+\end{equation}
+
+and 
+
+\begin{equation}\label{eq:1.9.9}
+Z_U = -S\epsilon_i +\sigma_v\Phi^{-1}\left[\left(1-\frac{\alpha}{2}\right)
+\Phi\left(\frac{\theta + S\epsilon_i}{\sigma_v}\right) + \frac{\alpha}{2}
+\Phi\left(\frac{S\epsilon_i}{\sigma_v}\right)\right]
+\end{equation}
+
+When $\theta \longrightarrow \infty$, these confidence interval become
+
+\begin{equation}\label{eq:1.9.10}
+Z_L = -S\epsilon_i +\sigma_v\Phi^{-1}\left[\frac{\alpha}{2} + \left(1-
+\frac{\alpha}{2}\right)\Phi\left(\frac{S\epsilon_i}{\sigma_v}\right)\right]
+\end{equation}
+
+and 
+
+\begin{equation}\label{eq:1.9.11}
+Z_U = -S\epsilon_i +\sigma_v\Phi^{-1}\left[\left(1-\frac{\alpha}{2}\right) + 
+\frac{\alpha}{2}\Phi\left(\frac{S\epsilon_i}{\sigma_v}\right)\right]
+\end{equation}
+
+For the efficiency score we have:
+
+$$\exp{\left(-U_i\right)} \leq \exp{\left(-u_i\right)}|\epsilon_i
+\leq \exp{\left(-L_i\right)}$$
+
 %% -- Bibliography -------------------------------------------------------------
 
 \bibliography{sfaR-bib}
