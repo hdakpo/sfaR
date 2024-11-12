@@ -354,9 +354,9 @@ The mode for the conditional inefficiency $u|\epsilon$ is $\mu_*$.
 From the previous developments, $u|\epsilon$ follows $\mathcal{N}^+(\mu_{*}, 
 \sigma_*)$. Let $\tilde{u} = \frac{u-\mu_*}{\sigma_*}$ then $\tilde{u}\in\left[
 -\frac{\mu_*}{\sigma_*}, \infty\right)$. Then the $(1-\alpha)100\%$ confidence 
-interval is given by
+interval is given by (see \citet{bera99})
 
-$$\mu_{*} + Z_L\sigma_* \leq E\left[u|\epsilon\right] \leq \mu_{*} + Z_U\sigma_*$$
+$$\mu_{*} + Z_L\sigma_* \leq u|\epsilon \leq \mu_{*} + Z_U\sigma_*$$
 
 such that
 
@@ -408,6 +408,143 @@ $\exp{\left(c_u + 2\mathbf{z}_{u,i}'\bm{\delta}\right)}$, respectively.
 \subsection{Exponential distribution} \label{subsec:exp}
 
 \subsubsection{Derivation of the density of $\epsilon$} \label{subsubsec:densexp}
+
+We have 
+
+$$f(u) = \frac{1}{\sigma_u}\exp{\left(-\frac{u}{\sigma_u}\right)}$$
+
+Then
+
+$$f(u,v)=\frac{1}{\sigma_u\sigma_v\sqrt{2\pi}}\exp{\left(-\frac{u}{\sigma_u}-
+\frac{1}{2}\frac{v^2}{\sigma_v^2}\right)}$$
+
+$$f(u, \epsilon+Su)=\frac{1}{\sigma_u\sigma_v\sqrt{2\pi}}\exp{\left(-\frac{u}{
+\sigma_u}-\frac{1}{2}\frac{\left(\epsilon+Su\right)^2}{\sigma_v^2}\right)}=
+\frac{1}{\sigma_u\sigma_v\sqrt{2\pi}}\exp{\left[-\frac{1}{2}\left(\frac{\left(
+\epsilon+Su\right)^2}{\sigma_v^2}+\frac{2u}{\sigma_u}\right)\right]}$$
+
+We have:
+\begin{align*}
+\frac{\left(\epsilon+Su\right)^2}{\sigma_v^2}+\frac{2u}{\sigma_u} & = 
+\frac{\epsilon^2+2Su\epsilon+u^2}{\sigma_v^2}+\frac{2u}{\sigma_u} \\
+& =  \frac{u^2}{\sigma_v^2}+2u\left(\frac{1}{\sigma_u}+\frac{S\epsilon}{
+\sigma_v^2}\right) + \frac{\epsilon^2}{\sigma_v^2} \\
+& =  \frac{1}{\sigma_v^2}\left[u^2 + 2u\left(\frac{\sigma_v^2}{\sigma_u} + 
+S\epsilon\right)\right] + \frac{\epsilon^2}{\sigma_v^2} \\
+& = \frac{1}{\sigma_v^2}\left\{\left[u+\left(\frac{\sigma_v^2}{\sigma_u} + 
+S\epsilon\right)\right]^2\right\}-\frac{1}{\sigma_v^2}\left(\frac{\sigma_v^2}{
+\sigma_u} + S\epsilon\right)^2+\frac{\epsilon^2}{\sigma_v^2} \\
+& = \frac{1}{\sigma_v^2}\left\{\left[u+\left(\frac{\sigma_v^2}{\sigma_u} + 
+S\epsilon\right)\right]^2\right\} - \left(\frac{\sigma_v^2}{\sigma_u^2}+
+\frac{2S\epsilon}{\sigma_u}\right)
+\end{align*}
+
+Then 
+
+$$f(u, \epsilon+Su)=\frac{1}{\sigma_u\sigma_v\sqrt{2\pi}}\exp{\left\{
+-\frac{1}{2\sigma_v^2}\left[u+\left(\frac{\sigma_v^2}{\sigma_u} + 
+S\epsilon\right)\right]^2 + \frac{\sigma_v^2}{2\sigma_u^2} + 
+\frac{S\epsilon}{\sigma_u} \right\}}$$
+
+Hence
+
+\begin{align*}
+f(\epsilon) & = \int_0^\infty \frac{1}{\sigma_u\sigma_v\sqrt{2\pi}}
+\exp{\left\{-\frac{1}{2\sigma_v^2}\left[u+\left(\frac{\sigma_v^2}{\sigma_u} + 
+S\epsilon\right)\right]^2 + \frac{\sigma_v^2}{2\sigma_u^2} + 
+\frac{S\epsilon}{\sigma_u} \right\}} du \\
+& = \frac{\exp{\left(\frac{\sigma_v^2}{2\sigma_u^2}+\frac{S\epsilon}{\sigma_u}
+\right)}}{\sigma_u\sigma_v}\int_0^\infty \frac{1}{\sqrt{2\pi}}\exp{\left\{
+-\frac{1}{2\sigma_v^2}\left[u+\left(\frac{\sigma_v^2}{\sigma_u} + 
+S\epsilon\right)\right]^2\right\}}du \\
+&= \frac{\exp{\left(\frac{\sigma_v^2}{2\sigma_u^2}+\frac{S\epsilon}{\sigma_u}
+\right)}}{\sigma_u\sigma_v}\int_0^\infty \frac{1}{\sqrt{2\pi}}\exp{\left\{
+-\frac{1}{2\sigma_v^2}\left[u-\left(-\frac{\sigma_v^2}{\sigma_u} - 
+S\epsilon\right)\right]^2\right\}}du
+\end{align*}
+
+Using the the solution of integral \ref{eq.a1} in the appendix, the density of 
+$\epsilon$ is given by:
+
+\begin{equation}\label{eq:1.2.1}
+f(\epsilon) = \frac{1}{\sigma_u}\exp{\left(\frac{\sigma_v^2}{2\sigma_u^2}+
+\frac{S\epsilon}{\sigma_u}\right)}\Phi\left(-\frac{\sigma_v}{\sigma_u} - 
+\frac{S\epsilon}{\sigma_v}\right)
+\end{equation}
+
+\subsubsection{Technical (in)efficiencies derivation} \label{subsubsec:techineffexp}
+
+\begin{itemize}
+\item Conditional inefficiency
+\end{itemize}
+
+$$f(u|\epsilon)=\frac{f(u, \epsilon)}{f(\epsilon)}=\frac{1}{\sigma_v\sqrt{2\pi}
+\Phi\left(-\frac{\sigma_v}{\sigma_u} - \frac{S\epsilon}{\sigma_v}\right)}\exp{
+\left\{-\frac{1}{2\sigma_v^2}\left[u+\left(\frac{\sigma_v^2}{\sigma_u} + 
+S\epsilon\right)\right]^2\right\}}$$
+
+Let $\mu_* = -\left(\frac{\sigma_v^2}{\sigma_u} + S\epsilon\right)$ then
+
+$$f(u|\epsilon) = \frac{1}{\sigma_v\sqrt{2\pi}\Phi\left(\frac{\mu_*}{\sigma_v}
+\right)}\exp{\left[-\frac{1}{2\sigma_v^2}\left(u-\mu_*\right)^2\right]}$$
+
+Then
+
+$$E\left[u|\epsilon\right] = \int_0^\infty \frac{u}{\sigma_v\sqrt{2\pi}
+\Phi\left(\frac{\mu_*}{\sigma_v}\right)}\exp{\left[-\frac{1}{2\sigma_v^2}
+\left(u-\mu_*\right)^2\right]}du = \frac{1}{\sigma_v\Phi\left(\frac{\mu_*}{
+\sigma_v}\right)}\int_0^\infty \frac{u}{\sqrt{2\pi}}\exp{\left[-\frac{1}{
+2\sigma_v^2}\left(u-\mu_*\right)^2\right]}du$$
+
+Using the solution of the integral \ref{eq.a3} in the appendix, we have:
+
+\begin{equation}\label{eq:1.2.2}
+E\left[u|\epsilon\right] = \mu_* + \sigma_v\frac{\phi\left(\frac{\mu_*}{
+\sigma_v}\right)}{\Phi\left(\frac{\mu_*}{\sigma_v}\right)}
+\end{equation}
+
+\begin{itemize}
+\item Conditional efficiency
+\end{itemize}
+
+\begin{align*}
+E\left[\exp{\left(-u\right)|\epsilon}\right] & = \int_0^\infty \frac{\exp{
+\left(-u\right)}}{\sigma_v\sqrt{2\pi}\Phi\left(\frac{\mu_*}{\sigma_v}\right)}
+\exp{\left[-\frac{1}{2\sigma_v^2}\left(u-\mu_*\right)^2\right]}du \\
+& = \int_0^\infty \frac{1}{\sigma_v\sqrt{2\pi}\Phi\left(\frac{\mu_*}{\sigma_v}
+\right)}\exp{\left[-\frac{1}{2\sigma_v^2}\left(u-\mu_*\right)^2-u\right]}du
+\end{align*}
+
+Using the the solution of integral \ref{eq.a4} in the appendix, and setting 
+$t = 1$, it is easy to obtain
+
+\begin{equation}\label{eq:1.2.3}
+E\left[\exp{\left(-u\right)|\epsilon}\right]=\exp{\left(-\mu_* + \frac{1}{2}
+\sigma_v^2\right)} \frac{\Phi\left(\frac{\mu_*}{\sigma_v}-\sigma_v\right)}{
+\Phi\left(\frac{\mu_*}{\sigma_v}\right)}
+\end{equation}
+
+\begin{itemize}
+\item Reciprocal conditional efficiency
+\end{itemize}
+
+Using the the solution of integral \ref{eq.a4} in the appendix, and setting 
+$t = -1$, we can write:
+
+\begin{equation}\label{eq:1.2.4}
+E\left[\exp{\left(u\right)|\epsilon}\right] = \exp{\left(\mu_* + \frac{1}{2}
+\sigma_v^2\right)} \frac{\Phi\left(\frac{\mu_*}{\sigma_v}+\sigma_v\right)}{
+\Phi\left(\frac{\mu_*}{\sigma_v}\right)}
+\end{equation}
+
+The mode for the conditional inefficiency $u|\epsilon$ is $\mu_*$.
+
+\subsubsection{Confidence intervals}
+
+The confidence interval is derived similarly as in the case of the truncated 
+normal distribution, given that $u|\epsilon$ follows 
+$\mathcal{N}^+(\mu_{*}, \sigma_v)$.
+
 
 %% -- Bibliography -------------------------------------------------------------
 
