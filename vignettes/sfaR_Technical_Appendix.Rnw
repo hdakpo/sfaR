@@ -1139,7 +1139,12 @@ E\left[u|\epsilon\right] = \frac{\frac{1}{R}\sum_{r = 1}^R\frac{u_r}{\sigma_v}
 \end{itemize}
 
 \begin{equation}\label{eq:1.5.3}
-E\left[\exp{\left(-u\right)|\epsilon}\right] =\frac{\frac{1}{R}\sum_{r = 1}^R\frac{\exp{\left(-u_r\right)}}{\sigma_v}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}=\frac{\sum_{r = 1}^R\exp{\left(-u_r\right)}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}{\sum_{r = 1}^R\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}
+E\left[\exp{\left(-u\right)|\epsilon}\right] =\frac{\frac{1}{R}
+\sum_{r = 1}^R\frac{\exp{\left(-u_r\right)}}{\sigma_v}\phi\left(
+\frac{\epsilon+Su_r}{\sigma_v}\right)}{\frac{1}{R}\sum_{r = 1}^R
+\frac{1}{\sigma_v}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}=
+\frac{\sum_{r = 1}^R\exp{\left(-u_r\right)}\phi\left(\frac{\epsilon+Su_r}{
+\sigma_v}\right)}{\sum_{r = 1}^R\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}
 \end{equation}
 
 \begin{itemize}
@@ -1147,8 +1152,12 @@ E\left[\exp{\left(-u\right)|\epsilon}\right] =\frac{\frac{1}{R}\sum_{r = 1}^R\fr
 \end{itemize}
 
 \begin{equation}\label{eq:1.5.4}
-E\left[\exp{\left(u\right)|\epsilon}\right] = \frac{\frac{1}{R}\sum_{r = 1}^R\frac{\exp{\left(u_r\right)}}{\sigma_v}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)} =
-\frac{\sum_{r = 1}^R\exp{\left(u_r\right)}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}{\sum_{r = 1}^R\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}
+E\left[\exp{\left(u\right)|\epsilon}\right] = \frac{\frac{1}{R}\sum_{r = 1}^R
+\frac{\exp{\left(u_r\right)}}{\sigma_v}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}
+\right)}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{
+\epsilon+Su_r}{\sigma_v}\right)} =
+\frac{\sum_{r = 1}^R\exp{\left(u_r\right)}\phi\left(\frac{\epsilon+Su_r}{
+\sigma_v}\right)}{\sum_{r = 1}^R\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}
 \end{equation}
 
 \subsubsection{Confidence intervals} \label{subsubsec:confintlognormal}
@@ -1163,18 +1172,22 @@ We propose to estimate the density of $\epsilon$ using quasi Monte-Carlo simulat
 
 We have 
 
-$$f(u) = \frac{k}{\sigma_u}\left(\frac{u}{\sigma_u}\right)^{k-1}\exp{\left(-\left(u/\sigma_u\right)^{k}\right)}$$
+$$f(u) = \frac{k}{\sigma_u}\left(\frac{u}{\sigma_u}\right)^{k-1}\exp{\left(-
+\left(u/\sigma_u\right)^{k}\right)}$$
 
 with $k > 0$
 
 then the density of $\epsilon$ is obtained as follows:
 
-$$f(\epsilon) = \int_0^\infty \frac{k}{\sigma_u}\left(\frac{u}{\sigma_u}\right)^{k-1}\exp{\left(-\left(u/\sigma_u\right)^{k}\right)}\frac{1}{\sigma_v}\phi\left(\frac{\epsilon+Su}{\sigma_v}\right)du$$
+$$f(\epsilon) = \int_0^\infty \frac{k}{\sigma_u}\left(\frac{u}{\sigma_u}
+\right)^{k-1}\exp{\left(-\left(u/\sigma_u\right)^{k}\right)}\frac{1}{\sigma_v}
+\phi\left(\frac{\epsilon+Su}{\sigma_v}\right)du$$
 
 $f(\epsilon)$ can be approximated:
 
 \begin{equation}\label{eq:1.6.1}
-f(\epsilon) = \approx \frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)
+f(\epsilon) = \approx \frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(
+\frac{\epsilon+Su_r}{\sigma_v}\right)
 \end{equation}
 
 where
@@ -1192,7 +1205,11 @@ Following the same development as in the log-normal case, we have
 \end{itemize}
 
 \begin{equation}\label{eq:1.6.2}
-E\left[u|\epsilon\right] = \frac{\frac{1}{R}\sum_{r = 1}^R\frac{u_r}{\sigma_v}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}=\frac{\sum_{r = 1}^Ru_r\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}{\sum_{r = 1}^R\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}
+E\left[u|\epsilon\right] = \frac{\frac{1}{R}\sum_{r = 1}^R\frac{u_r}{\sigma_v}
+\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}{\frac{1}{R}\sum_{r = 1}^R
+\frac{1}{\sigma_v}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}=
+\frac{\sum_{r = 1}^Ru_r\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}{
+\sum_{r = 1}^R\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}
 \end{equation}
 
 \begin{itemize}
@@ -1200,7 +1217,12 @@ E\left[u|\epsilon\right] = \frac{\frac{1}{R}\sum_{r = 1}^R\frac{u_r}{\sigma_v}\p
 \end{itemize}
 
 \begin{equation}\label{eq:1.6.3}
-E\left[\exp{\left(-u\right)|\epsilon}\right] = \frac{\frac{1}{R}\sum_{r = 1}^R\frac{\exp{\left(-u_r\right)}}{\sigma_v}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}=\frac{\sum_{r = 1}^R\exp{\left(-u_r\right)}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}{\sum_{r = 1}^R\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}
+E\left[\exp{\left(-u\right)|\epsilon}\right] = \frac{\frac{1}{R}\sum_{r = 1}^R
+\frac{\exp{\left(-u_r\right)}}{\sigma_v}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}
+\right)}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(
+\frac{\epsilon+Su_r}{\sigma_v}\right)}=\frac{\sum_{r = 1}^R\exp{
+\left(-u_r\right)}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}{
+\sum_{r = 1}^R\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}
 \end{equation}
 
 \begin{itemize}
@@ -1208,7 +1230,12 @@ E\left[\exp{\left(-u\right)|\epsilon}\right] = \frac{\frac{1}{R}\sum_{r = 1}^R\f
 \end{itemize}
 
 \begin{equation}\label{eq:1.6.4}
-E\left[\exp{\left(u\right)|\epsilon}\right] = \frac{\frac{1}{R}\sum_{r = 1}^R\frac{\exp{\left(u_r\right)}}{\sigma_v}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}=\frac{\sum_{r = 1}^R\exp{\left(u_r\right)}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}{\sum_{r = 1}^R\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}
+E\left[\exp{\left(u\right)|\epsilon}\right] = \frac{\frac{1}{R}\sum_{r = 1}^R
+\frac{\exp{\left(u_r\right)}}{\sigma_v}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}
+\right)}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(
+\frac{\epsilon+Su_r}{\sigma_v}\right)}=\frac{\sum_{r = 1}^R\exp{
+\left(u_r\right)}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}{
+\sum_{r = 1}^R\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}
 \end{equation}
 
 \subsubsection{Confidence intervals} \label{subsubsec:confintweibull}
