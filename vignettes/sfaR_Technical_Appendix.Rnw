@@ -1425,11 +1425,196 @@ b+\sigma_v\right)}{\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}
 \item Mode of conditional inefficiency
 \end{itemize}
 
-No conditional mode is derived for the generalized exponential-normal
+No conditional mode is derived for the generalized exponential-normal convolution
+
+\subsubsection{Confidence intervals} \label{subsubsec:confintgenexp}
+
+No confidence intervals are computed for the generalized exponential-normal 
+convolution.
+
+\subsection{Truncated Skewed Laplace distribution} \label{subsec:trunskewlap}
+
+\subsubsection{Derivation of the density of $\epsilon$} \label{subsubsec:dentrunkskewlap}
+
+We have
+
+$$f(u) =\frac{1+\lambda}{\sigma_u\left(
+2\lambda+1\right)}\left\{2\exp{\left(-\frac{u}{\sigma_u}\right)}-
+\exp{\left(-\frac{\left(1+\lambda\right)u}{\sigma_u}\right)}\right\}$$
+
+with $\lambda > 0$
+
+then
+
+$$f(u,v) = \frac{1+\lambda}{\sigma_u\left(2\lambda+1\right)}\left\{2\exp{
+\left(-\frac{u}{\sigma_u}\right)}-\exp{\left(-\frac{\left(1+\lambda\right)u}{
+\sigma_u}\right)}\right\}\frac{1}{\sigma_v}\phi\left(\frac{v}{\sigma_v}\right)$$
+
+Then
+
+$$f(u,\epsilon +Su) = \frac{1+\lambda}{\sigma_u\left(2\lambda+1\right)}\left\{
+2\exp{\left(-\frac{u}{\sigma_u}\right)}-\exp{\left(-\frac{\left(
+1+\lambda\right)u}{\sigma_u}\right)}\right\}\frac{1}{\sigma_v}\phi\left(\frac{
+\epsilon +Su}{\sigma_v}\right)$$
+
+We have:
+
+$$\frac{2u}{\sigma_u} + \left(\frac{\epsilon +Su}{\sigma_v}\right)^2=\left[
+\frac{u}{\sigma_v} + \left(\frac{\sigma_v}{\sigma_u}+\frac{S\epsilon}{\sigma_v}
+\right)\right]^2 - \left(\frac{\sigma_v^2}{\sigma_u^2}+\frac{2S\epsilon}{
+\sigma_u}\right)$$
+
+and 
+
+$$\frac{2\left(1+\lambda\right)u}{\sigma_u} + \left(\frac{\epsilon +Su}{
+\sigma_v}\right)^2=\left[\frac{u}{\sigma_v} + \left(\left(1+\lambda\right)
+\frac{\sigma_v}{\sigma_u}+\frac{S\epsilon}{\sigma_v}\right)\right]^2 - 
+\left(1+\lambda\right)\left(\left(1+\lambda\right)\frac{\sigma_v^2}{
+\sigma_u^2}+\frac{2S\epsilon}{\sigma_u}\right)$$
+
+We then have
+
+
+\begin{align*}
+f(u,\epsilon) & = \frac{1+\lambda}{\sigma_u\sigma_v\left(2\lambda+1\right)}
+\left\{2\exp{\left(\frac{\sigma_v^2}{2\sigma_u^2}+\frac{S\epsilon}{\sigma_u}
+\right)}\phi\left[\frac{u}{\sigma_v} + \left(\frac{\sigma_v}{\sigma_u}+
+\frac{S\epsilon}{\sigma_v}\right)\right]- \right. \\
+& \quad \left. \exp{\left(1+\lambda\right)\left(\left(1+\lambda\right)\frac{
+\sigma_v^2}{2\sigma_u^2}+\frac{S\epsilon}{\sigma_u}\right)}\phi\left[\frac{u}{
+\sigma_v} + \left(\left(1+\lambda\right)\frac{\sigma_v}{\sigma_u}+\frac{
+S\epsilon}{\sigma_v}\right)\right]\right\}
+\end{align*}
+
+Therefore
+
+\begin{align*}
+f(\epsilon) & =\frac{1+\lambda}{\sigma_u\left(2\lambda+1\right)}\left\{2\exp{
+\left(\frac{\sigma_v^2}{2\sigma_u^2}+\frac{S\epsilon}{\sigma_u}\right)}\int_{
+\frac{\sigma_v}{\sigma_u}+\frac{S\epsilon}{\sigma_v}}^\infty\phi\left(
+\tilde{u}\right)d\tilde{u} - \right. \\
+& \quad \left.\exp{\left[\left(1+\lambda\right)\left(\left(1+\lambda\right)
+\frac{\sigma_v^2}{2\sigma_u^2}+\frac{S\epsilon}{\sigma_u}\right)\right]}\int_{
+\left(1+\lambda\right)\frac{\sigma_v}{\sigma_u}+\frac{S\epsilon}{
+\sigma_v}}^\infty\phi\left(\tilde{u}\right)d\tilde{u}\right\}
+\end{align*}
+
+
+Solving the previous integrals yields
+
+\begin{align*}
+f(\epsilon) & =\frac{1+\lambda}{\sigma_u\left(2\lambda+1\right)}\left\{
+2\exp{\left(\frac{\sigma_v^2}{2\sigma_u^2}+\frac{S\epsilon}{\sigma_u}\right)}
+\Phi\left(-\frac{\sigma_v}{\sigma_u}-\frac{S\epsilon}{\sigma_v}\right) -\right. \\
+& \quad \left.\exp{\left(\frac{\left(1+\lambda\right)^2\sigma_v^2}{
+2\sigma_u^2}+\frac{S\epsilon\left(1+\lambda\right)}{\sigma_u}\right)}
+\Phi\left(-\frac{\left(1+\lambda\right)\sigma_v}{\sigma_u}-\frac{
+S\epsilon}{\sigma_v}\right)\right\}
+\end{align*}
+
+We can also write
+
+\begin{equation}\label{eq:1.8.1}
+f(\epsilon) = \frac{1+\lambda}{\sigma_u\left(2\lambda+1\right)}\left[
+2\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(
+b\right)\right]
+\end{equation}
+
+where
+
+$$A = \left(\frac{\sigma_v^2}{2\sigma_u^2}+\frac{S\epsilon}{\sigma_u}\right)$$
+
+$$B = \left(\frac{\left(1+\lambda\right)^2\sigma_v^2}{2\sigma_u^2}+\frac{
+S\epsilon\left(1+\lambda\right)}{\sigma_u}\right)$$
+
+$$a = -\frac{\sigma_v}{\sigma_u}-\frac{S\epsilon}{\sigma_v}$$
+
+and
+
+$$b = -\frac{\left(1+\lambda\right)\sigma_v}{\sigma_u}-\frac{S\epsilon}{\sigma_v}$$
+
+\subsubsection{Technical (in)efficiencies derivation} \label{subsubsec:techinefftrunskewlap}
+
+\begin{itemize}
+\item Conditional inefficiency
+\end{itemize}
+
+$$f(u|\epsilon)=\frac{f(u, \epsilon)}{f(\epsilon)}=\frac{2\exp{\left(A\right)}
+\phi\left[\frac{u}{\sigma_v} - a\right]- \exp{\left(B\right)}\phi\left[
+\frac{u}{\sigma_v} - b\right]}{\sigma_v\left[2\exp{\left(A\right)}
+\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)\right]}$$
+
+Using all the previous developments,
+
+\begin{equation}\label{eq:1.8.2}
+E\left[u|\epsilon\right] = \sigma_v \frac{2\exp{\left(A\right)}\left[
+\phi\left(a\right) + a\Phi\left(a\right)\right]- \exp{\left(B\right)}\left[
+\phi\left(b\right)+b\Phi\left(b\right)\right]}{2\exp{\left(A\right)}
+\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}
+\end{equation}
+
+\begin{itemize}
+\item Conditional efficiency
+\end{itemize}
+
+Following previous developments, we have:
+
+$$\int_0^\infty \exp{\left(-u\right)} \phi\left[\frac{u}{\sigma_v} -a\right]du =
+\sigma_v\exp{\left(-a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a-
+\sigma_v\right) $$
+
+and 
+
+$$\int_0^\infty \exp{\left(-u\right)} \phi\left[\frac{u}{\sigma_v} -b\right]=
+\sigma_v\exp{\left(-b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(b-
+\sigma_v\right)$$
+
+Then
+
+\begin{equation}\label{eq:1.8.3}
+E\left[\exp{\left(-u\right)|\epsilon}\right] = \frac{2\exp{\left(A\right)}\exp{
+\left(-a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a-\sigma_v\right)-\exp{
+\left(B\right)}\exp{\left(-b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(b-
+\sigma_v\right)}{2\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}
+\Phi\left(b\right)}
+\end{equation}
+
+\begin{itemize}
+\item Reciprocal conditional efficiency
+\end{itemize}
+
+In terms of the reciprocal, again following previous developments, we have:
+
+$$\int_0^\infty \exp{\left(u\right)} \phi\left[\frac{u}{\sigma_v} -a\right]du =
+\sigma_v\exp{\left(a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a+
+\sigma_v\right) $$
+
+and 
+
+$$\int_0^\infty \exp{\left(u\right)} \phi\left[\frac{u}{\sigma_v} -b\right]=
+\sigma_v\exp{\left(b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(b+
+\sigma_v\right)$$
+
+Then
+
+\begin{equation}\label{eq:1.8.4}
+E\left[\exp{\left(u\right)|\epsilon}\right] = \frac{2\exp{\left(A\right)}\exp{
+\left(a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a+\sigma_v\right)-\exp{
+\left(B\right)}\exp{\left(b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(b+
+\sigma_v\right)}{2\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}
+\Phi\left(b\right)}
+\end{equation}
+
+\begin{itemize}
+\item Mode of conditional inefficiency
+\end{itemize}
+
+No conditional mode is derived for the truncated skewed laplace-normal 
+convolution.
 
 \subsubsection{Confidence intervals}
 
-No confidence intervals are computed for the generalized exponential-normal 
+No confidence intervals are computed for the truncated skewed laplace-normal 
 convolution.
 
 %% -- Bibliography -------------------------------------------------------------
