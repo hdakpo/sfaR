@@ -21,6 +21,7 @@ sfacross(
   udist = "hnormal",
   scaling = FALSE,
   start = NULL,
+  randStart = FALSE,
   method = "bfgs",
   hessianType = 1L,
   simType = "halton",
@@ -97,6 +98,12 @@ Default = \code{FALSE}. (see section \sQuote{Details}).}
 
 \item{start}{Numeric vector. Optional starting values for the maximum
 likelihood (ML) estimation.}
+
+\item{randStart}{Logical. Define if random starting values should be used for
+M(S)L estimation. New starting values are obtained as old ones + draws from
+normal distribution with std. deviation of 0.01. \code{'seed'} is not
+considered here, then each run will provide different starting values
+(unless a seed is set by the user before the run).}
 
 \item{method}{Optimization algorithm used for the estimation. Default =
 \code{'bfgs'}. 11 algorithms are available: \itemize{ \item \code{'bfgs'},
