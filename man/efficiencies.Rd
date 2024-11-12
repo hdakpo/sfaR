@@ -212,7 +212,7 @@ and
 \itemize{ \item The confidence intervals are obtained with: }
 
 \deqn{\mu_{i\ast} + I_L\sigma_\ast \leq 
-E\left\lbrack u_i|\epsilon_i\right\rbrack \leq 
+u_i|\epsilon_i\leq 
 \mu_{i\ast} + I_U\sigma_\ast }
 
 with \eqn{LB_i = \mu_{i*} + I_L\sigma_*} and
@@ -234,8 +234,7 @@ and
 
 Thus
 
-\deqn{\exp{\left(-UB_i\right)} \leq E\left
-\lbrack\exp{\left(-u_i\right)}|\epsilon_i\right\rbrack 
+\deqn{\exp{\left(-UB_i\right)} \leq \exp{\left(-u_i\right)}|\epsilon_i
 \leq\exp{\left(-LB_i\right)}}
 
 In the case of the sample selection, as underlined in Greene (2010), the
