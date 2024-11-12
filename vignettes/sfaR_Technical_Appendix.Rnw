@@ -347,6 +347,10 @@ E\left[\exp{\left(u\right)|\epsilon}\right] = \exp{\left(\mu_* + \frac{1}{2}
 \Phi\left(\frac{\mu_*}{\sigma_*}\right)}
 \end{equation}
 
+\begin{itemize}
+\item Mode of conditional inefficiency
+\end{itemize}
+
 The mode for the conditional inefficiency $u|\epsilon$ is $\mu_*$.
 
 \subsubsection{Confidence intervals} \label{subsubsec:confinttruncnorm}
@@ -536,6 +540,10 @@ E\left[\exp{\left(u\right)|\epsilon}\right] = \exp{\left(\mu_* + \frac{1}{2}
 \sigma_v^2\right)} \frac{\Phi\left(\frac{\mu_*}{\sigma_v}+\sigma_v\right)}{
 \Phi\left(\frac{\mu_*}{\sigma_v}\right)}
 \end{equation}
+
+\begin{itemize}
+\item Mode of conditional inefficiency
+\end{itemize}
 
 The mode for the conditional inefficiency $u|\epsilon$ is $\mu_*$.
 
@@ -1059,6 +1067,12 @@ follows:
 $\tilde{\tilde{z}} = \tilde{\tilde{\mu}} + \sigma_v\Phi^{-1}\left[
 \tilde{\tilde{PL}} + F \times \left(1 - \tilde{\tilde{PL}}\right)\right]$
 
+\begin{itemize}
+\item Mode of conditional inefficiency
+\end{itemize}
+
+No conditional mode is derived for the gamma-normal convolution.
+
 \subsubsection{Confidence intervals} \label{subsubsec:confintgamma}
 
 No confidence intervals are computed for the gamma-normal convolution.
@@ -1160,6 +1174,12 @@ E\left[\exp{\left(u\right)|\epsilon}\right] = \frac{\frac{1}{R}\sum_{r = 1}^R
 \sigma_v}\right)}{\sum_{r = 1}^R\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}
 \end{equation}
 
+\begin{itemize}
+\item Mode of conditional inefficiency
+\end{itemize}
+
+No conditional mode is derived for the log normal-normal convolution.
+
 \subsubsection{Confidence intervals} \label{subsubsec:confintlognormal}
 
 No confidence intervals are computed for the lognormal-normal convolution.
@@ -1238,9 +1258,179 @@ E\left[\exp{\left(u\right)|\epsilon}\right] = \frac{\frac{1}{R}\sum_{r = 1}^R
 \sum_{r = 1}^R\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}
 \end{equation}
 
+\begin{itemize}
+\item Mode of conditional inefficiency
+\end{itemize}
+
+No conditional mode is derived for the weibull-normal convolution.
+
 \subsubsection{Confidence intervals} \label{subsubsec:confintweibull}
 
 No confidence intervals are computed for the weibull-normal convolution.
+
+\subsection{Generalized Exponential distribution} \label{subsec:genexp}
+
+\subsubsection{Derivation of the density of $\epsilon$} \label{subsubsec:dengenexp}
+
+We have
+
+$$f(u) = \frac{2}{\sigma_u}\left[1-\exp{\left(-u/\sigma_u\right)}
+\right]\exp{\left(-u/\sigma_u\right)}$$
+
+then
+
+$$f(u,v)=\frac{2}{\sigma_u}\exp{\left(-u/\sigma_u\right)}\frac{1}{\sigma_v}
+\phi\left(\frac{v}{\sigma_v}\right)-\frac{2}{\sigma_u}\exp{\left(-2u/\sigma_u
+\right)}\frac{1}{\sigma_v}\phi\left(\frac{v}{\sigma_v}\right)$$
+
+Let's replace $v$ by $\epsilon+Su$.
+
+We have:
+
+\begin{align*}
+f(u, \epsilon) &= \frac{2}{\sigma_u\sigma_v\sqrt{2\pi}}\exp{\left\{-\frac{u}{
+\sigma_u}-\frac{1}{2}\left(\frac{\epsilon+Su}{\sigma_v}\right)^2\right\}}-
+\frac{2}{\sigma_u\sigma_v\sqrt{2\pi}}\exp{\left\{-\frac{2u}{\sigma_u}-
+\frac{1}{2}\left(\frac{\epsilon+Su}{\sigma_v}\right)^2\right\}}\\
+&=\frac{2}{\sigma_u\sigma_v\sqrt{2\pi}}\exp{\left\{-\frac{1}{2}\left[\frac{2u}{
+\sigma_u} + \left(\frac{\epsilon + Su}{\sigma_v}\right)^2\right]\right\}} - 
+\frac{2}{\sigma_u\sigma_v\sqrt{2\pi}}\exp{\left\{-\frac{1}{2}\left[\frac{4u}{
+\sigma_u} + \left(\frac{\epsilon + Su}{\sigma_v}\right)^2\right]\right\}}
+\end{align*}
+
+$$\frac{2u}{\sigma_u}+\frac{\epsilon^2+2Su\epsilon+u^2}{\sigma_v^2}=\left[
+\frac{u}{\sigma_v} + \left(\frac{S\epsilon}{\sigma_v} + \frac{\sigma_v}{
+\sigma_u}\right)\right]^2 -\frac{2S\epsilon}{\sigma_u}-\frac{\sigma_v^2}{
+\sigma_u^2}$$
+
+similarly
+
+$$\frac{4u}{\sigma_u}+\frac{\epsilon^2+2Su\epsilon+u^2}{\sigma_v^2}=\left[
+\frac{u}{\sigma_v} + \left(\frac{S\epsilon}{\sigma_v} + \frac{2\sigma_v}{
+\sigma_u}\right)\right]^2 -\frac{4S\epsilon}{\sigma_u}-\frac{4\sigma_v^2}{
+\sigma_u^2}$$
+
+Then
+
+$$f(u, \epsilon) =\frac{2}{\sigma_u\sigma_v}\exp{\left(\frac{S\epsilon}{
+\sigma_u}+\frac{\sigma_v^2}{2\sigma_u^2}\right)}\phi\left[\frac{u}{\sigma_v} + 
+\left(\frac{S\epsilon}{\sigma_v} + \frac{\sigma_v}{\sigma_u}\right)\right]-
+\frac{2}{\sigma_u\sigma_v}\exp{\left(\frac{2S\epsilon}{\sigma_u}+
+\frac{2\sigma_v^2}{\sigma_u^2}\right)}\phi\left[\frac{u}{\sigma_v} + 
+\left(\frac{S\epsilon}{\sigma_v} + \frac{2\sigma_v}{\sigma_u}\right)\right]$$
+
+Therefore, we have
+
+\begin{align*}
+f(\epsilon) & = \frac{2}{\sigma_u}\Bigg\{\exp{\left(\frac{S\epsilon}{\sigma_u}+
+\frac{\sigma_v^2}{2\sigma_u^2}\right)}\int_0^\infty \frac{1}{\sigma_v}\phi\left[
+\frac{u}{\sigma_v} + \left(\frac{S\epsilon}{\sigma_v} + \frac{\sigma_v}{
+\sigma_u}\right)\right]du - \\
+& \exp{\left(\frac{2S\epsilon}{\sigma_u}+\frac{2\sigma_v^2}{\sigma_u^2}\right)}
+\int_0^\infty\frac{1}{\sigma_v}\phi\left[\frac{u}{\sigma_v} + \left(\frac{
+S\epsilon}{\sigma_v} + \frac{2\sigma_v}{\sigma_u}\right)\right]du \Bigg\}
+\end{align*}
+
+Solving the integrals in the previous expression (see useful integral in 
+\ref{eq.a1}) yields
+
+\begin{equation}\label{eq:1.7.1}
+f(\epsilon) = f(\epsilon)=\frac{2}{\sigma_u}\exp{\left(A\right)}\Phi 
+\left(a\right)-\frac{2}{\sigma_u}\exp{\left(B\right)}\Phi\left(b\right)
+\end{equation}
+
+with
+
+$$A=\frac{S\epsilon}{\sigma_u}+\frac{\sigma_v^2}{2\sigma_u^2}$$
+
+$$B = \frac{2S\epsilon}{\sigma_u}+\frac{2\sigma_v^2}{\sigma_u^2}$$
+
+$$a = -\frac{S\epsilon}{\sigma_v}-\frac{\sigma_v}{\sigma_u}$$
+
+and
+
+$$b = -\frac{S\epsilon}{\sigma_v}- \frac{2\sigma_v}{\sigma_u}$$
+
+\subsubsection{Technical (in)efficiencies derivation} \label{subsubsec:techineffgenexp}
+
+\begin{align*}
+f(u|\epsilon) & =\frac{f(u, \epsilon)}{f(\epsilon)} \\
+& = \frac{\frac{1}{\sigma_v}\exp{(A)}\phi\left[\frac{u}{\sigma_v} - a\right]-
+\frac{1}{\sigma_v}\exp{(B)}\phi\left[\frac{u}{\sigma_v} - b\right]}{\exp{
+\left(A\right)}\Phi \left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}
+\end{align*}
+
+\begin{itemize}
+\item Conditional inefficiency
+\end{itemize}
+
+The conditional inefficiency is obtained as
+
+$$E\left[u|\epsilon\right] = \frac{\exp{(A)}\int_0^\infty \frac{u}{\sigma_v}
+\phi\left[\frac{u}{\sigma_v} - a\right]du - \exp{(B)}\int_0^\infty\frac{u}{
+\sigma_v}\phi\left[\frac{u}{\sigma_v} - b\right]du}{\exp{\left(A\right)}\Phi
+\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$$
+
+From the useful integrals in \ref{eq.a3}, we have
+
+We have 
+
+$$\int_0^\infty u \phi\left[\frac{u}{\sigma_v} -a\right]du = \sigma_v^2\left[
+\phi\left(a\right) + a\Phi\left(a\right)\right]$$
+
+and 
+
+$$\int_0^\infty u \phi\left[\frac{u}{\sigma_v} -b\right]=\sigma_v^2\left[
+\phi\left(b\right)+b\Phi\left(b\right)\right]$$
+
+Then
+
+\begin{equation}\label{eq:1.7.2}
+E\left[u|\epsilon\right] = \sigma_v \frac{\exp{\left(A\right)}\left[\phi\left(
+a\right) + a\Phi\left(a\right)\right]- \exp{\left(B\right)}\left[\phi\left(
+b\right)+b\Phi\left(b\right)\right]}{\exp{\left(A\right)}\Phi\left(a\right)-
+\exp{\left(B\right)}\Phi\left(b\right)}
+\end{equation}
+
+\begin{itemize}
+\item Conditional efficiency
+\end{itemize}
+
+From the useful integral in \ref{eq.a4}, and setting $t = 1$, it is easy to derive
+
+\begin{equation}\label{eq:1.7.3}
+E\left[\exp{\left(-u\right)|\epsilon}\right] =\frac{\exp{\left(A\right)}\exp{
+\left(-a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a-\sigma_v\right)-\exp{
+\left(B\right)}\exp{\left(-b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(
+b-\sigma_v\right)}{\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}
+\Phi\left(b\right)}
+\end{equation}
+
+\begin{itemize}
+\item Reciprocal conditional efficiency
+\end{itemize}
+
+The reciprocal conditional efficiency is obtained as (see \ref{eq.a4}, and 
+set $t = -1$)
+
+\begin{equation}\label{eq:1.7.4}
+E\left[\exp{\left(u\right)|\epsilon}\right] = \frac{\exp{\left(A\right)}\exp{
+\left(a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a+\sigma_v\right)-\exp{
+\left(B\right)}\exp{\left(b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(
+b+\sigma_v\right)}{\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}
+\Phi\left(b\right)}
+\end{equation}
+
+\begin{itemize}
+\item Mode of conditional inefficiency
+\end{itemize}
+
+No conditional mode is derived for the generalized exponential-normal
+
+\subsubsection{Confidence intervals}
+
+No confidence intervals are computed for the generalized exponential-normal 
+convolution.
 
 %% -- Bibliography -------------------------------------------------------------
 
