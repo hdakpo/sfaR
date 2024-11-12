@@ -732,7 +732,7 @@ then
 M(u|\epsilon) = \frac{\mu_*}{2} + \sqrt{\sigma_*^2+\frac{\mu_*^2}{4}}
 \end{equation}
 
-\subsubsection{Confidence intervals}
+\subsubsection{Confidence intervals} \label{subsubsec:confintrayleigh}
 
 No confidence intervals are derived for the convolution of the Rayleigh-normal 
 distributions.
@@ -1059,9 +1059,161 @@ follows:
 $\tilde{\tilde{z}} = \tilde{\tilde{\mu}} + \sigma_v\Phi^{-1}\left[
 \tilde{\tilde{PL}} + F \times \left(1 - \tilde{\tilde{PL}}\right)\right]$
 
-\subsubsection{Confidence intervals}
+\subsubsection{Confidence intervals} \label{subsubsec:confintgamma}
 
 No confidence intervals are computed for the gamma-normal convolution.
+
+\subsection{Log-normal distribution} \label{subsec:lognormal}
+
+\subsubsection{Derivation of the density of $\epsilon$} \label{subsubsec:denlognormal}
+
+We have
+
+$$f(u) = \frac{1}{u\sigma_u}\phi\left(\frac{\ln{u}-\mu}{\sigma_u}\right)$$
+
+then the density of $\epsilon$ is obtained as follows:
+
+$$f(\epsilon) = \int_0^\infty \frac{1}{u\sigma_u}\phi\left(\frac{\ln{u}-\mu}{
+\sigma_u}\right)\frac{1}{\sigma_v}\phi\left(\frac{\epsilon+Su}{\sigma_v}\right)du$$
+
+This density can be obtained using maximum simulated likelihood (MSL). Following 
+\citet{wang20}, the Quasi-Monte Carlo simulation works as follows:
+
+\begin{equation}\label{eq:1.5.0}
+\int_D l(u)du = \int_D \frac{l(u)}{g(u)}g(u)du \approx \frac{1}{R}
+\sum_{r = 1}^R \frac{l(u_r)}{g(u_r)}
+\end{equation}
+
+where $u$ follows a specific distribution with PDF $g(u)$, $l(u)$ is the 
+function to be integrated, $u_r$ is a random number following this distribution 
+and $R$ is the total number of $u_r$. In our case 
+$g(u) = \frac{1}{u\sigma_u}\phi\left(\frac{\ln{u}-\mu}{\sigma_u}\right)$. 
+Moreover, 
+
+$$u_r=\exp{\left(\mu +\sigma_u\Phi^{-1}\left(h_r\right)\right)}$$
+
+where $h_r$ follows a standard uniform distribution and can also be drawn from 
+Halton sequences, or any other pseudo random number generator.
+
+Hence
+
+\begin{equation}\label{eq:1.5.1}
+f(\epsilon) \approx \frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}
+\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)
+\end{equation}
+
+\subsubsection{Technical (in)efficiencies derivation} \label{subsubsec:techinefflognormal}
+
+\begin{itemize}
+\item Conditional inefficiency
+\end{itemize}
+
+The conditional inefficiency is obtained following the same principle for MSL.
+
+$$f(u|\epsilon)=\frac{f(u, \epsilon)}{f(\epsilon)} =
+\frac{\frac{1}{u\sigma_u}\phi\left(\frac{\ln{u}-\mu}{
+\sigma_u}\right)\frac{1}{\sigma_v}\phi\left(\frac{\epsilon+Su}{\sigma_v}
+\right)}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}
+\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)} $$
+
+Therefore, 
+
+$$E\left[u|\epsilon\right] = \frac{\int_0^\infty \frac{1}{u\sigma_u}
+\phi\left(\frac{\ln{u}-\mu}{
+\sigma_u}\right)\frac{u}{\sigma_v}\phi\left(\frac{\epsilon+Su}{\sigma_v}
+\right)}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}
+\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}$$
+
+Using the same principle as in equation \ref{eq:1.5.0}, we have
+
+\begin{equation}\label{eq:1.5.2}
+E\left[u|\epsilon\right] = \frac{\frac{1}{R}\sum_{r = 1}^R\frac{u_r}{\sigma_v}
+\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}{\frac{1}{R}
+\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}
+=\frac{\sum_{r = 1}^Ru_r\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}{
+\sum_{r = 1}^R\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}
+\end{equation}
+
+\begin{itemize}
+\item Conditional efficiency
+\end{itemize}
+
+\begin{equation}\label{eq:1.5.3}
+E\left[\exp{\left(-u\right)|\epsilon}\right] =\frac{\frac{1}{R}\sum_{r = 1}^R\frac{\exp{\left(-u_r\right)}}{\sigma_v}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}=\frac{\sum_{r = 1}^R\exp{\left(-u_r\right)}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}{\sum_{r = 1}^R\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}
+\end{equation}
+
+\begin{itemize}
+\item Reciprocal conditional efficiency
+\end{itemize}
+
+\begin{equation}\label{eq:1.5.4}
+E\left[\exp{\left(u\right)|\epsilon}\right] = \frac{\frac{1}{R}\sum_{r = 1}^R\frac{\exp{\left(u_r\right)}}{\sigma_v}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)} =
+\frac{\sum_{r = 1}^R\exp{\left(u_r\right)}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}{\sum_{r = 1}^R\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}
+\end{equation}
+
+\subsubsection{Confidence intervals} \label{subsubsec:confintlognormal}
+
+No confidence intervals are computed for the lognormal-normal convolution.
+
+\subsection{Weibull distribution} \label{subsec:weibull}
+
+\subsubsection{Derivation of the density of $\epsilon$} \label{subsubsec:denweibull}
+
+We propose to estimate the density of $\epsilon$ using quasi Monte-Carlo simulation.
+
+We have 
+
+$$f(u) = \frac{k}{\sigma_u}\left(\frac{u}{\sigma_u}\right)^{k-1}\exp{\left(-\left(u/\sigma_u\right)^{k}\right)}$$
+
+with $k > 0$
+
+then the density of $\epsilon$ is obtained as follows:
+
+$$f(\epsilon) = \int_0^\infty \frac{k}{\sigma_u}\left(\frac{u}{\sigma_u}\right)^{k-1}\exp{\left(-\left(u/\sigma_u\right)^{k}\right)}\frac{1}{\sigma_v}\phi\left(\frac{\epsilon+Su}{\sigma_v}\right)du$$
+
+$f(\epsilon)$ can be approximated:
+
+\begin{equation}\label{eq:1.6.1}
+f(\epsilon) = \approx \frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)
+\end{equation}
+
+where
+
+$$u_r = \sigma_u\left(-\ln{\left(1-h_r\right)}\right)^{1/k}$$
+and $h_r$ follows a standard uniform distribution and can also be drawn from 
+Halton sequences, or any other pseudo random number generator.
+
+\subsubsection{Technical (in)efficiencies derivation} \label{subsubsec:techineffweibull}
+
+Following the same development as in the log-normal case, we have
+
+\begin{itemize}
+\item Conditional inefficiency
+\end{itemize}
+
+\begin{equation}\label{eq:1.6.2}
+E\left[u|\epsilon\right] = \frac{\frac{1}{R}\sum_{r = 1}^R\frac{u_r}{\sigma_v}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}=\frac{\sum_{r = 1}^Ru_r\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}{\sum_{r = 1}^R\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}
+\end{equation}
+
+\begin{itemize}
+\item Conditional efficiency
+\end{itemize}
+
+\begin{equation}\label{eq:1.6.3}
+E\left[\exp{\left(-u\right)|\epsilon}\right] = \frac{\frac{1}{R}\sum_{r = 1}^R\frac{\exp{\left(-u_r\right)}}{\sigma_v}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}=\frac{\sum_{r = 1}^R\exp{\left(-u_r\right)}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}{\sum_{r = 1}^R\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}
+\end{equation}
+
+\begin{itemize}
+\item Reciprocal conditional efficiency
+\end{itemize}
+
+\begin{equation}\label{eq:1.6.4}
+E\left[\exp{\left(u\right)|\epsilon}\right] = \frac{\frac{1}{R}\sum_{r = 1}^R\frac{\exp{\left(u_r\right)}}{\sigma_v}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}{\frac{1}{R}\sum_{r = 1}^R\frac{1}{\sigma_v}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}=\frac{\sum_{r = 1}^R\exp{\left(u_r\right)}\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}{\sum_{r = 1}^R\phi\left(\frac{\epsilon+Su_r}{\sigma_v}\right)}
+\end{equation}
+
+\subsubsection{Confidence intervals} \label{subsubsec:confintweibull}
+
+No confidence intervals are computed for the weibull-normal convolution.
 
 %% -- Bibliography -------------------------------------------------------------
 
