@@ -1879,7 +1879,7 @@ which yields $-S\epsilon$. When $-\theta < S\epsilon < 0$, the mode is
 $-S\epsilon$. When $S\epsilon \geq 0$, the mode is $0$, and in all other cases, the
 mode equals $\theta$.
 
-\subsubsection{Confidence intervals}
+\subsubsection{Confidence intervals} \label{subsubsec:confintuniform}
 
 The distribution of $u|\epsilon$ shows that this variable follows 
 $\mathcal{N}^+\left(\mu_*, \sigma_*\right)$ with $\mu_{i*} = -S\epsilon_i$ and 
@@ -1937,6 +1937,269 @@ For the efficiency score we have:
 
 $$\exp{\left(-U_i\right)} \leq \exp{\left(-u_i\right)}|\epsilon_i
 \leq \exp{\left(-L_i\right)}$$
+
+\subsection{Folded normal distribution} \label{subsec:foldednormal}
+
+Here $u = |U|$ where  $U \sim \mathcal{N}\left(\mu, \sigma_u^2\right)$. 
+Following \citet{leone61} we have:
+
+$$f(u) = \frac{1}{\sigma_u}\left[\phi\left(\frac{u-\mu}{\sigma_u}\right) + 
+\phi\left(\frac{u+\mu}{\sigma_u}\right)\right]
+ \quad \quad \text{with} \quad u \geq 0$$
+
+\subsubsection{Derivation of the density of $\epsilon$} \label{subsubsec:denfoldednormal}
+
+We have
+
+$$f(u,v) = \frac{1}{\sigma_u\sigma_v2\pi}\exp{\left\{-\frac{1}{2}\left[
+\frac{v^2}{\sigma_v^2} + \left(\frac{u-\mu}{\sigma_u}\right)^2\right]\right\}} + 
+\frac{1}{\sigma_u\sigma_v2\pi}\exp{\left\{-\frac{1}{2}\left[\frac{v^2}{
+\sigma_v^2} + \left(\frac{u+\mu}{\sigma_u}\right)^2\right]\right\}}$$
+
+This model is also equivalent to:
+
+\begin{align*}
+f(u,\epsilon + Su) & =\frac{1}{\sigma_u\sigma_v2\pi}\exp{\left\{-\frac{1}{2}
+\left[\left(\frac{\epsilon + Su}{\sigma_v}\right)^2 + \left(\frac{u-\mu}{
+\sigma_u}\right)^2\right]\right\}} + \\
+& \frac{1}{\sigma_u\sigma_v2\pi}\exp{\left\{-\frac{1}{2}\left[\left(\frac{
+\epsilon + Su}{\sigma_v}\right)^2 + \left(\frac{u+\mu}{\sigma_u}\right)^2
+\right]\right\}}
+\end{align*}
+
+Following previous developments, we have
+
+$$\left(\frac{\epsilon + Su}{\sigma_v}\right)^2 + \left(\frac{u-\mu}{\sigma_u}
+\right)^2 = 
+\left(\frac{u-\mu_*}{\sigma_*}\right)^2 + \frac{\left(S\epsilon + \mu 
+\right)^2}{\sigma_v^2 + \sigma_u^2}$$
+
+where 
+
+$$\mu_*= \frac{\mu\sigma_v^2 - \epsilon S\sigma_u^2}{\sigma_u^2 + \sigma_v^2}$$
+
+and 
+
+$$\sigma_*^2=\frac{\sigma_u^2\sigma_v^2}{\sigma_u^2 + \sigma_v^2}$$
+
+On the other hand, we have:
+
+\begin{align*}
+\left(\frac{\epsilon + Su}{\sigma_v}\right)^2 + \left(\frac{u+\mu}{\sigma_u}
+\right)^2 & = 
+\frac{\epsilon^2 + 2\epsilon Su + S^2u^2}{\sigma_v^2} + \frac{u^2 + 2\mu u + 
+\mu^2}{\sigma_u^2} \\
+ & = u^2\left(\frac{1}{\sigma_v^2} + \frac{1}{\sigma_u^2}\right) + 2u\left(
+ \frac{\mu}{\sigma_u^2} + \frac{\epsilon S}{\sigma_v^2}\right) + \left(\frac{
+ \epsilon^2}{\sigma_v^2} + \frac{\mu^2}{\sigma_u^2}\right) \\
+ & = \frac{\sigma_u^2 + \sigma_v^2}{\sigma_u^2\sigma_v^2}\left[u^2 + 2u\left(
+ \frac{\mu\sigma_v^2 + \epsilon S\sigma_u^2}{\sigma_u^2 + \sigma_v^2}\right)
+ \right] + \left(\frac{\epsilon^2}{\sigma_v^2} + \frac{\mu^2}{\sigma_u^2}\right)
+\end{align*}
+
+Let 
+
+$$\mu_{**} = -\frac{\mu\sigma_v^2 + \epsilon S\sigma_u^2}{\sigma_u^2 + 
+\sigma_v^2}$$
+
+Then we have:
+
+$$\frac{1}{\sigma_*^2}\left(u^2 - 2u\mu_{**} + \mu_{**}^2\right) - \frac{
+\mu_{**}^2}{\sigma_*^2} + \frac{\epsilon^2}{\sigma_v^2} + \frac{\mu^2}{
+\sigma_u^2}=\left(\frac{u-\mu_{**}}{\sigma_*}\right)^2 + \frac{\left(S\epsilon - 
+\mu \right)^2}{\sigma_v^2 + \sigma_u^2}$$
+
+Actually, we have:
+
+$$\frac{\mu_{**}^2}{\sigma_*^2} = \left[\frac{\mu\sigma_v^2 + 
+\epsilon S\sigma_u^2}{\sigma_u^2 + \sigma_v^2}\right]^2\frac{\sigma_u^2+
+\sigma_v^2}{\sigma_u^2\sigma_v^2}=\frac{\mu^2\sigma_v^4+2\epsilon S\mu\sigma_u^2 
+\sigma_v^2 + \epsilon^2\sigma_u^4}{\sigma_u^2\sigma_v^2\left(\sigma_u^2+
+\sigma_v^2\right)}$$
+
+Then
+
+\begin{align*}
+-\frac{\mu_{**}^2}{\sigma_*^2} + \frac{\epsilon^2}{\sigma_v^2} + \frac{\mu^2}{
+\sigma_u^2} & =
+\frac{-\mu^2\sigma_v^4-2\epsilon S\mu\sigma_u^2 \sigma_v^2 - \epsilon^2
+\sigma_u^4}{\sigma_u^2\sigma_v^2\left(\sigma_u^2+\sigma_v^2\right)} + 
+\frac{\epsilon^2}{\sigma_v^2} + \frac{\mu^2}{\sigma_u^2} \\
+& = \epsilon^2\left(\frac{1}{\sigma_v^2}-\frac{\sigma_u^2}{\sigma_v^2\left(
+\sigma_u^2+\sigma_v^2\right)}\right) - \frac{2\epsilon S\mu}{\sigma_u^2+
+\sigma_v^2} - \frac{\mu^2\sigma_v^2}{\sigma_u^2\left(\sigma_u^2+\sigma_v^2
+\right)} + \frac{\mu^2}{\sigma_u^2} \\
+& = \frac{1}{\sigma_u^2+\sigma_v^2}\left(\epsilon^2 - 2\epsilon S\mu\right) + 
+\frac{\mu^2}{\sigma_u^2+\sigma_v^2} \\
+& = \frac{\left(S\epsilon - \mu \right)^2}{\sigma_v^2 + \sigma_u^2}
+\end{align*}
+
+The previous density function then simplifies into:
+
+\begin{align*}
+f(u,\epsilon + Su) &= \frac{1}{\sigma_u\sigma_v2\pi}\exp{\left\{-\frac{1}{2}
+\left[\left(\frac{u-\mu_*}{\sigma_*}\right)^2 + \frac{\left(S\epsilon + \mu 
+\right)^2}{\sigma_v^2 + 
+\sigma_u^2}\right]\right\}} + \\
+& \frac{1}{\sigma_u\sigma_v2\pi}\exp{\left\{-\frac{1}{2}\left[\left(\frac{u-
+\mu_{**}}{\sigma_*}\right)^2 + \frac{\left(S\epsilon - \mu \right)^2}{
+\sigma_v^2 + \sigma_u^2}\right]\right\}}
+\end{align*}
+
+Thus 
+
+\begin{align*}
+f(\epsilon)& =\int_0^\infty f(u,\epsilon + Su)du \\
+& =\int_0^\infty \frac{1}{\sigma_u\sigma_v2\pi}\exp{\left\{-\frac{1}{2}\left[
+\left(\frac{u-\mu_*}{\sigma_*}\right)^2 + \frac{\left(S\epsilon + \mu 
+\right)^2}{\sigma_v^2 + \sigma_u^2}\right]\right\}}du + \\ & \int_0^\infty 
+\frac{1}{\sigma_u\sigma_v2\pi}\exp{\left\{-\frac{1}{2}\left[\left(\frac{u-
+\mu_{**}}{\sigma_*}\right)^2 + \frac{\left(S\epsilon - \mu \right)^2}{
+\sigma_v^2 + \sigma_u^2}\right]\right\}}du \\
+ & = \frac{1}{\sigma_u\sigma_v\sqrt{2\pi}}\exp{\left[-\frac{1}{2}\frac{
+ \left(S\epsilon + \mu \right)^2}{\sigma_v^2 + \sigma_u^2}\right]}\sigma_* 
+ \Phi\left(\frac{\mu_*}{\sigma_*}\right) + 
+ \frac{1}{\sigma_u\sigma_v\sqrt{2\pi}}\exp{\left[-\frac{1}{2}\frac{\left(
+ S\epsilon - \mu \right)^2}{\sigma_v^2 + \sigma_u^2}\right]}\sigma_* 
+ \Phi\left(\frac{\mu_{**}}{\sigma_*}\right) \\
+ & = \frac{1}{ \sqrt{\sigma_v^2 + \sigma_u^2}\sqrt{2\pi}}\exp{\left[-\frac{1}{2}
+ \frac{\left(S\epsilon + \mu \right)^2}{\sigma_v^2 + \sigma_u^2}\right]} 
+ \Phi\left(\frac{\mu_*}{\sigma_*}\right) + 
+ \frac{1}{ \sqrt{\sigma_v^2 + \sigma_u^2}\sqrt{2\pi}}\exp{\left[-\frac{1}{2}
+ \frac{\left(S\epsilon - \mu \right)^2}{\sigma_v^2 + \sigma_u^2}\right]} 
+ \Phi\left(\frac{\mu_{**}}{\sigma_*}\right) \\
+ & = \frac{1}{ \sqrt{\sigma_v^2 + \sigma_u^2}}\phi{\left(\frac{S\epsilon + 
+ \mu}{\sqrt{\sigma_v^2 + \sigma_u^2}}\right)} \Phi\left(\frac{\mu_*}{
+ \sigma_*}\right) + \frac{1}{ \sqrt{\sigma_v^2 + \sigma_u^2}}\phi{\left(
+ \frac{S\epsilon - \mu}{\sqrt{\sigma_v^2 + \sigma_u^2}}\right)} \Phi\left(
+ \frac{\mu_{**}}{\sigma_*}\right)
+\end{align*}
+
+\begin{equation}\label{eq:1.10.1}
+f(\epsilon) = \frac{1}{ \sqrt{\sigma_v^2 + \sigma_u^2}}\left\{\phi{\left(
+\frac{S\epsilon + \mu}{\sqrt{\sigma_v^2 + \sigma_u^2}}\right)} \Phi\left(
+\frac{\mu_*}{\sigma_*}\right) + 
+ \phi{\left(\frac{S\epsilon - \mu}{\sqrt{\sigma_v^2 + \sigma_u^2}}\right)} 
+ \Phi\left(\frac{\mu_{**}}{\sigma_*}\right)\right\}
+\end{equation}
+
+\subsubsection{Technical (in)efficiencies derivation}
+
+The conditional (in)efficiency is derived following \citet{jon82} for 
+$E\left[u|\epsilon\right]$ and \citet{batt88} for 
+$E\left[\exp{\left(-u\right)|\epsilon}\right]$. We have:
+
+\begin{align*}
+f(u|\epsilon) & =\frac{f(u, \epsilon)}{f(\epsilon)} \\
+ &=\frac{ \frac{1}{\sigma_u\sigma_v2\pi}\exp{\left\{-\frac{1}{2}\left[\left(
+ \frac{u-\mu_*}{\sigma_*}\right)^2 + \frac{\left(S\epsilon + \mu \right)^2}{
+ \sigma_v^2 + \sigma_u^2}\right]\right\}} + 
+\frac{1}{\sigma_u\sigma_v2\pi}\exp{\left\{-\frac{1}{2}\left[\left(\frac{u-
+\mu_{**}}{\sigma_*}\right)^2 + \frac{\left(S\epsilon - \mu \right)^2}{
+\sigma_v^2 + \sigma_u^2}\right]\right\}}}{\frac{1}{ \sqrt{\sigma_v^2 + 
+\sigma_u^2}}\phi{\left(\frac{S\epsilon + \mu}{\sqrt{\sigma_v^2 + \sigma_u^2}}
+\right)} \Phi\left(\frac{\mu_*}{\sigma_*}\right) + 
+ \frac{1}{ \sqrt{\sigma_v^2 + \sigma_u^2}}\phi{\left(\frac{S\epsilon - \mu}{
+ \sqrt{\sigma_v^2 + \sigma_u^2}}\right)} \Phi\left(\frac{\mu_{**}}{\sigma_*}
+ \right)} \\
+ & = \frac{\frac{1}{\sigma_*\sqrt{2\pi}}\exp{\left[-\frac{1}{2}\frac{\left(
+ S\epsilon + \mu \right)^2}{\sigma_v^2 + \sigma_u^2}\right]}\frac{1}{
+ \sqrt{2\pi}}\exp{\left[-\frac{1}{2}\left(\frac{u-\mu_*}{\sigma_*}
+ \right)^2\right]} + \frac{1}{\sigma_*\sqrt{2\pi}}\exp{\left[-\frac{1}{2}
+ \frac{\left(S\epsilon - \mu \right)^2}{\sigma_v^2 + \sigma_u^2}\right]}
+ \frac{1}{\sqrt{2\pi}}\exp{\left[-\frac{1}{2}\left(\frac{u-\mu_{**}}{\sigma_*}
+ \right)^2\right]}
+ }{\phi{\left(\frac{S\epsilon + \mu}{\sqrt{\sigma_v^2 + \sigma_u^2}}\right)}
+ \Phi\left(\frac{\mu_*}{\sigma_*}\right) + 
+ \phi{\left(\frac{S\epsilon - \mu}{\sqrt{\sigma_v^2 + \sigma_u^2}}\right)} 
+ \Phi\left(\frac{\mu_{**}}{\sigma_*}\right)} \\
+ & = \frac{\frac{1}{\sigma_*}\phi{\left(\frac{S\epsilon + \mu}{\sqrt{
+ \sigma_v^2 + \sigma_u^2}}\right)}\frac{1}{\sqrt{2\pi}}\exp{\left[-
+ \frac{1}{2}\left(\frac{u-\mu_*}{\sigma_*}\right)^2\right]} +
+ \frac{1}{\sigma_*}\phi{\left(\frac{S\epsilon - \mu}{\sqrt{\sigma_v^2 + 
+ \sigma_u^2}}\right)}\frac{1}{\sqrt{2\pi}}\exp{\left[-\frac{1}{2}\left(
+ \frac{u-\mu_{**}}{\sigma_*}\right)^2\right]}
+ }{\phi{\left(\frac{S\epsilon + \mu}{\sqrt{\sigma_v^2 + \sigma_u^2}}\right)} 
+ \Phi\left(\frac{\mu_*}{\sigma_*}\right) + 
+ \phi{\left(\frac{S\epsilon - \mu}{\sqrt{\sigma_v^2 + \sigma_u^2}}\right)} 
+ \Phi\left(\frac{\mu_{**}}{\sigma_*}\right)}
+\end{align*}
+
+\begin{itemize}
+\item Conditional inefficiency
+\end{itemize}
+
+$$E\left[u|\epsilon\right]=\int_0^\infty u f(u|\epsilon) du$$ 
+
+Following previous developments, we have:
+
+\begin{equation}\label{eq:1.10.2}
+E\left[u|\epsilon\right] =\frac{\phi{\left(\frac{S\epsilon + \mu}{\sqrt{
+\sigma_v^2 + \sigma_u^2}}\right)}\left[\mu_*\Phi\left(\frac{\mu_*}{\sigma_*}
+\right) + \sigma_*\phi\left(\frac{\mu_*}{\sigma_*}\right)\right] + \phi{\left(
+\frac{S\epsilon - \mu}{\sqrt{\sigma_v^2 + \sigma_u^2}}\right)}\left[\mu_{**}
+\Phi\left(\frac{\mu_{**}}{\sigma_*}\right) + \sigma_*\phi\left(\frac{\mu_{**}}{
+\sigma_*}\right)\right]}{\phi{\left(\frac{S\epsilon + \mu}{\sqrt{\sigma_v^2 + 
+\sigma_u^2}}\right)} \Phi\left(\frac{\mu_*}{\sigma_*}\right) + 
+ \phi{\left(\frac{S\epsilon - \mu}{\sqrt{\sigma_v^2 + \sigma_u^2}}\right)} 
+ \Phi\left(\frac{\mu_{**}}{\sigma_*}\right)}
+\end{equation}
+
+\begin{itemize}
+\item Conditional efficiency
+\end{itemize}
+
+$$E\left[\exp{\left(-u\right)|\epsilon}\right] = \int_0^\infty \exp{(-u)} 
+f(u|\epsilon) du$$
+
+Following previous developments, we have:
+
+\begin{align}\label{eq:1.10.3}
+E\left[\exp{\left(-u\right)|\epsilon}\right] & = \Bigg\{\phi{\left(
+\frac{S\epsilon + \mu}{\sqrt{\sigma_v^2 + \sigma_u^2}}\right)}\left[\exp{
+\left(-\mu_*+\frac{1}{2}\sigma_*^2\right)}\Phi\left(\frac{\mu_*}{\sigma_*}-
+\sigma_*\right)\right] + \nonumber \\
+& \phi{\left(\frac{S\epsilon - \mu}{\sqrt{\sigma_v^2 + 
+\sigma_u^2}}\right)}\left[\exp{\left(-\mu_{**}+\frac{1}{2}\sigma_*^2\right)}
+\Phi\left(\frac{\mu_{**}}{\sigma_*}-\sigma_*\right)\right] \Bigg\} \nonumber \\
+& \Bigg/ \Bigg\{\phi{\left(
+\frac{S\epsilon + \mu}{\sqrt{\sigma_v^2 + \sigma_u^2}}\right)} \Phi\left(
+\frac{\mu_*}{\sigma_*}\right) + \phi{\left(\frac{S\epsilon - \mu}{
+\sqrt{\sigma_v^2 + \sigma_u^2}}\right)} \Phi\left(\frac{\mu_{**}}{\sigma_*}
+\right)\Bigg\}
+\end{align}
+
+\begin{itemize}
+\item Reciprocal conditional efficiency
+\end{itemize}
+
+The previous measure of the efficiency is equivalent to the Shephard's output
+efficiency score or the Farrell efficiency in the case of cost or input distance 
+function. The reciprocal of this measure is $E\left[\exp{(u)}|\epsilon\right]$
+
+Following previous developments, we have:
+
+\begin{equation}\label{eq:1.10.4}
+E\left[\exp{\left(u\right)|\epsilon}\right] = \frac{\phi{\left(\frac{S\epsilon + 
+\mu}{\sqrt{\sigma_v^2 + \sigma_u^2}}\right)}\left[\exp{\left(\mu_*+\frac{1}{2}
+\sigma_*^2\right)}\Phi\left(\frac{\mu_*}{\sigma_*}+\sigma_*\right)\right] + 
+\phi{\left(\frac{S\epsilon - \mu}{\sqrt{\sigma_v^2 + \sigma_u^2}}\right)}
+\left[\exp{\left(\mu_{**}+\frac{1}{2}\sigma_*^2\right)}\Phi\left(\frac{
+\mu_{**}}{\sigma_*}+\sigma_*\right)\right]}{\phi{\left(\frac{S\epsilon + 
+\mu}{\sqrt{\sigma_v^2 + \sigma_u^2}}\right)} \Phi\left(\frac{\mu_*}{
+\sigma_*}\right) + \phi{\left(\frac{S\epsilon - \mu}{\sqrt{\sigma_v^2 + 
+\sigma_u^2}}\right)} \Phi\left(\frac{\mu_{**}}{\sigma_*}\right)}
+\end{equation}
+
+\begin{itemize}
+\item Mode of conditional inefficiency
+\end{itemize}
+
+No conditional mode is derived for the folded normal-normal convolution
+
+\subsubsection{Confidence intervals}
+
+No confidence intervals are computed for the folded normal-normal convolution.
 
 %% -- Bibliography -------------------------------------------------------------
 
