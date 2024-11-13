@@ -489,7 +489,10 @@ $$f(u|\epsilon)=\frac{f(u, \epsilon)}{f(\epsilon)}=\frac{1}{\sigma_v\sqrt{2\pi}
 \left\{-\frac{1}{2\sigma_v^2}\left[u+\left(\frac{\sigma_v^2}{\sigma_u} + 
 S\epsilon\right)\right]^2\right\}}$$
 
-Let $\mu_* = -\left(\frac{\sigma_v^2}{\sigma_u} + S\epsilon\right)$ then
+Let 
+$$\mu_* = -\frac{\sigma_v^2}{\sigma_u} - S\epsilon$$
+
+then
 
 $$f(u|\epsilon) = \frac{1}{\sigma_v\sqrt{2\pi}\Phi\left(\frac{\mu_*}{\sigma_v}
 \right)}\exp{\left[-\frac{1}{2\sigma_v^2}\left(u-\mu_*\right)^2\right]}$$
@@ -2278,25 +2281,26 @@ f(\epsilon) &= \frac{\alpha + 1}{\alpha}\frac{1}{\sigma_u}\Bigg\{ \exp{
 \Bigg\}
 \end{align*}
 
-which can be further simplified as
+Let
 
-\begin{equation}\label{eq:1.11.1}
-f(\epsilon) = \frac{\alpha + 1}{\alpha}\frac{1}{\sigma_u}\left\{
-\exp{\left(A\right)}\Phi\left(a\right) - 
-\exp{\left(B\right)}\Phi\left(b\right)\right\}
-\end{equation}
+$$\mu_* = -\frac{\sigma_v^2}{\sigma_u}-S\epsilon$$
 
-where
+$$\mu_{**} = -\left(1+\alpha\right)\frac{\sigma_v}{\sigma_u} - S\epsilon$$
 
 $$A = \frac{\sigma_v^2}{2\sigma_u^2}+\frac{S\epsilon}{\sigma_u}$$
 
-$$a = -\frac{\sigma_v}{\sigma_u} - \frac{S\epsilon}{\sigma_v}$$
+and
 
 $$B = \left(1 + \alpha\right)\frac{S\epsilon}{\sigma_u} + \left(
 1 + \alpha\right)^2\frac{\sigma_v^2}{2\sigma_u^2}$$
 
-$$b = -\left(1+\alpha\right)\frac{\sigma_v}{\sigma_u} - 
-\frac{S\epsilon}{\sigma_v}$$
+then we have
+
+\begin{equation}\label{eq:1.11.1}
+f(\epsilon) = \frac{\alpha + 1}{\alpha}\frac{1}{\sigma_u}\left\{
+\exp{\left(A\right)}\Phi\left(\frac{\mu_*}{\sigma_v}\right) - 
+\exp{\left(B\right)}\Phi\left(\frac{\mu_{**}}{\sigma_v}\right)\right\}
+\end{equation}
 
 \subsubsection{Technical (in)efficiencies derivation} \label{subsubsec:techineffweightedexponential}
 
@@ -2305,19 +2309,19 @@ We have:
 \begin{align*}
 f(u|\epsilon) & =\frac{f(u, \epsilon)}{f(\epsilon)} \\
 &= \frac{\frac{\alpha+1}{\alpha}\frac{\exp{\left(A\right)}}{\sigma_u\sigma_v
-\sqrt{2\pi}}\exp{\left(-\frac{1}{2\sigma_v^2}\left[u-\sigma_v a\right]^2\right)} 
+\sqrt{2\pi}}\exp{\left(-\frac{1}{2\sigma_v^2}\left[u-\mu_*\right]^2\right)} 
 - \frac{\alpha+1}{\alpha}\frac{\exp{\left(B\right)}}{\sigma_u\sigma_v
-\sqrt{2\pi}}\exp{\left(-\frac{1}{2\sigma_v^2}\left[u-\sigma_v b\right]^2
+\sqrt{2\pi}}\exp{\left(-\frac{1}{2\sigma_v^2}\left[u-\mu_{**}\right]^2
 \right)}}{\frac{\alpha + 1}{\alpha}\frac{1}{\sigma_u}\left\{
-\exp{\left(A\right)}\Phi\left(a\right) - 
-\exp{\left(B\right)}\Phi\left(b\right)\right\}} \\
+\exp{\left(A\right)}\Phi\left(\frac{\mu_*}{\sigma_v}\right) - 
+\exp{\left(B\right)}\Phi\left(\frac{\mu_{**}}{\sigma_v}\right)\right\}} \\
  &=\frac{
     \frac{\exp{\left(A\right)}}{\sigma_v\sqrt{2\pi}} \exp\left(-\frac{1}{
-    2\sigma_v^2} \left[u - \sigma_v a\right]^2 \right) 
+    2\sigma_v^2} \left[u - \mu_*\right]^2 \right) 
     - \frac{\exp{\left(B\right)}}{\sigma_v\sqrt{2\pi}} \exp\left(-\frac{1}{
-    2\sigma_v^2} \left[u - \sigma_v b\right]^2 \right)
-}{\exp{\left(A\right)} \Phi\left(a\right) - \exp{\left(B\right)} 
-\Phi\left(b\right)
+    2\sigma_v^2} \left[u - \mu_{**}\right]^2 \right)
+}{\exp{\left(A\right)}\Phi\left(\frac{\mu_*}{\sigma_v}\right) - 
+\exp{\left(B\right)}\Phi\left(\frac{\mu_{**}}{\sigma_v}\right)
 }
 \end{align*}
 
@@ -2325,85 +2329,50 @@ f(u|\epsilon) & =\frac{f(u, \epsilon)}{f(\epsilon)} \\
 \item Conditional inefficiency
 \end{itemize}
 
-To obtain the conditional inefficiency, we need to solve two integrals. 
-The first one is
-
-$$I_1 = \int_0^\infty \frac{1}{\sigma_v\sqrt{2\pi}} u 
-\exp\left(-\frac{1}{2\sigma_v^2} \left[u - \sigma_v a\right]^2 \right)du$$
-
-and the second one is
-
-$$I_2 = \int_0^\infty \frac{1}{\sigma_v\sqrt{2\pi}} u 
-\exp\left(-\frac{1}{2\sigma_v^2} \left[u - \sigma_v b\right]^2 \right)du$$
-
 Using the integral in \ref{eq.a3}, we have:
 
-$$I_1 = \sigma_v\phi\left(a\right) + \sigma_v a\Phi\left(a\right)$$
-
-and 
-
-$$I_2 = \sigma_v\phi\left(b\right) +\sigma_v b\Phi\left(b\right)$$
-
-Then
-
 \begin{equation}\label{eq:1.11.2}
-E\left[u|\epsilon\right] = \sigma_v\frac{
-\exp{\left(A\right)}\left\{\phi\left(a\right) + a\Phi\left(a\right)\right\} - 
-\exp\left(B\right)\left\{\phi\left(b\right) + b\Phi\left(b\right) \right\}}{
-\exp{\left(A\right)}\Phi\left(a\right) - \exp\left(B\right)\Phi\left(b\right)} 
+E\left[u|\epsilon\right] = \frac{
+\exp{\left(A\right)}\left\{\sigma_v\phi\left(\frac{\mu_*}{\sigma_v}\right) + 
+\mu_*\Phi\left(\frac{\mu_*}{\sigma_v}\right)\right\} - \exp\left(B\right)
+\left\{\sigma_v\phi\left(\mu_{**}\right) + \frac{\mu_{**}}{\sigma_v}
+\Phi\left(\frac{\mu_{**}}{\sigma_v}\right) \right\}}{\exp{\left(A\right)}
+\Phi\left(\frac{\mu_*}{\sigma_v}\right) - \exp\left(B\right)
+\Phi\left(\frac{\mu_{**}}{\sigma_v}\right)} 
 \end{equation}
-
-The conditional efficiency and its reciprocal can be obtained by solving the 
-following two integrals:
-
-$$I_1 = \int_0^\infty \frac{1}{\sigma_v\sqrt{2\pi}} \exp\left(-tu -
-\frac{1}{2\sigma_v^2} \left[u - \sigma_v a\right]^2 \right)du$$
-
-and 
-
-$$I_2 = \int_0^\infty \frac{1}{\sigma_v\sqrt{2\pi}} \exp\left(-tu -
-\frac{1}{2\sigma_v^2} \left[u - \sigma_v b\right]^2 \right)du$$
-
-Using the integral in \ref{eq.a4}, we have:
-
-We have
-
-$$I_1 = \exp{\left(-t\sigma_v a + \frac{1}{2}t^2\sigma_v^2\right)}
-\Phi\left(a - t\sigma_v\right)$$
-
-and
-
-$$I_2 =\exp{\left(-t\sigma_v b + \frac{1}{2}t^2\sigma_v^2\right)}
-\Phi\left(b - t\sigma_v\right)$$
 
 \begin{itemize}
 \item Conditional efficiency
 \end{itemize}
 
-The conditional efficiency is obtained by setting $t=1$, which yields
+The conditional efficiency is obtained by using the integral in \ref{eq.a4},
+and setting $t=1$, which yields
 
 \begin{equation}\label{eq:1.11.3}
-E\left[\exp{\left(-u\right)|\epsilon}\right]\frac{
-\exp{\left(A\right)}\exp{\left(-\sigma_v a + \frac{1}{2}\sigma_v^2\right)}
-\Phi\left(a - \sigma_v\right) - 
-\exp\left(B\right)\exp{\left(-\sigma_v b + \frac{1}{2}\sigma_v^2\right)}
-\Phi\left(b - \sigma_v\right)}{
-\exp{\left(A\right)}\Phi\left(a\right) - \exp\left(B\right)\Phi\left(b\right)} 
+E\left[\exp{\left(-u\right)|\epsilon}\right]=\frac{
+\exp{\left(A\right)}\exp{\left(-\mu_* + \frac{1}{2}\sigma_v^2\right)}
+\Phi\left(\frac{\mu_*}{\sigma_v} - \sigma_v\right) - 
+\exp\left(B\right)\exp{\left(-\mu_{**} + \frac{1}{2}\sigma_v^2\right)}
+\Phi\left(\frac{\mu_{**}}{\sigma_v} - \sigma_v\right)}{
+\exp{\left(A\right)}\Phi\left(\frac{\mu_*}{\sigma_v}\right) - 
+\exp\left(B\right)\Phi\left(\frac{\mu_{**}}{\sigma_v}\right)} 
 \end{equation}
 
 \begin{itemize}
 \item Reciprocal conditional efficiency
 \end{itemize}
 
-The reciprocal conditional efficiency is obtained by setting $t=-1$, which yields
+The reciprocal conditional efficiency is obtained by using the integral in 
+\ref{eq.a4}, and setting $t=1$, which yields
 
 \begin{equation}\label{eq:1.11.4}
 E\left[\exp{\left(u\right)|\epsilon}\right] = \frac{
-\exp{\left(A\right)}\exp{\left(\sigma_v a + \frac{1}{2}\sigma_v^2\right)}
-\Phi\left(a + \sigma_v\right) - 
-\exp\left(B\right)\exp{\left(\sigma_v b + \frac{1}{2}\sigma_v^2\right)}
-\Phi\left(b + \sigma_v\right)}{
-\exp{\left(A\right)}\Phi\left(a\right) - \exp\left(B\right)\Phi\left(b\right)}
+\exp{\left(A\right)}\exp{\left(\mu_* + \frac{1}{2}\sigma_v^2\right)}
+\Phi\left(\frac{\mu_*}{\sigma_v} + \sigma_v\right) - 
+\exp\left(B\right)\exp{\left(\mu_{**} + \frac{1}{2}\sigma_v^2\right)}
+\Phi\left(\frac{\mu_{**}}{\sigma_v} + \sigma_v\right)}{
+\exp{\left(A\right)}\Phi\left(\frac{\mu_*}{\sigma_v}\right) - 
+\exp\left(B\right)\Phi\left(\frac{\mu_{**}}{\sigma_v}\right)}
 \end{equation}
 
 \begin{itemize}
@@ -2472,7 +2441,10 @@ S\epsilon\right)\Phi\left(-\frac{\sigma_v}{\sigma_u} -
 \frac{S\epsilon}{\sigma_v}\right)\right\}$$
 
 
-Let $\mu_* = -\left(\frac{\sigma_v^2}{\sigma_u} + S\epsilon\right)$ then
+Let 
+$$\mu_* = -\frac{\sigma_v^2}{\sigma_u} - S\epsilon$$
+
+then
 
 \begin{equation}\label{eq:1.12.1}
 f(\epsilon) = \frac{\exp{\left(\frac{\sigma_v^2}{2\sigma_u^2} + 
