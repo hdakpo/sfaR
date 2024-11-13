@@ -1533,11 +1533,11 @@ $$A = \left(\frac{\sigma_v^2}{2\sigma_u^2}+\frac{S\epsilon}{\sigma_u}\right)$$
 $$B = \left(\frac{\left(1+\lambda\right)^2\sigma_v^2}{2\sigma_u^2}+\frac{
 S\epsilon\left(1+\lambda\right)}{\sigma_u}\right)$$
 
-$$a = -\frac{\sigma_v}{\sigma_u}-\frac{S\epsilon}{\sigma_v}$$
+$$\mu_* = -\frac{\sigma_v^2}{\sigma_u}-S\epsilon$$
 
 and
 
-$$b = -\frac{\left(1+\lambda\right)\sigma_v}{\sigma_u}-\frac{S\epsilon}{\sigma_v}$$
+$$\mu_{**} = -\frac{\left(1+\lambda\right)\sigma_v^2}{\sigma_u}-S\epsilon$$
 
 \subsubsection{Technical (in)efficiencies derivation} \label{subsubsec:techinefftrunskewlap}
 
@@ -1546,17 +1546,21 @@ $$b = -\frac{\left(1+\lambda\right)\sigma_v}{\sigma_u}-\frac{S\epsilon}{\sigma_v
 \end{itemize}
 
 $$f(u|\epsilon)=\frac{f(u, \epsilon)}{f(\epsilon)}=\frac{2\exp{\left(A\right)}
-\phi\left[\frac{u}{\sigma_v} - a\right]- \exp{\left(B\right)}\phi\left[
-\frac{u}{\sigma_v} - b\right]}{\sigma_v\left[2\exp{\left(A\right)}
-\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)\right]}$$
+\phi\left[\frac{u-\mu_*}{\sigma_v}\right]- \exp{\left(B\right)}\phi\left[
+\frac{u-\mu_{**}}{\sigma_v}\right]}{\sigma_v\left[2\exp{\left(A\right)}
+\Phi\left(\frac{\mu_*}{\sigma_v}\right)-\exp{\left(B\right)}
+\Phi\left(\frac{\mu_{**}}{\sigma_v}\right)\right]}$$
 
 Using the integral in \ref{eq.a3}, we have
 
 \begin{equation}\label{eq:1.8.2}
-E\left[u|\epsilon\right] = \sigma_v \frac{2\exp{\left(A\right)}\left[
-\phi\left(a\right) + a\Phi\left(a\right)\right]- \exp{\left(B\right)}\left[
-\phi\left(b\right)+b\Phi\left(b\right)\right]}{2\exp{\left(A\right)}
-\Phi\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}
+E\left[u|\epsilon\right] = \frac{2\exp{\left(A\right)}\left[
+\sigma_v\phi\left(\frac{\mu_*}{\sigma_v}\right) + \mu_*\Phi
+\left(\frac{\mu_*}{\sigma_v}\right)\right]- \exp{\left(B\right)}\left[
+\sigma_v\phi\left(\frac{\mu_{**}}{\sigma_v}\right)+\mu_{**}
+\Phi\left(\frac{\mu_{**}}{\sigma_v}\right)\right]}{2\exp{\left(A\right)}
+\Phi\left(\frac{\mu_*}{\sigma_v}\right)-\exp{\left(B\right)}
+\Phi\left(\frac{\mu_{**}}{\sigma_v}\right)}
 \end{equation}
 
 \begin{itemize}
@@ -1565,24 +1569,14 @@ E\left[u|\epsilon\right] = \sigma_v \frac{2\exp{\left(A\right)}\left[
 
 Using the integral in \ref{eq.a4}, we have:
 
-$$\int_0^\infty \exp{\left(-u\right)} \phi\left[\frac{u}{\sigma_v} -a\right]du =
-\sigma_v\exp{\left(-a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a-
-\sigma_v\right) $$
-
-and 
-
-$$\int_0^\infty \exp{\left(-u\right)} \phi\left[\frac{u}{\sigma_v} -b\right]du=
-\sigma_v\exp{\left(-b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(b-
-\sigma_v\right)$$
-
-Then
-
 \begin{equation}\label{eq:1.8.3}
 E\left[\exp{\left(-u\right)|\epsilon}\right] = \frac{2\exp{\left(A\right)}\exp{
-\left(-a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a-\sigma_v\right)-\exp{
-\left(B\right)}\exp{\left(-b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(b-
-\sigma_v\right)}{2\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}
-\Phi\left(b\right)}
+\left(-\mu_*+\frac{\sigma_v^2}{2}\right)}
+\Phi\left(\frac{\mu_*}{\sigma_v}-\sigma_v\right)-\exp{\left(B\right)}
+\exp{\left(-\mu_{**}+\frac{\sigma_v^2}{2}\right)}
+\Phi\left(\frac{\mu_{**}}{\sigma_v}-\sigma_v\right)}{2\exp{\left(A\right)}
+\Phi\left(\frac{\mu_*}{\sigma_v}\right)-\exp{\left(B\right)}
+\Phi\left(\frac{\mu_{**}}{\sigma_v}\right)}
 \end{equation}
 
 \begin{itemize}
@@ -1591,24 +1585,14 @@ E\left[\exp{\left(-u\right)|\epsilon}\right] = \frac{2\exp{\left(A\right)}\exp{
 
 In terms of the reciprocal, again using the integral in \ref{eq.a4}, we have:
 
-$$\int_0^\infty \exp{\left(u\right)} \phi\left[\frac{u}{\sigma_v} -a\right]du =
-\sigma_v\exp{\left(a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a+
-\sigma_v\right) $$
-
-and 
-
-$$\int_0^\infty \exp{\left(u\right)} \phi\left[\frac{u}{\sigma_v} -b\right]du=
-\sigma_v\exp{\left(b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(b+
-\sigma_v\right)$$
-
-Then
-
 \begin{equation}\label{eq:1.8.4}
 E\left[\exp{\left(u\right)|\epsilon}\right] = \frac{2\exp{\left(A\right)}\exp{
-\left(a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a+\sigma_v\right)-\exp{
-\left(B\right)}\exp{\left(b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(b+
-\sigma_v\right)}{2\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}
-\Phi\left(b\right)}
+\left(\mu_*+\frac{\sigma_v^2}{2}\right)}
+\Phi\left(\frac{\mu_*}{\sigma_v}+\sigma_v\right)-\exp{\left(B\right)}
+\exp{\left(\mu_{**}+\frac{\sigma_v^2}{2}\right)}
+\Phi\left(\frac{\mu_{**}}{\sigma_v}+\sigma_v\right)}{2\exp{\left(A\right)}
+\Phi\left(\frac{\mu_*}{\sigma_v}\right)-\exp{\left(B\right)}
+\Phi\left(\frac{\mu_{**}}{\sigma_v}\right)}
 \end{equation}
 
 \begin{itemize}
