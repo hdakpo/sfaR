@@ -1342,7 +1342,8 @@ Solving the integrals in the previous expression (see useful integral in
 
 \begin{equation}\label{eq:1.7.1}
 f(\epsilon) = f(\epsilon)=\frac{2}{\sigma_u}\exp{\left(A\right)}\Phi 
-\left(a\right)-\frac{2}{\sigma_u}\exp{\left(B\right)}\Phi\left(b\right)
+\left(\frac{\mu_{*}}{\sigma_v}\right)-\frac{2}{\sigma_u}
+\exp{\left(B\right)}\Phi\left(\frac{\mu_{**}}{\sigma_v}\right)
 \end{equation}
 
 with
@@ -1351,19 +1352,20 @@ $$A=\frac{S\epsilon}{\sigma_u}+\frac{\sigma_v^2}{2\sigma_u^2}$$
 
 $$B = \frac{2S\epsilon}{\sigma_u}+\frac{2\sigma_v^2}{\sigma_u^2}$$
 
-$$a = -\frac{S\epsilon}{\sigma_v}-\frac{\sigma_v}{\sigma_u}$$
+$$\mu_* = -\frac{\sigma_v^2}{\sigma_u}-S\epsilon$$
 
 and
 
-$$b = -\frac{S\epsilon}{\sigma_v}- \frac{2\sigma_v}{\sigma_u}$$
+$$\mu_{**} = -\frac{2\sigma_v^2}{\sigma_u}-S\epsilon$$
 
 \subsubsection{Technical (in)efficiencies derivation} \label{subsubsec:techineffgenexp}
 
 \begin{align*}
 f(u|\epsilon) & =\frac{f(u, \epsilon)}{f(\epsilon)} \\
-& = \frac{\frac{1}{\sigma_v}\exp{(A)}\phi\left[\frac{u}{\sigma_v} - a\right]-
-\frac{1}{\sigma_v}\exp{(B)}\phi\left[\frac{u}{\sigma_v} - b\right]}{\exp{
-\left(A\right)}\Phi \left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}
+& = \frac{\frac{1}{\sigma_v}\exp{(A)}\phi\left[\frac{u-\mu_*}{\sigma_v}\right]-
+\frac{1}{\sigma_v}\exp{(B)}\phi\left[\frac{u-\mu_{**}}{\sigma_v}\right]}{\exp{
+\left(A\right)}\Phi \left(\frac{\mu_*}{\sigma_v}\right)-\exp{\left(B\right)}
+\Phi\left(\frac{\mu_{**}}{\sigma_v}\right)}
 \end{align*}
 
 \begin{itemize}
@@ -1373,29 +1375,20 @@ f(u|\epsilon) & =\frac{f(u, \epsilon)}{f(\epsilon)} \\
 The conditional inefficiency is obtained as
 
 $$E\left[u|\epsilon\right] = \frac{\exp{(A)}\int_0^\infty \frac{u}{\sigma_v}
-\phi\left[\frac{u}{\sigma_v} - a\right]du - \exp{(B)}\int_0^\infty\frac{u}{
-\sigma_v}\phi\left[\frac{u}{\sigma_v} - b\right]du}{\exp{\left(A\right)}\Phi
-\left(a\right)-\exp{\left(B\right)}\Phi\left(b\right)}$$
+\phi\left[\frac{u - \mu_*}{\sigma_v}\right]du - \exp{(B)}\int_0^\infty\frac{u}{
+\sigma_v}\phi\left[\frac{u-\mu_{**}}{\sigma_v}\right]du}{\exp{\left(A\right)}\Phi
+\left(\frac{\mu_{*}}{\sigma_v}\right)-\exp{\left(B\right)}
+\Phi\left(\frac{\mu_{**}}{\sigma_v}\right)}$$
 
-From the useful integrals in \ref{eq.a3}, we have
-
-We have 
-
-$$\int_0^\infty u \phi\left[\frac{u}{\sigma_v} -a\right]du = \sigma_v^2\left[
-\phi\left(a\right) + a\Phi\left(a\right)\right]$$
-
-and 
-
-$$\int_0^\infty u \phi\left[\frac{u}{\sigma_v} -b\right]du=\sigma_v^2\left[
-\phi\left(b\right)+b\Phi\left(b\right)\right]$$
-
-Then
+From the useful integral in \ref{eq.a3}, we have
 
 \begin{equation}\label{eq:1.7.2}
-E\left[u|\epsilon\right] = \sigma_v \frac{\exp{\left(A\right)}\left[\phi\left(
-a\right) + a\Phi\left(a\right)\right]- \exp{\left(B\right)}\left[\phi\left(
-b\right)+b\Phi\left(b\right)\right]}{\exp{\left(A\right)}\Phi\left(a\right)-
-\exp{\left(B\right)}\Phi\left(b\right)}
+E\left[u|\epsilon\right] = \frac{\exp{\left(A\right)}\left[\sigma_v\phi\left(
+\mu_*\right) + \mu_*\Phi\left(\frac{\mu_{*}}{\sigma_v}\right)\right]- 
+\exp{\left(B\right)}\left[\sigma_v\phi\left(\frac{\mu_{**}}{\sigma_v}\right)+
+\mu_{**}\Phi\left(\frac{\mu_{*}}{\sigma_v}\right)\right]}{\exp{\left(A\right)}
+\Phi\left(\frac{\mu_{*}}{\sigma_v}\right)-\exp{\left(B\right)}
+\Phi\left(\frac{\mu_{**}}{\sigma_v}\right)}
 \end{equation}
 
 \begin{itemize}
@@ -1406,10 +1399,12 @@ From the useful integral in \ref{eq.a4}, and setting $t = 1$, it is easy to deri
 
 \begin{equation}\label{eq:1.7.3}
 E\left[\exp{\left(-u\right)|\epsilon}\right] =\frac{\exp{\left(A\right)}\exp{
-\left(-a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a-\sigma_v\right)-\exp{
-\left(B\right)}\exp{\left(-b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(
-b-\sigma_v\right)}{\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}
-\Phi\left(b\right)}
+\left(-\mu_*+\frac{\sigma_v^2}{2}\right)}
+\Phi\left(\frac{\mu_{*}}{\sigma_v}-\sigma_v\right)-\exp{\left(B\right)}
+\exp{\left(-\mu_{**}+\frac{\sigma_v^2}{2}\right)}
+\Phi\left(\frac{\mu_{**}}{\sigma_v}-\sigma_v\right)}{\exp{\left(A\right)}
+\Phi\left(\frac{\mu_{*}}{\sigma_v}\right)-\exp{\left(B\right)}
+\Phi\left(\frac{\mu_{**}}{\sigma_v}\right)}
 \end{equation}
 
 \begin{itemize}
@@ -1421,10 +1416,12 @@ set $t = -1$)
 
 \begin{equation}\label{eq:1.7.4}
 E\left[\exp{\left(u\right)|\epsilon}\right] = \frac{\exp{\left(A\right)}\exp{
-\left(a\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(a+\sigma_v\right)-\exp{
-\left(B\right)}\exp{\left(b\sigma_v+\frac{\sigma_v^2}{2}\right)}\Phi\left(
-b+\sigma_v\right)}{\exp{\left(A\right)}\Phi\left(a\right)-\exp{\left(B\right)}
-\Phi\left(b\right)}
+\left(\mu_*+\frac{\sigma_v^2}{2}\right)}
+\Phi\left(\frac{\mu_{*}}{\sigma_v}+\sigma_v\right)-\exp{\left(B\right)}
+\exp{\left(\mu_{**}+\frac{\sigma_v^2}{2}\right)}
+\Phi\left(\frac{\mu_{**}}{\sigma_v}+\sigma_v\right)}{\exp{\left(A\right)}
+\Phi\left(\frac{\mu_{*}}{\sigma_v}\right)-\exp{\left(B\right)}
+\Phi\left(\frac{\mu_{**}}{\sigma_v}\right)}
 \end{equation}
 
 \begin{itemize}
