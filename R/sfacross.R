@@ -747,7 +747,7 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
     }
     cat("Initialization of", Nsim, simDist, "draws per observation ...\n")
     # burn + 1 cause halton fn always starts with 0
-    FiMat <- drawMat(N = N, Nsim = Nsim, simType = simType,
+    FiMat <- drawMatUniDim(N = N, Nsim = Nsim, simType = simType,
       prime = prime, burn = burn + 1, antithetics = antithetics,
       seed = seed)
   }

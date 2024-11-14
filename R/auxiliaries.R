@@ -286,7 +286,7 @@ is_prime <- function(prime) {
 #' @param seed seed for the draw
 #' @param antithetics logical for antithetics draws
 #' @noRd
-drawMat <- function(N, Nsim, simType, prime, burn, seed, antithetics) {
+drawMatUniDim <- function(N, Nsim, simType, prime, burn, seed, antithetics) {
   if (simType == "halton") {
     matDraw <- matrix(halton(prime = prime, length = (Nsim *
       N), drop = burn), nrow = N, ncol = Nsim, byrow = TRUE)
