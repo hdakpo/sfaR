@@ -826,7 +826,7 @@ parameter  $\left(-\frac{\sigma_v^2}{\sigma_u} - S\epsilon\right)$ and variance
 parameter $\sigma_v^2$.
 
 \begin{equation}\label{eq:1.4.1}
-f(\epsilon) = f(\epsilon) = \frac{\exp{\left(\frac{\sigma_v^2}{2\sigma_u^2} + 
+f(\epsilon) = \frac{\exp{\left(\frac{\sigma_v^2}{2\sigma_u^2} + 
 \frac{S\epsilon}{\sigma_u}\right)}}{\sigma_u^P\Gamma\left(P\right)}
 \Phi\left(-\frac{\sigma_v}{\sigma_u} - \frac{S\epsilon}{\sigma_v}\right)
 \hat{h}(P-1, \epsilon)
@@ -955,10 +955,10 @@ This implies that
 Then 
 
 \begin{align*}
-J &= \exp{\left(\frac{t\sigma_v^2}{\sigma_u} + S\epsilon + \frac{\sigma_v^2}{2}
+J &= \exp{\left(\frac{\sigma_v^2}{\sigma_u} + S\epsilon + \frac{\sigma_v^2}{2}
 \right)}\times Prob\left[\tilde{z} > 0 |\epsilon\right] \times \int_0^\infty 
 \tilde{z}^{P-1}f(\tilde{z} |\tilde{z} > 0, \epsilon)d\tilde{z}  \\
-&= \exp{\left(\frac{t\sigma_v^2}{\sigma_u} + S\epsilon + \frac{\sigma_v^2}{2}
+&= \exp{\left(\frac{\sigma_v^2}{\sigma_u} + S\epsilon + \frac{\sigma_v^2}{2}
 \right)}\times Prob\left[\tilde{z} > 0|\epsilon\right] \times E\left[
 \tilde{z}^{P-1}|\tilde{z}>0, \epsilon\right]
 \end{align*}
@@ -976,7 +976,7 @@ E\left[\exp{\left(-u\right)|\epsilon}\right] = \frac{\exp{\left(\frac{
 with
 
 $$g(P-1, \epsilon)=E\left[\tilde{z}^{P-1}|\tilde{z}>0, \epsilon\right] 
-\approx \frac{1}{R}\sum_{r = 1}^R \tilde{z}^{P-1}$$
+\approx \frac{1}{R}\sum_{r = 1}^R \tilde{z}_r^{P-1}$$
 
 $\hat{g}$ and $\hat{h}$ can be obtained from the same Halton draws. In the case 
 of $\hat{g}$ we have:
@@ -1026,11 +1026,11 @@ This implies that
 Then 
 
 \begin{align*}
-J &= \exp{\left(\frac{\sigma_v^2}{\sigma_u} + S\epsilon - \frac{\sigma_v^2}{2}
+J &= \exp{\left(-\frac{\sigma_v^2}{\sigma_u} - S\epsilon + \frac{\sigma_v^2}{2}
 \right)}\times Prob\left[\tilde{\tilde{z}} > 0 |\epsilon\right] \times 
 \int_0^\infty \tilde{\tilde{z}}^{P-1}f(\tilde{\tilde{z}} |\tilde{\tilde{z}} > 0, 
 \epsilon)d\tilde{\tilde{z}}  \\
-&= \exp{\left(\frac{\sigma_v^2}{\sigma_u} + S\epsilon - \frac{\sigma_v^2}{2}
+&= \exp{\left(-\frac{\sigma_v^2}{\sigma_u} - S\epsilon + \frac{\sigma_v^2}{2}
 \right)}\times Prob\left[\tilde{\tilde{z}} > 0|\epsilon\right] \times 
 E\left[\tilde{\tilde{z}}^{P-1}|\tilde{\tilde{z}}>0, \epsilon\right]
 \end{align*}
@@ -1038,7 +1038,7 @@ E\left[\tilde{\tilde{z}}^{P-1}|\tilde{\tilde{z}}>0, \epsilon\right]
 with 
 
 $$k(P-1, \epsilon)=E\left[\tilde{\tilde{z}}^{P-1}|\tilde{\tilde{z}}>0, 
-\epsilon\right] \approx \frac{1}{R}\sum_{r = 1}^R \tilde{z}^{P-1}$$
+\epsilon\right] \approx \frac{1}{R}\sum_{r = 1}^R \tilde{\tilde{z}}_r^{P-1}$$
 
 Therefore
 
@@ -2502,8 +2502,437 @@ No conditional mode is derived for the lindley-normal convolution
 
 No confidence intervals are computed for the lindley-normal convolution.
 
+\subsection{Beta exponential distribution} \label{subsec:betaexponential}
+
+We have
+
+$$
+f(u) = \frac{\lambda}{\mathrm{B}\left(\alpha, \beta\right)}
+\exp{\left(-\alpha \lambda u\right)}\left(1 - 
+\exp{\left(-\lambda u\right)}\right)^{\beta - 1}
+$$
+
+where $\alpha >0$, $\beta > 0$ are scale parameters. Moreover, 
+
+$$\mathrm{B}\left(\alpha, \beta\right) = \frac{\Gamma\left(\alpha\right)
+ \Gamma\left(\beta\right)}{\Gamma\left(\alpha + \beta\right)}$$
+ 
+Let's parametrize $\lambda = \frac{1}{\sigma_u}$.
+
+\subsubsection{Derivation of the density of $\epsilon$} \label{subsubsec:denbetaexponential}
+
+We have
+
+$$f(u,v) = \frac{1}{\mathrm{B}\left(\alpha, \beta\right)}\frac{1}{
+\sigma_u\sigma_v\sqrt{2\pi}}\exp{\left(-\alpha\frac{u}{\sigma_u} - 
+\frac{v^2}{2\sigma_v^2}\right)}\left(1 - \exp{\left(-\frac{u}{\sigma_u}\right)}
+\right)^{\beta - 1}$$
+
+and 
+
+$$f(u,\epsilon + Su) = \frac{1}{\mathrm{B}\left(\alpha, \beta\right)}\frac{1}{
+\sigma_u\sigma_v\sqrt{2\pi}}\exp{\left(-\alpha\frac{u}{\sigma_u} - 
+\frac{\left(\epsilon + Su\right)^2}{2\sigma_v^2}
+\right)}\left(1 - \exp{\left(-\frac{u}{\sigma_u}\right)}\right)^{\beta - 1}$$
+
+The expression in the first exponential can be transformed as:
+
+\begin{align*}
+-\alpha\frac{u}{\sigma_u} - \frac{\left(\epsilon + Su\right)^2}{2\sigma_v^2} & =
+-\frac{1}{2\sigma_v^2}\left\{\frac{2\alpha u\sigma_v^2}{\sigma_u} + 
+\epsilon^2 + 2uS\epsilon + u^2\right\} \\
+& = -\frac{1}{2\sigma_v^2}\left\{u^2 + 2u\left(S\epsilon + 
+\alpha\frac{\sigma_v^2}{\sigma_u}\right) + \epsilon^2\right\} \\
+& = -\frac{1}{2\sigma_v^2}\left\{\left[u + \left(S\epsilon + 
+\alpha\frac{\sigma_v^2}{\sigma_u}\right)\right]^2 + \epsilon^2 - \left(S\epsilon + 
+\alpha\frac{\sigma_v^2}{\sigma_u}\right)^2\right\} \\
+&= -\frac{1}{2\sigma_v^2}\left\{\left[u + \left(S\epsilon + 
+\alpha\frac{\sigma_v^2}{\sigma_u}\right)\right]^2\right\} + 
+\alpha^2\frac{\sigma_v^2}{2\sigma_u^2} + \alpha\frac{S\epsilon}{\sigma_u}
+\end{align*}
+
+The previous density simplifies to
+
+$$f(u,\epsilon + Su) = \frac{1}{\mathrm{B}\left(\alpha, \beta\right)}
+\frac{\exp{\left(\alpha^2\frac{\sigma_v^2}{2\sigma_u^2} + 
+\alpha\frac{S\epsilon}{\sigma_u}\right)}}{\sigma_u\sigma_v\sqrt{2\pi}}
+\exp{\left(-\frac{1}{2\sigma_v^2}\left\{\left[u + \left(S\epsilon + 
+\alpha\frac{\sigma_v^2}{\sigma_u}\right)\right]^2\right\}\right)}
+\left(1 - \exp{\left(-\frac{u}{\sigma_u}\right)}\right)^{\beta - 1}$$
+
+then
+
+$$f(\epsilon) = \frac{1}{\mathrm{B}\left(\alpha, \beta\right)}
+\frac{\exp{\left(\alpha^2\frac{\sigma_v^2}{2\sigma_u^2} + 
+\alpha\frac{S\epsilon}{\sigma_u}\right)}}{\sigma_u}\int_0^\infty 
+\frac{\left(1 - \exp{\left(-\frac{u}{\sigma_u}\right)}\right)^{\beta - 1}}{
+\sigma_v\sqrt{2\pi}}\exp{\left(-\frac{1}{2\sigma_v^2}\left\{
+\left[u + \left(S\epsilon + \alpha\frac{\sigma_v^2}{\sigma_u}\right)\right]^2
+\right\}\right)}du$$
+
+As in the gamma distribution case, let
+
+\begin{align*}
+I &= \int_0^\infty 
+\frac{\left(1 - \exp{\left(-\frac{u}{\sigma_u}\right)}\right)^{\beta - 1}}{
+\sigma_v\sqrt{2\pi}} \exp{\left(-\frac{1}{2\sigma_v^2}\left(
+u + S\epsilon + \alpha\frac{\sigma_v^2}{\sigma_u}\right)^2\right)} \, du \\
+&= \int_0^\infty 
+\frac{\left(1 - \exp{\left(-\frac{u}{\sigma_u}\right)}\right)^{\beta - 1}}{
+\sigma_v} \phi\left(\frac{1}{\sigma_v}\left[u + S\epsilon + 
+\alpha\frac{\sigma_v^2}{\sigma_u}\right]\right) \, du
+\end{align*}
+
+Let $z$ be a normally distributed variable with mean $\left(-S\epsilon - 
+\alpha\frac{\sigma_v^2}{\sigma_u}\right)$ and variance $\sigma_v^2$. Then
+
+$$\int_0^\infty f(z|\epsilon)dz = \int_0^\infty\frac{1}{\sigma_v\sqrt{2\pi}}
+\exp{\left\{-\frac{1}{2\sigma_v^2}\left[z+\left(S\epsilon + 
+\alpha\frac{\sigma_v^2}{\sigma_u}\right)\right]^2\right\}}dz = 
+Prob\left[z > 0|\epsilon\right]$$
+
+This implies that 
+
+ $$f(z | z > 0, \epsilon) = \frac{f(z|\epsilon)}{
+ Prob\left[z > 0 |\epsilon\right]} = \frac{\exp{\left\{-\frac{1}{2\sigma_v^2}
+ \left[z+\left(S\epsilon + \alpha\frac{\sigma_v^2}{\sigma_u}\right)\right]^2
+ \right\}}}{\int_0^\infty\exp{\left\{-\frac{1}{2\sigma_v^2}
+ \left[z+\left(S\epsilon + \alpha\frac{\sigma_v^2}{\sigma_u}\right)\right]^2
+ \right\}}dz}$$
+
+Then 
+
+\begin{align*}
+I &= Prob\left[z > 0 |\epsilon\right] \times \int_0^\infty 
+\left(1 - \exp{\left(-\frac{z}{\sigma_u}\right)}\right)^{\beta - 1}f(z | z > 0, 
+\epsilon)dz \\
+&= Prob\left[z > 0|\epsilon\right] \times 
+E\left[\left(1 - \exp{\left(-\frac{z}{\sigma_u}\right)}\right)^{\beta - 1}|z>0, 
+\epsilon\right]
+\end{align*}
+
+This integral can be approximated using maximum simulated likelihood (MSL). 
+We have
+
+$$f(\epsilon) = \frac{1}{\mathrm{B}\left(\alpha, \beta\right)}
+\frac{\exp{\left(\alpha^2\frac{\sigma_v^2}{2\sigma_u^2} + 
+\alpha\frac{S\epsilon}{\sigma_u}\right)}}{\sigma_u}
+Prob\left[z > 0 |\epsilon\right]h(\beta-1, \epsilon)$$
+
+where 
+
+$$h(\beta-1, \epsilon)=E\left[\left(1 - \exp{\left(-\frac{z}{\sigma_u}\right)}
+\right)^{\beta - 1}|z>0, \epsilon\right] \approx \frac{1}{R}
+\sum_{r = 1}^R \left(1 - \exp{\left(-\frac{z_r}{\sigma_u}\right)}
+\right)^{\beta - 1}$$
+
+where $z$ is a random draw from the truncated normal distribution with mean 
+parameter  $\left(-S\epsilon - \alpha\frac{\sigma_v^2}{\sigma_u}\right)$ and 
+variance parameter $\sigma_v^2$.
+
+\begin{equation}\label{eq:1.13.1}
+f(\epsilon) = \frac{1}{\mathrm{B}\left(\alpha, \beta\right)}
+\frac{\exp{\left(\alpha^2\frac{\sigma_v^2}{2\sigma_u^2} + 
+\alpha\frac{S\epsilon}{\sigma_u}\right)}}{\sigma_u}
+\Phi\left(-\alpha\frac{\sigma_v}{\sigma_u} - \frac{S\epsilon}{\sigma_v}\right)
+\hat{h}(\beta-1, \epsilon)
+\end{equation}
+
+Random draws from the truncated distribution are obtained using Geweke's method 
+as follows: 
+  
+Let  
+  
+$L$ = truncation point = $0$  
+   
+$\mu$ = the mean of untruncated distribution = $\left(-\alpha\frac{\sigma_v^2}{
+\sigma_u} - S\epsilon\right)$  
+   
+$\sigma_v$ = the standard deviation of the untruncated distribution  
+   
+$PL = \Phi\left[\left(L - \mu\right)/\sigma_v\right]$ 
+   
+$F$ one draw from $U\left[0, 1\right]$  
+   
+Then $z$ the draw from the truncated distribution is obtained as follows: 
+   
+$z = \mu + \sigma_v\Phi^{-1}\left[PL + F \times \left(1 - PL\right)\right]$
+
+\subsubsection{Technical (in)efficiencies derivation} \label{subsubsec:techineffbetaexponential}
+
+\begin{itemize}
+\item Conditional inefficiency
+\end{itemize}
+
+$$f(u|\epsilon)=\frac{f(u, \epsilon)}{f(\epsilon)}$$
+
+We have
+
+$$E\left[u|\epsilon\right]=\frac{\int_0^\infty u
+\frac{\left(1 - \exp{\left(-\frac{z}{\sigma_u}\right)}
+\right)^{\beta - 1}}{\sigma_v}
+\phi\left\{\frac{1}{\sigma_v}\left[u+\left(S\epsilon + \alpha\frac{\sigma_v^2}{
+\sigma_u}\right)\right]\right\} du}{\Phi\left(-\alpha\frac{\sigma_v}{\sigma_u} - 
+\frac{S\epsilon}{\sigma_v}\right)\hat{h}(\beta-1, \epsilon)}$$
+
+Let's consider
+
+$$J = \int_0^\infty u
+\frac{\left(1 - \exp{\left(-\frac{z}{\sigma_u}\right)}
+\right)^{\beta - 1}}{\sigma_v}
+\phi\left\{\frac{1}{\sigma_v}\left[u+\left(S\epsilon + \alpha\frac{\sigma_v^2}{
+\sigma_u}\right)\right]\right\} du$$
+
+Then following the previous developments in deriving the likelihood, we have:
+
+$$J = Prob\left[z > 0|\epsilon\right] \times 
+E\left[z\left(1 - \exp{\left(-\frac{z}{\sigma_u}\right)}\right)^{\beta - 1}|z>0, 
+\epsilon\right]$$
+
+Let
+
+$$g(\beta-1, \epsilon)=E\left[z\left(1 - \exp{\left(-\frac{z}{\sigma_u}\right)}
+\right)^{\beta - 1}|z>0, \epsilon\right] \approx \frac{1}{R}
+\sum_{r = 1}^R z_r\left(1 - \exp{\left(-\frac{z_r}{\sigma_u}\right)}
+\right)^{\beta - 1}$$
+
+Then
+
+\begin{equation}\label{eq:1.13.2}
+E\left[u|\epsilon\right] = \frac{\hat{g}(\beta - 1, \epsilon)}{
+\hat{h}(\beta-1, \epsilon)}
+\end{equation}
+
+\begin{itemize}
+\item (Reciprocal) Conditional efficiency
+\end{itemize}
+
+To obtain the conditional efficiency and its reciprocal we need to compute the 
+following integral
+
+$$E\left[\exp{\left(-tu\right)}|\epsilon\right] = \int_0^\infty 
+\exp{\left(-tu\right)}f(u|\epsilon)du=\frac{\int_0^\infty \exp{\left(-tu\right)}
+\frac{\left(1 - \exp{\left(-\frac{z}{\sigma_u}\right)}\right)^{\beta - 1}}{
+\sigma_v}\phi\left\{\frac{1}{\sigma_v}
+\left[u+\left(\alpha\frac{\sigma_v^2}{\sigma_u} + S\epsilon\right)\right]
+\right\}du}{\Phi\left(-\alpha\frac{\sigma_v}{\sigma_u} - 
+\frac{S\epsilon}{\sigma_v}\right)\hat{h}(\beta-1, \epsilon)}$$
+
+Let
+
+$$K = \int_0^\infty \exp{\left(-tu\right)}
+\frac{\left(1 - \exp{\left(-\frac{u}{\sigma_u}\right)}\right)^{\beta - 1}}{
+\sigma_v}\phi\left\{\frac{1}{\sigma_v}\left[u+\left(\alpha\frac{\sigma_v^2}{
+\sigma_u} + S\epsilon\right)\right]\right\}du$$
+
+We have:
+
+\begin{align*}
+\exp{\left(-tu\right)}\phi\left\{\frac{1}{\sigma_v}\left[u+\left(
+\alpha\frac{\sigma_v^2}{\sigma_u} + S\epsilon\right)\right]\right\} &= 
+\frac{1}{\sqrt{2\pi}}\exp{\left\{-\frac{1}{2\sigma_v^2}
+\left[u+\left(\alpha\frac{\sigma_v^2}{\sigma_u} + S\epsilon\right)\right]^2-
+tu\right\}} \\
+ &= \frac{1}{\sqrt{2\pi}}\exp{\left\{-\frac{1}{2\sigma_v^2}
+ \left[u^2+2u\left(\alpha\frac{\sigma_v^2}{\sigma_u} + S\epsilon\right) + 
+ \left(\alpha\frac{\sigma_v^2}{\sigma_u} + S\epsilon\right)^2\right]-
+ \frac{2tu\sigma_v^2}{2\sigma_v^2}\right\}} \\
+ &= \frac{1}{\sqrt{2\pi}}\exp{\left\{-\frac{1}{2\sigma_v^2}
+ \left[u^2+2u\left(\alpha\frac{\sigma_v^2}{\sigma_u} + S\epsilon + 
+ t\sigma_v^2\right) + \left(\alpha\frac{\sigma_v^2}{\sigma_u} + 
+ S\epsilon\right)^2\right]\right\}} \\
+ &= \frac{1}{\sqrt{2\pi}}\exp\Bigg\{-\frac{1}{2\sigma_v^2}\Bigg\{
+ \left[u+\left(\alpha\frac{\sigma_v^2}{\sigma_u} + S\epsilon + t\sigma_v^2\right)
+ \right]^2+\left(\alpha\frac{\sigma_v^2}{\sigma_u} + S\epsilon\right)^2 - \\
+ & \left(\alpha\frac{\sigma_v^2}{\sigma_u} + S\epsilon + 
+ t\sigma_v^2\right)^2\Bigg\}\Bigg\} \\
+ &= \frac{1}{\sqrt{2\pi}}\exp\Bigg\{-\frac{1}{2\sigma_v^2}\Bigg\{
+ \left[u+\left(\alpha\frac{\sigma_v^2}{\sigma_u} + S\epsilon + 
+ t\sigma_v^2\right)\right]^2 - \\
+ & t\sigma_v^2\left(2\alpha\frac{\sigma_v^2}{\sigma_u} + 
+ 2S\epsilon + t\sigma_v^2\right)\Bigg\}\Bigg\} \\
+ &= \frac{1}{\sqrt{2\pi}}\exp{\left\{-\frac{1}{2\sigma_v^2}
+ \left[u+\left(\alpha\frac{\sigma_v^2}{\sigma_u} + S\epsilon + 
+ t\sigma_v^2\right)\right]^2\right\}} \cdot\\
+ & \exp{ \left(\alpha\frac{t\sigma_v^2}{\sigma_u} + St\epsilon + 
+ \frac{t^2\sigma_v^2}{2}\right)}
+\end{align*}
+
+Hence
+
+\begin{equation}
+K = \exp{\left(\alpha\frac{t\sigma_v^2}{\sigma_u} + St\epsilon + 
+\frac{t^2\sigma_v^2}{2}\right)} \int_0^\infty 
+\frac{\left(1 - \exp{\left(-\frac{u}{\sigma_u}\right)}\right)^{\beta - 1}}{
+\sigma_v} \, \phi\left\{\frac{1}{\sigma_v}\left[u + 
+\left(\alpha\frac{\sigma_v^2}{\sigma_u} + 
+S\epsilon + t\sigma_v^2\right)\right]\right\} du
+\end{equation}
+
+To obtain the conditional efficiency, $t$ is set to equal $1$.
+
+As previously, let $\tilde{z}$ be a normally distributed variable with mean 
+$\left(-\alpha\frac{\sigma_v^2}{\sigma_u} - S\epsilon - \sigma_v^2\right)$ and 
+variance $\sigma_v^2$. Then
+
+$$\int_0^\infty f(\tilde{z}|\epsilon)d\tilde{z} = \int_0^\infty\frac{1}{
+\sigma_v\sqrt{2\pi}}\exp{\left\{-\frac{1}{2\sigma_v^2}\left[\tilde{z}+
+\left(\alpha\frac{\sigma_v^2}{\sigma_u} + S\epsilon + \sigma_v^2\right)\right]^2
+\right\}}d\tilde{z} = Prob\left[\tilde{z} > 0|\epsilon\right]$$
+
+
+This implies that 
+
+ $$f(\tilde{z} | \tilde{z} > 0, \epsilon) = \frac{f(\tilde{z}|\epsilon)}{
+ Prob\left[\tilde{z} > 0 |\epsilon\right]} = \frac{\exp{\left\{-\frac{1}{
+ 2\sigma_v^2}\left[\tilde{z}+\left(\alpha\frac{\sigma_v^2}{\sigma_u} + S\epsilon+
+ \sigma_v^2\right)\right]^2\right\}}}{\int_0^\infty\exp{\left\{-\frac{1}{
+ 2\sigma_v^2}\left[\tilde{z}+\left(\alpha\frac{\sigma_v^2}{\sigma_u} + S\epsilon + 
+ \sigma_v^2\right)\right]^2\right\}}d\tilde{z}}$$
+
+Then 
+
+\begin{align*}
+K &= \exp{\left(\frac{\alpha\sigma_v^2}{\sigma_u} + S\epsilon + \frac{\sigma_v^2}{2}
+\right)}\times Prob\left[\tilde{z} > 0 |\epsilon\right] \times \int_0^\infty 
+\left(1 - \exp{\left(-\frac{\tilde{z}}{\sigma_u}\right)}\right)^{\beta - 1}
+f(\tilde{z} |\tilde{z} > 0, \epsilon)d\tilde{z}  \\
+&= \exp{\left(\frac{\alpha\sigma_v^2}{\sigma_u} + S\epsilon + \frac{\sigma_v^2}{2}
+\right)}\times Prob\left[\tilde{z} > 0|\epsilon\right] \times E\left[
+\left(1 - \exp{\left(-\frac{\tilde{z}}{\sigma_u}\right)}\right)^{\beta - 1}|
+\tilde{z}>0, \epsilon\right]
+\end{align*}
+
+The conditional efficiency is calculated as
+
+\begin{equation}\label{eq:1.13.3}
+E\left[\exp{\left(-u\right)|\epsilon}\right] = \frac{\exp{\left(\alpha\frac{
+\sigma_v^2}{\sigma_u} + S\epsilon + \frac{\sigma_v^2}{2}\right)}\Phi\left(
+-\alpha\frac{\sigma_v}{\sigma_u} - \frac{S\epsilon}{\sigma_v} - \sigma_v\right)
+\hat{l}(\beta-1, \epsilon)}{\Phi\left(-\alpha\frac{\sigma_v}{\sigma_u} - 
+\frac{S\epsilon}{\sigma_v}\right)\hat{h}(\beta-1, \epsilon)}
+\end{equation}
+
+with
+
+$$l(\beta-1, \epsilon)=E\left[\left(1 - \exp{\left(-\frac{\tilde{z}}{\sigma_u}
+\right)}\right)^{\beta - 1}|\tilde{z}>0, \epsilon\right] 
+\approx \frac{1}{R}\sum_{r = 1}^R \left(1 - \exp{\left(-\frac{\tilde{z}_r}{
+\sigma_u}\right)}\right)^{\beta - 1}$$
+
+$\hat{l}$ and $\hat{h}$ can be obtained from the same Halton draws. In the case 
+of $\hat{l}$ we have:
+
+Let  
+  
+$L$ = truncation point = $0$  
+   
+$\tilde{\mu}$ = the mean of untruncated distribution = $\left(-\alpha\frac{
+\sigma_v^2}{\sigma_u} - S\epsilon - \sigma_v^2\right)$  
+   
+$\sigma_v$ = the standard deviation of the untruncated distribution  
+   
+$\tilde{PL} = \Phi\left[\left(L - \tilde{\mu}\right)/\sigma_v\right]$ 
+   
+$F$ one draw from $U\left[0, 1\right]$  
+   
+Then $\tilde{z}$ the draw from the truncated distribution is obtained as follows: 
+   
+$\tilde{z} = \tilde{\mu} + \sigma_v\Phi^{-1}\left[\tilde{PL} + F \times 
+\left(1 - \tilde{PL}\right)\right]$
+
+\bigskip
+
+For the reciprocal conditional efficiency, $t$ is set to equal $-1$. 
+
+Let $\tilde{\tilde{z}}$ be a normally distributed variable with mean $\left(
+-\alpha\frac{\sigma_v^2}{\sigma_u} - S\epsilon + \sigma_v^2\right)$ and variance 
+$\sigma_v^2$. Then
+
+$$\int_0^\infty f(\tilde{\tilde{z}}|\epsilon)d\tilde{\tilde{z}} = \int_0^\infty
+\frac{1}{\sigma_v\sqrt{2\pi}}\exp{\left\{-\frac{1}{2\sigma_v^2}\left[\tilde{
+\tilde{z}}+\left(\alpha\frac{\sigma_v^2}{\sigma_u} + S\epsilon - \sigma_v^2\right)
+\right]^2\right\}}d\tilde{\tilde{z}} = Prob\left[
+\tilde{\tilde{z}} > 0|\epsilon\right]$$
+
+This implies that 
+
+ $$f(\tilde{\tilde{z}} | \tilde{\tilde{z}} > 0, \epsilon) = \frac{f(\tilde{
+ \tilde{z}}|\epsilon)}{Prob\left[\tilde{\tilde{z}} > 0 |\epsilon\right]} = 
+ \frac{\exp{\left\{-\frac{1}{2\sigma_v^2}\left[\tilde{\tilde{z}}+\left(
+ \alpha\frac{\sigma_v^2}{\sigma_u} + S\epsilon-\sigma_v^2\right)\right]^2
+ \right\}}}{\int_0^\infty\exp{\left\{-\frac{1}{2\sigma_v^2}
+ \left[\tilde{\tilde{z}}+\left(\alpha\frac{\sigma_v^2}{\sigma_u} + S\epsilon - 
+ \sigma_v^2\right)\right]^2 \right\}}d\tilde{\tilde{z}}}$$
+
+Then 
+
+\begin{align*}
+K &= \exp{\left(-\alpha\frac{\sigma_v^2}{\sigma_u} - S\epsilon + \frac{\sigma_v^2}{2}
+\right)}\times Prob\left[\tilde{\tilde{z}} > 0 |\epsilon\right] \times 
+\int_0^\infty \left(1 - \exp{\left(-\frac{\tilde{\tilde{z}}}{\sigma_u}\right)}
+\right)^{\beta - 1}f(\tilde{\tilde{z}} |\tilde{\tilde{z}} > 0, 
+\epsilon)d\tilde{\tilde{z}}  \\
+&= \exp{\left(-\alpha\frac{\sigma_v^2}{\sigma_u} - S\epsilon + 
+\frac{\sigma_v^2}{2}\right)}\times 
+Prob\left[\tilde{\tilde{z}} > 0|\epsilon\right] \times 
+E\left[\left(1 - \exp{\left(-\frac{\tilde{\tilde{z}}}{\sigma_u}\right)}
+\right)^{\beta - 1}|\tilde{\tilde{z}}>0, \epsilon\right]
+\end{align*}
+
+with 
+
+$$l'(\beta-1, \epsilon)=E\left[\left(1 - \exp{\left(-\frac{\tilde{\tilde{z}}}{
+\sigma_u}\right)}\right)^{\beta - 1}|\tilde{\tilde{z}}>0, 
+\epsilon\right] \approx \frac{1}{R}\sum_{r = 1}^R \left(1 - 
+\exp{\left(-\frac{\tilde{\tilde{z}}_r}{\sigma_u}\right)}\right)^{\beta - 1}$$
+
+Therefore
+
+\begin{equation}\label{eq:1.13.4}
+E\left[\exp{\left(u\right)|\epsilon}\right] = \frac{\exp{\left(-
+\alpha\frac{\sigma_v^2}{\sigma_u} - S\epsilon + \frac{\sigma_v^2}{2}\right)}
+\Phi\left(-\alpha\frac{\sigma_v}{\sigma_u} - \frac{S\epsilon}{\sigma_v} + 
+\sigma_v\right)  \hat{l'}(\beta-1, \epsilon)}{
+\Phi\left(-\alpha\frac{\sigma_v}{\sigma_u} - 
+\frac{S\epsilon}{\sigma_v}\right)\hat{h}(\beta-1, \epsilon)}
+\end{equation}
+
+$\hat{l'}$ and $\hat{h}$ can be obtained from the same Halton draws. In the case 
+of $\hat{l'}$ we have:
+
+Let  
+  
+$L$ = truncation point = $0$  
+   
+$\tilde{\tilde{\mu}}$ = the mean of untruncated distribution = $\left(-
+\alpha\frac{\sigma_v^2}{\sigma_u} - S\epsilon + \sigma_v^2\right)$  
+   
+$\sigma_v$ = the standard deviation of the untruncated distribution  
+   
+$\tilde{\tilde{PL}} = \Phi\left[\left(L - 
+\tilde{\tilde{\mu}}\right)/\sigma_v\right]$ 
+   
+$F$ one draw from $U\left[0, 1\right]$  
+   
+Then $\tilde{\tilde{z}}$ the draw from the truncated distribution is obtained as 
+follows: 
+   
+$\tilde{\tilde{z}} = \tilde{\tilde{\mu}} + \sigma_v\Phi^{-1}\left[
+\tilde{\tilde{PL}} + F \times \left(1 - \tilde{\tilde{PL}}\right)\right]$
+
+\begin{itemize}
+\item Mode of conditional inefficiency
+\end{itemize}
+
+No conditional mode is derived for the gamma-normal convolution.
+
+\subsubsection{Confidence intervals} \label{subsubsec:confintbetaexponential}
+
+No confidence intervals are computed for the beta exponential-normal convolution.
 
 %% -- Bibliography -------------------------------------------------------------
+\newpage
 
 \bibliography{sfaR-bib}
 
