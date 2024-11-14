@@ -271,8 +271,6 @@ halton <- function(prime, length, drop) {
 
 # matrix of draws ----------
 
-list_primes <- randtoolbox::get.primes(1e+05)
-
 #' @param prime prime number
 #' @noRd
 is_prime <- function(prime) {
@@ -305,16 +303,9 @@ drawMatUniDim <- function(N, Nsim, simType, prime, burn, seed, antithetics) {
       }
     } else {
       if (simType == "sobol") {
-        idPrime <- which(list_primes == prime)
-        if (idPrime == 1) {
-          matDraw <- matrix(randtoolbox::sobol(n = Nsim *
-          N, dim = idPrime, scrambling = 1, seed = seed),
-          nrow = N, ncol = Nsim, byrow = TRUE)
-        } else {
-          matDraw <- matrix(randtoolbox::sobol(n = Nsim *
-          N, dim = idPrime, scrambling = 1, seed = seed)[,
-          idPrime], nrow = N, ncol = Nsim, byrow = TRUE)
-        }
+        # does not requires prime
+        matDraw <- matrix(qrng::sobol(n = Nsim * N, dim = 1, randomize = "none",
+          skip = burn), nrow = N, ncol = Nsim, byrow = TRUE)
       } else {
         if (simType == "uniform") {
           set.seed(seed)

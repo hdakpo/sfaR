@@ -83,7 +83,6 @@
 #' @importFrom stats pchisq qchisq uniroot complete.cases
 #' @importFrom methods as new
 #' @importFrom Formula as.Formula Formula
-#' @importFrom randtoolbox get.primes sobol
 #' @importFrom qrng ghalton
 #' @importFrom maxLik maxBFGS maxBHHH maxCG maxNR maxCG maxSANN maxNM
 #' @importFrom ucminf ucminf

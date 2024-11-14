@@ -35,7 +35,6 @@ Imports:
     nleqslv,
     plm,
     qrng,
-    randtoolbox,
     stats,
     trustOptim,
     ucminf
