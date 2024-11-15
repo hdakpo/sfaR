@@ -96,4 +96,6 @@
 #' @importFrom plm pdata.frame index
 # @importFrom texreg extract createTexreg
 #' @importFrom mnorm pmnorm
+#' @importFrom RTMB MakeADFun GetTape MakeTape advector
+#' @importFrom calculus jacobian hessian
 NULL
