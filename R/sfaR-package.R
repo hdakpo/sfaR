@@ -74,9 +74,9 @@
 #' @author K Hervé Dakpo, Yann Desjeux, Arne Henningsen and Laure Latruffe
 #'
 # @importFrom base standardGeneric
-#' @importFrom stats coefficients dnorm lm model.frame
+#' @importFrom stats coefficients lm model.frame
 #' @importFrom stats model.matrix model.response nlminb
-#' @importFrom stats pnorm qnorm delete.response fitted
+#' @importFrom stats delete.response fitted
 #' @importFrom stats logLik residuals terms vcov formula
 #' @importFrom stats integrate runif model.weights nobs
 #' @importFrom stats na.pass printCoefmat pt qt na.omit
@@ -96,6 +96,7 @@
 #' @importFrom plm pdata.frame index
 # @importFrom texreg extract createTexreg
 #' @importFrom mnorm pmnorm
-#' @importFrom RTMB MakeADFun GetTape MakeTape advector
+# @importFrom RTMB MakeADFun GetTape MakeTape advector
 #' @importFrom calculus jacobian hessian
+#' @import RTMB
 NULL
