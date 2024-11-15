@@ -130,6 +130,13 @@ for trust regions and sparse Hessian
 \code{'nlminb'}, for optimization using PORT routines (see
 \code{\link[stats:nlminb]{nlminb}})}}
 
+\item{derivs}{Character string. Set the way the gradient (first order
+derivative) and Hessian (second order derivative) are computed. 3 options are
+available: \itemize{ \item \code{'ad'}, for automatic differentiation
+(whenever possible) \item \code{'analytical'}, for analytical derivatives
+\item \code{'numerical'}, for numerical derivatives using finite differences
+from the \CRANpkg{calculus} package. Default = \code{'ad'}.}}
+
 \item{hessianType}{Integer. Indicate the way the variance-covariance matrix is
 estimated. If \code{1} (Default), second order derivatives are used (e.g.,
 autopmatic differentiation, analytical or numerical). If \code{2}, bhhh
