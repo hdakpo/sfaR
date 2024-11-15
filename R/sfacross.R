@@ -97,9 +97,10 @@
 #' (see \code{\link[trustOptim:trust.optim]{trust.optim}}) \item
 #' \code{'nlminb'}, for optimization using PORT routines (see
 #' \code{\link[stats:nlminb]{nlminb}})}
-#' @param hessianType Integer. If \code{1} (Default), analytic Hessian is
-#' returned for all the distributions. If \code{2},
-#' bhhh Hessian is estimated (\eqn{g'g}).
+#' @param hessianType Integer. Indicate the way the variance-covariance matrix is
+#' estimated. If \code{1} (Default), second order derivatives are used (e.g., 
+#' autopmatic differentiation, analytical or numerical). If \code{2}, bhhh 
+#' Hessian is estimated as the outer product of the gradient (\eqn{g'g}).
 #' @param simType Character string. If \code{simType = 'halton'} (Default),
 #' Halton draws are used for maximum simulated likelihood (MSL). If
 #' \code{simType = 'ghalton'}, Generalized-Halton draws are used for MSL. If
@@ -129,6 +130,14 @@
 #' step length is decreased while also moving closer to the pure gradient
 #' direction. See \code{\link[maxLik:maxBHHH]{maxBHHH}} and
 #' \code{\link[maxLik:maxNR]{maxNR}}.
+#' @param accuracy Accuracy for the numerical derivatives. Default = \code{4L}.
+#' See \code{\link[calculus:jacobian]{jacobian}} and 
+#' \code{\link[calculus:hessian]{hessian}} from the \CRANpkg{calculus} package 
+#' for more details.
+#' @param stepsize Stepsize for the numerical derivatives. Default = \code{1e-5}.
+#' See \code{\link[calculus:jacobian]{jacobian}} and 
+#' \code{\link[calculus:hessian]{hessian}} from the \CRANpkg{calculus} package 
+#' for more details.
 #' @param x an object of class sfacross (returned by the function 
 #' \code{\link{sfacross}}).
 #' @param ... additional arguments of frontier are passed to sfacross; 
@@ -503,10 +512,11 @@
 #' @export
 sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
   data, subset, weights, wscale = TRUE, S = 1L, udist = "hnormal",
-  scaling = FALSE, start = NULL, randStart = FALSE, method = "bfgs", hessianType = 1L,
-  simType = "halton", Nsim = 100, prime = 2L, burn = 10, antithetics = FALSE,
-  seed = 12345, itermax = 2000, printInfo = FALSE, tol = 1e-12,
-  gradtol = 1e-06, stepmax = 0.1, qac = "marquardt") {
+  scaling = FALSE, start = NULL, randStart = FALSE, method = "bfgs", derivs = "ad", 
+  hessianType = 1L, simType = "halton", Nsim = 100, prime = 2L, burn = 10,
+  antithetics = FALSE,   seed = 12345, itermax = 2000, printInfo = FALSE, 
+  tol = 1e-12, gradtol = 1e-06, stepmax = 0.1, qac = "marquardt", 
+  accuracy = 4L, stepsize = 1e-5) {
   # u distribution check -------
   udist <- tolower(udist)
   if (!(udist %in% c("hnormal", "exponential", "tnormal", "rayleigh",
@@ -699,6 +709,11 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
     stop("Unknown or non-available optimization algorithm: ",
       paste(method), call. = FALSE)
   }
+  derivs <- tolower(derivs)
+  if (!(derivs %in% c("ad", "analytical", "numerical"))) {
+    stop("Unknown or non-available derivative method: ", paste(derivs),
+      call. = FALSE)
+  }
   # Check hessian type
   if (length(hessianType) != 1 || !(hessianType %in% c(1L,
     2L))) {
@@ -789,6 +804,12 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
     stop("argument 'qac' must be either 'marquardt' or 'stephalving'",
       call. = FALSE)
   }
+  if (!is.numeric(accuracy) || length(accuracy) != 1) {
+    stop("argument 'accuracy' must be a single numeric scalar", call. = FALSE)
+  }
+  if (stepsize < 0) {
+    stop("argument 'stepsize' must be non-negative", call. = FALSE)
+  }
   # Step 1: OLS -------
   olsRes <- if (colnames(Xvar)[1] == "(Intercept)") {
     if (dim(Xvar)[2] == 1) {
@@ -851,19 +872,19 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
       list(start = start, randStart = randStart, sdStart = sdStart, olsParam = olsParam, dataTable = dataTable,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
         uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-        S = S, wHvar = wHvar, method = method, printInfo = printInfo,
+        S = S, wHvar = wHvar, method = method, derivs = derivs, printInfo = printInfo,
         itermax = itermax, stepmax = stepmax, tol = tol,
         gradtol = gradtol, hessianType = hessianType,
-        qac = qac)
+        qac = qac, accuracy = accuracy, stepsize = stepsize)
     } else {
       list(start = start, randStart = randStart, sdStart = sdStart, olsParam = olsParam, dataTable = dataTable,
         nXvar = nXvar, nmuZUvar = nmuZUvar, nuZUvar = nuZUvar,
         nvZVvar = nvZVvar, muHvar = muHvar, uHvar = uHvar,
         vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
-        wHvar = wHvar, method = method, printInfo = printInfo,
+        wHvar = wHvar, method = method, derivs = derivs, printInfo = printInfo,
         itermax = itermax, stepmax = stepmax, tol = tol,
         gradtol = gradtol, hessianType = hessianType,
-        qac = qac)
+        qac = qac, accuracy = accuracy, stepsize = stepsize)
     }
   } else {
     if (udist == "lognormal") {
@@ -871,27 +892,27 @@ sfacross <- function(formula, muhet, uhet, vhet, logDepVar = TRUE,
         nXvar = nXvar, nmuZUvar = nmuZUvar, nuZUvar = nuZUvar,
         nvZVvar = nvZVvar, muHvar = muHvar, uHvar = uHvar,
         vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S,
-        wHvar = wHvar, N = N, FiMat = FiMat, method = method,
+        wHvar = wHvar, N = N, FiMat = FiMat, method = method, derivs = derivs, 
         printInfo = printInfo, itermax = itermax, stepmax = stepmax,
         tol = tol, gradtol = gradtol, hessianType = hessianType,
-        qac = qac)
+        qac = qac, accuracy = accuracy, stepsize = stepsize)
     } else {
       if (udist %in% c("gamma", "weibull")) {
         list(start = start, randStart = randStart, sdStart = sdStart, olsParam = olsParam, dataTable = dataTable,
           nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
           uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
           Xvar = Xvar, S = S, wHvar = wHvar, N = N, FiMat = FiMat,
-          method = method, printInfo = printInfo, itermax = itermax,
+          method = method, derivs = derivs, printInfo = printInfo, itermax = itermax,
           stepmax = stepmax, tol = tol, gradtol = gradtol,
-          hessianType = hessianType, qac = qac)
+          hessianType = hessianType, qac = qac, accuracy = accuracy, stepsize = stepsize)
       } else {
         list(start = start, randStart = randStart, sdStart = sdStart, olsParam = olsParam, dataTable = dataTable,
           nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
           uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
-          Xvar = Xvar, S = S, wHvar = wHvar, method = method,
+          Xvar = Xvar, S = S, wHvar = wHvar, method = method, derivs = derivs, 
           printInfo = printInfo, itermax = itermax, stepmax = stepmax,
           tol = tol, gradtol = gradtol, hessianType = hessianType,
-          qac = qac)
+          qac = qac, accuracy = accuracy, stepsize = stepsize)
       }
     }
   }

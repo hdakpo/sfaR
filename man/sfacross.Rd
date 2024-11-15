@@ -23,6 +23,7 @@ sfacross(
   start = NULL,
   randStart = FALSE,
   method = "bfgs",
+  derivs = "ad",
   hessianType = 1L,
   simType = "halton",
   Nsim = 100,
@@ -35,7 +36,9 @@ sfacross(
   tol = 1e-12,
   gradtol = 1e-06,
   stepmax = 0.1,
-  qac = "marquardt"
+  qac = "marquardt",
+  accuracy = 4L,
+  stepsize = 1e-05
 )
 
 \method{print}{sfacross}(x, ...)
@@ -127,9 +130,10 @@ for trust regions and sparse Hessian
 \code{'nlminb'}, for optimization using PORT routines (see
 \code{\link[stats:nlminb]{nlminb}})}}
 
-\item{hessianType}{Integer. If \code{1} (Default), analytic Hessian is
-returned for all the distributions. If \code{2},
-bhhh Hessian is estimated (\eqn{g'g}).}
+\item{hessianType}{Integer. Indicate the way the variance-covariance matrix is
+estimated. If \code{1} (Default), second order derivatives are used (e.g.,
+autopmatic differentiation, analytical or numerical). If \code{2}, bhhh
+Hessian is estimated as the outer product of the gradient (\eqn{g'g}).}
 
 \item{simType}{Character string. If \code{simType = 'halton'} (Default),
 Halton draws are used for maximum simulated likelihood (MSL). If
@@ -171,6 +175,16 @@ decreased but the direction is kept. If \code{'marquardt'} (default), the
 step length is decreased while also moving closer to the pure gradient
 direction. See \code{\link[maxLik:maxBHHH]{maxBHHH}} and
 \code{\link[maxLik:maxNR]{maxNR}}.}
+
+\item{accuracy}{Accuracy for the numerical derivatives. Default = \code{4L}.
+See \code{\link[calculus:jacobian]{jacobian}} and
+\code{\link[calculus:hessian]{hessian}} from the \CRANpkg{calculus} package
+for more details.}
+
+\item{stepsize}{Stepsize for the numerical derivatives. Default = \code{1e-5}.
+See \code{\link[calculus:jacobian]{jacobian}} and
+\code{\link[calculus:hessian]{hessian}} from the \CRANpkg{calculus} package
+for more details.}
 
 \item{x}{an object of class sfacross (returned by the function
 \code{\link{sfacross}}).}
