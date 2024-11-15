@@ -25,6 +25,7 @@ BugReports: https://github.com/hdakpo/sfaR/issues
 Depends: 
     R (>= 3.5.0)
 Imports: 
+    calculus,
     cubature,
     fastGHQuad,
     Formula,
@@ -35,6 +36,7 @@ Imports:
     nleqslv,
     plm,
     qrng,
+    RTMB,
     stats,
     trustOptim,
     ucminf
