@@ -25,6 +25,8 @@
 
 * Packages `texreg` and `sandwich` are moved from Imports to Suggests.
 
+* Remove dependency to package `randtoolbox`.
+
 # sfaR 1.0.1
 
 ## BUG FIXES
