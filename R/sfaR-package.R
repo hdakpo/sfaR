@@ -77,7 +77,7 @@
 #' @importFrom stats coefficients lm model.frame
 #' @importFrom stats model.matrix model.response nlminb
 #' @importFrom stats delete.response fitted
-#' @importFrom stats logLik residuals terms vcov formula
+#' @importFrom stats rnorm logLik residuals terms vcov formula
 #' @importFrom stats integrate runif model.weights nobs
 #' @importFrom stats na.pass printCoefmat pt qt na.omit
 #' @importFrom stats pchisq qchisq uniroot complete.cases
