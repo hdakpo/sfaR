@@ -17,3 +17,8 @@ vignettes/*.pdf
 .Renviron
 .DS_Store
 
+*.bbl
+*.log
+*.gz
+vignettes/sfaR_handout.tex
+vignettes/sfaR_handout-concordance.tex
