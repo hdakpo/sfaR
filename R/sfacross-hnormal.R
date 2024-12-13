@@ -395,6 +395,7 @@ halfnormAlgOpt <- function(start, randStart, sdStart, olsParam, dataTable, S, nX
           Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar)), var = unname(parm),
           accuracy = accuracy, stepsize = stepsize)
       }
+      ### solve for different algorithms ------
       mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal, fn = function(parm) -sum(chalfnormlike(parm,
         nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
         vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)),
@@ -481,6 +482,7 @@ halfnormAlgOpt <- function(start, randStart, sdStart, olsParam, dataTable, S, nX
     } else {
       ## analytical derivatives ------
       if (derivs == "analytical") {
+        ### solve for different algorithms ------
         mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
           fn = function(parm) -sum(chalfnormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
           nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
