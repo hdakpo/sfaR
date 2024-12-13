@@ -29,21 +29,17 @@ ctruncnormscalike <- function(parm, nXvar, nuZUvar, nvZVvar,
   delta <- parm[(nXvar + 1):(nXvar + nuZUvar - 1)]
   tau <- parm[nXvar + length(delta) + 1]
   cu <- parm[nXvar + length(delta) + 2]
-  phi <- parm[(nXvar + length(delta) + 2 + 1):(nXvar + length(delta) +
-    2 + nvZVvar)]
-  musca <- exp(as.numeric(crossprod(matrix(delta), t(uHvar[,
-    -1, drop = FALSE])))) * tau
-  Wusca <- cu + 2 * as.numeric(crossprod(matrix(delta), t(uHvar[,
-    -1, drop = FALSE])))
-  Wvsca <- as.numeric(crossprod(matrix(phi), t(vHvar)))
+  phi <- parm[(nXvar + length(delta) + 2 + 1):(nXvar + length(delta) + 2 + nvZVvar)]
+  musca <- exp(crossprod(matrix(delta), t(uHvar[, -1, drop = FALSE]))[1, ]) * tau
+  Wusca <- cu + 2 * crossprod(matrix(delta), t(uHvar[, -1, drop = FALSE]))[1, ]
+  Wvsca <- crossprod(matrix(phi), t(vHvar))[1, ]
   epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
-  mustar <- (musca * exp(Wvsca) - exp(Wusca) * S * epsilon)/(exp(Wusca) +
-    exp(Wvsca))
+  mustar <- (musca * exp(Wvsca) - exp(Wusca) * S * epsilon)/(exp(Wusca) + exp(Wvsca))
   sigmastar <- sqrt(exp(Wusca) * exp(Wvsca)/(exp(Wusca) + exp(Wvsca)))
   ll <- (-1/2 * log(exp(Wusca) + exp(Wvsca)) + dnorm((musca +
     S * epsilon)/sqrt(exp(Wusca) + exp(Wvsca)), log = TRUE) +
-    pnorm(mustar/sigmastar, log.p = TRUE) - pnorm(musca/sqrt(exp(Wusca)),
-    log.p = TRUE))
+    log(pnorm(mustar/sigmastar)) - log(pnorm(musca/sqrt(exp(Wusca)))))
+  RTMB::ADREPORT(ll * wHvar)
   return(ll * wHvar)
 }
 
@@ -62,7 +58,7 @@ csttruncnormscal <- function(olsObj, epsiRes, S, nuZUvar, uHvar,
   m2 <- sum(epsiRes^2)/length(epsiRes)
   m3 <- sum(epsiRes^3)/length(epsiRes)
   if (S * m3 > 0) {
-    ## Coelli (1995) suggests 0.05 for gamma
+    ## Coeli (1995) suggests 0.05 for gamma
     varu <- (abs(S * m3 * sqrt(pi/2)/(1 - 4/pi)))^(2/3)
   } else {
     varu <- (S * m3 * sqrt(pi/2)/(1 - 4/pi))^(2/3)
@@ -85,7 +81,7 @@ csttruncnormscal <- function(olsObj, epsiRes, S, nuZUvar, uHvar,
       paste(if (length(grep("Intercept", colnames(uHvar))) ==
         0)
         colnames(uHvar)[is.na(reg_hetu$coefficients)[-1]] else colnames(uHvar)[is.na(reg_hetu$coefficients)],
-        collapse = ", "), ". This may be due to a singular matrix due to potential perfect multicollinearity",
+        collapse = ", "), ". This may be due to a singular matrix due to potential perfect multicolinearity",
       call. = FALSE)
   reg_hetv <- if (nvZVvar == 1) {
     lm(log(varv) ~ 1)
@@ -96,7 +92,7 @@ csttruncnormscal <- function(olsObj, epsiRes, S, nuZUvar, uHvar,
   if (any(is.na(reg_hetv$coefficients)))
     stop("at least one of the OLS coefficients of 'vhet' is NA: ",
       paste(colnames(vHvar)[is.na(reg_hetv$coefficients)],
-        collapse = ", "), ". This may be due to a singular matrix due to potential perfect multicollinearity",
+        collapse = ", "), ". This may be due to a singular matrix due to potential perfect multicolinearity",
       call. = FALSE)
   if (names(olsObj)[1] == "(Intercept)") {
     beta <- c(olsObj[1] + S * sqrt(varu * 2/pi), olsObj[-1])
@@ -412,130 +408,298 @@ chesstruncnormscalike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar, vHvar, Y
 #' @param hessianType how hessian is computed
 #' @param qac qac option for maxLik
 #' @noRd
-truncnormscalAlgOpt <- function(start, randStart, sdStart, olsParam, dataTable, S,
-  nXvar, uHvar, nuZUvar, vHvar, nvZVvar, Yvar, Xvar, wHvar,
-  method, printInfo, itermax, stepmax, tol, gradtol, hessianType,
-  qac) {
+truncnormscalAlgOpt <- function(start, randStart, sdStart, olsParam, dataTable, S, nXvar,
+  uHvar, nuZUvar, vHvar, nvZVvar, Yvar, Xvar, wHvar, method, derivs, printInfo,
+  itermax, stepmax, tol, gradtol, hessianType, qac, accuracy, stepsize) {
+  ## starting values and log likelihood ------
   startVal <- if (!is.null(start))
-    start else csttruncnormscal(olsObj = olsParam, epsiRes = dataTable[["olsResiduals"]],
-    S = S, uHvar = uHvar, nuZUvar = nuZUvar, vHvar = vHvar,
-    nvZVvar = nvZVvar)
+    start else csttruncnormscal(olsObj = olsParam, epsiRes = dataTable[["olsResiduals"]], S = S,
+    uHvar = uHvar, nuZUvar = nuZUvar, vHvar = vHvar, nvZVvar = nvZVvar)
   if (randStart)
     startVal <- startVal + rnorm(length(startVal), sd = sdStart)
-  startLoglik <- sum(ctruncnormscalike(startVal, nXvar = nXvar,
-    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
-    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar))
-  if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
+  startLoglik <- sum(ctruncnormscalike(startVal, nXvar = nXvar, nuZUvar = nuZUvar,
+    nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    wHvar = wHvar, S = S))
+  ## automatic differentiation ------
+  if (derivs == "ad") {
+    if (method %in% c("bfgs", "nr", "nm", "cg", "sann")) {
     maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...),
-      bhhh = function(...) maxLik::maxBHHH(...), nr = function(...) maxLik::maxNR(...),
-      nm = function(...) maxLik::maxNM(...), cg = function(...) maxLik::maxCG(...),
-      sann = function(...) maxLik::maxSANN(...))
+      nr = function(...) maxLik::maxNR(...), nm = function(...) maxLik::maxNM(...),
+      cg = function(...) maxLik::maxCG(...), sann = function(...) maxLik::maxSANN(...))
     method <- "maxLikAlgo"
   }
-  mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
-    fn = function(parm) -sum(ctruncnormscalike(parm, nXvar = nXvar,
-      nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
-      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar)),
-    gr = function(parm) -colSums(cgradtruncnormscalike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S, wHvar = wHvar)), hessian = 0, control = list(trace = if (printInfo) 1 else 0,
-      maxeval = itermax, stepmax = stepmax, xtol = tol,
-      grtol = gradtol)), maxLikAlgo = maxRoutine(fn = ctruncnormscalike,
-    grad = cgradtruncnormscalike, hess = chesstruncnormscalike,
-    start = startVal, finalHessian = if (hessianType == 2) "bhhh" else TRUE,
-    control = list(printLevel = if (printInfo) 2 else 0,
-      iterlim = itermax, reltol = tol, tol = tol, qac = qac),
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-    S = S, wHvar = wHvar), sr1 = trustOptim::trust.optim(x = startVal,
-    fn = function(parm) -sum(ctruncnormscalike(parm, nXvar = nXvar,
-      nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
-      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar)),
-    gr = function(parm) -colSums(cgradtruncnormscalike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S, wHvar = wHvar)), method = "SR1", control = list(maxit = itermax,
-      cgtol = gradtol, stop.trust.radius = tol, prec = tol,
-      report.level = if (printInfo) 2 else 0, report.precision = 1L)),
-    sparse = trustOptim::trust.optim(x = startVal, fn = function(parm) -sum(ctruncnormscalike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S, wHvar = wHvar)), gr = function(parm) -colSums(cgradtruncnormscalike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S, wHvar = wHvar)), hs = function(parm) as(-chesstruncnormscalike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S, wHvar = wHvar), "dgCMatrix"), method = "Sparse",
-      control = list(maxit = itermax, cgtol = gradtol,
-        stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
-        report.precision = 1L, preconditioner = 1L)),
-    mla = marqLevAlg::mla(b = startVal, fn = function(parm) -sum(ctruncnormscalike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S, wHvar = wHvar)), gr = function(parm) -colSums(cgradtruncnormscalike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S, wHvar = wHvar)), hess = function(parm) -chesstruncnormscalike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S, wHvar = wHvar), print.info = printInfo, maxiter = itermax,
-      epsa = gradtol, epsb = gradtol), nlminb = nlminb(start = startVal,
-      objective = function(parm) -sum(ctruncnormscalike(parm,
-        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-        S = S, wHvar = wHvar)), gradient = function(parm) -colSums(cgradtruncnormscalike(parm,
-        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-        S = S, wHvar = wHvar)), hessian = function(parm) -chesstruncnormscalike(parm,
-        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-        S = S, wHvar = wHvar), control = list(iter.max = itermax,
-        trace = if (printInfo) 1 else 0, eval.max = itermax,
-        rel.tol = tol, x.tol = tol)))
-  if (method %in% c("ucminf", "nlminb")) {
-    mleObj$gradient <- colSums(cgradtruncnormscalike(mleObj$par,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      S = S, wHvar = wHvar))
-  }
-  mlParam <- if (method %in% c("ucminf", "nlminb")) {
-    mleObj$par
-  } else {
-    if (method == "maxLikAlgo") {
-      mleObj$estimate
+    cgradbhhhtruncnormscalAD <- RTMB::MakeADFun(function(p) sum(ctruncnormscalike(p, nXvar = nXvar,
+      nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
+      Xvar = Xvar, S = S, wHvar = wHvar)), startVal, ADreport = TRUE, silent = TRUE)
+    cgradhesstruncnormscalAD <- RTMB::MakeADFun(function(p) sum(ctruncnormscalike(p, nXvar = nXvar,
+      nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
+      Xvar = Xvar, S = S, wHvar = wHvar)), startVal, ADreport = FALSE, silent = TRUE)
+    fnGradObstruncnormscal <- function(parm) {
+      Ta1 <- RTMB::GetTape(cgradbhhhtruncnormscalAD)
+      Ta2 <- RTMB::MakeTape(function(weight) {
+        WT <- RTMB::MakeTape(function(x) sum(Ta1(x) * weight), parm)
+        (WT$jacfun())(RTMB::advector(parm))
+      }, rep(1, nrow(Xvar)))
+      t((Ta2$jacfun())(RTMB::advector(rep(1, nrow(Xvar)))))
+    }
+    ### solve for different algorithms ------
+    mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal, fn = function(p) -cgradhesstruncnormscalAD$fn(p),
+      gr = function(p) -cgradhesstruncnormscalAD$gr(p), hessian = 0, control = list(trace = if (printInfo) 1 else 0,
+        maxeval = itermax, stepmax = stepmax, xtol = tol, grtol = gradtol)),
+      maxLikAlgo = maxRoutine(fn = cgradhesstruncnormscalAD$fn, grad = cgradhesstruncnormscalAD$gr,
+        hess = cgradhesstruncnormscalAD$he, start = startVal, finalHessian = TRUE,
+        control = list(printLevel = if (printInfo) 2 else 0, iterlim = itermax,
+          reltol = tol, tol = tol, qac = qac)), bhhh = maxLik::maxBHHH(fn = cgradbhhhtruncnormscalAD$fn,
+        grad = fnGradObstruncnormscal, hess = cgradhesstruncnormscalAD$he, start = startVal,
+        finalHessian = TRUE, control = list(printLevel = if (printInfo) 2 else 0,
+          iterlim = itermax, reltol = tol, tol = tol, qac = qac)), sr1 = trustOptim::trust.optim(x = startVal,
+        fn = function(p) -cgradhesstruncnormscalAD$fn(p), gr = function(p) -cgradhesstruncnormscalAD$gr(p),
+        method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
+          stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
+          report.precision = 1L)), sparse = trustOptim::trust.optim(x = startVal,
+        fn = function(p) -cgradhesstruncnormscalAD$fn(p), gr = function(p) -cgradhesstruncnormscalAD$gr(p),
+        hs = function(p) as(-cgradhesstruncnormscalAD$he(p), "dgCMatrix"), method = "Sparse",
+        control = list(maxit = itermax, cgtol = gradtol, stop.trust.radius = tol,
+          prec = tol, report.level = if (printInfo) 2 else 0, report.precision = 1L,
+          preconditioner = 1L)), mla = marqLevAlg::mla(b = startVal, fn = function(p) -cgradhesstruncnormscalAD$fn(p),
+        gr = function(p) -cgradhesstruncnormscalAD$gr(p), hess = function(p) -cgradhesstruncnormscalAD$he(p),
+        print.info = printInfo, maxiter = itermax, epsa = gradtol, epsb = gradtol),
+      nlminb = nlminb(start = startVal, objective = function(p) -cgradhesstruncnormscalAD$fn(p),
+        gradient = function(p) -cgradhesstruncnormscalAD$gr(p), hessian = function(p) -cgradhesstruncnormscalAD$he(p),
+        control = list(iter.max = itermax, trace = if (printInfo) 1 else 0,
+          eval.max = itermax, rel.tol = tol, x.tol = tol)))
+    if (method %in% c("ucminf", "nlminb")) {
+      mleObj$gradient <- cgradhesstruncnormscalAD$gr(mleObj$par)
+    }
+    mlParam <- if (method %in% c("ucminf", "nlminb")) {
+      mleObj$par
     } else {
-      if (method %in% c("sr1", "sparse")) {
-        mleObj$solution
+      if (method %in% c("maxLikAlgo", "bhhh")) {
+        mleObj$estimate
       } else {
-        if (method == "mla") {
+        if (method %in% c("sr1", "sparse")) {
+          mleObj$solution
+        } else {
+          if (method == "mla") {
           mleObj$b
+          }
         }
       }
     }
+    if (hessianType != 2) {
+      if (method %in% c("ucminf", "nlminb"))
+        mleObj$hessian <- cgradhesstruncnormscalAD$he(mleObj$par)
+      if (method == "sr1")
+        mleObj$hessian <- cgradhesstruncnormscalAD$he(mleObj$solution)
+      if (method == "mla")
+        mleObj$hessian <- cgradhesstruncnormscalAD$he(mleObj$b)
+    }
+    mleObj$logL_OBS <- cgradbhhhtruncnormscalAD$fn(mlParam)
+    mleObj$gradL_OBS <- fnGradObstruncnormscal(mlParam)
+    rm(cgradbhhhtruncnormscalAD, cgradhesstruncnormscalAD, fnGradObstruncnormscal)
+  } else {
+    if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
+    maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...), bhhh = function(...) maxLik::maxBHHH(...),
+      nr = function(...) maxLik::maxNR(...), nm = function(...) maxLik::maxNM(...),
+      cg = function(...) maxLik::maxCG(...), sann = function(...) maxLik::maxSANN(...))
+    method <- "maxLikAlgo"
+    }
+    ## numerical derivatives ------
+    if (derivs == "numerical") {
+      cgradtruncnormscalikeNum <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
+        vHvar, Yvar, Xvar, wHvar, S) {
+        calculus::jacobian(ctruncnormscalike, var = unname(parm), params = list(nXvar = nXvar,
+          nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar), accuracy = accuracy,
+          stepsize = stepsize)
+      }
+      chesstruncnormscalikeNum <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
+        vHvar, Yvar, Xvar, wHvar, S) {
+        calculus::hessian(function(parm) sum(ctruncnormscalike(parm, nXvar = nXvar,
+          nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar)), var = unname(parm),
+          accuracy = accuracy, stepsize = stepsize)
+      }
+      ### solve for different algorithms ------
+      mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal, fn = function(parm) -sum(ctruncnormscalike(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)),
+        gr = function(parm) -colSums(cgradtruncnormscalikeNum(parm, nXvar = nXvar,
+          nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)), hessian = 0, control = list(trace = if (printInfo) 1 else 0,
+          maxeval = itermax, stepmax = stepmax, xtol = tol, grtol = gradtol)),
+        maxLikAlgo = maxRoutine(fn = ctruncnormscalike, grad = cgradtruncnormscalikeNum,
+          hess = chesstruncnormscalikeNum, start = startVal, finalHessian = if (hessianType ==
+          2) "bhhh" else TRUE, control = list(printLevel = if (printInfo) 2 else 0,
+          iterlim = itermax, reltol = tol, tol = tol, qac = qac), nXvar = nXvar,
+          nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S), sr1 = trustOptim::trust.optim(x = startVal,
+          fn = function(parm) -sum(ctruncnormscalike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+          nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
+          Xvar = Xvar, wHvar = wHvar, S = S)), gr = function(parm) -colSums(cgradtruncnormscalikeNum(parm,
+          nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+          vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)), method = "SR1", control = list(maxit = itermax,
+          cgtol = gradtol, stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
+          report.precision = 1L)), sparse = trustOptim::trust.optim(x = startVal,
+          fn = function(parm) -sum(ctruncnormscalike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+          nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
+          Xvar = Xvar, wHvar = wHvar, S = S)), gr = function(parm) -colSums(cgradtruncnormscalikeNum(parm,
+          nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+          vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)), hs = function(parm) as(-chesstruncnormscalikeNum(parm,
+          nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+          vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S), "dgCMatrix"), method = "Sparse",
+          control = list(maxit = itermax, cgtol = gradtol, stop.trust.radius = tol,
+          prec = tol, report.level = if (printInfo) 2 else 0, report.precision = 1L,
+          preconditioner = 1L)), mla = marqLevAlg::mla(b = startVal, fn = function(parm) -sum(ctruncnormscalike(parm,
+          nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+          vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)),
+          gr = function(parm) -colSums(cgradtruncnormscalikeNum(parm, nXvar = nXvar,
+          nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)), hess = function(parm) -chesstruncnormscalikeNum(parm,
+          nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+          vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S), print.info = printInfo,
+          maxiter = itermax, epsa = gradtol, epsb = gradtol), nlminb = nlminb(start = startVal,
+          objective = function(parm) -sum(ctruncnormscalike(parm, nXvar = nXvar,
+          nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)), gradient = function(parm) -colSums(cgradtruncnormscalikeNum(parm,
+          nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+          vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)), hessian = function(parm) -chesstruncnormscalikeNum(parm,
+          nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+          vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S), control = list(iter.max = itermax,
+          trace = if (printInfo) 1 else 0, eval.max = itermax, rel.tol = tol,
+          x.tol = tol)))
+      if (method %in% c("ucminf", "nlminb")) {
+        mleObj$gradient <- colSums(cgradtruncnormscalikeNum(mleObj$par, nXvar = nXvar,
+          nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S))
+      }
+      mlParam <- if (method %in% c("ucminf", "nlminb")) {
+        mleObj$par
+      } else {
+        if (method %in% c("maxLikAlgo", "bhhh")) {
+          mleObj$estimate
+        } else {
+          if (method %in% c("sr1", "sparse")) {
+          mleObj$solution
+          } else {
+          if (method == "mla") {
+            mleObj$b
+          }
+          }
+        }
+      }
+      if (hessianType != 2) {
+        if (method %in% c("ucminf", "nlminb"))
+          mleObj$hessian <- chesstruncnormscalikeNum(parm = mleObj$par, nXvar = nXvar,
+          nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)
+        if (method == "sr1")
+          mleObj$hessian <- chesstruncnormscalikeNum(parm = mleObj$solution,
+          nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+          vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)
+      }
+      mleObj$logL_OBS <- ctruncnormscalike(mlParam, nXvar = nXvar,
+        nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+        Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)
+      mleObj$gradL_OBS <- cgradtruncnormscalikeNum(parm = mlParam, nXvar = nXvar,
+        nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+        Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)
+    } else {
+      ## analytical derivatives ------
+      if (derivs == "analytical") {
+        ### solve for different algorithms ------
+        mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
+          fn = function(parm) -sum(ctruncnormscalike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+          nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
+          Xvar = Xvar, wHvar = wHvar, S = S)), gr = function(parm) -colSums(cgradtruncnormscalike(parm,
+          nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+          vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)),
+          hessian = 0, control = list(trace = if (printInfo) 1 else 0, maxeval = itermax,
+          stepmax = stepmax, xtol = tol, grtol = gradtol)), maxLikAlgo = maxRoutine(fn = ctruncnormscalike,
+          grad = cgradtruncnormscalike, hess = chesstruncnormscalike, start = startVal,
+          finalHessian = if (hessianType == 2) "bhhh" else TRUE, control = list(printLevel = if (printInfo) 2 else 0,
+          iterlim = itermax, reltol = tol, tol = tol, qac = qac), nXvar = nXvar,
+          nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S), sr1 = trustOptim::trust.optim(x = startVal,
+          fn = function(parm) -sum(ctruncnormscalike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+          nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
+          Xvar = Xvar, wHvar = wHvar, S = S)), gr = function(parm) -colSums(cgradtruncnormscalike(parm,
+          nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+          vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)),
+          method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
+          stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
+          report.precision = 1L)), sparse = trustOptim::trust.optim(x = startVal,
+          fn = function(parm) -sum(ctruncnormscalike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+          nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
+          Xvar = Xvar, wHvar = wHvar, S = S)), gr = function(parm) -colSums(cgradtruncnormscalike(parm,
+          nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+          vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)),
+          hs = function(parm) as(-chesstruncnormscalike(parm, nXvar = nXvar,
+          nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S), "dgCMatrix"),
+          method = "Sparse", control = list(maxit = itermax, cgtol = gradtol,
+          stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
+          report.precision = 1L, preconditioner = 1L)), mla = marqLevAlg::mla(b = startVal,
+          fn = function(parm) -sum(ctruncnormscalike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+          nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
+          Xvar = Xvar, wHvar = wHvar, S = S)), gr = function(parm) -colSums(cgradtruncnormscalike(parm,
+          nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+          vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)),
+          hess = function(parm) -chesstruncnormscalike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+          nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
+          Xvar = Xvar, wHvar = wHvar, S = S), print.info = printInfo, maxiter = itermax,
+          epsa = gradtol, epsb = gradtol), nlminb = nlminb(start = startVal,
+          objective = function(parm) -sum(ctruncnormscalike(parm, nXvar = nXvar,
+          nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)), gradient = function(parm) -colSums(cgradtruncnormscalike(parm,
+          nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+          vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)),
+          hessian = function(parm) -chesstruncnormscalike(parm, nXvar = nXvar,
+          nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S), control = list(iter.max = itermax,
+          trace = if (printInfo) 1 else 0, eval.max = itermax, rel.tol = tol,
+          x.tol = tol)))
+        if (method %in% c("ucminf", "nlminb")) {
+          mleObj$gradient <- colSums(cgradtruncnormscalike(mleObj$par, nXvar = nXvar,
+          nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S))
+        }
+        mlParam <- if (method %in% c("ucminf", "nlminb")) {
+          mleObj$par
+        } else {
+          if (method %in% c("maxLikAlgo", "bhhh")) {
+          mleObj$estimate
+          } else {
+          if (method %in% c("sr1", "sparse")) {
+            mleObj$solution
+          } else {
+            if (method == "mla") {
+            mleObj$b
+            }
+          }
+          }
+        }
+        if (hessianType != 2) {
+          if (method %in% c("ucminf", "nlminb"))
+          mleObj$hessian <- chesstruncnormscalike(parm = mleObj$par, nXvar = nXvar,
+            nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+            Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)
+          if (method == "sr1")
+          mleObj$hessian <- chesstruncnormscalike(parm = mleObj$solution, nXvar = nXvar,
+            nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+            Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)
+        }
+        mleObj$logL_OBS <- ctruncnormscalike(mlParam, nXvar = nXvar,
+        nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+        Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)
+        mleObj$gradL_OBS <- cgradtruncnormscalike(parm = mlParam, nXvar = nXvar,
+          nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)
+      }
+    }
   }
-  if (hessianType != 2) {
-    if (method %in% c("ucminf", "nlminb"))
-      mleObj$hessian <- chesstruncnormscalike(parm = mleObj$par,
-        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-        S = S, wHvar = wHvar)
-    if (method == "sr1")
-      mleObj$hessian <- chesstruncnormscalike(parm = mleObj$solution,
-        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-        S = S, wHvar = wHvar)
-  }
-  mleObj$logL_OBS <- ctruncnormscalike(parm = mlParam, nXvar = nXvar,
-    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
-    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar)
-  mleObj$gradL_OBS <- cgradtruncnormscalike(parm = mlParam,
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-    S = S, wHvar = wHvar)
-  return(list(startVal = startVal, startLoglik = startLoglik,
-    mleObj = mleObj, mlParam = mlParam))
+  return(list(startVal = startVal, startLoglik = startLoglik, mleObj = mleObj,
+    mlParam = mlParam))
 }
 
 # Conditional efficiencies estimation ----------
