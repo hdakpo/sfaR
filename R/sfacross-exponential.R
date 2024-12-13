@@ -30,7 +30,7 @@ cexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
   phi <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
   Wu <- crossprod(matrix(delta), t(uHvar))[1, ]
   Wv <- crossprod(matrix(phi), t(vHvar))[1, ]
-  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
+  epsilon <- Yvar - crossprod(matrix(beta), t(Xvar))[1, ]
   ll <- (-Wu/2 + log(pnorm(-S * epsilon/sqrt(exp(Wv)) - sqrt(exp(Wv)/exp(Wu)))) +
     S * epsilon/sqrt(exp(Wu)) + exp(Wv)/(2 * exp(Wu)))
   RTMB::ADREPORT(ll * wHvar)
@@ -117,9 +117,9 @@ cgradexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
   beta <- parm[1:(nXvar)]
   delta <- parm[(nXvar + 1):(nXvar + nuZUvar)]
   phi <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
-  Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
-  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
+  Wu <- crossprod(matrix(delta), t(uHvar))[1, ]
+  Wv <- crossprod(matrix(phi), t(vHvar))[1, ]
+  epsilon <- Yvar - crossprod(matrix(beta), t(Xvar))[1, ]
   .e1 <- Wv
   .e2 <- Wu
   .e3 <- exp(.e2)
@@ -157,9 +157,9 @@ chessexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
   beta <- parm[1:(nXvar)]
   delta <- parm[(nXvar + 1):(nXvar + nuZUvar)]
   phi <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
-  Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
-  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
+  Wu <- crossprod(matrix(delta), t(uHvar))[1, ]
+  Wv <- crossprod(matrix(phi), t(vHvar))[1, ]
+  epsilon <- Yvar - crossprod(matrix(beta), t(Xvar))[1, ]
   .e1 <- Wv
   .e2 <- Wu
   .e3 <- exp(.e2)
@@ -552,10 +552,10 @@ cexponormeff <- function(object, level) {
     rhs = 2)
   vHvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 3)
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
-  Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
+  Wu <- crossprod(matrix(delta), t(uHvar))[1, ]
+  Wv <- crossprod(matrix(phi), t(vHvar))[1, ]
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
-    as.numeric(crossprod(matrix(beta), t(Xvar)))
+    crossprod(matrix(beta), t(Xvar))[1, ]
   mustar <- -object$S * epsilon - exp(Wv)/sqrt(exp(Wu))
   u <- mustar + sqrt(exp(Wv)) * dnorm(mustar/sqrt(exp(Wv)))/pnorm(mustar/sqrt(exp(Wv)))
   uLB <- mustar + qnorm(1 - (1 - (1 - level)/2) * (1 - pnorm(-mustar/sqrt(exp(Wv))))) *
@@ -590,7 +590,7 @@ cmargexponorm_Eu <- function(object) {
     object$nuZUvar)]
   uHvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 2)
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wu <- crossprod(matrix(delta), t(uHvar))[1, ]
   margEff <- kronecker(matrix(delta[2:object$nuZUvar] * 1/2,
     nrow = 1), matrix(exp(Wu/2), ncol = 1))
   colnames(margEff) <- paste0("Eu_", colnames(uHvar)[-1])
@@ -602,7 +602,7 @@ cmargexponorm_Vu <- function(object) {
     object$nuZUvar)]
   uHvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 2)
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wu <- crossprod(matrix(delta), t(uHvar))[1, ]
   margEff <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1),
     matrix(exp(Wu), ncol = 1))
   colnames(margEff) <- paste0("Vu_", colnames(uHvar)[-1])

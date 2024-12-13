@@ -36,7 +36,7 @@ ctruncnormlike <- function(parm, nXvar, nmuZUvar, nuZUvar, nvZVvar,
   mu <- crossprod(matrix(omega), t(muHvar))[1, ]
   Wu <- crossprod(matrix(delta), t(uHvar))[1, ]
   Wv <- crossprod(matrix(phi), t(vHvar))[1, ]
-  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
+  epsilon <- Yvar - crossprod(matrix(beta), t(Xvar))[1, ]
   mustar <- (mu * exp(Wv) - exp(Wu) * S * epsilon)/(exp(Wu) +
     exp(Wv))
   sigmastar <- sqrt(exp(Wu) * exp(Wv)/(exp(Wu) + exp(Wv)))
@@ -146,10 +146,10 @@ cgradtruncnormlike <- function(parm, nXvar, nmuZUvar, nuZUvar,
     nuZUvar)]
   phi <- parm[(nXvar + nmuZUvar + nuZUvar + 1):(nXvar + nmuZUvar +
     nuZUvar + nvZVvar)]
-  mu <- as.numeric(crossprod(matrix(omega), t(muHvar)))
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
-  Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
-  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
+  mu <- crossprod(matrix(omega), t(muHvar))[1, ]
+  Wu <- crossprod(matrix(delta), t(uHvar))[1, ]
+  Wv <- crossprod(matrix(phi), t(vHvar))[1, ]
+  epsilon <- Yvar - crossprod(matrix(beta), t(Xvar))[1, ]
    .e1 <- Wu
   .e2 <- exp(.e1)
   .e3 <- exp(Wv)
@@ -206,10 +206,10 @@ chesstruncnormlike <- function(parm, nXvar, nmuZUvar, nuZUvar,
     nuZUvar)]
   phi <- parm[(nXvar + nmuZUvar + nuZUvar + 1):(nXvar + nmuZUvar +
     nuZUvar + nvZVvar)]
-  mu <- as.numeric(crossprod(matrix(omega), t(muHvar)))
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
-  Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
-  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
+  mu <- crossprod(matrix(omega), t(muHvar))[1, ]
+  Wu <- crossprod(matrix(delta), t(uHvar))[1, ]
+  Wv <- crossprod(matrix(phi), t(vHvar))[1, ]
+  epsilon <- Yvar - crossprod(matrix(beta), t(Xvar))[1, ]
   .e1 <- Wu
   .e2 <- exp(Wv)
   .e3 <- exp(.e1)
@@ -709,11 +709,11 @@ ctruncnormeff <- function(object, level) {
     rhs = 3)
   vHvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 4)
-  mu <- as.numeric(crossprod(matrix(omega), t(muHvar)))
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
-  Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
+  mu <- crossprod(matrix(omega), t(muHvar))[1, ]
+  Wu <- crossprod(matrix(delta), t(uHvar))[1, ]
+  Wv <- crossprod(matrix(phi), t(vHvar))[1, ]
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
-    as.numeric(crossprod(matrix(beta), t(Xvar)))
+    crossprod(matrix(beta), t(Xvar))[1, ]
   mustar <- (mu * exp(Wv) - exp(Wu) * object$S * epsilon)/(exp(Wu) +
     exp(Wv))
   sigmastar <- sqrt(exp(Wu) * exp(Wv)/(exp(Wu) + exp(Wv)))
@@ -754,8 +754,8 @@ cmargtruncnorm_Eu <- function(object) {
     rhs = 2)
   uHvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 3)
-  mu <- as.numeric(crossprod(matrix(omega), t(muHvar)))
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  mu <- crossprod(matrix(omega), t(muHvar))[1, ]
+  Wu <- crossprod(matrix(delta), t(uHvar))[1, ]
   Lambda <- mu/exp(Wu/2)
   mu_mat <- kronecker(matrix(omega[2:object$nmuZUvar], nrow = 1),
     matrix(1 - Lambda * dnorm(Lambda)/pnorm(Lambda) - (dnorm(Lambda)/pnorm(Lambda))^2,
@@ -783,8 +783,8 @@ cmargtruncnorm_Vu <- function(object) {
     rhs = 2)
   uHvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 3)
-  mu <- as.numeric(crossprod(matrix(omega), t(muHvar)))
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  mu <- crossprod(matrix(omega), t(muHvar))[1, ]
+  Wu <- crossprod(matrix(delta), t(uHvar))[1, ]
   Lambda <- mu/exp(Wu/2)
   m1 <- exp(Wu/2) * (Lambda + dnorm(Lambda)/pnorm(Lambda))
   m2 <- exp(Wu) * (1 - Lambda * dnorm(Lambda)/pnorm(Lambda) -

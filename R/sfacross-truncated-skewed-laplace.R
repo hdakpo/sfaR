@@ -31,7 +31,7 @@ ctslnormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
   lambda <- parm[nXvar + nuZUvar + nvZVvar + 1]
   Wu <- crossprod(matrix(delta), t(uHvar))[1, ]
   Wv <- crossprod(matrix(phi), t(vHvar))[1, ]
-  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
+  epsilon <- Yvar - crossprod(matrix(beta), t(Xvar))[1, ]
   A <- exp(Wv)/(2 * exp(Wu)) + S * epsilon/exp(Wu/2)
   B <- (1 + lambda)^2 * exp(Wv)/(2 * exp(Wu)) + S * epsilon *
     (1 + lambda)/exp(Wu/2)
@@ -126,9 +126,9 @@ cgradtslnormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
   delta <- parm[(nXvar + 1):(nXvar + nuZUvar)]
   phi <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
   lambda <- parm[nXvar + nuZUvar + nvZVvar + 1]
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
-  Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
-  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
+  Wu <- crossprod(matrix(delta), t(uHvar))[1, ]
+  Wv <- crossprod(matrix(phi), t(vHvar))[1, ]
+  epsilon <- Yvar - crossprod(matrix(beta), t(Xvar))[1, ]
   .e1 <- Wv
   .e2 <- Wu
   .e3 <- exp(.e1/2)
@@ -185,9 +185,9 @@ chesstslnormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
   delta <- parm[(nXvar + 1):(nXvar + nuZUvar)]
   phi <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
   lambda <- parm[nXvar + nuZUvar + nvZVvar + 1]
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
-  Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
-  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
+  Wu <- crossprod(matrix(delta), t(uHvar))[1, ]
+  Wv <- crossprod(matrix(phi), t(vHvar))[1, ]
+  epsilon <- Yvar - crossprod(matrix(beta), t(Xvar))[1, ]
  .e1 <- Wv
   .e2 <- Wu
   .e3 <- exp(.e1/2)
@@ -657,10 +657,10 @@ ctslnormeff <- function(object, level) {
     rhs = 3)
   lambda <- object$mlParam[object$nXvar + object$nuZUvar +
     object$nvZVvar + 1]
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
-  Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
+  Wu <- crossprod(matrix(delta), t(uHvar))[1, ]
+  Wv <- crossprod(matrix(phi), t(vHvar))[1, ]
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
-    as.numeric(crossprod(matrix(beta), t(Xvar)))
+    crossprod(matrix(beta), t(Xvar))[1, ]
   A <- exp(Wv)/(2 * exp(Wu)) + object$S * epsilon/exp(Wu/2)
   B <- (1 + lambda)^2 * exp(Wv)/(2 * exp(Wu)) + object$S *
     epsilon * (1 + lambda)/exp(Wu/2)
@@ -698,7 +698,7 @@ cmargtslnorm_Eu <- function(object) {
     rhs = 2)
   lambda <- object$mlParam[object$nXvar + object$nuZUvar +
     object$nvZVvar + 1]
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wu <- crossprod(matrix(delta), t(uHvar))[1, ]
   margEff <- kronecker(matrix(delta[2:object$nuZUvar] * (1 +
     4 * lambda + 2 * lambda^2)/((1 + lambda) * (1 + 2 * lambda)),
     nrow = 1), matrix(exp(Wu/2), ncol = 1))
@@ -713,7 +713,7 @@ cmargtslnorm_Vu <- function(object) {
     rhs = 2)
   lambda <- object$mlParam[object$nXvar + object$nuZUvar +
     object$nvZVvar + 1]
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wu <- crossprod(matrix(delta), t(uHvar))[1, ]
   margEff <- kronecker(matrix(delta[2:object$nuZUvar] * (1 +
     8 * lambda + 16 * lambda^2 + 12 * lambda^3 + 4 * lambda^4)/((1 +
     lambda)^2 * (1 + 2 * lambda)^2), nrow = 1), matrix(exp(Wu),

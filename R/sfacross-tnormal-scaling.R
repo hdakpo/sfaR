@@ -33,7 +33,7 @@ ctruncnormscalike <- function(parm, nXvar, nuZUvar, nvZVvar,
   musca <- exp(crossprod(matrix(delta), t(uHvar[, -1, drop = FALSE]))[1, ]) * tau
   Wusca <- cu + 2 * crossprod(matrix(delta), t(uHvar[, -1, drop = FALSE]))[1, ]
   Wvsca <- crossprod(matrix(phi), t(vHvar))[1, ]
-  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
+  epsilon <- Yvar - crossprod(matrix(beta), t(Xvar))[1, ]
   mustar <- (musca * exp(Wvsca) - exp(Wusca) * S * epsilon)/(exp(Wusca) + exp(Wvsca))
   sigmastar <- sqrt(exp(Wusca) * exp(Wvsca)/(exp(Wusca) + exp(Wvsca)))
   ll <- (-1/2 * log(exp(Wusca) + exp(Wvsca)) + dnorm((musca +
@@ -723,13 +723,11 @@ ctruncnormscaleff <- function(object, level) {
     2]
   phi <- object$mlParam[(object$nXvar + (object$nuZUvar - 1) +
     2 + 1):(object$nXvar + (object$nuZUvar - 1) + 2 + object$nvZVvar)]
-  musca <- exp(as.numeric(crossprod(matrix(delta), t(uHvar[,
-    -1, drop = FALSE])))) * tau
-  Wusca <- cu + 2 * as.numeric(crossprod(matrix(delta), t(uHvar[,
-    -1, drop = FALSE])))
-  Wvsca <- as.numeric(crossprod(matrix(phi), t(vHvar)))
+  musca <- exp(crossprod(matrix(delta), t(uHvar[, -1, drop = FALSE]))[1, ]) * tau
+  Wusca <- cu + 2 * crossprod(matrix(delta), t(uHvar[, -1, drop = FALSE]))[1, ]
+  Wvsca <- crossprod(matrix(phi), t(vHvar))[1, ]
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
-    as.numeric(crossprod(matrix(beta), t(Xvar)))
+    crossprod(matrix(beta), t(Xvar))[1, ]
   mustar <- (musca * exp(Wvsca) - exp(Wusca) * object$S * epsilon)/(exp(Wusca) +
     exp(Wvsca))
   sigmastar <- sqrt(exp(Wusca) * exp(Wvsca)/(exp(Wusca) + exp(Wvsca)))
@@ -770,7 +768,7 @@ cmargtruncnormscal_Eu <- function(object) {
     1]
   cu <- object$mlParam[object$nXvar + (object$nuZUvar - 1) +
     2]
-  hi <- exp(as.numeric(crossprod(matrix(delta), t(uHvar[, -1]))))
+  hi <- exp(crossprod(matrix(delta), t(uHvar[, -1, drop = FALSE]))[1, ])
   Lambda <- tau/exp(cu/2)
   m1 <- exp(cu/2) * (Lambda + dnorm(Lambda)/pnorm(Lambda))
   margEff <- kronecker(matrix(delta, nrow = 1), matrix(m1 *
@@ -788,8 +786,7 @@ cmargtruncnormscal_Vu <- function(object) {
     1]
   cu <- object$mlParam[object$nXvar + (object$nuZUvar - 1) +
     2]
-  hi2 <- exp(2 * as.numeric(crossprod(matrix(delta), t(uHvar[,
-    -1]))))
+  hi2 <- exp(2 * crossprod(matrix(delta), t(uHvar[, -1, drop = FALSE]))[1, ])
   Lambda <- tau/exp(cu/2)
   m2 <- exp(cu) * (1 - Lambda * dnorm(Lambda)/pnorm(Lambda) -
     (dnorm(Lambda)/pnorm(Lambda))^2)

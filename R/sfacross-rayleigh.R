@@ -30,7 +30,7 @@ craynormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
   phi <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
   Wu <- crossprod(matrix(delta), t(uHvar))[1, ]
   Wv <- crossprod(matrix(phi), t(vHvar))[1, ]
-  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
+  epsilon <- Yvar - crossprod(matrix(beta), t(Xvar))[1, ]
   mustar <- -exp(Wu) * S * epsilon/(exp(Wu) + exp(Wv))
   sigmastar <- sqrt(exp(Wu) * exp(Wv)/(exp(Wu) + exp(Wv)))
   ll <- (-Wu - 1/2 * Wv - (S * epsilon)^2/(2 * exp(Wv)) + 1/2 *
@@ -118,10 +118,10 @@ cgradraynormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
   beta <- parm[1:(nXvar)]
   delta <- parm[(nXvar + 1):(nXvar + nuZUvar)]
   phi <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
-  Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
+  Wu <- crossprod(matrix(delta), t(uHvar))[1, ]
+  Wv <- crossprod(matrix(phi), t(vHvar))[1, ]
+  epsilon <- Yvar - crossprod(matrix(beta), t(Xvar))[1, ]
   sigma_sq <- exp(Wu) + exp(Wv)
-  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
   .e2 <- exp(Wu)
   .e3 <- exp(Wv)
   .e4 <- .e2 + .e3
@@ -169,10 +169,10 @@ chessraynormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
   beta <- parm[1:(nXvar)]
   delta <- parm[(nXvar + 1):(nXvar + nuZUvar)]
   phi <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
-  Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
+  Wu <- crossprod(matrix(delta), t(uHvar))[1, ]
+  Wv <- crossprod(matrix(phi), t(vHvar))[1, ]
+  epsilon <- Yvar - crossprod(matrix(beta), t(Xvar))[1, ]
   sigma_sq <- exp(Wu) + exp(Wv)
-  epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
   .e2 <- exp(Wu)
   .e3 <- exp(Wv)
   .e4 <- .e2 + .e3
@@ -616,10 +616,10 @@ craynormeff <- function(object, level) {
     rhs = 2)
   vHvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 3)
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
-  Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
+  Wu <- crossprod(matrix(delta), t(uHvar))[1, ]
+  Wv <- crossprod(matrix(phi), t(vHvar))[1, ]
   epsilon <- model.response(model.frame(object$formula, data = object$dataTable)) -
-    as.numeric(crossprod(matrix(beta), t(Xvar)))
+    crossprod(matrix(beta), t(Xvar))[1, ]
   mustar <- -exp(Wu) * object$S * epsilon/(exp(Wu) + exp(Wv))
   sigmastar <- sqrt(exp(Wu) * exp(Wv)/(exp(Wu) + exp(Wv)))
   u <- (mustar * sigmastar * dnorm(mustar/sigmastar) + (mustar^2 +
@@ -655,7 +655,7 @@ cmargraynorm_Eu <- function(object) {
     object$nuZUvar)]
   uHvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 2)
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wu <- crossprod(matrix(delta), t(uHvar))[1, ]
   margEff <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1), matrix(exp(Wu/2) * 1/2 *
     sqrt(pi/2), ncol = 1))
   colnames(margEff) <- paste0("Eu_", colnames(uHvar)[-1])
@@ -667,7 +667,7 @@ cmargraynorm_Vu <- function(object) {
     object$nuZUvar)]
   uHvar <- model.matrix(object$formula, data = object$dataTable,
     rhs = 2)
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
+  Wu <- crossprod(matrix(delta), t(uHvar))[1, ]
   margEff <- kronecker(matrix(delta[2:object$nuZUvar], nrow = 1), matrix(exp(Wu) * (4 -
     pi)/2, ncol = 1))
   colnames(margEff) <- paste0("Vu_", colnames(uHvar)[-1])
