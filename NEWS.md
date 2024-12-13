@@ -6,6 +6,8 @@
 
 * Add random starting values for ML estimation
 
+* Add automatic and numerical differentiation for the gradient and hessian
+
 ## BUG FIXES
 
 * `efficiencies` returns error when all formulas only contains intercept for
