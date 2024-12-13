@@ -129,7 +129,7 @@ cgradexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
   .e9 <- sqrt(.e4/.e3)
   .e10 <- .e8/.e7
   .e11 <- -(.e10 + .e9)
-  .e12 <- dnorm(.e11, 0, 1)
+  .e12 <- dnorm(.e11)
   .e13 <- pnorm(.e11)
   .e14 <- 2 * .e3
   .e16 <- exp(.e2/2)
@@ -171,7 +171,7 @@ chessexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
   .e11 <- .e10 + .e6
   .e12 <- -.e11
   .e13 <- pnorm(.e12)
-  .e14 <- dnorm(.e12, 0, 1)
+  .e14 <- dnorm(.e12)
   .e15 <- .e3 * .e6
   .e16 <- .e3 * .e13
   .e18 <- 0.5 * (.e4/.e15) - 0.5 * .e10

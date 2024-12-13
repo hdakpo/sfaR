@@ -150,8 +150,8 @@ cgradtslnormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
   .e23 <- exp(.e11/.e12 + .e13)
   .e24 <- pnorm(.e18)
   .e26 <- 2 * (.e23 * .e24) - .e21 * .e22
-  .e27 <- dnorm(.e16, 0, 1)
-  .e28 <- dnorm(.e18, 0, 1)
+  .e27 <- dnorm(.e16)
+  .e28 <- dnorm(.e18)
   .e29 <- .e12^2
   .e30 <- 0.5 * .e13
   .e31 <- 0.5 * .e9
@@ -210,11 +210,11 @@ chesstslnormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
   .e23 <- pnorm(.e18)
   .e25 <- exp((.e22/.e13 + .e16) * .e9)
   .e26 <- pnorm(.e21)
-  .e27 <- dnorm(.e18, 0, 1)
+  .e27 <- dnorm(.e18)
   .e28 <- .e12/.e13
   .e29 <- exp(.e28 + .e16)
   .e30 <- .e13^2
-  .e31 <- dnorm(.e21, 0, 1)
+  .e31 <- dnorm(.e21)
   .e32 <- 0.5 * .e10
   .e33 <- 0.5 * .e16
   .e35 <- 2 * (.e29 * .e26) - .e25 * .e23

@@ -150,15 +150,15 @@ cgradtruncnormscalike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar, vHvar, Y
   .e22 <- .e20/.e15
   .e24 <- exp(.e3/2)
   .e25 <- dnorm(.e21)
-  .e26 <- dnorm(.e21, 0, 1)
-  .e27 <- dnorm(.e22, 0, 1)
+  .e26 <- dnorm(.e21)
+  .e27 <- dnorm(.e22)
   .e28 <- pnorm(.e22)
   .e29 <- .e8/.e24
   .e30 <- .e15^2
   .e31 <- .e26 * .e16
   .e32 <- (0.5 * (.e26 * .e16^2/(.e25 * .e6)) - 0.5)/.e6
   .e33 <- .e31/.e25
-  .e34 <- dnorm(.e29, 0, 1)
+  .e34 <- dnorm(.e29)
   .e35 <- .e24 * pnorm(.e29)
   .e36 <- .e4/.e6
   .e37 <- .e28 * .e13
@@ -217,8 +217,7 @@ chesstruncnormscalike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar, vHvar, Y
   .e24 <- dnorm(.e21)
   .e25 <- .e14^2
   .e26 <- pnorm(.e22)
-  .e27 <- dnorm(.e21, 0, 1)
-  .e28 <- dnorm(.e22, 0, 1)
+  .e28 <- dnorm(.e22)
   .e29 <- .e19^2
   .e31 <- exp(.e3/2)
   .e32 <- 2 * .e23
@@ -237,7 +236,7 @@ chesstruncnormscalike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar, vHvar, Y
   .e50 <- 0.5 * (.e38/.e13) + .e13
   .e52 <- 0.5 * (.e37/.e13) + .e13
   .e53 <- .e45 * .e4
-  .e54 <- .e27 * .e29
+  .e54 <- .e24 * .e29
   .e58 <- pnorm(.e42)
   .e59 <- .e8 - .e4 * .e19/.e6
   .e60 <- .e16 - 2 * .e18
@@ -247,12 +246,12 @@ chesstruncnormscalike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar, vHvar, Y
   .e71 <- .e60/.e14 - .e53 * .e20/.e25
   .e72 <- .e62 - .e52 * .e20/.e25
   .e73 <- .e31 * .e58
-  .e74 <- .e27/.e24
+  .e74 <- .e24/.e24
   .e75 <- .e39^2
   .e76 <- .e46^2
-  .e77 <- dnorm(.e42, 0, 1)
+  .e77 <- dnorm(.e42)
   .e78 <- 0.5 * (.e54/.e39)
-  .e79 <- .e27 * .e19
+  .e79 <- .e24 * .e19
   .e81 <- .e78 - 0.5
   .e82 <- .e28 * .e4
   .e83 <- .e73^2
@@ -263,11 +262,11 @@ chesstruncnormscalike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar, vHvar, Y
   .e88 <- .e81/.e6
   .e89 <- .e79 * .e59
   .e90 <- .e87/.e46
-  .e93 <- (.e86 * .e29/.e6 - 1) * .e27 * .e19/.e24
+  .e93 <- (.e86 * .e29/.e6 - 1) * .e24 * .e19/.e24
   .e94 <- .e65 * .e28
   .e97 <- (.e74 - 1) * .e29
   .e99 <- 0.5 * ((0.5 * (.e29/(.e24 * .e6^3)) - (0.5 * (.e54/.e6) + .e24)/.e75) *
-    .e27 * .e29) - .e88
+    .e24 * .e29) - .e88
   .e100 <- 0.5 * .e34
   .e101 <- .e54/.e75
   .e102 <- .e82/.e46
@@ -293,13 +292,13 @@ chesstruncnormscalike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar, vHvar, Y
   .e142 <- .e93 + .e90
   .e144 <- .e65 * .e85 * .e72
   .e145 <- .e65 * .e20
-  .e148 <- ((1 - .e74) * .e29/.e6 - 1) * .e27/.e24
-  .e155 <- (.e97/.e6 + 1) * .e27/.e24
+  .e148 <- ((1 - .e74) * .e29/.e6 - 1) * .e24/.e24
+  .e155 <- (.e97/.e6 + 1) * .e24/.e24
   .e156 <- .e71^2
   .e158 <- (.e20/.e46 + .e82 * .e5/.e76) * .e28/.e6
   .e161 <- .e86 * .e19 * .e59 + 2 * .e4
   .e162 <- (0.5 * (((.e129 - .e123)/.e39 - (2 * (.e24 * .e4) - .e89) * .e19/.e75) *
-    .e27 * .e19) - 2 * (.e81 * .e4/.e6))/.e6
+    .e24 * .e19) - 2 * (.e81 * .e4/.e6))/.e6
   .e163 <- .e99/.e6
   .e164 <- (0.5 * (.e38 * .e26/.e14) - .e94 * .e13) * .e4
   .e166 <- .e52/.e25 + .e28 * .e72/.e121
@@ -307,8 +306,8 @@ chesstruncnormscalike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar, vHvar, Y
   .e174 <- .e97 * .e59/.e6
   .e175 <- .e6^2
   .e177 <- .e20/.e4 + .e90
-  .e178 <- 0.5 * (((.e84 - 2)/.e39 - .e101) * .e27 * .e19/.e6)
-  .e179 <- 0.5 * (((2 - .e84)/.e39 + .e101) * .e27 * .e19/.e6)
+  .e178 <- 0.5 * (((.e84 - 2)/.e39 - .e101) * .e24 * .e19/.e6)
+  .e179 <- 0.5 * (((2 - .e84)/.e39 + .e101) * .e24 * .e19/.e6)
   .e180 <- 0.5 * (.e36 * .e35)
   .e182 <- 0.5 * (.e37 * .e26/.e14) + .e28 * .e13 * .e72
   .e186 <- 0.5 * .e23 - 0.5 * (0.5 * .e36 + .e23)
@@ -329,7 +328,7 @@ chesstruncnormscalike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar, vHvar, Y
     .e82/.e76) * .e28 * .e4/.e6)/.e6) * wHvar, Xvar)
   hessll[1:nXvar, (nXvar + 1):(nXvar + (nuZUvar - 1))] <- crossprod(S * Xvar *
     (((2/.e14 - .e119) * .e4 - .e71 * (.e20/.e5 + .e102)/.e6) * .e28/.e26 - ((.e84 -
-      1) * .e59 + (.e4 - .e130) * .e19/.e6) * .e27/.e39) * wHvar, uHvar[, -1,
+      1) * .e59 + (.e4 - .e130) * .e19/.e6) * .e24/.e39) * wHvar, uHvar[, -1,
     drop = FALSE])
   hessll[1:nXvar, nXvar + (nuZUvar - 1) + 1] <- crossprod(S * Xvar, (-((.e148 +
     .e158) * .e7/.e6)) * wHvar)
@@ -342,11 +341,11 @@ chesstruncnormscalike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar, vHvar, Y
     -1, drop = FALSE] * (((.e16 - (.e156 * .e20 + 4 * .e18))/.e14 - (((.e34 *
     .e197 * .e5/.e13 + 2 * .e45) * .e20 + .e45 * (2 * .e16 - (.e127 + 4 * .e15) *
     .e4)) * .e4/.e25 + .e156 * .e28/.e26)) * .e28/.e26 - ((((.e79 * .e59^2/.e24 -
-    (.e34 * .e19 + .e8) * .e4)/.e6 + .e8) * .e19 + (.e8 - .e123) * .e59) * .e27/.e24 +
+    (.e34 * .e19 + .e8) * .e4)/.e6 + .e8) * .e19 + (.e8 - .e123) * .e59) * .e24/.e24 +
     (2 - 2 * ((.e130 + .e4)/.e6)) * .e4)/.e6) * wHvar, uHvar[, -1, drop = FALSE])
   hessll[(nXvar + 1):(nXvar + (nuZUvar - 1)), nXvar + (nuZUvar - 1) + 1] <- crossprod(uHvar[,
     -1, drop = FALSE], (((((1/.e46 - .e140) * .e5 - .e105/.e196) * .e28 - ((.e174 +
-    .e129 + .e15) * .e27/.e24 + 2 * ((.e90 - .e194) * .e4/.e6)))/.e6 + .e77 *
+    .e129 + .e15) * .e24/.e24 + 2 * ((.e90 - .e194) * .e4/.e6)))/.e6 + .e77 *
     (.e195 - .e191)) * .e7) * wHvar)
   hessll[(nXvar + 1):(nXvar + (nuZUvar - 1)), nXvar + (nuZUvar - 1) + 2] <- crossprod(uHvar[,
     -1, drop = FALSE], ((.e162 + 2 * (.e88 - .e94/.e26) - ((.e50 * .e201 + .e186 *

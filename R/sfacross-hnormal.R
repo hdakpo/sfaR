@@ -130,10 +130,10 @@ cgradhalfnormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
   .e10 <- .e4 * .e9
   .e11 <- -(S * .e2 * .e6/.e10)
   .e13 <- S * .e6/sqrt(.e4)
-  .e14 <- dnorm(.e11, 0, 1)
+  .e14 <- dnorm(.e11)
   .e15 <- dnorm(.e13)
   .e17 <- pnorm(.e11)
-  .e19 <- S * dnorm(.e13, 0, 1) * .e6
+  .e19 <- S * dnorm(.e13) * .e6
   .e20 <- .e10^2
   .e22 <- 0.5 * (.e19/(.e15 * .e4^2))
   .e23 <- 0.5/.e4
@@ -179,12 +179,11 @@ chesshalfnormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
   .e17 <- pnorm(.e14)
   .e18 <- .e10^2
   .e19 <- dnorm(.e16)
-  .e20 <- dnorm(.e14, 0, 1)
+  .e20 <- dnorm(.e14)
   .e21 <- .e2/.e4
   .e22 <- .e3/.e4
   .e23 <- S^2
   .e24 <- .e9^2
-  .e25 <- dnorm(.e16, 0, 1)
   .e26 <- 1 - .e21
   .e27 <- 1 - .e22
   .e28 <- .e4^2
@@ -197,20 +196,20 @@ chesshalfnormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
   .e43 <- .e17 * .e7
   .e44 <- .e33^2
   .e45 <- .e23 * .e24
-  .e46 <- .e23 * .e25
+  .e46 <- .e23 * .e19
   .e50 <- 0.5 * (.e45/(.e19 * .e4^4)) - (0.5 * (.e46 * .e24) + 2 * (.e19 * .e4))/.e44
   .e51 <- .e2^2
   .e53 <- .e38^2
   .e54 <- .e42 * .e20
   .e55 <- .e43^2
-  .e56 <- 0.5 * (S * .e50 * .e25 * .e9)
+  .e56 <- 0.5 * (S * .e50 * .e19 * .e9)
   .e57 <- 0.5/.e33
   .e58 <- 0.5/.e28
-  .e59 <- .e25/.e19
-  .e60 <- S * .e25
+  .e59 <- .e19/.e19
+  .e60 <- S * .e19
   .e61 <- .e32 * .e4
   .e62 <- .e37 * .e20
-  .e63 <- (0.5 * ((.e45/.e4 - 1)/.e33 - .e46 * .e4 * .e24/.e44) - .e57) * .e25
+  .e63 <- (0.5 * ((.e45/.e4 - 1)/.e33 - .e46 * .e4 * .e24/.e44) - .e57) * .e19
   .e65 <- .e54/.e17
   .e66 <- .e4 * .e17
   .e68 <- 0.5 * (.e26 * .e27)
@@ -226,7 +225,7 @@ chesshalfnormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
   hessll <- matrix(0, nrow = nXvar + nuZUvar + nvZVvar, ncol = nXvar + nuZUvar +
     nvZVvar)
   hessll[1:nXvar, 1:nXvar] <- crossprod(Xvar * (.e23 * (.e74 * (.e15/(.e3 * .e17 *
-    .e7) - .e20/.e55)/.e4 + .e25 * (.e23 * (1 - .e59) * .e24/.e4 - 1)/.e19)/.e4) *
+    .e7) - .e20/.e55)/.e4 + .e19 * (.e23 * (1 - .e59) * .e24/.e4 - 1)/.e19)/.e4) *
     wHvar, Xvar)
   hessll[1:nXvar, (nXvar + 1):(nXvar + nuZUvar)] <- crossprod(S * Xvar * ((.e65 +
     S * (.e63 - .e54 * .e2 * (.e15/.e3 - .e20/.e43)/.e66) * .e9) * .e2) * wHvar,
@@ -249,7 +248,7 @@ chesshalfnormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
     S * ((((.e71 - 0.5 * (.e69 + .e22)) * .e27 + .e23 * .e37^2 * .e2 * .e3 *
       .e24/(.e18 * .e4)) * .e2/(.e38 * .e7) + .e37 * (1/.e38 - .e37 * (2 *
       (.e66 * .e7) + S * .e20 * .e2 * .e9) * .e3/.e53)) * .e20 * .e2 + S *
-      (0.5 * (.e50 * .e3) + .e57) * .e25 * .e9) * .e9) * .e3) * wHvar, vHvar)
+      (0.5 * (.e50 * .e3) + .e57) * .e19 * .e9) * .e9) * .e3) * wHvar, vHvar)
   hessll[lower.tri(hessll)] <- t(hessll)[lower.tri(hessll)]
   # hessll <- (hessll + (hessll))/2
   return(hessll)

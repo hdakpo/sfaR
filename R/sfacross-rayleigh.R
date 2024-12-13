@@ -141,7 +141,7 @@ cgradraynormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
   .e22 <- .e18/.e3
   .e24 <- S * .e13 * .e9
   .e25 <- S^2
-  gradll <- cbind(S * Xvar * (((.e13 + S * dnorm(.e12, 0, 1) * (.e7/.e3 - .e2/.e10) *
+  gradll <- cbind(S * Xvar * (((.e13 + S * dnorm(.e12) * (.e7/.e3 - .e2/.e10) *
     .e9)/.e17 - .e22) * .e2/.e4 + .e22), uHvar * (((0.5 * (.e14 * .e3/.e7) -
     .e24) * .e2/(.e17 * .e4) + 0.5) * .e21 + .e25 * (1/.e10 - (0.5 * (.e21 *
     .e3/.e7) + .e7) * .e2/.e19) * .e2^2 * .e20/.e10 - 1), vHvar * ((((0.5 * (.e15 *
@@ -191,7 +191,6 @@ chessraynormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
   .e20 <- .e14 * .e7
   .e23 <- .e11 * .e13 * .e9/.e4
   .e24 <- .e20 - .e23
-  .e25 <- dnorm(.e12, 0, 1)
   .e27 <- S * .e13 * .e9
   .e28 <- .e19 * .e3
   .e29 <- S^2
@@ -207,7 +206,7 @@ chessraynormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
   .e44 <- .e18 * .e7
   .e46 <- 0.5 * (.e43/.e7)
   .e48 <- 1/.e10 - .e41/.e18
-  .e49 <- S * .e25
+  .e49 <- S * .e14
   .e50 <- .e16 * .e14
   .e51 <- .e46 - .e27
   .e53 <- .e49 * .e40 * .e9
@@ -222,7 +221,7 @@ chessraynormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
   .e65 <- .e19 * .e16
   .e66 <- (2 * .e3)^2
   .e67 <- S * .e48
-  .e68 <- .e60 * .e25
+  .e68 <- .e60 * .e14
   .e69 <- .e44^2
   .e71 <- .e58/.e24 - .e60 * .e2 * .e33/.e44
   .e72 <- .e51 * .e19
@@ -235,32 +234,32 @@ chessraynormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
   .e80 <- 1/.e3
   .e82 <- .e13/.e4
   .e83 <- S * .e37
-  .e84 <- .e67 * .e25
+  .e84 <- .e67 * .e14
   .e87 <- .e68 * .e2^2
   .e88 <- .e29 * .e48
   .e89 <- .e29 * .e2
   hessll <- matrix(0, nrow = nXvar + nuZUvar + nvZVvar, ncol = nXvar + nuZUvar +
     nvZVvar)
   hessll[1:nXvar, 1:nXvar] <- crossprod(Xvar * (.e29 * (((((.e89 * .e33/(.e4 *
-    .e3) - 1) * .e40 + .e38) * .e25 - .e2 * .e54^2/.e42)/.e24 + .e80) * .e2/.e4 -
+    .e3) - 1) * .e40 + .e38) * .e14 - .e2 * .e54^2/.e42)/.e24 + .e80) * .e2/.e4 -
     .e80)) * wHvar, Xvar)
   hessll[1:nXvar, (nXvar + 1):(nXvar + nuZUvar)] <- crossprod(S * Xvar * ((((.e13 -
     0.5 * (.e49 * .e2 * .e9/.e10))/.e42 - .e64 * .e54/.e63) * .e19 - 2 * (.e67 *
     .e2 * .e9/.e10)) * .e2) * wHvar, uHvar)
   hessll[1:nXvar, (nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)] <- crossprod(S *
-    Xvar * ((((.e2 * (S * (0.5 * (.e16/.e3) + 1/.e4) * .e25 * .e9/.e7 - .e58 *
+    Xvar * ((((.e2 * (S * (0.5 * (.e16/.e3) + 1/.e4) * .e14 * .e9/.e7 - .e58 *
     .e54/.e24) - .e13)/.e42 + 2 * (.e83 * .e2 * .e9/.e44)) * .e2/.e4 - 4 * (.e55/.e66)) *
     .e3) * wHvar, vHvar)
   hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + 1):(nXvar + nuZUvar)] <- crossprod(uHvar *
     (((((.e46 + S * (.e84 * .e2 * .e9 - .e13) * .e9 - (.e64/.e4 + 0.5 * (0.5 *
-      (.e19 * .e14 * .e3/.e7) + .e88 * .e25 * .e2 * .e33)))/.e24 - 0.5)/.e4 -
+      (.e19 * .e14 * .e3/.e7) + .e88 * .e14 * .e2 * .e33)))/.e24 - 0.5)/.e4 -
       (.e72 + .e20 - .e23) * .e51 * .e2/.e63) * .e19 + .e29 * ((2 * .e48 -
       ((.e78 + 1 - 0.5 * (.e77 + .e17)) * .e19 * .e3/.e7 + (2 - 2 * (.e35^2 *
         .e2 * .e4/.e18)) * .e7) * .e2/.e18)/.e10 - .e35 * .e48 * .e2/.e18) *
       .e2 * .e33) * .e2) * wHvar, uHvar)
   hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + nuZUvar + 1):(nXvar + nuZUvar +
     nvZVvar)] <- crossprod(uHvar * ((((.e76 + 0.5 * ((.e43/.e4 - .e29 * .e16 *
-    .e48 * .e25 * .e2 * .e33/.e7) * .e2/.e4 - 0.5 * (.e65 * .e14)))/.e7 + (.e27 -
+    .e48 * .e14 * .e2 * .e33/.e7) * .e2/.e4 - 0.5 * (.e65 * .e14)))/.e7 + (.e27 -
     (.e58 * .e51 * .e19/.e24 + S * (.e82 + .e84 * .e9) * .e9) * .e2)/.e4)/.e24 +
     0.5/.e4 - (.e71/.e4 + .e29 * (((0.5 * (.e28/.e4) + 0.5 * ((.e17 - 1) * .e3/.e4 +
     1 - .e75) + .e61) * .e2/.e7 + .e7)/.e44 + .e37 * (.e79 - (0.5 * (.e18 * .e19/.e10) +
@@ -268,7 +267,7 @@ chessraynormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
   hessll[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar), (nXvar + nuZUvar +
     1):(nXvar + nuZUvar + nvZVvar)] <- crossprod(vHvar * ((((((0.5 * (.e3 * (.e87 *
     .e33/.e44 - .e14)/.e4 - .e76) + 0.5 * .e14) * .e16/.e7 + (.e3 * (S * (.e83 *
-    .e25 * .e2 * .e9/.e18 - .e82) * .e9 - .e58^2 * .e2/.e24) + .e27)/.e4)/.e24 -
+    .e14 * .e2 * .e9/.e18 - .e82) * .e9 - .e58^2 * .e2/.e24) + .e27)/.e4)/.e24 -
     (.e71 * .e3/.e4 + .e29 * (.e37 * (.e79 - (0.5 * (.e18 * .e16/.e10) + 2 *
       (.e37 * .e3)) * .e2 * .e3/.e69) + (0.5 * .e15 - 0.5 * (.e61 + .e15)) *
       .e16 * .e4/(.e18 * .e3)) * .e2 * .e33)) * .e2 - .e61)/.e4 + (2 - 16 *

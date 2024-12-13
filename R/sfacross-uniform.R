@@ -127,9 +127,9 @@ cgraduninormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
   .e9 <- sqrt(12) * .e7 + .e4
   .e10 <- .e9/.e1
   .e11 <- .e4/.e1
-  .e12 <- dnorm(.e10, 0, 1)
+  .e12 <- dnorm(.e10)
   .e13 <- .e1 * (pnorm(.e10) - pnorm(.e11))
-  .e14 <- dnorm(.e11, 0, 1)
+  .e14 <- dnorm(.e11)
   gradll <- cbind(S * Xvar * ((.e14 - .e12)/.e13), uHvar * (sqrt(12)/2 * (.e12 *
     .e7/.e13) - 0.5), vHvar * ((0.5 * (S * .e14 * .e3) - 0.5 * (.e9 * .e12))/.e13))
   return(gradll * wHvar)
@@ -163,9 +163,9 @@ chessuninormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
   .e9 <- sqrt(12) * .e7 + .e4
   .e10 <- .e9/.e2
   .e11 <- .e4/.e2
-  .e12 <- dnorm(.e10, 0, 1)
+  .e12 <- dnorm(.e10)
   .e14 <- pnorm(.e10) - pnorm(.e11)
-  .e15 <- dnorm(.e11, 0, 1)
+  .e15 <- dnorm(.e11)
   .e16 <- .e2 * .e14
   .e17 <- .e16^2
   .e18 <- .e9 * .e12

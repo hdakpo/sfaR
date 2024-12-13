@@ -140,8 +140,8 @@ cgradgenexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
   .e19 <- exp(.e11/.e15 + .e12)
   .e20 <- pnorm(.e13)
   .e21 <- pnorm(.e14)
-  .e22 <- dnorm(.e13, 0, 1)
-  .e23 <- dnorm(.e14, 0, 1)
+  .e22 <- dnorm(.e13)
+  .e23 <- dnorm(.e14)
   .e26 <- .e19 * .e21 - .e18 * .e20
   .e27 <- 0.5 * .e9
   gradll <- cbind(S * Xvar * (((.e23/.e3 - .e21/.e5) * .e19 - (.e22/.e3 - 2 * (.e20/.e5)) *
@@ -194,8 +194,8 @@ chessgenexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
   .e22 <- .e11/.e18
   .e24 <- exp(.e19 + 2 * .e12)
   .e25 <- exp(.e22 + .e12)
-  .e26 <- dnorm(.e16, 0, 1)
-  .e27 <- dnorm(.e17, 0, 1)
+  .e26 <- dnorm(.e16)
+  .e27 <- dnorm(.e17)
   .e28 <- 0.5 * .e9
   .e29 <- .e18^2
   .e30 <- 0.5 * .e8
