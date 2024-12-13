@@ -726,7 +726,7 @@ sfaselectioncross <- function(selectionF, frontierF, uhet, vhet,
       }
     }
     cat("Initialization of", Nsim, simDist, "draws per observation ...\n")
-    FiMat <- drawMat(N = N_F, Nsim = Nsim, simType = simType,
+    FiMat <- drawMatUniDim(N = N_F, Nsim = Nsim, simType = simType,
       prime = prime, burn = burn, antithetics = antithetics,
       seed = seed)
   }
