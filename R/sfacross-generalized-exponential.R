@@ -28,8 +28,8 @@ cgenexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
   beta <- parm[1:(nXvar)]
   delta <- parm[(nXvar + 1):(nXvar + nuZUvar)]
   phi <- parm[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)]
-  Wu <- as.numeric(crossprod(matrix(delta), t(uHvar)))
-  Wv <- as.numeric(crossprod(matrix(phi), t(vHvar)))
+  Wu <- crossprod(matrix(delta), t(uHvar))[1, ]
+  Wv <- crossprod(matrix(phi), t(vHvar))[1, ]
   epsilon <- Yvar - as.numeric(crossprod(matrix(beta), t(Xvar)))
   A <- S * epsilon/exp(Wu/2) + exp(Wv)/(2 * exp(Wu))
   B <- 2 * S * epsilon/exp(Wu/2) + 2 * exp(Wv)/exp(Wu)
@@ -37,6 +37,7 @@ cgenexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
   b <- -S * epsilon/exp(Wv/2) - 2 * exp(Wv/2)/exp(Wu/2)
   ll <- (log(2) - 1/2 * Wu + log(exp(A) * pnorm(a) - exp(B) *
     pnorm(b)))
+  RTMB::ADREPORT(ll * wHvar)
   return(ll * wHvar)
 }
 
@@ -278,6 +279,7 @@ chessgenexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param S integer for cost/prod estimation
 #' @param wHvar vector of weights (weighted likelihood)
 #' @param method algorithm for solver
+#' @param derivs type of derivatives
 #' @param printInfo logical print info during optimization
 #' @param itermax maximum iteration
 #' @param stepmax stepmax for ucminf
@@ -285,133 +287,301 @@ chessgenexponormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
 #' @param gradtol gradient tolerance
 #' @param hessianType how hessian is computed
 #' @param qac qac option for maxLik
+#' @param accuracy accuracy for numerical derivatives
+#' @param stepsize stepsize for numerical derivatives
 #' @noRd
-genexponormAlgOpt <- function(start, randStart, sdStart, olsParam, dataTable, S,
-  nXvar, uHvar, nuZUvar, vHvar, nvZVvar, Yvar, Xvar, wHvar,
-  method, printInfo, itermax, stepmax, tol, gradtol, hessianType,
-  qac) {
+genexponormAlgOpt <- function(start, randStart, sdStart, olsParam, dataTable, S, nXvar,
+  uHvar, nuZUvar, vHvar, nvZVvar, Yvar, Xvar, wHvar, method, derivs, printInfo,
+  itermax, stepmax, tol, gradtol, hessianType, qac, accuracy, stepsize) {
+  ## starting values and log likelihood ------
   startVal <- if (!is.null(start))
-    start else cstgenexponorm(olsObj = olsParam, epsiRes = dataTable[["olsResiduals"]],
-    S = S, uHvar = uHvar, nuZUvar = nuZUvar, vHvar = vHvar,
-    nvZVvar = nvZVvar)
+    start else cstgenexponorm(olsObj = olsParam, epsiRes = dataTable[["olsResiduals"]], S = S,
+    uHvar = uHvar, nuZUvar = nuZUvar, vHvar = vHvar, nvZVvar = nvZVvar)
   if (randStart)
     startVal <- startVal + rnorm(length(startVal), sd = sdStart)
-  startLoglik <- sum(cgenexponormlike(startVal, nXvar = nXvar,
-    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
-    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar,
-    S = S))
-  if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
+  startLoglik <- sum(cgenexponormlike(startVal, nXvar = nXvar, nuZUvar = nuZUvar,
+    nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
+    wHvar = wHvar, S = S))
+  ## automatic differentiation ------
+  if (derivs == "ad") {
+    if (method %in% c("bfgs", "nr", "nm", "cg", "sann")) {
     maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...),
-      bhhh = function(...) maxLik::maxBHHH(...), nr = function(...) maxLik::maxNR(...),
-      nm = function(...) maxLik::maxNM(...), cg = function(...) maxLik::maxCG(...),
-      sann = function(...) maxLik::maxSANN(...))
+      nr = function(...) maxLik::maxNR(...), nm = function(...) maxLik::maxNM(...),
+      cg = function(...) maxLik::maxCG(...), sann = function(...) maxLik::maxSANN(...))
     method <- "maxLikAlgo"
   }
-  mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
-    fn = function(parm) -sum(cgenexponormlike(parm, nXvar = nXvar,
-      nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
-      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar,
-      S = S)), gr = function(parm) -colSums(cgradgenexponormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      wHvar = wHvar, S = S)), hessian = 0, control = list(trace = if (printInfo) 1 else 0,
-      maxeval = itermax, stepmax = stepmax, xtol = tol,
-      grtol = gradtol)), maxLikAlgo = maxRoutine(fn = cgenexponormlike,
-    grad = cgradgenexponormlike, hess = chessgenexponormlike,
-    start = startVal, finalHessian = if (hessianType == 2) "bhhh" else TRUE,
-    control = list(printLevel = if (printInfo) 2 else 0,
-      iterlim = itermax, reltol = tol, tol = tol, qac = qac),
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-    wHvar = wHvar, S = S), sr1 = trustOptim::trust.optim(x = startVal,
-    fn = function(parm) -sum(cgenexponormlike(parm, nXvar = nXvar,
-      nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
-      vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar,
-      S = S)), gr = function(parm) -colSums(cgradgenexponormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      wHvar = wHvar, S = S)), method = "SR1", control = list(maxit = itermax,
-      cgtol = gradtol, stop.trust.radius = tol, prec = tol,
-      report.level = if (printInfo) 2 else 0, report.precision = 1L)),
-    sparse = trustOptim::trust.optim(x = startVal, fn = function(parm) -sum(cgenexponormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      wHvar = wHvar, S = S)), gr = function(parm) -colSums(cgradgenexponormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      wHvar = wHvar, S = S)), hs = function(parm) as(-chessgenexponormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      wHvar = wHvar, S = S), "dgCMatrix"), method = "Sparse",
-      control = list(maxit = itermax, cgtol = gradtol,
-        stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
-        report.precision = 1L, preconditioner = 1L)),
-    mla = marqLevAlg::mla(b = startVal, fn = function(parm) -sum(cgenexponormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      wHvar = wHvar, S = S)), gr = function(parm) -colSums(cgradgenexponormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      wHvar = wHvar, S = S)), hess = function(parm) -chessgenexponormlike(parm,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      wHvar = wHvar, S = S), print.info = printInfo, maxiter = itermax,
-      epsa = gradtol, epsb = gradtol), nlminb = nlminb(start = startVal,
-      objective = function(parm) -sum(cgenexponormlike(parm,
-        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-        wHvar = wHvar, S = S)), gradient = function(parm) -colSums(cgradgenexponormlike(parm,
-        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-        wHvar = wHvar, S = S)), hessian = function(parm) -chessgenexponormlike(parm,
-        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-        wHvar = wHvar, S = S), control = list(iter.max = itermax,
-        trace = if (printInfo) 1 else 0, eval.max = itermax,
-        rel.tol = tol, x.tol = tol)))
-  if (method %in% c("ucminf", "nlminb")) {
-    mleObj$gradient <- colSums(cgradgenexponormlike(mleObj$par,
-      nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-      uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-      wHvar = wHvar, S = S))
-  }
-  mlParam <- if (method %in% c("ucminf", "nlminb")) {
-    mleObj$par
-  } else {
-    if (method == "maxLikAlgo") {
-      mleObj$estimate
+    cgradbhhhgenexponormAD <- RTMB::MakeADFun(function(p) sum(cgenexponormlike(p, nXvar = nXvar,
+      nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
+      Xvar = Xvar, S = S, wHvar = wHvar)), startVal, ADreport = TRUE, silent = TRUE)
+    cgradhessgenexponormAD <- RTMB::MakeADFun(function(p) sum(cgenexponormlike(p, nXvar = nXvar,
+      nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
+      Xvar = Xvar, S = S, wHvar = wHvar)), startVal, ADreport = FALSE, silent = TRUE)
+    fnGradObsgenexpo <- function(parm) {
+      Ta1 <- RTMB::GetTape(cgradbhhhgenexponormAD)
+      Ta2 <- RTMB::MakeTape(function(weight) {
+        WT <- RTMB::MakeTape(function(x) sum(Ta1(x) * weight), parm)
+        (WT$jacfun())(RTMB::advector(parm))
+      }, rep(1, nrow(Xvar)))
+      t((Ta2$jacfun())(RTMB::advector(rep(1, nrow(Xvar)))))
+    }
+    ### solve for different algorithms ------
+    mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal, fn = function(p) -cgradhessgenexponormAD$fn(p),
+      gr = function(p) -cgradhessgenexponormAD$gr(p), hessian = 0, control = list(trace = if (printInfo) 1 else 0,
+        maxeval = itermax, stepmax = stepmax, xtol = tol, grtol = gradtol)),
+      maxLikAlgo = maxRoutine(fn = cgradhessgenexponormAD$fn, grad = cgradhessgenexponormAD$gr,
+        hess = cgradhessgenexponormAD$he, start = startVal, finalHessian = TRUE,
+        control = list(printLevel = if (printInfo) 2 else 0, iterlim = itermax,
+          reltol = tol, tol = tol, qac = qac)), bhhh = maxLik::maxBHHH(fn = cgradbhhhgenexponormAD$fn,
+        grad = fnGradObsgenexpo, hess = cgradhessgenexponormAD$he, start = startVal,
+        finalHessian = TRUE, control = list(printLevel = if (printInfo) 2 else 0,
+          iterlim = itermax, reltol = tol, tol = tol, qac = qac)), sr1 = trustOptim::trust.optim(x = startVal,
+        fn = function(p) -cgradhessgenexponormAD$fn(p), gr = function(p) -cgradhessgenexponormAD$gr(p),
+        method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
+          stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
+          report.precision = 1L)), sparse = trustOptim::trust.optim(x = startVal,
+        fn = function(p) -cgradhessgenexponormAD$fn(p), gr = function(p) -cgradhessgenexponormAD$gr(p),
+        hs = function(p) as(-cgradhessgenexponormAD$he(p), "dgCMatrix"), method = "Sparse",
+        control = list(maxit = itermax, cgtol = gradtol, stop.trust.radius = tol,
+          prec = tol, report.level = if (printInfo) 2 else 0, report.precision = 1L,
+          preconditioner = 1L)), mla = marqLevAlg::mla(b = startVal, fn = function(p) -cgradhessgenexponormAD$fn(p),
+        gr = function(p) -cgradhessgenexponormAD$gr(p), hess = function(p) -cgradhessgenexponormAD$he(p),
+        print.info = printInfo, maxiter = itermax, epsa = gradtol, epsb = gradtol),
+      nlminb = nlminb(start = startVal, objective = function(p) -cgradhessgenexponormAD$fn(p),
+        gradient = function(p) -cgradhessgenexponormAD$gr(p), hessian = function(p) -cgradhessgenexponormAD$he(p),
+        control = list(iter.max = itermax, trace = if (printInfo) 1 else 0,
+          eval.max = itermax, rel.tol = tol, x.tol = tol)))
+    if (method %in% c("ucminf", "nlminb")) {
+      mleObj$gradient <- cgradhessgenexponormAD$gr(mleObj$par)
+    }
+    mlParam <- if (method %in% c("ucminf", "nlminb")) {
+      mleObj$par
     } else {
-      if (method %in% c("sr1", "sparse")) {
-        mleObj$solution
+      if (method %in% c("maxLikAlgo", "bhhh")) {
+        mleObj$estimate
       } else {
-        if (method == "mla") {
+        if (method %in% c("sr1", "sparse")) {
+          mleObj$solution
+        } else {
+          if (method == "mla") {
           mleObj$b
+          }
         }
       }
     }
+    if (hessianType != 2) {
+      if (method %in% c("ucminf", "nlminb"))
+        mleObj$hessian <- cgradhessgenexponormAD$he(mleObj$par)
+      if (method == "sr1")
+        mleObj$hessian <- cgradhessgenexponormAD$he(mleObj$solution)
+      if (method == "mla")
+        mleObj$hessian <- cgradhessgenexponormAD$he(mleObj$b)
+    }
+    mleObj$logL_OBS <- cgradbhhhgenexponormAD$fn(mlParam)
+    mleObj$gradL_OBS <- fnGradObsgenexpo(mlParam)
+    rm(cgradbhhhgenexponormAD, cgradhessgenexponormAD, fnGradObsgenexpo)
+  } else {
+    if (method %in% c("bfgs", "bhhh", "nr", "nm", "cg", "sann")) {
+    maxRoutine <- switch(method, bfgs = function(...) maxLik::maxBFGS(...), bhhh = function(...) maxLik::maxBHHH(...),
+      nr = function(...) maxLik::maxNR(...), nm = function(...) maxLik::maxNM(...),
+      cg = function(...) maxLik::maxCG(...), sann = function(...) maxLik::maxSANN(...))
+    method <- "maxLikAlgo"
+    }
+    ## numerical derivatives ------
+    if (derivs == "numerical") {
+      cgradgenexponormlikeNum <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
+        vHvar, Yvar, Xvar, wHvar, S) {
+        calculus::jacobian(cgenexponormlike, var = unname(parm), params = list(nXvar = nXvar,
+          nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar), accuracy = accuracy,
+          stepsize = stepsize)
+      }
+      chessgenexponormlikeNum <- function(parm, nXvar, nuZUvar, nvZVvar, uHvar,
+        vHvar, Yvar, Xvar, wHvar, S) {
+        calculus::hessian(function(parm) sum(cgenexponormlike(parm, nXvar = nXvar,
+          nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, S = S, wHvar = wHvar)), var = unname(parm),
+          accuracy = accuracy, stepsize = stepsize)
+      }
+      ### solve for different algorithms ------
+      mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal, fn = function(parm) -sum(cgenexponormlike(parm,
+        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+        vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)),
+        gr = function(parm) -colSums(cgradgenexponormlikeNum(parm, nXvar = nXvar,
+          nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)), hessian = 0, control = list(trace = if (printInfo) 1 else 0,
+          maxeval = itermax, stepmax = stepmax, xtol = tol, grtol = gradtol)),
+        maxLikAlgo = maxRoutine(fn = cgenexponormlike, grad = cgradgenexponormlikeNum,
+          hess = chessgenexponormlikeNum, start = startVal, finalHessian = if (hessianType ==
+          2) "bhhh" else TRUE, control = list(printLevel = if (printInfo) 2 else 0,
+          iterlim = itermax, reltol = tol, tol = tol, qac = qac), nXvar = nXvar,
+          nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S), sr1 = trustOptim::trust.optim(x = startVal,
+          fn = function(parm) -sum(cgenexponormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+          nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
+          Xvar = Xvar, wHvar = wHvar, S = S)), gr = function(parm) -colSums(cgradgenexponormlikeNum(parm,
+          nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+          vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)), method = "SR1", control = list(maxit = itermax,
+          cgtol = gradtol, stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
+          report.precision = 1L)), sparse = trustOptim::trust.optim(x = startVal,
+          fn = function(parm) -sum(cgenexponormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+          nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
+          Xvar = Xvar, wHvar = wHvar, S = S)), gr = function(parm) -colSums(cgradgenexponormlikeNum(parm,
+          nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+          vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)), hs = function(parm) as(-chessgenexponormlikeNum(parm,
+          nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+          vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S), "dgCMatrix"), method = "Sparse",
+          control = list(maxit = itermax, cgtol = gradtol, stop.trust.radius = tol,
+          prec = tol, report.level = if (printInfo) 2 else 0, report.precision = 1L,
+          preconditioner = 1L)), mla = marqLevAlg::mla(b = startVal, fn = function(parm) -sum(cgenexponormlike(parm,
+          nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+          vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)),
+          gr = function(parm) -colSums(cgradgenexponormlikeNum(parm, nXvar = nXvar,
+          nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)), hess = function(parm) -chessgenexponormlikeNum(parm,
+          nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+          vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S), print.info = printInfo,
+          maxiter = itermax, epsa = gradtol, epsb = gradtol), nlminb = nlminb(start = startVal,
+          objective = function(parm) -sum(cgenexponormlike(parm, nXvar = nXvar,
+          nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)), gradient = function(parm) -colSums(cgradgenexponormlikeNum(parm,
+          nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+          vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)), hessian = function(parm) -chessgenexponormlikeNum(parm,
+          nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+          vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S), control = list(iter.max = itermax,
+          trace = if (printInfo) 1 else 0, eval.max = itermax, rel.tol = tol,
+          x.tol = tol)))
+      if (method %in% c("ucminf", "nlminb")) {
+        mleObj$gradient <- colSums(cgradgenexponormlikeNum(mleObj$par, nXvar = nXvar,
+          nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S))
+      }
+      mlParam <- if (method %in% c("ucminf", "nlminb")) {
+        mleObj$par
+      } else {
+        if (method %in% c("maxLikAlgo", "bhhh")) {
+          mleObj$estimate
+        } else {
+          if (method %in% c("sr1", "sparse")) {
+          mleObj$solution
+          } else {
+          if (method == "mla") {
+            mleObj$b
+          }
+          }
+        }
+      }
+      if (hessianType != 2) {
+        if (method %in% c("ucminf", "nlminb"))
+          mleObj$hessian <- chessgenexponormlikeNum(parm = mleObj$par, nXvar = nXvar,
+          nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)
+        if (method == "sr1")
+          mleObj$hessian <- chessgenexponormlikeNum(parm = mleObj$solution,
+          nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+          vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)
+      }
+      mleObj$logL_OBS <- cgenexponormlike(mlParam, nXvar = nXvar,
+        nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+        Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)
+      mleObj$gradL_OBS <- cgradgenexponormlikeNum(parm = mlParam, nXvar = nXvar,
+        nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+        Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)
+    } else {
+      ## analytical derivatives ------
+      if (derivs == "analytical") {
+        ### solve for different algorithms ------
+        mleObj <- switch(method, ucminf = ucminf::ucminf(par = startVal,
+          fn = function(parm) -sum(cgenexponormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+          nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
+          Xvar = Xvar, wHvar = wHvar, S = S)), gr = function(parm) -colSums(cgradgenexponormlike(parm,
+          nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+          vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)),
+          hessian = 0, control = list(trace = if (printInfo) 1 else 0, maxeval = itermax,
+          stepmax = stepmax, xtol = tol, grtol = gradtol)), maxLikAlgo = maxRoutine(fn = cgenexponormlike,
+          grad = cgradgenexponormlike, hess = chessgenexponormlike, start = startVal,
+          finalHessian = if (hessianType == 2) "bhhh" else TRUE, control = list(printLevel = if (printInfo) 2 else 0,
+          iterlim = itermax, reltol = tol, tol = tol, qac = qac), nXvar = nXvar,
+          nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S), sr1 = trustOptim::trust.optim(x = startVal,
+          fn = function(parm) -sum(cgenexponormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+          nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
+          Xvar = Xvar, wHvar = wHvar, S = S)), gr = function(parm) -colSums(cgradgenexponormlike(parm,
+          nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+          vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)),
+          method = "SR1", control = list(maxit = itermax, cgtol = gradtol,
+          stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
+          report.precision = 1L)), sparse = trustOptim::trust.optim(x = startVal,
+          fn = function(parm) -sum(cgenexponormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+          nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
+          Xvar = Xvar, wHvar = wHvar, S = S)), gr = function(parm) -colSums(cgradgenexponormlike(parm,
+          nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+          vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)),
+          hs = function(parm) as(-chessgenexponormlike(parm, nXvar = nXvar,
+          nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S), "dgCMatrix"),
+          method = "Sparse", control = list(maxit = itermax, cgtol = gradtol,
+          stop.trust.radius = tol, prec = tol, report.level = if (printInfo) 2 else 0,
+          report.precision = 1L, preconditioner = 1L)), mla = marqLevAlg::mla(b = startVal,
+          fn = function(parm) -sum(cgenexponormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+          nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
+          Xvar = Xvar, wHvar = wHvar, S = S)), gr = function(parm) -colSums(cgradgenexponormlike(parm,
+          nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+          vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)),
+          hess = function(parm) -chessgenexponormlike(parm, nXvar = nXvar, nuZUvar = nuZUvar,
+          nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar, Yvar = Yvar,
+          Xvar = Xvar, wHvar = wHvar, S = S), print.info = printInfo, maxiter = itermax,
+          epsa = gradtol, epsb = gradtol), nlminb = nlminb(start = startVal,
+          objective = function(parm) -sum(cgenexponormlike(parm, nXvar = nXvar,
+          nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)), gradient = function(parm) -colSums(cgradgenexponormlike(parm,
+          nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
+          vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)),
+          hessian = function(parm) -chessgenexponormlike(parm, nXvar = nXvar,
+          nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S), control = list(iter.max = itermax,
+          trace = if (printInfo) 1 else 0, eval.max = itermax, rel.tol = tol,
+          x.tol = tol)))
+        if (method %in% c("ucminf", "nlminb")) {
+          mleObj$gradient <- colSums(cgradgenexponormlike(mleObj$par, nXvar = nXvar,
+          nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S))
+        }
+        mlParam <- if (method %in% c("ucminf", "nlminb")) {
+          mleObj$par
+        } else {
+          if (method %in% c("maxLikAlgo", "bhhh")) {
+          mleObj$estimate
+          } else {
+          if (method %in% c("sr1", "sparse")) {
+            mleObj$solution
+          } else {
+            if (method == "mla") {
+            mleObj$b
+            }
+          }
+          }
+        }
+        if (hessianType != 2) {
+          if (method %in% c("ucminf", "nlminb"))
+          mleObj$hessian <- chessgenexponormlike(parm = mleObj$par, nXvar = nXvar,
+            nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+            Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)
+          if (method == "sr1")
+          mleObj$hessian <- chessgenexponormlike(parm = mleObj$solution, nXvar = nXvar,
+            nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+            Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)
+        }
+        mleObj$logL_OBS <- cgenexponormlike(mlParam, nXvar = nXvar,
+        nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+        Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)
+        mleObj$gradL_OBS <- cgradgenexponormlike(parm = mlParam, nXvar = nXvar,
+          nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar, vHvar = vHvar,
+          Yvar = Yvar, Xvar = Xvar, wHvar = wHvar, S = S)
+      }
+    }
   }
-  if (hessianType != 2) {
-    if (method %in% c("ucminf", "nlminb"))
-      mleObj$hessian <- chessgenexponormlike(parm = mleObj$par,
-        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-        wHvar = wHvar, S = S)
-    if (method == "sr1")
-      mleObj$hessian <- chessgenexponormlike(parm = mleObj$solution,
-        nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-        uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-        wHvar = wHvar, S = S)
-  }
-  mleObj$logL_OBS <- cgenexponormlike(parm = mlParam, nXvar = nXvar,
-    nuZUvar = nuZUvar, nvZVvar = nvZVvar, uHvar = uHvar,
-    vHvar = vHvar, Yvar = Yvar, Xvar = Xvar, wHvar = wHvar,
-    S = S)
-  mleObj$gradL_OBS <- cgradgenexponormlike(parm = mlParam,
-    nXvar = nXvar, nuZUvar = nuZUvar, nvZVvar = nvZVvar,
-    uHvar = uHvar, vHvar = vHvar, Yvar = Yvar, Xvar = Xvar,
-    wHvar = wHvar, S = S)
-  return(list(startVal = startVal, startLoglik = startLoglik,
-    mleObj = mleObj, mlParam = mlParam))
+  return(list(startVal = startVal, startLoglik = startLoglik, mleObj = mleObj,
+    mlParam = mlParam))
 }
 
 # Conditional efficiencies estimation ----------
