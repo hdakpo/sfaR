@@ -122,25 +122,22 @@ cgradhalfnormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
   Wv <- crossprod(matrix(phi), t(vHvar))[1, ]
   epsilon <- Yvar - crossprod(matrix(beta), t(Xvar))[1, ]
   sigma_sq <- exp(Wu) + exp(Wv)
-  .e2 <- exp(Wu)
-  .e3 <- exp(Wv)
-  .e4 <- .e2 + .e3
-  .e6 <- epsilon
-  .e9 <- sqrt(.e2 * .e3/.e4)
-  .e10 <- .e4 * .e9
-  .e11 <- -(S * .e2 * .e6/.e10)
-  .e13 <- S * .e6/sqrt(.e4)
-  .e14 <- dnorm(.e11)
-  .e15 <- dnorm(.e13)
-  .e17 <- pnorm(.e11)
-  .e19 <- S * dnorm(.e13) * .e6
-  .e20 <- .e10^2
-  .e22 <- 0.5 * (.e19/(.e15 * .e4^2))
-  .e23 <- 0.5/.e4
-  gradll <- cbind(Xvar * (S * (.e14 * .e2/(.e17 * .e9) + .e19/.e15)/.e4), uHvar *
-    (.e2 * (S * (.e22 - (1/.e10 - (0.5 * ((1 - .e2/.e4) * .e3/.e9) + .e9) * .e2/.e20) *
-      .e14/.e17) * .e6 - .e23)), vHvar * (.e3 * (S * ((0.5 * ((1 - .e3/.e4) *
-    .e2/.e9) + .e9) * .e14 * .e2/(.e20 * .e17) + .e22) * .e6 - .e23)))
+  .e1 <- exp(Wu)
+  .e2 <- exp(Wv)
+  .e3 <- .e1 + .e2
+  .e4 <- sqrt(.e1 * .e2/(.e3))
+  .e5 <- pnorm(-(S * .e1 * epsilon/((.e3) * .e4)))
+  .e6 <- dnorm(S * epsilon/sqrt(.e3))
+  .e7 <- dnorm(-(S * .e1 * epsilon/((.e3) * .e4)))
+  .e8 <- (S * .e6 * epsilon/(.e6 * (.e3)^2))
+  .e9 <- (0.5 * ((1 - .e1/(.e3)) * .e2/.e4) + .e4)
+  .e10 <- (1/((.e3) * .e4) - .e9 * .e1/((.e3) * .e4)^2)
+  .e11 <- (0.5 * .e8 - .e10 * .e7/.e5)
+  .e12 <- (((.e3) * .e4)^2 * .e5)
+  .e13 <- (0.5 * ((1 - .e2/(.e3)) * .e1/.e4) + .e4)
+  gradll <- cbind(Xvar * S * (.e7 * .e1/(.e5 * .e4) + S * .e6 * epsilon/.e6)/(.e3),
+    uHvar * .e1 * (S * .e11 * epsilon - 0.5/(.e3)), vHvar * .e2 * (S * (.e13 *
+      .e7 * .e1/.e12 + 0.5 * .e8) * epsilon - 0.5/(.e3)))
   return(gradll * wHvar)
 }
 
@@ -166,89 +163,58 @@ chesshalfnormlike <- function(parm, nXvar, nuZUvar, nvZVvar,
   Wv <- crossprod(matrix(phi), t(vHvar))[1, ]
   epsilon <- Yvar - crossprod(matrix(beta), t(Xvar))[1, ]
   sigma_sq <- exp(Wu) + exp(Wv)
-  .e2 <- exp(Wu)
-  .e3 <- exp(Wv)
-  .e4 <- .e2 + .e3
-  .e7 <- sqrt(.e2 * .e3/.e4)
-  .e9 <- epsilon
-  .e10 <- .e4 * .e7
-  .e13 <- S * .e2 * .e9/.e10
-  .e14 <- -.e13
-  .e15 <- S * .e9
-  .e16 <- .e15/sqrt(.e4)
-  .e17 <- pnorm(.e14)
-  .e18 <- .e10^2
-  .e19 <- dnorm(.e16)
-  .e20 <- dnorm(.e14)
-  .e21 <- .e2/.e4
-  .e22 <- .e3/.e4
-  .e23 <- S^2
-  .e24 <- .e9^2
-  .e26 <- 1 - .e21
-  .e27 <- 1 - .e22
-  .e28 <- .e4^2
-  .e29 <- .e26 * .e3
-  .e32 <- 0.5 * (.e29/.e7) + .e7
-  .e33 <- .e19 * .e28
-  .e37 <- 0.5 * (.e27 * .e2/.e7) + .e7
-  .e38 <- .e18 * .e17
-  .e42 <- 1/.e10 - .e32 * .e2/.e18
-  .e43 <- .e17 * .e7
-  .e44 <- .e33^2
-  .e45 <- .e23 * .e24
-  .e46 <- .e23 * .e19
-  .e50 <- 0.5 * (.e45/(.e19 * .e4^4)) - (0.5 * (.e46 * .e24) + 2 * (.e19 * .e4))/.e44
-  .e51 <- .e2^2
-  .e53 <- .e38^2
-  .e54 <- .e42 * .e20
-  .e55 <- .e43^2
-  .e56 <- 0.5 * (S * .e50 * .e19 * .e9)
-  .e57 <- 0.5/.e33
-  .e58 <- 0.5/.e28
-  .e59 <- .e19/.e19
-  .e60 <- S * .e19
-  .e61 <- .e32 * .e4
-  .e62 <- .e37 * .e20
-  .e63 <- (0.5 * ((.e45/.e4 - 1)/.e33 - .e46 * .e4 * .e24/.e44) - .e57) * .e19
-  .e65 <- .e54/.e17
-  .e66 <- .e4 * .e17
-  .e68 <- 0.5 * (.e26 * .e27)
-  .e69 <- 0.5 * .e27
-  .e70 <- 0.5 * .e21
-  .e71 <- 0.5 * .e22
-  .e74 <- .e20 * .e51
-  .e75 <- .e20/.e17
-  .e76 <- S * .e42
-  .e80 <- .e60 * (.e23 * (0.5 - 0.5 * .e59) * .e24/.e4 - 1) * .e9/.e19 - .e20 *
-    .e2/.e43
-  .e83 <- .e23 * .e37
+  .e1 <- exp(Wu)
+  .e2 <- exp(Wv)
+  .e3 <- .e1 + .e2
+  .e4 <- sqrt(.e1 * .e2/(.e3))
+  .e5 <- pnorm(-(S * .e1 * epsilon/((.e3) * .e4)))
+  .e6 <- dnorm(S * epsilon/sqrt(.e3))
+  .e7 <- dnorm(-(S * .e1 * epsilon/((.e3) * .e4)))
+  .e8 <- (S * .e6 * epsilon/(.e6 * (.e3)^2))
+  .e9 <- (0.5 * ((1 - .e1/(.e3)) * .e2/.e4) + .e4)
+  .e10 <- (1/((.e3) * .e4) - .e9 * .e1/((.e3) * .e4)^2)
+  .e11 <- (0.5 * .e8 - .e10 * .e7/.e5)
+  .e12 <- (((.e3) * .e4)^2 * .e5)
+  .e13 <- (0.5 * ((1 - .e2/(.e3)) * .e1/.e4) + .e4)
+  .e14 <- (.e6 * (.e3)^2)
+  .e15 <- (0.5 * ((epsilon^2/(.e3) - 1)/.e14 - .e6 * (.e3) * epsilon^2/.e14^2) -
+    0.5/.e14)
+  .e16 <- (epsilon^2/(.e6 * (.e3)^4))
+  .e17 <- (0.5 * (.e6 * epsilon^2) + 2 * (.e6 * (.e3)))
+  .e18 <- (S * (0.5 * .e16 - .e17/.e14^2) * .e6 * epsilon)
   hessll <- matrix(0, nrow = nXvar + nuZUvar + nvZVvar, ncol = nXvar + nuZUvar +
     nvZVvar)
-  hessll[1:nXvar, 1:nXvar] <- crossprod(Xvar * (.e23 * (.e74 * (.e15/(.e3 * .e17 *
-    .e7) - .e20/.e55)/.e4 + .e19 * (.e23 * (1 - .e59) * .e24/.e4 - 1)/.e19)/.e4) *
-    wHvar, Xvar)
-  hessll[1:nXvar, (nXvar + 1):(nXvar + nuZUvar)] <- crossprod(S * Xvar * ((.e65 +
-    S * (.e63 - .e54 * .e2 * (.e15/.e3 - .e20/.e43)/.e66) * .e9) * .e2) * wHvar,
-    uHvar)
+  hessll[1:nXvar, 1:nXvar] <- crossprod(Xvar * ((.e7 * .e1^2 * (S * epsilon/(.e2 *
+    .e5 * .e4) - .e7/(.e5 * .e4)^2)/(.e3) + .e6 * ((1 - .e6/.e6) * epsilon^2/(.e3) -
+    1)/.e6)/(.e3)) * wHvar, Xvar)
+  hessll[1:nXvar, (nXvar + 1):(nXvar + nuZUvar)] <- crossprod(S * Xvar * ((.e10 *
+    .e7/.e5 + S * (.e15 * .e6 - .e10 * .e7 * .e1 * (S * epsilon/.e2 - .e7/(.e5 *
+    .e4))/((.e3) * .e5)) * epsilon) * .e1) * wHvar, uHvar)
   hessll[1:nXvar, (nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar)] <- crossprod(S *
-    Xvar * (.e3 * (S * (.e62 * .e51 * (.e15/(.e18 * .e3 * .e17) - .e18 * .e20/(.e53 *
-    .e7))/.e4 + .e63) * .e9 - .e62 * .e2/.e38)) * wHvar, vHvar)
+    Xvar * (.e2 * (S * (.e13 * .e7 * .e1^2 * (S * epsilon/(((.e3) * .e4)^2 *
+    .e2 * .e5) - ((.e3) * .e4)^2 * .e7/(.e12^2 * .e4))/(.e3) + .e15 * .e6) *
+    epsilon - .e13 * .e7 * .e1/.e12)) * wHvar, vHvar)
   hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + 1):(nXvar + nuZUvar)] <- crossprod(uHvar *
-    (((.e58 + S * (.e56 - .e20 * (S * .e42^2 * (.e75 - .e13) * .e9 - ((.e70 +
-      1 - 0.5 * (0.5 * .e26 + .e21)) * .e26 * .e3/.e7 + (2 - 2 * (.e32^2 *
-      .e2 * .e4/.e18)) * .e7)/.e18)/.e17) * .e9) * .e2 + S * (0.5 * (.e60 *
-      .e9/.e33) - .e65) * .e9 - 0.5/.e4) * .e2) * wHvar, uHvar)
+    (((0.5/(.e3)^2 + S * (0.5 * .e18 - .e7 * (S * .e10^2 * (.e7/.e5 - S * .e1 *
+      epsilon/((.e3) * .e4)) * epsilon - ((0.5 * (.e1/(.e3)) + 1 - 0.5 * (0.5 *
+      (1 - .e1/(.e3)) + .e1/(.e3))) * (1 - .e1/(.e3)) * .e2/.e4 + (2 - 2 *
+      (.e9^2 * .e1 * (.e3)/((.e3) * .e4)^2)) * .e4)/((.e3) * .e4)^2)/.e5) *
+      epsilon) * .e1 + S * .e11 * epsilon - 0.5/(.e3)) * .e1) * wHvar, uHvar)
   hessll[(nXvar + 1):(nXvar + nuZUvar), (nXvar + nuZUvar + 1):(nXvar + nuZUvar +
-    nvZVvar)] <- crossprod(uHvar * ((.e58 + S * (((((0.5 * .e29 - .e83 * .e42 *
-    .e2 * .e24)/.e4 + 0.5 * ((.e21 - 1) * .e3/.e4 + 1 - .e68) + .e69) * .e2/.e7 +
-    .e7)/.e38 - .e37 * (2 * (.e61 * .e17 * .e7) - S * .e18 * .e42 * .e20 * .e9) *
-    .e2/.e53) * .e20 + .e56) * .e9) * .e2 * .e3) * wHvar, vHvar)
+    nvZVvar)] <- crossprod(uHvar * ((0.5/(.e3)^2 + S * (((((0.5 * ((1 - .e1/(.e3)) *
+    .e2) - .e13 * .e10 * .e1 * epsilon^2)/(.e3) + 0.5 * ((.e1/(.e3) - 1) * .e2/(.e3) +
+    1 - 0.5 * ((1 - .e1/(.e3)) * (1 - .e2/(.e3)))) + 0.5 * (1 - .e2/(.e3))) *
+    .e1/.e4 + .e4)/.e12 - .e13 * (2 * (.e9 * (.e3) * .e5 * .e4) - S * ((.e3) *
+    .e4)^2 * .e10 * .e7 * epsilon) * .e1/.e12^2) * .e7 + 0.5 * .e18) * epsilon) *
+    .e1 * .e2) * wHvar, vHvar)
   hessll[(nXvar + nuZUvar + 1):(nXvar + nuZUvar + nvZVvar), (nXvar + nuZUvar +
-    1):(nXvar + nuZUvar + nvZVvar)] <- crossprod(vHvar * (((.e71 - 0.5)/.e4 +
-    S * ((((.e71 - 0.5 * (.e69 + .e22)) * .e27 + .e23 * .e37^2 * .e2 * .e3 *
-      .e24/(.e18 * .e4)) * .e2/(.e38 * .e7) + .e37 * (1/.e38 - .e37 * (2 *
-      (.e66 * .e7) + S * .e20 * .e2 * .e9) * .e3/.e53)) * .e20 * .e2 + S *
-      (0.5 * (.e50 * .e3) + .e57) * .e19 * .e9) * .e9) * .e3) * wHvar, vHvar)
+    1):(nXvar + nuZUvar + nvZVvar)] <- crossprod(vHvar * (((0.5 * (.e2/(.e3)) -
+    0.5)/(.e3) + S * ((((0.5 * (.e2/(.e3)) - 0.5 * (0.5 * (1 - .e2/(.e3)) + .e2/(.e3))) *
+    (1 - .e2/(.e3)) + .e13^2 * .e1 * .e2 * epsilon^2/(((.e3) * .e4)^2 * (.e3))) *
+    .e1/(((.e3) * .e4)^2 * .e5 * .e4) + .e13 * (1/.e12 - .e13 * (2 * ((.e3) *
+    .e5 * .e4) + S * .e7 * .e1 * epsilon) * .e2/.e12^2)) * .e7 * .e1 + S * (0.5 *
+    ((0.5 * .e16 - .e17/.e14^2) * .e2) + 0.5/.e14) * .e6 * epsilon) * epsilon) *
+    .e2) * wHvar, vHvar)
   hessll[lower.tri(hessll)] <- t(hessll)[lower.tri(hessll)]
   # hessll <- (hessll + (hessll))/2
   return(hessll)
