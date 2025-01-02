@@ -10,11 +10,15 @@
 vignettes/*.html
 vignettes/*.pdf
 .httr-oauth
+*.bbl
 *_cache/
+*-concordance.tex
 /cache/
 *.utf8.md
 *.knit.md
+*.log
 .Renviron
+*.synctex.gz
 .DS_Store
 vignettes/sfaR_Technical_Appendix-concordance.tex
 vignettes/sfaR_Technical_Appendix.synctex.gz
@@ -24,6 +28,7 @@ vignettes/sfaR_Technical_Appendix.bbl
 vignettes/sfaR_Handout-concordance.tex
 vignettes/sfaR_Handout.synctex.gz
 vignettes/sfaR_Handout.tex
+vignettes/sfaR_handout.tex
 vignettes/sfaR_Handout.log
 vignettes/sfaR_Handout.bbl
 inst/doc
