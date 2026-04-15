@@ -776,7 +776,7 @@ kurtosis.test <- function(x) {
   SD4 <- sqrt(24 * (n - 2) * (n - 3) * n/((n + 1)^2 * (n +
     3) * (n + 5)))
   U4 <- (a4 - 3 + 6/(n + 1))/SD4
-  B <- (6 * (n * n - 5 * n + 2)/((n + 7) * (n + 9))) * sqrt((6 *
+  B <- (6 * (n^2 - 5 * n + 2)/((n + 7) * (n + 9))) * sqrt((6 *
     (n + 3) * (n + 5))/(n * (n - 2) * (n - 3)))
   A <- 6 + (8/B) * ((2/B) + sqrt(1 + 4/(B^2)))
   jm <- sqrt(2/(9 * A))
@@ -807,7 +807,7 @@ omnibus.test <- function(x) {
   delta <- 1/sqrt(log(sqrt(W2)))
   a <- sqrt(2/(W2 - 1))
   Z3 <- delta * log((U3/a) + sqrt((U3/a)^2 + 1))
-  B <- (6 * (n * n - 5 * n + 2)/((n + 7) * (n + 9))) * sqrt((6 *
+  B <- (6 * (n^2 - 5 * n + 2)/((n + 7) * (n + 9))) * sqrt((6 *
     (n + 3) * (n + 5))/(n * (n - 2) * (n - 3)))
   A <- 6 + (8/B) * ((2/B) + sqrt(1 + 4/(B^2)))
   jm <- sqrt(2/(9 * A))
