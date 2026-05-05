@@ -16,4 +16,7 @@ vignettes/*.pdf
 *.knit.md
 .Renviron
 .DS_Store
-
+*.bbl
+*.gz
+*.log
+*.tex
